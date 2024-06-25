@@ -1,27 +1,86 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sama_client_flutter/src/navigation/screens/chat_lists_screen.dart';
 
+import '../features/chat_list/view/chatlist_page.dart';
+import '../features/login/view/login_page.dart';
+import '../repository/authentication/authentication_repository.dart';
+import '../shared/auth/bloc/auth_bloc.dart';
 import 'constants.dart';
-import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
 
-final GoRouter router = GoRouter(
-  routes: <RouteBase>[
-    GoRoute(
-      path: rootScreenPath,
-      builder: (context, state) => const HomeScreen(),
+GoRouter router(BuildContext context) => GoRouter(
+      routes: <RouteBase>[
+        GoRoute(
+          path: rootScreenPath,
+          builder: (context, state) => const HomePage(),
+          redirect: (context, state) {
+            return BlocProvider.of<AuthenticationBloc>(context)
+                .tryGetUser()
+                .then((currentUser) {
+              print('[router][$rootScreenPath] ${state.fullPath}');
+              return currentUser != null ? state.fullPath : loginScreenPath;
+            });
+          },
+        ),
+        GoRoute(
+            path: loginScreenPath,
+            builder: (context, state) {
+              return const LoginPage();
+            }),
+        GoRoute(
+          path: chatListScreenPath,
+          builder: (context, state) {
+            return const HomePage();
+          },
+        ),
+      ],
+      refreshListenable:
+          GoRouterRefreshBloc<AuthenticationBloc, AuthenticationState>(
+        BlocProvider.of<AuthenticationBloc>(context),
+      ),
       redirect: (context, state) {
-        final loggedIn = false; // TODO VT test code
-        return loggedIn ? chatListScreenPath : loginScreenPath;
+        return BlocProvider.of<AuthenticationBloc>(context)
+            .tryGetUser()
+            .then((currentUser) {
+          print('[router][redirect] ${state.fullPath}');
+          return currentUser != null
+              ? state.fullPath == loginScreenPath
+                  ? rootScreenPath
+                  : state.fullPath
+              : loginScreenPath;
+        });
       },
-    ),
-    GoRoute(
-      path: loginScreenPath,
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: chatListScreenPath,
-      builder: (context, state) => const ChatListScreen(),
-    ),
-  ],
-);
+    );
+
+// The router Bloc that required to manage the user authorisation state at any app point.
+// When authorisation state was changer the router will catch this event and redirect to the right screen
+class GoRouterRefreshBloc<BLOC extends BlocBase<STATE>, STATE>
+    extends ChangeNotifier {
+  GoRouterRefreshBloc(BLOC bloc) {
+    _blocStream = bloc.stream.listen(
+      (STATE state) {
+        print('[GoRouterRefreshBloc][listen] state: state');
+        if (state is AuthenticationState) {
+          var authenticationState = state as AuthenticationState;
+          if (authenticationState.status ==
+                  AuthenticationStatus.authenticated ||
+              authenticationState.status ==
+                  AuthenticationStatus.unauthenticated) {
+            print('[GoRouterRefreshBloc][listen] notifyListeners');
+            notifyListeners();
+          }
+        }
+      },
+    );
+  }
+
+  late final StreamSubscription<STATE> _blocStream;
+
+  @override
+  void dispose() {
+    _blocStream.cancel();
+    super.dispose();
+  }
+}
