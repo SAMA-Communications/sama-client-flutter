@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_client_flutter/src/repository/chat/chat_repository.dart';
 
 import 'src/navigation/app_router.dart';
 import 'src/repository/authentication/authentication_repository.dart';
@@ -21,12 +22,14 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   late final AuthenticationRepository _authenticationRepository;
   late final UserRepository _userRepository;
+  late final ChatRepository _chatRepository;
 
   @override
   void initState() {
     super.initState();
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository();
+    _chatRepository = ChatRepository();
   }
 
   @override
@@ -37,14 +40,17 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: _authenticationRepository,
+    return RepositoryProvider(
+      create: (context) => _authenticationRepository,
       child: BlocProvider(
         create: (_) => AuthenticationBloc(
           authenticationRepository: _authenticationRepository,
           userRepository: _userRepository,
         ),
-        child: const AppView(),
+        child: RepositoryProvider(
+          create: (context) => _chatRepository,
+          child: const AppView(),
+        ),
       ),
     );
   }

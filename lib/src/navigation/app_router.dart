@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/chat_list/view/chatlist_page.dart';
+import '../features/chat_list/view/chats_page.dart';
 import '../features/login/view/login_page.dart';
 import '../repository/authentication/authentication_repository.dart';
 import '../shared/auth/bloc/auth_bloc.dart';
