@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/status.dart' as status;
@@ -22,19 +23,30 @@ class SamaConnectionService {
   WebSocketChannel? connection;
   Map<String, Completer<Map<String, dynamic>>> awaitingRequests = {};
 
-  Future<WebSocketChannel> getConnection() async {
-    if (openConnectionFeature != null) {
-      return openConnectionFeature!;
-    } else if (connection != null) {
-      return Future.value(connection);
-    }
+  final StreamController<ConnectionState> _connectionStateStreamController =
+      StreamController.broadcast();
+
+  Stream<ConnectionState> get connectionStateStream =>
+      _connectionStateStreamController.stream;
+
+  ConnectionState _connectionState = ConnectionState.idle;
+
+  ConnectionState get connectionState => _connectionState;
+
+  Future<WebSocketChannel> connect() {
+    log(
+      '[SamaConnectionService][connect]',
+    );
+
+    _updateConnectionState(ConnectionState.connecting);
 
     final wssUrl = Uri.parse(apiUrl);
     final channel = WebSocketChannel.connect(wssUrl);
 
-    openConnectionFeature = channel.ready.then((_) {
-      connection = channel;
-      connection?.stream.listen(
+    return channel.ready.then((_) {
+      _updateConnectionState(ConnectionState.connected);
+
+      channel.stream.listen(
         (data) {
           log(
             '[SamaConnectionService][onDataReceived]',
@@ -48,12 +60,28 @@ class SamaConnectionService {
             stringData: error.toString(),
           );
           _processError(error);
+          _updateConnectionState(ConnectionState.failed);
         },
         onDone: () {
           log('[SamaConnectionService][onDone]');
+          _updateConnectionState(ConnectionState.failed);
         },
       );
       return channel;
+    });
+  }
+
+  Future<WebSocketChannel> getConnection(
+      {bool forciblyRecreateConnection = false}) async {
+    if (!forciblyRecreateConnection && openConnectionFeature != null) {
+      return openConnectionFeature!;
+    } else if (!forciblyRecreateConnection && connection != null) {
+      return Future.value(connection);
+    }
+
+    openConnectionFeature = connect().then((channel) {
+      connection = channel;
+      return connection!;
     }).whenComplete(() {
       openConnectionFeature = null;
     });
@@ -79,13 +107,44 @@ class SamaConnectionService {
 
     getConnection().then((connection) {
       connection.sink.add(jsonEncode(request));
+    }).catchError((onError) {
+      if (onError is SocketException) {
+        log('request', stringData: 'SocketException');
+        requestCompleter.completeError(ResponseException.fromJson(
+            {'status': -1, 'message': onError.message}));
+      } else if (onError is WebSocketChannelException) {
+        log('request', stringData: 'WebSocketChannelException');
+        requestCompleter.completeError(ResponseException.fromJson(
+            {'status': -1, 'message': onError.message}));
+      } else {
+        requestCompleter.completeError(ResponseException.fromJson({
+          'status': -1,
+          'message':
+              'Unknown error happens. Please check internet connection and try again'
+        }));
+      }
     });
 
     return requestCompleter.future;
   }
 
+  Future<bool> reconnect() {
+    log('[SamaConnectionService][reconnect]');
+    return getConnection(forciblyRecreateConnection: true).then((onValue) {
+      log('[SamaConnectionService][reconnect]', stringData: 'reconnected');
+      return true;
+    }).catchError((exception) {
+      log('[SamaConnectionService][reconnect]', stringData: 'reconnect failed');
+      return false;
+    });
+  }
+
   closeConnection() {
-    connection?.sink.close(status.goingAway);
+    connection?.sink.close(status.goingAway).then((_) {
+      _updateConnectionState(ConnectionState.disconnected);
+
+      connection = null;
+    });
   }
 
   void _processError(error) {
@@ -138,4 +197,13 @@ class SamaConnectionService {
       }
     }
   }
+
+  void _updateConnectionState(ConnectionState state) {
+    if (_connectionState != state) {
+      _connectionState = state;
+      _connectionStateStreamController.add(state);
+    }
+  }
 }
+
+enum ConnectionState { idle, connecting, connected, disconnected, failed }
