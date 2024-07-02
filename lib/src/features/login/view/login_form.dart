@@ -159,6 +159,7 @@ class _UsernameInput extends StatelessWidget {
           ),
           child: TextField(
             key: const Key('loginForm_usernameInput_textField'),
+            keyboardType: TextInputType.text,
             onChanged: (username) =>
                 context.read<LoginBloc>().add(LoginUsernameChanged(username)),
             decoration: InputDecoration(
@@ -214,6 +215,7 @@ class _PasswordInputState extends State<_PasswordInput> {
           ),
           child: TextField(
             key: const Key('loginForm_passwordInput_textField'),
+            keyboardType: TextInputType.visiblePassword,
             onChanged: (password) =>
                 context.read<LoginBloc>().add(LoginPasswordChanged(password)),
             obscureText: isPasswordInvisible,

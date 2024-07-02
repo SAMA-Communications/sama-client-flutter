@@ -13,7 +13,7 @@ class Username extends FormzInput<String, UsernameValidationError> {
   UsernameValidationError? validator(String value) {
     if (value.isEmpty) return UsernameValidationError.empty;
 
-    if (value.length < loginMinLength) return UsernameValidationError.short;
+    if (value.trim().length < loginMinLength) return UsernameValidationError.short;
     return null;
   }
 }

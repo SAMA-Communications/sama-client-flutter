@@ -13,7 +13,7 @@ class Password extends FormzInput<String, PasswordValidationError> {
   PasswordValidationError? validator(String value) {
     if (value.isEmpty) return PasswordValidationError.empty;
 
-    if (value.length < passwordMinLength) return PasswordValidationError.short;
+    if (value.trim().length < passwordMinLength) return PasswordValidationError.short;
     return null;
   }
 }
