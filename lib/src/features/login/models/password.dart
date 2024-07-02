@@ -2,6 +2,8 @@ import 'package:formz/formz.dart';
 
 enum PasswordValidationError { empty, short, unavailableSymbols }
 
+const int passwordMinLength = 3;
+
 class Password extends FormzInput<String, PasswordValidationError> {
   const Password.pure() : super.pure('');
 
@@ -11,7 +13,7 @@ class Password extends FormzInput<String, PasswordValidationError> {
   PasswordValidationError? validator(String value) {
     if (value.isEmpty) return PasswordValidationError.empty;
 
-    if (value.length < 4) return PasswordValidationError.short;
+    if (value.length < passwordMinLength) return PasswordValidationError.short;
     return null;
   }
 }
