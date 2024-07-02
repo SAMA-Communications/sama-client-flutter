@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../repository/chat/chat_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
-import '../../../shared/ui/colors.dart';
-import '../bloc/chat_bloc.dart';
 import '../chats.dart';
 
 class HomePage extends StatelessWidget {
@@ -17,7 +15,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = context.select(
-          (AuthenticationBloc bloc) => bloc.state.user,
+      (AuthenticationBloc bloc) => bloc.state.user,
     );
     return Scaffold(
       appBar: AppBar(
@@ -29,13 +27,11 @@ class HomePage extends StatelessWidget {
             width: 32,
             fit: BoxFit.cover,
           ),
-          onPressed: () {
-
-          },
+          onPressed: () {},
         ),
         title: const Text(
           'Chat',
-            style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white),
         ),
         actions: <Widget>[
           IconButton(
@@ -50,14 +46,14 @@ class HomePage extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (context) {
-          return ChatBloc(chatRepository: RepositoryProvider.of<ChatRepository>(context))..add(ChatFetched());
+          return ChatBloc(
+              chatRepository: RepositoryProvider.of<ChatRepository>(context))
+            ..add(ChatFetched());
         },
         child: const ChatsList(),
       ),
     );
   }
 
-  _openSearch(BuildContext context) {
-
-  }
+  _openSearch(BuildContext context) {}
 }

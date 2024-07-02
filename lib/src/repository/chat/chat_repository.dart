@@ -24,14 +24,19 @@ class ChatRepository {
     final List<api.Chat> chats = await getChats();
     final List<String> cids = chats.map((element) => element.id!).toList();
     final List<User> users = await getParticipants(cids);
-    final List<ChatModel> result = chats.map((element) => ChatModel(id: element.id!,
-        createdAt: element.createdAt!,
-        updatedAt: element.updatedAt!,
-        type: element.type!,
-        name: element.type! == 'g' ? element.name! : null,
-        opponent: users.where((user) => user.id == element.opponentId).firstOrNull,
-        unreadMessagesCount: element.unreadMessagesCount,
-        lastMessage: element.lastMessage)).toList();
+    final List<ChatModel> result = chats
+        .map((element) => ChatModel(
+            id: element.id!,
+            createdAt: element.createdAt!,
+            updatedAt: element.updatedAt!,
+            type: element.type!,
+            name: element.type! == 'g' ? element.name! : null,
+            opponent: users
+                .where((user) => user.id == element.opponentId)
+                .firstOrNull,
+            unreadMessagesCount: element.unreadMessagesCount,
+            lastMessage: element.lastMessage))
+        .toList();
     return result;
   }
 }

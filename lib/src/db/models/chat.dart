@@ -18,7 +18,6 @@ class ChatFields {
   static const List<String> participantsIds = []; //last_message
 }
 
-
 class ChatModel {
   final String id;
   final DateTime createdAt; //created_at
@@ -39,6 +38,4 @@ class ChatModel {
     required this.lastMessage,
     required this.opponent,
   });
-
-
 }

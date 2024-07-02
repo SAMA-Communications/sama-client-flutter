@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sama_client_flutter/src/repository/chat/chat_repository.dart';
 
 import 'src/navigation/app_router.dart';
 import 'src/repository/authentication/authentication_repository.dart';
+import 'src/repository/chat/chat_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/ui/colors.dart';

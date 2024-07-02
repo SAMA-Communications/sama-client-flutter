@@ -17,15 +17,15 @@ class Attachment extends Equatable {
         fileBlurHash = json['file_blur_hash'];
 
   Map<String, dynamic> toJson() => {
-    'file_id': fileId,
-    'file_name': fileName,
-    'file_blur_hash': fileBlurHash,
-  };
+        'file_id': fileId,
+        'file_name': fileName,
+        'file_blur_hash': fileBlurHash,
+      };
 
   @override
   List<Object?> get props => [
-    fileId,
-  ];
+        fileId,
+      ];
 
   static const empty = Attachment();
 }

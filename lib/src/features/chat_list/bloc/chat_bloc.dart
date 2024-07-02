@@ -44,12 +44,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           state.copyWith(
             status: ChatStatus.success,
             chats: chats,
-            hasReachedMax: true, //FixME RP when if pagination will be implemented
+            hasReachedMax:
+                true, //FixME RP when if pagination will be implemented
           ),
         );
       }
 
-      final List<ChatModel> chats = await _chatRepository.getChatsWithParticipants();
+      final List<ChatModel> chats =
+          await _chatRepository.getChatsWithParticipants();
 
       chats.isEmpty
           ? emit(state.copyWith(hasReachedMax: true))
@@ -60,7 +62,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
                 hasReachedMax: false,
               ),
             );
-    } catch (_) {
+    } catch (err) {
+      print("_onChatFetched err= $err");
       emit(state.copyWith(status: ChatStatus.failure));
     }
   }

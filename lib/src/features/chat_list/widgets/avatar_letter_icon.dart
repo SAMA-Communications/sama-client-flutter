@@ -9,7 +9,8 @@ class AvatarLetterIcon extends StatelessWidget {
 
   String getText() {
     if (name.isNotEmpty && ((lastName ?? '') != '')) {
-      return name.substring(0, 1).toUpperCase() + lastName!.substring(0, 1).toUpperCase();
+      return name.substring(0, 1).toUpperCase() +
+          lastName!.substring(0, 1).toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
   }
@@ -22,6 +23,7 @@ class AvatarLetterIcon extends StatelessWidget {
           borderRadius: BorderRadius.circular(5.0),
         ),
         padding: const EdgeInsets.all(4.0),
+        margin: const EdgeInsets.only(bottom: 8.0),
         height: 55.0,
         width: 50.0,
         child: Center(

@@ -5,8 +5,8 @@ const String conversationsRequest = 'conversation_list';
 const String getParticipantsByCids = 'get_participants_by_cids';
 
 Future<List<Chat>> fetchChats([int startIndex = 0]) async {
-  return SamaConnectionService.instance.sendRequest(conversationsRequest, {
-  }).then((response) {
+  return SamaConnectionService.instance
+      .sendRequest(conversationsRequest, {}).then((response) {
     List<Chat> chats;
     List<dynamic> items = List.of(response['conversations']);
     if (items.isEmpty) {

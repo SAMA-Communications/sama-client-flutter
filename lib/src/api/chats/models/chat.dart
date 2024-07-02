@@ -13,23 +13,22 @@ class Chat extends Equatable {
   final String? name; //name
   final int? unreadMessagesCount; //unread_messages_count
 
-  const Chat({
-    this.id,
-    this.createdAt,
-    this.updatedAt,
-    this.lastMessage,
-    this.opponentId,
-    this.ownerId,
-    this.type,
-    this.name,
-    this.unreadMessagesCount
-  });
+  const Chat(
+      {this.id,
+      this.createdAt,
+      this.updatedAt,
+      this.lastMessage,
+      this.opponentId,
+      this.ownerId,
+      this.type,
+      this.name,
+      this.unreadMessagesCount});
 
   Chat.fromJson(Map<String, dynamic> json)
       : id = json['_id'],
         createdAt = DateTime.tryParse(json['created_at']?.toString() ?? ''),
         updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? ''),
-        lastMessage = Message.fromJson(json['last_message']),
+        lastMessage = json['last_message'] != null ? Message.fromJson(json['last_message']) : null,
         opponentId = json['opponent_id'],
         ownerId = json['owner_id'],
         type = json['type'],
@@ -37,20 +36,20 @@ class Chat extends Equatable {
         unreadMessagesCount = json['unread_messages_count'];
 
   Map<String, dynamic> toJson() => {
-    '_id': id,
-    'created_at': createdAt,
-    'updated_at': updatedAt,
-    'opponent_id': opponentId,
-    'owner_id': ownerId,
-    'type': type,
-    'name': name,
-    'unread_messages_count': unreadMessagesCount,
-  };
+        '_id': id,
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+        'opponent_id': opponentId,
+        'owner_id': ownerId,
+        'type': type,
+        'name': name,
+        'unread_messages_count': unreadMessagesCount,
+      };
 
   @override
   List<Object?> get props => [
-    id,
-  ];
+        id,
+      ];
 
   static const empty = Chat();
 }

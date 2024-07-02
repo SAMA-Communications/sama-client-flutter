@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../chats.dart';
 
-
 class ChatsList extends StatefulWidget {
   const ChatsList({super.key});
 
@@ -26,25 +25,24 @@ class _ChatsListState extends State<ChatsList> {
       builder: (context, state) {
         switch (state.status) {
           case ChatStatus.failure:
-            return const Center(child: Text('failed to fetch posts'));
+            return const Center(child: Text('failed to fetch chats'));
           case ChatStatus.success:
             if (state.chats.isEmpty) {
               return const Center(child: Text('no chats'));
             }
             return ListView.separated(
-              itemBuilder: (BuildContext context, int index) {
-                return index >= state.chats.length
-                    ? const BottomLoader()
-                    : ChatListItem(chat: state.chats[index]);
-              },
-              itemCount: state.hasReachedMax
-                  ? state.chats.length
-                  : state.chats.length + 1,
-              controller: _scrollController,
-              separatorBuilder: (context, index) => const SizedBox(
-                height: 10,
-              )
-            );
+                itemBuilder: (BuildContext context, int index) {
+                  return index >= state.chats.length
+                      ? const BottomLoader()
+                      : ChatListItem(chat: state.chats[index]);
+                },
+                itemCount: state.hasReachedMax
+                    ? state.chats.length
+                    : state.chats.length + 1,
+                controller: _scrollController,
+                separatorBuilder: (context, index) => const SizedBox(
+                      height: 10,
+                    ));
           case ChatStatus.initial:
             return const Center(child: CircularProgressIndicator());
         }

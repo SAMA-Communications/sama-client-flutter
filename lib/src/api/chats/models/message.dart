@@ -25,28 +25,31 @@ class Message extends Equatable {
 
   Message.fromJson(Map<String, dynamic> json)
       : id = json['_id'],
-        from = json['opponent_id'],
+        from = json['from'],
         cid = json['cid'],
         status = json['status'],
         body = json['body'],
-        attachments = json['attachments'] == null ? null : List.of(json['attachments']).map((element) => Attachment.fromJson(element)).toList(),
+        attachments = json['attachments'] == null
+            ? null
+            : List.of(json['attachments'])
+                .map((element) => Attachment.fromJson(element))
+                .toList(),
         createdAt = json['created_at'],
         t = json['t'];
 
-
   Map<String, dynamic> toJson() => {
-    '_id': id,
-    'from': from,
-    'cid': cid,
-    'status': status,
-    'body': body,
-    't': createdAt,
-  };
+        '_id': id,
+        'from': from,
+        'cid': cid,
+        'status': status,
+        'body': body,
+        't': createdAt,
+      };
 
   @override
   List<Object?> get props => [
-    id,
-  ];
+        id,
+      ];
 
   static const empty = Message();
 }
