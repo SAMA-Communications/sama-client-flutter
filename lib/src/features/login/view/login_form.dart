@@ -53,6 +53,7 @@ class LoginFormState extends State<LoginForm> {
             Align(
               alignment: Alignment.center,
               child: ToggleButtons(
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
                 borderColor: Colors.transparent,
                 fillColor: Colors.transparent,
                 selectedBorderColor: Colors.transparent,
