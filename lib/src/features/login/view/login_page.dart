@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,7 +20,7 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: white,
       appBar: AppBar(
-        toolbarHeight: MediaQuery.of(context).size.height / 4,
+        toolbarHeight: min((MediaQuery.of(context).size.height / 4) + 20, 220),
         flexibleSpace: Stack(
           children: [
             Image.asset(
