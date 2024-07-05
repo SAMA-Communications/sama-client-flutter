@@ -41,7 +41,7 @@ class _ChatsListState extends State<ChatsList> {
                     : state.chats.length + 1,
                 controller: _scrollController,
                 separatorBuilder: (context, index) => const SizedBox(
-                      height: 10,
+                      height: 5,
                     ));
           case ChatStatus.initial:
             return const Center(child: CircularProgressIndicator());

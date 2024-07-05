@@ -11,13 +11,12 @@ class AvatarGroupIcon extends StatelessWidget {
           borderRadius: BorderRadius.circular(5.0),
         ),
         padding: const EdgeInsets.all(4.0),
-        margin: const EdgeInsets.only(bottom: 8.0),
-        height: 55.0,
-        width: 50.0,
+        height: 60.0,
+        width: 55.0,
         child: const Center(
           child: Icon(
             Icons.people_alt_outlined,
-            size: 28.0,
+            size: 30.0,
           ),
         ));
   }

@@ -17,27 +17,21 @@ class ChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: ListTile(
-        leading: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 40,
-            minHeight: 40,
-            maxWidth: 64,
-            maxHeight: 64,
-          ),
-          child: chat.type == 'u'
-              ? AvatarLetterIcon(
-                  name: chat.opponent?.firstName ?? chat.opponent?.login  ?? "Deleted account",
-                  lastName: chat.opponent?.lastName,
-                )
-              : const AvatarGroupIcon(),
-        ),
+        leading: chat.type == 'u'
+            ? AvatarLetterIcon(
+                name: chat.opponent?.firstName ??
+                    chat.opponent?.login ??
+                    "Deleted account",
+                lastName: chat.opponent?.lastName,
+              )
+            : const AvatarGroupIcon(),
         title: Text(_getChatName(chat),
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
         subtitle: BodyWidget(message: chat.lastMessage),
         trailing: DateUnreadWidget(chat: chat),
         isThreeLine: true,
         dense: false,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18.0),
+        contentPadding: const EdgeInsets.fromLTRB(18.0, 0, 18.0, 4.0),
         onTap: () {},
       ),
     );
@@ -81,7 +75,10 @@ class BodyWidget extends StatelessWidget {
                 ),
               ),
             ),
-          TextSpan(text: body),
+          TextSpan(
+            text: body,
+            style: const TextStyle(fontWeight: FontWeight.w200, fontSize: 16),
+          ),
         ],
       ),
     );
@@ -106,7 +103,7 @@ class DateUnreadWidget extends StatelessWidget {
                     ? DateTime.fromMillisecondsSinceEpoch(
                         chat.lastMessage!.t! * 1000)
                     : chat.updatedAt!)),
-            style: const TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey, fontSize: 15),
           ),
         ),
         if (chat.unreadMessagesCount != null && chat.unreadMessagesCount != 0)
