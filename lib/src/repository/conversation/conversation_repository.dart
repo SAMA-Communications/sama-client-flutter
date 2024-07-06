@@ -1,16 +1,16 @@
 import '../../api/api.dart' as api;
 import '../../api/api.dart';
-import '../../db/models/chat.dart';
+import '../../db/models/conversation.dart';
 
-class ChatRepository {
-  List<api.Chat>? _chats;
+class ConversationRepository {
+  List<api.Conversation>? _conversations;
   List<api.User>? _participants;
 
-  Future<List<api.Chat>> getChats() async {
+  Future<List<api.Conversation>> getConversations() async {
     //FixME RP later with storage mechanism
-    if (_chats != null) return _chats!;
+    if (_conversations != null) return _conversations!;
 
-    return api.fetchChats();
+    return api.fetchConversations();
   }
 
   Future<List<api.User>> getParticipants(List<String> cids) async {
@@ -20,12 +20,12 @@ class ChatRepository {
     return api.fetchParticipants(cids);
   }
 
-  Future<List<ChatModel>> getChatsWithParticipants() async {
-    final List<api.Chat> chats = await getChats();
-    final List<String> cids = chats.map((element) => element.id!).toList();
+  Future<List<ConversationModel>> getConversationsWithParticipants() async {
+    final List<api.Conversation> conversations = await getConversations();
+    final List<String> cids = conversations.map((element) => element.id!).toList();
     final List<User> users = await getParticipants(cids);
-    final List<ChatModel> result = chats
-        .map((element) => ChatModel(
+    final List<ConversationModel> result = conversations
+        .map((element) => ConversationModel(
             id: element.id!,
             createdAt: element.createdAt!,
             updatedAt: element.updatedAt!,

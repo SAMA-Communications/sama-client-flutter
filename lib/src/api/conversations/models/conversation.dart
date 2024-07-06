@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'message.dart';
 
-class Chat extends Equatable {
+class Conversation extends Equatable {
   final String? id; //_id
   final DateTime? createdAt; //created_at
   final DateTime? updatedAt; //updated_at
@@ -13,7 +13,7 @@ class Chat extends Equatable {
   final String? name; //name
   final int? unreadMessagesCount; //unread_messages_count
 
-  const Chat(
+  const Conversation(
       {this.id,
       this.createdAt,
       this.updatedAt,
@@ -24,7 +24,7 @@ class Chat extends Equatable {
       this.name,
       this.unreadMessagesCount});
 
-  Chat.fromJson(Map<String, dynamic> json)
+  Conversation.fromJson(Map<String, dynamic> json)
       : id = json['_id'],
         createdAt = DateTime.tryParse(json['created_at']?.toString() ?? ''),
         updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? ''),
@@ -51,5 +51,5 @@ class Chat extends Equatable {
         id,
       ];
 
-  static const empty = Chat();
+  static const empty = Conversation();
 }

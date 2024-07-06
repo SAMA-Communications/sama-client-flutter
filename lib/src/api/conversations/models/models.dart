@@ -1,3 +1,3 @@
 export './attachment.dart';
-export './chat.dart';
+export './conversation.dart';
 export './message.dart';

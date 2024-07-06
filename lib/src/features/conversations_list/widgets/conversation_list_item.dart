@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import '../../../api/chats/models/message.dart';
-import '../../../db/models/chat.dart';
-import '../../../features/chat_list/widgets/avatar_group_icon.dart';
-import '../../../api/chats/models/models.dart';
+import '../../../api/conversations/models/message.dart';
+import '../../../db/models/conversation.dart';
+import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
+import '../../../api/conversations/models/models.dart';
 import '../../../shared/ui/colors.dart';
 import 'avatar_letter_icon.dart';
 import 'package:intl/intl.dart';
 
-class ChatListItem extends StatelessWidget {
-  const ChatListItem({required this.chat, super.key});
+class ConversationListItem extends StatelessWidget {
+  const ConversationListItem({required this.conversation, super.key});
 
-  final ChatModel chat;
+  final ConversationModel conversation;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       child: ListTile(
-        leading: chat.type == 'u'
+        leading: conversation.type == 'u'
             ? AvatarLetterIcon(
-                name: chat.opponent?.firstName ??
-                    chat.opponent?.login ??
+                name: conversation.opponent?.firstName ??
+                    conversation.opponent?.login ??
                     "Deleted account",
-                lastName: chat.opponent?.lastName,
+                lastName: conversation.opponent?.lastName,
               )
             : const AvatarGroupIcon(),
-        title: Text(_getChatName(chat),
+        title: Text(_getConversationName(conversation),
             style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
-        subtitle: BodyWidget(message: chat.lastMessage),
-        trailing: DateUnreadWidget(chat: chat),
+        subtitle: BodyWidget(message: conversation.lastMessage),
+        trailing: DateUnreadWidget(conversation: conversation),
         isThreeLine: true,
         dense: false,
         contentPadding: const EdgeInsets.fromLTRB(18.0, 0, 18.0, 4.0),
@@ -37,13 +37,13 @@ class ChatListItem extends StatelessWidget {
     );
   }
 
-  String _getChatName(ChatModel chat) {
-    return chat.name ??
-        (chat.opponent?.firstName != null && chat.opponent?.lastName != null
-            ? "${chat.opponent?.firstName!} ${chat.opponent?.lastName!}"
-            : chat.opponent?.firstName != null
-                ? chat.opponent!.firstName!
-                : chat.opponent?.login ?? "Deleted account");
+  String _getConversationName(ConversationModel conversation) {
+    return conversation.name ??
+        (conversation.opponent?.firstName != null && conversation.opponent?.lastName != null
+            ? "${conversation.opponent?.firstName!} ${conversation.opponent?.lastName!}"
+            : conversation.opponent?.firstName != null
+                ? conversation.opponent!.firstName!
+                : conversation.opponent?.login ?? "Deleted account");
   }
 }
 
@@ -86,9 +86,9 @@ class BodyWidget extends StatelessWidget {
 }
 
 class DateUnreadWidget extends StatelessWidget {
-  const DateUnreadWidget({required this.chat, super.key});
+  const DateUnreadWidget({required this.conversation, super.key});
 
-  final ChatModel chat;
+  final ConversationModel conversation;
 
   @override
   Widget build(BuildContext context) {
@@ -99,14 +99,14 @@ class DateUnreadWidget extends StatelessWidget {
           padding: const EdgeInsets.only(right: 2),
           child: Text(
             DateFormatter().getVerboseDateTimeRepresentation(
-                (chat.lastMessage?.t != null
+                (conversation.lastMessage?.t != null
                     ? DateTime.fromMillisecondsSinceEpoch(
-                        chat.lastMessage!.t! * 1000)
-                    : chat.updatedAt!)),
+                        conversation.lastMessage!.t! * 1000)
+                    : conversation.updatedAt!)),
             style: const TextStyle(color: Colors.grey, fontSize: 15),
           ),
         ),
-        if (chat.unreadMessagesCount != null && chat.unreadMessagesCount != 0)
+        if (conversation.unreadMessagesCount != null && conversation.unreadMessagesCount != 0)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Container(
@@ -114,7 +114,7 @@ class DateUnreadWidget extends StatelessWidget {
               decoration: BoxDecoration(
                   color: slateBlue, borderRadius: BorderRadius.circular(10.0)),
               child: Text(
-                chat.unreadMessagesCount.toString(),
+                conversation.unreadMessagesCount.toString(),
                 style: const TextStyle(color: Colors.white),
               ),
             ),

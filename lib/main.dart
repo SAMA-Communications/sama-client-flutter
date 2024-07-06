@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'src/navigation/app_router.dart';
 import 'src/repository/authentication/authentication_repository.dart';
-import 'src/repository/chat/chat_repository.dart';
+import 'src/repository/conversation/conversation_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/ui/colors.dart';
@@ -22,14 +22,14 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   late final AuthenticationRepository _authenticationRepository;
   late final UserRepository _userRepository;
-  late final ChatRepository _chatRepository;
+  late final ConversationRepository _conversationRepository;
 
   @override
   void initState() {
     super.initState();
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository();
-    _chatRepository = ChatRepository();
+    _conversationRepository = ConversationRepository();
   }
 
   @override
@@ -48,7 +48,7 @@ class _AppState extends State<App> {
           userRepository: _userRepository,
         ),
         child: RepositoryProvider(
-          create: (context) => _chatRepository,
+          create: (context) => _conversationRepository,
           child: const AppView(),
         ),
       ),

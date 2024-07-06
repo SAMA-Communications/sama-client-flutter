@@ -1,11 +1,11 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../api/api.dart';
-import '../../api/chats/models/message.dart';
+import '../../api/conversations/models/message.dart';
 
 //FixME RP later
-class ChatFields {
-  static const String tableName = 'chats';
+class ConversationFields {
+  static const String tableName = 'conversations';
   static const String idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
   static const String textType = 'TEXT NOT NULL';
   static const String intType = 'INTEGER NOT NULL';
@@ -18,7 +18,7 @@ class ChatFields {
   static const List<String> participantsIds = []; //last_message
 }
 
-class ChatModel {
+class ConversationModel {
   final String id;
   final DateTime createdAt; //created_at
   final DateTime updatedAt; //updated_at
@@ -28,7 +28,7 @@ class ChatModel {
   final Message? lastMessage;
   final User? opponent;
 
-  ChatModel({
+  ConversationModel({
     required this.id,
     required this.createdAt,
     required this.updatedAt,

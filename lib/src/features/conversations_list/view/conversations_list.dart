@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../chats.dart';
+import '../conversations.dart';
 
-class ChatsList extends StatefulWidget {
-  const ChatsList({super.key});
+class ConversationsList extends StatefulWidget {
+  const ConversationsList({super.key});
 
   @override
-  State<ChatsList> createState() => _ChatsListState();
+  State<ConversationsList> createState() => _ConversationsListState();
 }
 
-class _ChatsListState extends State<ChatsList> {
+class _ConversationsListState extends State<ConversationsList> {
   final _scrollController = ScrollController();
 
   @override
@@ -21,29 +21,29 @@ class _ChatsListState extends State<ChatsList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatBloc, ChatState>(
+    return BlocBuilder<ConversationBloc, ConversationState>(
       builder: (context, state) {
         switch (state.status) {
-          case ChatStatus.failure:
-            return const Center(child: Text('failed to fetch chats'));
-          case ChatStatus.success:
-            if (state.chats.isEmpty) {
-              return const Center(child: Text('no chats'));
+          case ConversationStatus.failure:
+            return const Center(child: Text('failed to fetch conversations'));
+          case ConversationStatus.success:
+            if (state.conversations.isEmpty) {
+              return const Center(child: Text('no conversations'));
             }
             return ListView.separated(
                 itemBuilder: (BuildContext context, int index) {
-                  return index >= state.chats.length
+                  return index >= state.conversations.length
                       ? const BottomLoader()
-                      : ChatListItem(chat: state.chats[index]);
+                      : ConversationListItem(conversation: state.conversations[index]);
                 },
                 itemCount: state.hasReachedMax
-                    ? state.chats.length
-                    : state.chats.length + 1,
+                    ? state.conversations.length
+                    : state.conversations.length + 1,
                 controller: _scrollController,
                 separatorBuilder: (context, index) => const SizedBox(
                       height: 5,
                     ));
-          case ChatStatus.initial:
+          case ConversationStatus.initial:
             return const Center(child: CircularProgressIndicator());
         }
       },
@@ -59,7 +59,7 @@ class _ChatsListState extends State<ChatsList> {
   }
 
   void _onScroll() {
-    if (_isBottom) context.read<ChatBloc>().add(ChatFetched());
+    if (_isBottom) context.read<ConversationBloc>().add(ConversationFetched());
   }
 
   bool get _isBottom {

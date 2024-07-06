@@ -4,17 +4,17 @@ import '../connection/connection.dart';
 const String conversationsRequest = 'conversation_list';
 const String getParticipantsByCids = 'get_participants_by_cids';
 
-Future<List<Chat>> fetchChats([int startIndex = 0]) async {
+Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
   return SamaConnectionService.instance
       .sendRequest(conversationsRequest, {}).then((response) {
-    List<Chat> chats;
+    List<Conversation> conversations;
     List<dynamic> items = List.of(response['conversations']);
     if (items.isEmpty) {
-      chats = [];
+      conversations = [];
     } else {
-      chats = items.map((element) => Chat.fromJson(element)).toList();
+      conversations = items.map((element) => Conversation.fromJson(element)).toList();
     }
-    return chats;
+    return conversations;
   });
 }
 

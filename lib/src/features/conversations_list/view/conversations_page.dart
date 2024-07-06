@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../repository/chat/chat_repository.dart';
+import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
-import '../chats.dart';
+import '../conversations.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -46,11 +46,11 @@ class HomePage extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (context) {
-          return ChatBloc(
-              chatRepository: RepositoryProvider.of<ChatRepository>(context))
-            ..add(ChatFetched());
+          return ConversationBloc(
+              conversationRepository: RepositoryProvider.of<ConversationRepository>(context))
+            ..add(ConversationFetched());
         },
-        child: const ChatsList(),
+        child: const ConversationsList(),
       ),
     );
   }
