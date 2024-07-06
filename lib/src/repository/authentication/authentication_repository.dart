@@ -24,6 +24,7 @@ class AuthenticationRepository {
     try {
       await api.login(
           api.User(login: username, password: password, deviceId: deviceId));
+      api.ReconnectionManager.instance.init();
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {
@@ -46,6 +47,7 @@ class AuthenticationRepository {
       if (signInWithCreatedUser) {
         await api.login(
             api.User(login: username, password: password, deviceId: deviceId));
+        api.ReconnectionManager.instance.init();
         _controller.add(AuthenticationStatus.authenticated);
       }
 
@@ -60,6 +62,7 @@ class AuthenticationRepository {
 
   Future<void> logOut() async {
     await api.logout().then((success) {
+      api.ReconnectionManager.instance.destroy();
       _controller.add(AuthenticationStatus.unauthenticated);
     });
   }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 const String samaLogTag = 'SAMA';
 
 class SamaLogger {
@@ -16,7 +18,7 @@ class SamaLogger {
 
 log(String subTag, {Map<dynamic, dynamic>? jsonData, String? stringData}) {
   if (SamaLogger.instance.printLogs) {
-    print(
-        '$samaLogTag: $subTag: ${jsonData != null ? '\n${const JsonEncoder.withIndent('  ').convert(jsonData)}' : stringData}');
+    debugPrint(
+        '$samaLogTag: $subTag ${jsonData != null ? ':\n${const JsonEncoder.withIndent('  ').convert(jsonData)}' : stringData != null ? ': $stringData' : ''}');
   }
 }
