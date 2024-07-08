@@ -34,7 +34,8 @@ class _ConversationsListState extends State<ConversationsList> {
                 itemBuilder: (BuildContext context, int index) {
                   return index >= state.conversations.length
                       ? const BottomLoader()
-                      : ConversationListItem(conversation: state.conversations[index]);
+                      : ConversationListItem(
+                          conversation: state.conversations[index]);
                 },
                 itemCount: state.hasReachedMax
                     ? state.conversations.length

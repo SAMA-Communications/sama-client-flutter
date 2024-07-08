@@ -25,8 +25,12 @@ class ConversationListItem extends StatelessWidget {
                 lastName: conversation.opponent?.lastName,
               )
             : const AvatarGroupIcon(),
-        title: Text(_getConversationName(conversation),
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
+        title: Text(
+          _getConversationName(conversation),
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: BodyWidget(message: conversation.lastMessage),
         trailing: DateUnreadWidget(conversation: conversation),
         isThreeLine: true,
@@ -39,7 +43,8 @@ class ConversationListItem extends StatelessWidget {
 
   String _getConversationName(ConversationModel conversation) {
     return conversation.name ??
-        (conversation.opponent?.firstName != null && conversation.opponent?.lastName != null
+        (conversation.opponent?.firstName != null &&
+                conversation.opponent?.lastName != null
             ? "${conversation.opponent?.firstName!} ${conversation.opponent?.lastName!}"
             : conversation.opponent?.firstName != null
                 ? conversation.opponent!.firstName!
@@ -81,6 +86,8 @@ class BodyWidget extends StatelessWidget {
           ),
         ],
       ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
@@ -106,7 +113,8 @@ class DateUnreadWidget extends StatelessWidget {
             style: const TextStyle(color: Colors.grey, fontSize: 15),
           ),
         ),
-        if (conversation.unreadMessagesCount != null && conversation.unreadMessagesCount != 0)
+        if (conversation.unreadMessagesCount != null &&
+            conversation.unreadMessagesCount != 0)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Container(

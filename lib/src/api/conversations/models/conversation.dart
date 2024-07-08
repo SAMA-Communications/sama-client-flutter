@@ -28,7 +28,9 @@ class Conversation extends Equatable {
       : id = json['_id'],
         createdAt = DateTime.tryParse(json['created_at']?.toString() ?? ''),
         updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? ''),
-        lastMessage = json['last_message'] != null ? Message.fromJson(json['last_message']) : null,
+        lastMessage = json['last_message'] != null
+            ? Message.fromJson(json['last_message'])
+            : null,
         opponentId = json['opponent_id'],
         ownerId = json['owner_id'],
         type = json['type'],

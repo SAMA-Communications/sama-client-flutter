@@ -47,7 +47,8 @@ class HomePage extends StatelessWidget {
       body: BlocProvider(
         create: (context) {
           return ConversationBloc(
-              conversationRepository: RepositoryProvider.of<ConversationRepository>(context))
+              conversationRepository:
+                  RepositoryProvider.of<ConversationRepository>(context))
             ..add(ConversationFetched());
         },
         child: const ConversationsList(),

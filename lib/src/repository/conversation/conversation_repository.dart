@@ -22,7 +22,8 @@ class ConversationRepository {
 
   Future<List<ConversationModel>> getConversationsWithParticipants() async {
     final List<api.Conversation> conversations = await getConversations();
-    final List<String> cids = conversations.map((element) => element.id!).toList();
+    final List<String> cids =
+        conversations.map((element) => element.id!).toList();
     final List<User> users = await getParticipants(cids);
     final List<ConversationModel> result = conversations
         .map((element) => ConversationModel(

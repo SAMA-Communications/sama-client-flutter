@@ -39,7 +39,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     if (state.hasReachedMax) return;
     try {
       if (state.status == ConversationStatus.initial) {
-        final conversations = await _conversationRepository.getConversationsWithParticipants();
+        final conversations =
+            await _conversationRepository.getConversationsWithParticipants();
         return emit(
           state.copyWith(
             status: ConversationStatus.success,
@@ -58,7 +59,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           : emit(
               state.copyWith(
                 status: ConversationStatus.success,
-                conversations: List.of(state.conversations)..addAll(conversations),
+                conversations: List.of(state.conversations)
+                  ..addAll(conversations),
                 hasReachedMax: false,
               ),
             );

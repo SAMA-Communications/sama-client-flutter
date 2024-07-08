@@ -12,7 +12,8 @@ Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
     if (items.isEmpty) {
       conversations = [];
     } else {
-      conversations = items.map((element) => Conversation.fromJson(element)).toList();
+      conversations =
+          items.map((element) => Conversation.fromJson(element)).toList();
     }
     return conversations;
   });
