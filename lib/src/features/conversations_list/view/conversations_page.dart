@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../conversations.dart';
@@ -56,5 +58,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  _openSearch(BuildContext context) {}
+  _openSearch(BuildContext context) {
+    context.go(globalSearch);
+  }
 }

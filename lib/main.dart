@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_client_flutter/src/repository/global_search/global_search_repository.dart';
 
 import 'src/navigation/app_router.dart';
 import 'src/repository/authentication/authentication_repository.dart';
@@ -23,6 +24,7 @@ class _AppState extends State<App> {
   late final AuthenticationRepository _authenticationRepository;
   late final UserRepository _userRepository;
   late final ConversationRepository _conversationRepository;
+  late final GlobalSearchRepository _globalSearchRepository;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _AppState extends State<App> {
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository();
     _conversationRepository = ConversationRepository();
+    _globalSearchRepository = GlobalSearchRepository();
   }
 
   @override
@@ -49,7 +52,10 @@ class _AppState extends State<App> {
         ),
         child: RepositoryProvider(
           create: (context) => _conversationRepository,
-          child: const AppView(),
+          child: RepositoryProvider(
+            create: (context) => _globalSearchRepository,
+            child: const AppView(),
+          ),
         ),
       ),
     );
