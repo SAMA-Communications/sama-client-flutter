@@ -60,13 +60,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         Future<void> requiredMethod;
         if (event.isSignup) {
           requiredMethod = _authenticationRepository.signUp(
-              username: state.username.value,
-              password: state.password.value,
+              username: state.username.value.trim(),
+              password: state.password.value.trim(),
               signInWithCreatedUser: event.isSighupWithLogin);
         } else {
           requiredMethod = _authenticationRepository.logIn(
-            username: state.username.value,
-            password: state.password.value,
+            username: state.username.value.trim(),
+            password: state.password.value.trim(),
           );
         }
 
