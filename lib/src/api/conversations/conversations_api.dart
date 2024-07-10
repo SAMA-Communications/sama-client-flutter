@@ -35,32 +35,10 @@ Future<List<User>> fetchParticipants(List<String> cids) async {
   });
 }
 
-Future<List<Conversation>> fetchChatsByName(String name) async {
-  return SamaConnectionService.instance
-      .sendRequest(conversationSearch, {'name': name,}).then((response) {
-    List<Conversation> chats;
-    List<dynamic> items = List.of(response['conversations']);
-    if (items.isEmpty) {
-      chats = [];
-    } else {
-      chats = items.map((element) => Conversation.fromJson(element)).toList();
-    }
-    return chats;
-  });
-}
-
-//FixME RP move to separate user_api
-Future<List<User>> fetchUsersByLogin(String login) async {
-  return SamaConnectionService.instance.sendRequest("user_search", {
-    'login': login,
+Future<List<String>> fetchConversationsIdsByName(String name) async {
+  return SamaConnectionService.instance.sendRequest(conversationSearch, {
+    'name': name,
   }).then((response) {
-    List<User> users;
-    List<dynamic> items = List.of(response['users']);
-    if (items.isEmpty) {
-      users = [];
-    } else {
-      users = items.map((element) => User.fromJson(element)).toList();
-    }
-    return users;
+    return List.of(response['conversations']).cast<String>();
   });
 }

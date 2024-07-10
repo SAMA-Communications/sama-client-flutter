@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/ui/colors.dart';
+
 class AvatarLetterIcon extends StatelessWidget {
   const AvatarLetterIcon({required this.name, this.lastName, super.key});
 
@@ -19,7 +21,7 @@ class AvatarLetterIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: black,
           borderRadius: BorderRadius.circular(5.0),
         ),
         padding: const EdgeInsets.all(4.0),
@@ -29,7 +31,7 @@ class AvatarLetterIcon extends StatelessWidget {
           child: Text(
             getText(),
             style: const TextStyle(
-                fontWeight: FontWeight.w400, color: Colors.grey, fontSize: 22),
+                fontWeight: FontWeight.w400, color: whiteAluminum, fontSize: 22),
           ),
         ));
   }

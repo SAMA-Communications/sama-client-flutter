@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_client_flutter/src/db/models/conversation.dart';
+import 'package:sama_client_flutter/src/features/conversations_list/conversations.dart';
 
+import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
+import '../../conversations_list/widgets/avatar_group_icon.dart';
+import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_event.dart';
 import '../bloc/global_search_state.dart';
@@ -48,7 +53,7 @@ class _SearchBarState extends State<_SearchBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.black,
+      backgroundColor: black,
       // titleSpacing: 0,
       leading: IconButton(
         icon: Image.asset(
@@ -64,9 +69,11 @@ class _SearchBarState extends State<_SearchBar> {
           controller: _textController,
           autocorrect: false,
           onChanged: (text) {
-            _globalSearchBloc.add(
-              TextChanged(text: text),
-            );
+            if (text.length >= 2) {
+              _globalSearchBloc.add(
+                TextChanged(text: text),
+              );
+            }
           },
           decoration: InputDecoration(
             filled: true,
@@ -84,7 +91,7 @@ class _SearchBarState extends State<_SearchBar> {
           ),
         ),
       ),
-        centerTitle: false,
+      centerTitle: false,
     );
   }
 
@@ -103,9 +110,13 @@ class _SearchBody extends StatelessWidget {
           SearchStateEmpty() => const Text('Please enter a term to begin'),
           SearchStateLoading() => const CircularProgressIndicator.adaptive(),
           SearchStateError() => Text(state.error),
-          SearchStateSuccess() => state.items.isEmpty
-              ? const Text('No Results')
-              : Expanded(child: _SearchResults(items: state.items)),
+          SearchStateSuccess() =>
+            state.users.isEmpty && state.conversations.isEmpty
+                ? const Text('No Results')
+                : Expanded(
+                    child: _SearchResults(
+                        users: state.users,
+                        conversations: state.conversations)),
         };
       },
     );
@@ -113,34 +124,50 @@ class _SearchBody extends StatelessWidget {
 }
 
 class _SearchResults extends StatelessWidget {
-  const _SearchResults({required this.items});
+  const _SearchResults({required this.users, required this.conversations});
 
-  final List<SearchResultItem> items;
+  final List<User> users;
+  final List<ConversationModel> conversations;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: items.length,
+    final conversationList = ListView.builder(
+      itemCount: conversations.length,
       itemBuilder: (BuildContext context, int index) {
-        return _SearchResultItem(item: items[index]);
+        final conversation = conversations[index];
+        return ConversationListItem(conversation: conversation);
       },
     );
-  }
-}
 
-class _SearchResultItem extends StatelessWidget {
-  const _SearchResultItem({required this.item});
+    final userList = ListView.builder(
+      itemCount: users.length,
+      itemBuilder: (BuildContext context, int index) {
+        final user = users[index];
+        return ListTile(
+          leading: AvatarLetterIcon(name: user.login!),
+          title: Text(user.login!),
+          onTap: () => print("onTap user $user"),
+        );
+      },
+    );
 
-  final SearchResultItem item;
+    // final conversationList = ListView.builder(
+    //   itemCount: conversations.length,
+    //   itemBuilder: (BuildContext context, int index) {
+    //     final conversation = conversations[index];
+    //     return ListTile(
+    //       leading:const AvatarGroupIcon(),
+    //       title: Text(conversation.name!),
+    //       onTap: () => print("onTap conversation $conversation"),
+    //     );
+    //   },
+    // );
 
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      // leading: CircleAvatar(
-      //   child: Image.network(item.owner.avatarUrl),
-      // ),
-      title: Text("item.fullName"),
-      // onTap: () => launchUrl(Uri.parse(item.htmlUrl)),
+    return Column(
+      children: <Widget>[
+        userList,
+        conversationList,
+      ],
     );
   }
 }

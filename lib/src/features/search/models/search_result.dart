@@ -1,17 +1,14 @@
-import '../../search/models/search_result_item.dart';
+import '../../../api/api.dart';
+import '../../../db/models/conversation.dart';
 
 class SearchResult {
-  const SearchResult({required this.items});
+  const SearchResult({required this.users, required this.conversations});
 
-  factory SearchResult.fromJson(List<dynamic> json) {
-    final items = json
-        .map(
-          (dynamic item) =>
-              SearchResultItem.fromJson(item as Map<String, dynamic>),
-        )
-        .toList();
-    return SearchResult(items: items);
+  factory SearchResult.from(
+      List<User> users, List<ConversationModel> conversations) {
+    return SearchResult(users: users, conversations: conversations);
   }
 
-  final List<SearchResultItem> items;
+  final List<User> users;
+  final List<ConversationModel> conversations;
 }

@@ -1,5 +1,3 @@
-
-
 import 'package:bloc/bloc.dart';
 import 'package:sama_client_flutter/src/repository/global_search/global_search_repository.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -23,9 +21,9 @@ class GlobalSearchBloc extends Bloc<GlobalSearchEvent, GlobalSearchState> {
   final GlobalSearchRepository globalSearchRepository;
 
   Future<void> _onTextChanged(
-      TextChanged event,
-      Emitter<GlobalSearchState> emit,
-      ) async {
+    TextChanged event,
+    Emitter<GlobalSearchState> emit,
+  ) async {
     final searchTerm = event.text;
 
     if (searchTerm.isEmpty) return emit(SearchStateEmpty());
@@ -34,7 +32,7 @@ class GlobalSearchBloc extends Bloc<GlobalSearchEvent, GlobalSearchState> {
 
     try {
       final results = await globalSearchRepository.search(searchTerm);
-      emit(SearchStateSuccess(results.items));
+      emit(SearchStateSuccess(results.users, results.conversations));
     } catch (error) {
       emit(
         error is SearchResultError
