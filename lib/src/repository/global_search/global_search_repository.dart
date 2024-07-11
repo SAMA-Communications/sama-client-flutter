@@ -17,12 +17,8 @@ class GlobalSearchRepository {
   });
 
   Future<SearchResult> search(String term) async {
-    List<dynamic> responses = await Future.wait(
-        [api.fetchConversationsIdsByName(term), api.fetchUsersByLogin(term)]);
-
-    final List<User> users = responses.firstWhere((item) => item is List<User>);
-    final List<String> ids =
-        responses.firstWhere((item) => item is List<String>);
+    final List<User> users = await api.fetchUsersByLogin(term);
+    final List<String> ids = await api.fetchConversationsIdsByName(term);
     final List<ConversationModel> conversations =
         localDataSource.getConversations(ids);
 

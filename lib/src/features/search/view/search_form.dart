@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sama_client_flutter/src/db/models/conversation.dart';
 import 'package:sama_client_flutter/src/features/conversations_list/conversations.dart';
 
 import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
-import '../../conversations_list/widgets/avatar_group_icon.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_event.dart';
 import '../bloc/global_search_state.dart';
-import '../models/search_result_item.dart';
 
 class SearchForm extends StatelessWidget {
   const SearchForm({super.key});
@@ -96,8 +95,12 @@ class _SearchBarState extends State<_SearchBar> {
   }
 
   void _onClearTapped() {
-    _textController.text = '';
-    _globalSearchBloc.add(const TextChanged(text: ''));
+    if (_textController.text.isNotEmpty) {
+      _textController.text = '';
+      _globalSearchBloc.add(const TextChanged(text: ''));
+    } else {
+      context.pop();
+    }
   }
 }
 
@@ -107,12 +110,24 @@ class _SearchBody extends StatelessWidget {
     return BlocBuilder<GlobalSearchBloc, GlobalSearchState>(
       builder: (context, state) {
         return switch (state) {
-          SearchStateEmpty() => const Text('Please enter a term to begin'),
-          SearchStateLoading() => const CircularProgressIndicator.adaptive(),
-          SearchStateError() => Text(state.error),
+          SearchStateEmpty() => const Padding(
+              padding: EdgeInsets.only(top: 18.0),
+              child: Text('Please enter a term to begin'),
+            ),
+          SearchStateLoading() => const Padding(
+              padding: EdgeInsets.only(top: 18.0),
+              child: CircularProgressIndicator.adaptive(),
+            ),
+          SearchStateError() => Padding(
+              padding: const EdgeInsets.only(top: 18.0),
+              child: Text(state.error),
+            ),
           SearchStateSuccess() =>
             state.users.isEmpty && state.conversations.isEmpty
-                ? const Text('No Results')
+                ? const Padding(
+                    padding: EdgeInsets.only(top: 18.0),
+                    child: Text('No Results'),
+                  )
                 : Expanded(
                     child: _SearchResults(
                         users: state.users,
@@ -131,43 +146,90 @@ class _SearchResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversationList = ListView.builder(
-      itemCount: conversations.length,
-      itemBuilder: (BuildContext context, int index) {
-        final conversation = conversations[index];
-        return ConversationListItem(conversation: conversation);
-      },
-    );
-
     final userList = ListView.builder(
-      itemCount: users.length,
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: users.length + 1,
       itemBuilder: (BuildContext context, int index) {
+        if (index == 0) {
+          // return the header
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Container(
+              padding: const EdgeInsets.only(left: 18.0),
+              width: double.maxFinite,
+              color: gainsborough, //define the background color
+              child: const Text(
+                'Users',
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          );
+        }
+        index -= 1;
+
         final user = users[index];
         return ListTile(
           leading: AvatarLetterIcon(name: user.login!),
-          title: Text(user.login!),
-          onTap: () => print("onTap user $user"),
+          title: Text(
+            user.login!,
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
+          onTap: () {
+            print('onUser Clicked');
+          },
         );
       },
     );
 
-    // final conversationList = ListView.builder(
-    //   itemCount: conversations.length,
-    //   itemBuilder: (BuildContext context, int index) {
-    //     final conversation = conversations[index];
-    //     return ListTile(
-    //       leading:const AvatarGroupIcon(),
-    //       title: Text(conversation.name!),
-    //       onTap: () => print("onTap conversation $conversation"),
-    //     );
-    //   },
-    // );
-
-    return Column(
-      children: <Widget>[
-        userList,
-        conversationList,
-      ],
+    final conversationList = ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: conversations.length + 1,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == 0) {
+          // return the header
+          return Padding(
+            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+            child: Container(
+              padding: const EdgeInsets.only(left: 18.0),
+              width: double.maxFinite,
+              color: gainsborough, //define the background color
+              child: const Text(
+                'Chats',
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          );
+        }
+        index -= 1;
+        final conversation = conversations[index];
+        return ConversationListItem(
+            conversation: conversation, onTap: onTapConversation);
+      },
     );
+
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: ListView(
+        padding: const EdgeInsets.only(top: 18.0),
+        children: <Widget>[
+          userList,
+          conversationList,
+        ],
+      ),
+    );
+  }
+
+  void onTapConversation() {
+    print('onTapConversation Clicked');
   }
 }
