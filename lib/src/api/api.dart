@@ -5,3 +5,4 @@ export 'conversations/conversations_api.dart';
 export 'users/models/user.dart';
 export 'users/users_api.dart';
 export 'utils/reconnection_manager.dart';
+export 'chats/messages_api.dart';
