@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../conversations.dart';
+
+class ConversationsList extends StatefulWidget {
+  const ConversationsList({super.key});
+
+  @override
+  State<ConversationsList> createState() => _ConversationsListState();
+}
+
+class _ConversationsListState extends State<ConversationsList> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ConversationBloc, ConversationState>(
+      builder: (context, state) {
+        switch (state.status) {
+          case ConversationStatus.failure:
+            return const Center(child: Text('failed to fetch conversations'));
+          case ConversationStatus.success:
+            if (state.conversations.isEmpty) {
+              return const Center(child: Text('no conversations'));
+            }
+            return ListView.separated(
+                itemBuilder: (BuildContext context, int index) {
+                  return index >= state.conversations.length
+                      ? const BottomLoader()
+                      : ConversationListItem(
+                          conversation: state.conversations[index]);
+                },
+                itemCount: state.hasReachedMax
+                    ? state.conversations.length
+                    : state.conversations.length + 1,
+                controller: _scrollController,
+                separatorBuilder: (context, index) => const SizedBox(
+                      height: 5,
+                    ));
+          case ConversationStatus.initial:
+            return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) context.read<ConversationBloc>().add(ConversationFetched());
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
+}
