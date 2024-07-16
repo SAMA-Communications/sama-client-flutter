@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sama_client_flutter/src/db/models/conversation.dart';
-import 'package:sama_client_flutter/src/features/conversations_list/conversations.dart';
 
+import '../../../db/models/conversation.dart';
+import '../../conversations_list/conversations.dart';
 import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
@@ -211,8 +211,7 @@ class _SearchResults extends StatelessWidget {
         }
         index -= 1;
         final conversation = conversations[index];
-        return ConversationListItem(
-            conversation: conversation, onTap: onTapConversation);
+        return ConversationListItem(conversation: conversation);
       },
     );
 
@@ -227,9 +226,5 @@ class _SearchResults extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void onTapConversation() {
-    print('onTapConversation Clicked');
   }
 }

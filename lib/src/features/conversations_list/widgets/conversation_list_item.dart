@@ -9,13 +9,9 @@ import 'avatar_letter_icon.dart';
 import 'package:intl/intl.dart';
 
 class ConversationListItem extends StatelessWidget {
-  const ConversationListItem(
-      {required this.conversation, this.onTap, super.key});
+  const ConversationListItem({required this.conversation, super.key});
 
   final ConversationModel conversation;
-  final Function()? onTap;
-
-  void onTouch() {}
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +36,7 @@ class ConversationListItem extends StatelessWidget {
         isThreeLine: true,
         dense: false,
         contentPadding: const EdgeInsets.fromLTRB(18.0, 0, 18.0, 4.0),
-        onTap: onTap,
+        onTap: () {},
       ),
     );
   }

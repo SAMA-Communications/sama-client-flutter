@@ -56,6 +56,6 @@ class HomePage extends StatelessWidget {
   }
 
   _openSearch(BuildContext context) {
-    context.push(globalSearch);
+    context.push(globalSearchPath);
   }
 }

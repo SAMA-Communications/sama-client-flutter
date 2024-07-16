@@ -35,7 +35,7 @@ Future<List<User>> fetchParticipants(List<String> cids) async {
   });
 }
 
-Future<List<String>> fetchConversationsIdsByName(String name) async {
+Future<List<String>> searchConversationsIdsByName(String name) async {
   return SamaConnectionService.instance.sendRequest(conversationSearch, {
     'name': name,
   }).then((response) {

@@ -106,7 +106,7 @@ Future<bool> delete() {
   });
 }
 
-Future<List<User>> fetchUsersByLogin(String login,
+Future<List<User>> searchUsersByLogin(String login,
     [List<String>? ignoreIds]) async {
   return SamaConnectionService.instance.sendRequest("user_search", {
     'login': login,

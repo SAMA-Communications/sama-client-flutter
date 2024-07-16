@@ -37,9 +37,9 @@ GoRouter router(BuildContext context) => GoRouter(
           },
         ),
         GoRoute(
-          path: globalSearch,
+          path: globalSearchPath,
           builder: (context, state) {
-            return const SearchPage();
+            return SearchPage.route();
           },
         ),
       ],

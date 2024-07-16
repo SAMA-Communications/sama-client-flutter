@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sama_client_flutter/src/repository/conversation/conversation_data_source.dart';
-import 'package:sama_client_flutter/src/repository/global_search/global_search_repository.dart';
+import 'src/repository/conversation/conversation_data_source.dart';
+import 'src/repository/global_search/global_search_repository.dart';
 
 import 'src/navigation/app_router.dart';
 import 'src/repository/authentication/authentication_repository.dart';

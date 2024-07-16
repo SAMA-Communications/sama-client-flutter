@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:sama_client_flutter/src/db/models/conversation.dart';
 
 import '../../../api/api.dart';
+import '../../../db/models/conversation.dart';
 
 sealed class GlobalSearchState extends Equatable {
   const GlobalSearchState();
