@@ -5,8 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../../api/users/models/models.dart';
-import '../../../api/utils/logger.dart';
+import '../../../api/api.dart';
 import '../../../db/models/conversation.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
@@ -31,6 +30,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final MessagesRepository messagesRepository;
   final UserRepository userRepository;
 
+  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
+
   ConversationBloc({
     required this.currentConversation,
     required this.conversationRepository,
@@ -44,6 +45,16 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ParticipantsRequested>(
       _onParticipantsRequested,
     );
+    on<_MessageReceived>(
+      _onMessageReceived,
+    );
+
+    incomingMessagesSubscription =
+        messagesRepository.incomingMessagesStream.listen((message) async {
+      if (message.cid != currentConversation.id) return;
+
+      add(_MessageReceived(message));
+    });
   }
 
   Future<void> _onMessagesRequested(
@@ -83,8 +94,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Future<List<ChatMessage>> _fetchMessages(
       {DateTime? ltDate, DateTime? gtTime}) async {
-    var messages = await messagesRepository
-        .getMessages(currentConversation.id, parameters: {
+    return messagesRepository.getMessages(currentConversation.id, parameters: {
       if (ltDate != null)
         'updated_at': {
           'lt': ltDate.toIso8601String(),
@@ -94,36 +104,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           'gt': gtTime.toIso8601String(),
         },
     });
-
-    var currentUser = await userRepository.getUser();
-
-    var result = <ChatMessage>[];
-
-    for (int i = 0; i < messages.length; i++) {
-      var message = messages[i];
-      var sender = state.participants
-          .where((participant) => participant.id == message.from)
-          .first;
-
-      var chatMessage = ChatMessage(
-          sender: sender,
-          isOwn: currentUser?.id == message.from,
-          isFirst: i == 0 || messages[i - 1].from != sender.id,
-          isLast: i == messages.length - 1 || messages[i + 1].from != sender.id,
-          id: message.id,
-          from: message.from,
-          cid: message.cid,
-          status: message.status,
-          body: message.body,
-          attachments: message.attachments,
-          createdAt: message.createdAt,
-          t: message.t,
-          extension: message.extension);
-
-      result.add(chatMessage);
-    }
-
-    return result;
   }
 
   Future<void> _onParticipantsRequested(
@@ -132,6 +112,38 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       var participants = await conversationRepository
           .getParticipants([currentConversation.id]);
       emit(state.copyWith(participants: participants));
-    } catch (_) {}
+    } catch (_) {
+      emit(state.copyWith(participants: []));
+    }
+  }
+
+  FutureOr<void> _onMessageReceived(
+      _MessageReceived event, Emitter<ConversationState> emit) {
+    var messages = [...state.messages];
+
+    if (messages.isNotEmpty) {
+      messages.first = messages.first.copyWith(
+        isLastUserMessage: event.message.from != messages.first.from,
+        isFirstUserMessage:
+            messages.length == 1 || messages[1].from != messages.first.from,
+      );
+    }
+
+    messages.insert(
+      0,
+      event.message.copyWith(
+        isFirstUserMessage:
+            messages.isEmpty || event.message.from != messages.first.from,
+        isLastUserMessage: true,
+      ),
+    );
+
+    emit(state.copyWith(messages: messages));
+  }
+
+  @override
+  Future<void> close() {
+    incomingMessagesSubscription?.cancel();
+    return super.close();
   }
 }

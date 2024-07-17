@@ -17,3 +17,9 @@ final class MessagesRequested extends ConversationEvent {
 final class ParticipantsRequested extends ConversationEvent {
   const ParticipantsRequested();
 }
+
+final class _MessageReceived extends ConversationEvent {
+  final ChatMessage message;
+
+  const _MessageReceived(this.message);
+}

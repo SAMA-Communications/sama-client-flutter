@@ -18,8 +18,8 @@ class UnsupportedMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MessageBubble(
       sender: message.sender,
-      isFirst: message.isFirst,
-      isLast: message.isLast,
+      isFirst: message.isFirstUserMessage,
+      isLast: message.isLastUserMessage,
       isOwn: message.isOwn,
       child: TextMessage(
         body: '⚠️ Unsupported type of message',
@@ -29,8 +29,8 @@ class UnsupportedMessage extends StatelessWidget {
         ),
         time: Text(
           dateToTime(DateTime.fromMillisecondsSinceEpoch(message.t! * 1000)),
-          style:
-              TextStyle(color: message.isOwn ? white : dullGray, fontSize: 12),
+          style: TextStyle(
+              color: message.isOwn ? white : dullGray, fontSize: 12.0),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../api/users/models/models.dart';
+import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
@@ -23,67 +23,70 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment:
-          isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        if (isFirst && !isOwn)
-          AvatarLetterIcon(
-            name: getUserName(sender),
-            lastName: sender.lastName,
-            size: const Size(40, 40),
-            borderRadius: 16,
-            backgroundColor: isOwn ? slateBlue : gainsborough,
-          ),
-        if (!isFirst && !isOwn)
-          const SizedBox(
-            width: 40,
-          ),
-        Flexible(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
-            decoration: BoxDecoration(
-              color: isOwn ? slateBlue : gainsborough,
-              borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(8),
-                  topRight: const Radius.circular(8),
-                  bottomRight: isFirst
-                      ? isOwn
-                          ? const Radius.circular(0)
-                          : const Radius.circular(8)
-                      : const Radius.circular(8),
-                  bottomLeft: isFirst
-                      ? isOwn
-                          ? const Radius.circular(8)
-                          : const Radius.circular(0)
-                      : const Radius.circular(8)),
+    return Container(
+      margin: const EdgeInsets.only(left: 8.0, right: 8.0),
+      child: Row(
+        mainAxisAlignment:
+            isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (isLast && !isOwn)
+            AvatarLetterIcon(
+              name: getUserName(sender),
+              lastName: sender.lastName,
+              size: const Size(40.0, 40.0),
+              borderRadius: 16.0,
+              backgroundColor: isOwn ? slateBlue : gainsborough,
             ),
-            padding: const EdgeInsets.all(6.0),
+          if (!isLast && !isOwn)
+            const SizedBox(
+              width: 40,
+            ),
+          Flexible(
             child: Container(
-              padding: const EdgeInsets.all(4.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (isLast && !isOwn)
-                    Text(
-                      getUserName(sender),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isOwn ? gainsborough : slateBlue,
+              margin: EdgeInsets.only(left: 8.0, right: isOwn ? 0.0 : 8.0),
+              decoration: BoxDecoration(
+                color: isOwn ? slateBlue : gainsborough,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(isFirst ? 8.0 : 4.0),
+                    topRight: Radius.circular(isFirst ? 8.0 : 4.0),
+                    bottomRight: isLast
+                        ? isOwn
+                            ? const Radius.circular(0.0)
+                            : const Radius.circular(8.0)
+                        : const Radius.circular(4.0),
+                    bottomLeft: isLast
+                        ? isOwn
+                            ? const Radius.circular(8.0)
+                            : const Radius.circular(0.0)
+                        : const Radius.circular(4.0)),
+              ),
+              padding: const EdgeInsets.all(6.0),
+              child: Container(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isFirst && !isOwn)
+                      Text(
+                        getUserName(sender),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isOwn ? gainsborough : slateBlue,
+                        ),
                       ),
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 300.0),
+                      child: child,
                     ),
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 300),
-                    child: child,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

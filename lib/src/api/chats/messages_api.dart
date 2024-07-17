@@ -1,7 +1,6 @@
-import 'package:sama_client_flutter/src/api/chats/realtime/models/message_statuses.dart';
-import 'package:sama_client_flutter/src/api/connection/connection.dart';
-
+import '../connection/connection.dart';
 import '../conversations/models/models.dart';
+import 'realtime/models/models.dart';
 
 const String messageEditRequestName = 'message_edit';
 const String messagesListRequestName = 'message_list';

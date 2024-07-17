@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../api/users/models/models.dart';
+import '../../../api/api.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../models/models.dart';
@@ -63,12 +63,12 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void _onScroll() {
-    if (_isBottom) {
+    if (_isTop) {
       context.read<ConversationBloc>().add(const MessagesRequested());
     }
   }
 
-  bool get _isBottom {
+  bool get _isTop {
     if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;

@@ -17,18 +17,19 @@ class TextMessageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MessageBubble(
-        sender: message.sender,
-        isFirst: message.isFirst,
-        isLast: message.isLast,
-        isOwn: message.isOwn,
-        child: TextMessage(
-          body: message.body ?? '',
-          style: TextStyle(color: message.isOwn ? white : black, fontSize: 16),
-          time: Text(
-            dateToTime(DateTime.fromMillisecondsSinceEpoch(message.t! * 1000)),
-            style: TextStyle(
-                color: message.isOwn ? white : dullGray, fontSize: 12),
-          ),
-        ),);
+      sender: message.sender,
+      isFirst: message.isFirstUserMessage,
+      isLast: message.isLastUserMessage,
+      isOwn: message.isOwn,
+      child: TextMessage(
+        body: message.body ?? '',
+        style: TextStyle(color: message.isOwn ? white : black, fontSize: 16.0),
+        time: Text(
+          dateToTime(DateTime.fromMillisecondsSinceEpoch(message.t! * 1000)),
+          style: TextStyle(
+              color: message.isOwn ? white : dullGray, fontSize: 12.0),
+        ),
+      ),
+    );
   }
 }

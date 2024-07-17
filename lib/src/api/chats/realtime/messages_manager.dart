@@ -8,11 +8,16 @@ import 'models/models.dart';
 
 Future<void> sendMessage({
   required Message message,
-  required String conversationId,
 }) {
   return SamaConnectionService.instance.getConnection().then((connection) {
     var dataToSend = {
-      'message': message.toJson(),
+      'message': {
+        'id': message.id,
+        'cid': message.cid,
+        'body': message.body,
+        if (message.extension != null) 'x': message.extension,
+        if (message.attachments != null) 'attachments': message.attachments,
+      },
     };
 
     log('[MessagesManager][sendMessage]', jsonData: dataToSend);
@@ -62,6 +67,8 @@ class MessagesManager {
       _deletedMessagesStatusController.stream;
 
   init() {
+    if (dataListener != null) return;
+
     dataListener = SamaConnectionService.instance.dataStream.listen((data) {
       if (data['message'] != null) {
         _processIncomingMessage(data['message']);

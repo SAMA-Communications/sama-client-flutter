@@ -16,7 +16,7 @@ class ServiceMessageBubble extends StatelessWidget {
       child: Container(
         decoration: const BoxDecoration(
           color: gainsborough,
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 4.0),
         padding: const EdgeInsets.all(6.0),

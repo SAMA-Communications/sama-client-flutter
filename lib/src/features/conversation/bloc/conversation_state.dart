@@ -31,9 +31,9 @@ final class ConversationState extends Equatable {
 
   @override
   String toString() {
-    return '''PostState { status: $status, hasReachedMax: $hasReachedMax, messages: ${messages.length} }''';
+    return '''PostState { status: $status, hasReachedMax: $hasReachedMax, messages: ${messages.length}, participants: ${participants.length} }''';
   }
 
   @override
-  List<Object> get props => [status, messages, hasReachedMax];
+  List<Object> get props => [status, messages, hasReachedMax, participants];
 }

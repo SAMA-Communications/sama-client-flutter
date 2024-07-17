@@ -32,12 +32,14 @@ class _AppState extends State<App> {
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository();
     _conversationRepository = ConversationRepository();
-    _messagesRepository = MessagesRepository();
+    _messagesRepository = MessagesRepository(userRepository: _userRepository);
+    _messagesRepository.initChatListeners();
   }
 
   @override
   void dispose() {
     _authenticationRepository.dispose();
+    _messagesRepository.destroyChatListeners();
     super.dispose();
   }
 

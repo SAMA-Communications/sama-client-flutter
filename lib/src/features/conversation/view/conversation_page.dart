@@ -10,25 +10,35 @@ import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/send_message/send_message_bloc.dart';
+import 'message_input.dart';
 import 'messages_list.dart';
 
 class ConversationPage extends StatelessWidget {
   const ConversationPage({super.key});
 
-  static BlocProvider<ConversationBloc> route(Object? extra) {
+  static MultiBlocProvider route(Object? extra) {
     ConversationModel currentConversation = extra as ConversationModel;
 
-    return BlocProvider(
-        create: (context) => ConversationBloc(
-            currentConversation: currentConversation,
-            conversationRepository:
-                RepositoryProvider.of<ConversationRepository>(context),
-            messagesRepository:
-                RepositoryProvider.of<MessagesRepository>(context),
-            userRepository: RepositoryProvider.of<UserRepository>(context))
-          ..add(const MessagesRequested())
-          ..add(const ParticipantsRequested()),
-        child: const ConversationPage());
+    return MultiBlocProvider(providers: [
+      BlocProvider(
+          create: (context) => ConversationBloc(
+              currentConversation: currentConversation,
+              conversationRepository:
+                  RepositoryProvider.of<ConversationRepository>(context),
+              messagesRepository:
+                  RepositoryProvider.of<MessagesRepository>(context),
+              userRepository: RepositoryProvider.of<UserRepository>(context))
+            ..add(const MessagesRequested())
+            ..add(const ParticipantsRequested())),
+      BlocProvider(
+        create: (context) => SendMessageBloc(
+          currentConversation: currentConversation,
+          messagesRepository:
+              RepositoryProvider.of<MessagesRepository>(context),
+        ),
+      ),
+    ], child: const ConversationPage());
   }
 
   @override
@@ -39,35 +49,41 @@ class ConversationPage extends StatelessWidget {
     return BlocBuilder<ConversationBloc, ConversationState>(
         builder: (BuildContext context, state) {
       return Scaffold(
-          appBar: AppBar(
-            toolbarHeight: 64,
-            centerTitle: false,
-            title: Padding(
-              padding: const EdgeInsets.only(top: 0.0),
-              child: ListTile(
-                title: Text(
-                  currentConversation.name ??
-                      getUserName(currentConversation.opponent),
-                  style: const TextStyle(
-                      fontSize: 28.0, fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                ),
-                subtitle: Text(
-                  _getSubtitle(currentConversation, state.participants),
-                  style: const TextStyle(fontSize: 14.0),
-                ),
+        appBar: AppBar(
+          toolbarHeight: 64,
+          centerTitle: false,
+          title: Padding(
+            padding: const EdgeInsets.only(top: 0.0),
+            child: ListTile(
+              title: Text(
+                currentConversation.name ??
+                    getUserName(currentConversation.opponent),
+                style: const TextStyle(
+                    fontSize: 28.0, fontWeight: FontWeight.bold),
+                maxLines: 1,
+              ),
+              subtitle: Text(
+                _getSubtitle(currentConversation, state.participants),
+                style: const TextStyle(fontSize: 14.0),
               ),
             ),
-            actions: [
-              IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.more_vert_outlined,
-                    color: dullGray,
-                  ))
-            ],
           ),
-          body: const MessagesList());
+          actions: [
+            IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.more_vert_outlined,
+                  color: dullGray,
+                ))
+          ],
+        ),
+        body: Column(
+          children: [
+            const Flexible(child: MessagesList()),
+            MessageInput(),
+          ],
+        ),
+      );
     });
   }
 
