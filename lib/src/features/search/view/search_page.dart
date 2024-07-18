@@ -16,13 +16,13 @@ class SearchPage extends StatelessWidget {
         BlocProvider<GlobalSearchBloc>(
           create: (context) => GlobalSearchBloc(
             globalSearchRepository:
-            RepositoryProvider.of<GlobalSearchRepository>(context),
+                RepositoryProvider.of<GlobalSearchRepository>(context),
           ),
         ),
         BlocProvider<ConversationCreateBloc>(
           create: (context) => ConversationCreateBloc(
             conversationRepository:
-            RepositoryProvider.of<ConversationRepository>(context),
+                RepositoryProvider.of<ConversationRepository>(context),
           ),
         ),
       ],

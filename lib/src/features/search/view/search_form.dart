@@ -145,11 +145,9 @@ class _SearchBody extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 18.0),
                 child: Text(state.error),
               ),
-            SearchStateSuccess() =>
-               Expanded(
-                      child: _SearchResults(
-                          users: state.users,
-                          conversations: state.conversations)),
+            SearchStateSuccess() => Expanded(
+                child: _SearchResults(
+                    users: state.users, conversations: state.conversations)),
           };
         },
       ),
@@ -214,8 +212,8 @@ class _SearchResults extends StatelessWidget {
                 contentPadding: const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
                 onTap: () {
                   context
-                .read<ConversationCreateBloc>()
-                .add(ConversationCreated(user: user, type: 'u'));
+                      .read<ConversationCreateBloc>()
+                      .add(ConversationCreated(user: user, type: 'u'));
                 },
               );
             },
