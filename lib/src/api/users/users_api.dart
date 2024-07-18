@@ -111,6 +111,7 @@ Future<List<User>> searchUsersByLogin(String login,
   return SamaConnectionService.instance.sendRequest("user_search", {
     'login': login,
     'ignore_ids': ignoreIds ?? [],
+    'limit': 5,
   }).then((response) {
     List<User> users;
     List<dynamic> items = List.of(response['users']);

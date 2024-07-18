@@ -112,7 +112,7 @@ class _SearchBody extends StatelessWidget {
         return switch (state) {
           SearchStateEmpty() => const Padding(
               padding: EdgeInsets.only(top: 18.0),
-              child: Text('Please enter a term to begin'),
+              child: Text('Please start typing to find user or chat'),
             ),
           SearchStateLoading() => const Padding(
               padding: EdgeInsets.only(top: 18.0),
@@ -122,16 +122,9 @@ class _SearchBody extends StatelessWidget {
               padding: const EdgeInsets.only(top: 18.0),
               child: Text(state.error),
             ),
-          SearchStateSuccess() =>
-            state.users.isEmpty && state.conversations.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.only(top: 18.0),
-                    child: Text('No Results'),
-                  )
-                : Expanded(
-                    child: _SearchResults(
-                        users: state.users,
-                        conversations: state.conversations)),
+          SearchStateSuccess() => Expanded(
+              child: _SearchResults(
+                  users: state.users, conversations: state.conversations)),
         };
       },
     );
@@ -144,84 +137,83 @@ class _SearchResults extends StatelessWidget {
   final List<User> users;
   final List<ConversationModel> conversations;
 
+  Widget _header(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      child: Container(
+        padding: const EdgeInsets.only(left: 18.0),
+        width: double.maxFinite,
+        color: gainsborough, //define the background color
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+
+  Widget _emptyListText(String title) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w300,
+          fontSize: 16,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final userList = ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: users.length + 1,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          // return the header
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Container(
-              padding: const EdgeInsets.only(left: 18.0),
-              width: double.maxFinite,
-              color: gainsborough, //define the background color
-              child: const Text(
-                'Users',
-                style: TextStyle(
-                  fontSize: 18,
+    final userList = users.isEmpty
+        ? _emptyListText('We couldn\'t find the specified users')
+        : ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: users.length,
+            itemBuilder: (BuildContext context, int index) {
+              final user = users[index];
+              return ListTile(
+                leading: AvatarLetterIcon(name: user.login!),
+                title: Text(
+                  user.login!,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w500, fontSize: 20),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ),
+                contentPadding: const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
+                onTap: () {
+                  print('onUser Clicked');
+                },
+              );
+            },
           );
-        }
-        index -= 1;
 
-        final user = users[index];
-        return ListTile(
-          leading: AvatarLetterIcon(name: user.login!),
-          title: Text(
-            user.login!,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          contentPadding: const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
-          onTap: () {
-            print('onUser Clicked');
-          },
-        );
-      },
-    );
-
-    final conversationList = ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: conversations.length + 1,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          // return the header
-          return Padding(
-            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-            child: Container(
-              padding: const EdgeInsets.only(left: 18.0),
-              width: double.maxFinite,
-              color: gainsborough, //define the background color
-              child: const Text(
-                'Chats',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-            ),
+    final conversationList = conversations.isEmpty
+        ? _emptyListText('We couldn\'t find the specified chats')
+        : ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: conversations.length,
+            itemBuilder: (BuildContext context, int index) {
+              final conversation = conversations[index];
+              return ConversationListItem(conversation: conversation);
+            },
           );
-        }
-        index -= 1;
-        final conversation = conversations[index];
-        return ConversationListItem(conversation: conversation);
-      },
-    );
 
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
       child: ListView(
-        padding: const EdgeInsets.only(top: 18.0),
+        padding: const EdgeInsets.only(top: 10.0),
         children: <Widget>[
+          _header('Users'),
           userList,
+          _header('Chats'),
           conversationList,
         ],
       ),
