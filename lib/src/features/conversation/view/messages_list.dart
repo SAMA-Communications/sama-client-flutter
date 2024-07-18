@@ -83,24 +83,37 @@ class _MessagesListState extends State<MessagesList> {
     } else if (message.extension?['type'] != null) {
       var type = message.extension?['type'];
 
-      if (type == 'added_participant') {
-        var user = User.fromJson((message.extension?['user']));
-        return ServiceMessageBubble(
-          child: RichText(
-            text: TextSpan(
-              style: DefaultTextStyle.of(context).style,
-              children: <TextSpan>[
-                TextSpan(
-                    text: getUserName(user),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const TextSpan(
-                  text: ' has been added to the group',
-                ),
-              ],
-            ),
-          ),
-        );
+      String notification;
+
+      switch (type) {
+        case 'added_participant':
+          notification = ' has been added to the group';
+          break;
+
+        case 'removed_participant':
+          notification = ' has been removed from the group';
+          break;
+
+        default:
+          notification = '';
       }
+
+      var user = User.fromJson((message.extension?['user']));
+      return ServiceMessageBubble(
+        child: RichText(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style,
+            children: <TextSpan>[
+              TextSpan(
+                  text: getUserName(user),
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: notification,
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     return TextMessageItem(message: message);

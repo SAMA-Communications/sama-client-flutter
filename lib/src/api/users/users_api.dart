@@ -73,7 +73,9 @@ Future<bool> logout() {
 Future<List<User>> getUsersByIds(Set<String> ids) {
   return SamaConnectionService.instance.sendRequest(
       usersGetByIdsRequestName, {'ids': ids.toList()}).then((response) {
-    return response['users'].map((user) => User.fromJson(user)).toList();
+    return List.of(response['users'])
+        .map((user) => User.fromJson(user))
+        .toList();
   });
 }
 

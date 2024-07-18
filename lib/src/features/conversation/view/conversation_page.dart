@@ -29,8 +29,7 @@ class ConversationPage extends StatelessWidget {
               messagesRepository:
                   RepositoryProvider.of<MessagesRepository>(context),
               userRepository: RepositoryProvider.of<UserRepository>(context))
-            ..add(const MessagesRequested())
-            ..add(const ParticipantsRequested())),
+            ..add(const MessagesRequested())),
       BlocProvider(
         create: (context) => SendMessageBloc(
           currentConversation: currentConversation,
@@ -89,7 +88,7 @@ class ConversationPage extends StatelessWidget {
 
   String _getSubtitle(
     ConversationModel conversation,
-    List<User> participants,
+    Set<User> participants,
   ) {
     if (conversation.type == 'u') {
       if (conversation.opponent?.recentActivity != null) {

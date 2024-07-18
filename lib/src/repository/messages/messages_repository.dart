@@ -8,7 +8,7 @@ import '../user/user_repository.dart';
 
 class MessagesRepository {
   final UserRepository userRepository;
-  final Set<api.User> participants = {};
+  final Map<String, api.User> participants = {};
 
   MessagesRepository({
     required this.userRepository,
@@ -30,25 +30,26 @@ class MessagesRepository {
         .getMessages({'cid': cid, if (parameters != null) ...parameters});
 
     var currentUser = await userRepository.getUser();
-    var conversationParticipants =
-        await api.fetchParticipants([cid]).then((participants) {
-      this.participants.addAll(participants);
-      return participants;
+
+    await api.fetchParticipants([cid]).then((participants) {
+      this.participants.addEntries(participants
+          .map((participant) => MapEntry(participant.id!, participant)));
     });
 
     var result = <ChatMessage>[];
 
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-      var sender = conversationParticipants
-          .where((participant) => participant.id == message.from)
-          .first;
+      var sender = participants[message.from]!;
 
       var chatMessage = ChatMessage(
           sender: sender,
           isOwn: currentUser?.id == message.from,
-          isLastUserMessage: i == 0 || messages[i - 1].from != messages[i].from,
+          isLastUserMessage: i == 0 ||
+              isServiceMessage(messages[i - 1]) ||
+              messages[i - 1].from != messages[i].from,
           isFirstUserMessage: i == messages.length - 1 ||
+              isServiceMessage(messages[i + 1]) ||
               messages[i + 1].from != messages[i].from,
           id: message.id,
           from: message.from,
@@ -79,6 +80,7 @@ class MessagesRepository {
       _incomingMessagesController.add(ChatMessage(
           sender: currentUser!,
           isOwn: true,
+          //will be calculated before add to list
           isFirstUserMessage: true,
           isLastUserMessage: true,
           id: message.id,
@@ -101,11 +103,16 @@ class MessagesRepository {
         .MessagesManager.instance.incomingMessagesStream
         .listen((message) async {
       var currentUser = await userRepository.getUser();
-      var sender = participants
-          .where((participant) => participant.id == message.from)
-          .firstOrNull;
-      sender ??= (await api.getUsersByIds({message.from!})).firstOrNull;
-      sender ??= api.User.empty;
+      var sender = participants[message.from];
+
+      if (sender == null) {
+        await api.getUsersByIds({message.from!}).then((users) {
+          participants
+              .addEntries(users.map((user) => MapEntry(user.id!, user)));
+        });
+      }
+
+      sender ??= participants[message.from] ?? api.User.empty;
 
       var chatMessage = ChatMessage(
         sender: sender,
@@ -134,4 +141,8 @@ class MessagesRepository {
     incomingMessagesSubscription = null;
     api.MessagesManager.instance.destroy();
   }
+}
+
+bool isServiceMessage(api.Message message) {
+  return message.extension != null && message.extension?['type'] != null;
 }

@@ -42,8 +42,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _onMessagesRequested,
       transformer: throttleDroppable(throttleDuration),
     );
-    on<ParticipantsRequested>(
-      _onParticipantsRequested,
+    on<_ParticipantsReceived>(
+      _onParticipantsReceived,
     );
     on<_MessageReceived>(
       _onMessageReceived,
@@ -54,6 +54,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       if (message.cid != currentConversation.id) return;
 
       add(_MessageReceived(message));
+    });
+
+    conversationRepository
+        .getParticipants([currentConversation.id]).then((participants) {
+      add(_ParticipantsReceived(participants.toSet()));
     });
   }
 
@@ -106,15 +111,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     });
   }
 
-  Future<void> _onParticipantsRequested(
-      ParticipantsRequested event, Emitter<ConversationState> emit) async {
-    try {
-      var participants = await conversationRepository
-          .getParticipants([currentConversation.id]);
-      emit(state.copyWith(participants: participants));
-    } catch (_) {
-      emit(state.copyWith(participants: []));
-    }
+  Future<void> _onParticipantsReceived(
+      _ParticipantsReceived event, Emitter<ConversationState> emit) async {
+    emit(state.copyWith(participants: event.participants));
   }
 
   FutureOr<void> _onMessageReceived(
@@ -123,17 +122,20 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     if (messages.isNotEmpty) {
       messages.first = messages.first.copyWith(
-        isLastUserMessage: event.message.from != messages.first.from,
-        isFirstUserMessage:
-            messages.length == 1 || messages[1].from != messages.first.from,
+        isLastUserMessage: isServiceMessage(messages.first) ||
+            event.message.from != messages.first.from,
+        isFirstUserMessage: messages.length == 1 ||
+            isServiceMessage(messages[1]) ||
+            messages[1].from != messages.first.from,
       );
     }
 
     messages.insert(
       0,
       event.message.copyWith(
-        isFirstUserMessage:
-            messages.isEmpty || event.message.from != messages.first.from,
+        isFirstUserMessage: isServiceMessage(messages.first) ||
+            messages.isEmpty ||
+            event.message.from != messages.first.from,
         isLastUserMessage: true,
       ),
     );
