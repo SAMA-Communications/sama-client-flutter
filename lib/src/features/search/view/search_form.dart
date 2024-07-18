@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../db/models/conversation.dart';
+import '../../conversation_create/bloc/conversation_create_bloc.dart';
+import '../../conversation_create/bloc/conversation_create_event.dart';
+import '../../conversation_create/bloc/conversation_create_state.dart';
+import '../../../shared/ui/view/loading_overlay.dart';
 import '../../conversations_list/conversations.dart';
 import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
@@ -107,33 +111,53 @@ class _SearchBarState extends State<_SearchBar> {
 class _SearchBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GlobalSearchBloc, GlobalSearchState>(
-      builder: (context, state) {
-        return switch (state) {
-          SearchStateEmpty() => const Padding(
-              padding: EdgeInsets.only(top: 18.0),
-              child: Text('Please enter a term to begin'),
-            ),
-          SearchStateLoading() => const Padding(
-              padding: EdgeInsets.only(top: 18.0),
-              child: CircularProgressIndicator.adaptive(),
-            ),
-          SearchStateError() => Padding(
-              padding: const EdgeInsets.only(top: 18.0),
-              child: Text(state.error),
-            ),
-          SearchStateSuccess() =>
-            state.users.isEmpty && state.conversations.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.only(top: 18.0),
-                    child: Text('No Results'),
-                  )
-                : Expanded(
-                    child: _SearchResults(
-                        users: state.users,
-                        conversations: state.conversations)),
-        };
+    final LoadingOverlay loadingOverlay = LoadingOverlay();
+
+    return BlocListener<ConversationCreateBloc, ConversationCreateState>(
+      listener: (context, state) {
+        if (state is ConversationCreatedLoading) {
+          loadingOverlay.show(context);
+        } else if (state is ConversationCreatedState) {
+          loadingOverlay.hide();
+          ConversationModel conversation = state.conversation;
+          context.pop();
+        } else if (state is ConversationCreatedStateError) {
+          loadingOverlay.hide();
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(content: Text(state.error ?? '')),
+            );
+        }
       },
+      child: BlocBuilder<GlobalSearchBloc, GlobalSearchState>(
+        builder: (context, state) {
+          return switch (state) {
+            SearchStateEmpty() => const Padding(
+                padding: EdgeInsets.only(top: 18.0),
+                child: Text('Please enter a term to begin'),
+              ),
+            SearchStateLoading() => const Padding(
+                padding: EdgeInsets.only(top: 18.0),
+                child: CircularProgressIndicator.adaptive(),
+              ),
+            SearchStateError() => Padding(
+                padding: const EdgeInsets.only(top: 18.0),
+                child: Text(state.error),
+              ),
+            SearchStateSuccess() =>
+              state.users.isEmpty && state.conversations.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 18.0),
+                      child: Text('No Results'),
+                    )
+                  : Expanded(
+                      child: _SearchResults(
+                          users: state.users,
+                          conversations: state.conversations)),
+          };
+        },
+      ),
     );
   }
 }
@@ -181,7 +205,9 @@ class _SearchResults extends StatelessWidget {
           ),
           contentPadding: const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
           onTap: () {
-            print('onUser Clicked');
+            context
+                .read<ConversationCreateBloc>()
+                .add(ConversationCreated(user: user, type: 'u'));
           },
         );
       },
