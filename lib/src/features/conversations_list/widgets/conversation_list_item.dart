@@ -110,7 +110,7 @@ class DateUnreadWidget extends StatelessWidget {
                     ? DateTime.fromMillisecondsSinceEpoch(
                         conversation.lastMessage!.t! * 1000)
                     : conversation.updatedAt!)),
-            style: const TextStyle(color: Colors.grey, fontSize: 15),
+            style: const TextStyle(color: whiteAluminum, fontSize: 15),
           ),
         ),
         if (conversation.unreadMessagesCount != null &&
@@ -123,7 +123,7 @@ class DateUnreadWidget extends StatelessWidget {
                   color: slateBlue, borderRadius: BorderRadius.circular(10.0)),
               child: Text(
                 conversation.unreadMessagesCount.toString(),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: white),
               ),
             ),
           ),

@@ -105,3 +105,21 @@ Future<bool> delete() {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
+
+Future<List<User>> searchUsersByLogin(String login,
+    [List<String>? ignoreIds]) async {
+  return SamaConnectionService.instance.sendRequest("user_search", {
+    'login': login,
+    'ignore_ids': ignoreIds ?? [],
+    'limit': 5,
+  }).then((response) {
+    List<User> users;
+    List<dynamic> items = List.of(response['users']);
+    if (items.isEmpty) {
+      users = [];
+    } else {
+      users = items.map((element) => User.fromJson(element)).toList();
+    }
+    return users;
+  });
+}

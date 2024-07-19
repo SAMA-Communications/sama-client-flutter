@@ -3,6 +3,7 @@ import '../connection/connection.dart';
 
 const String conversationsRequest = 'conversation_list';
 const String getParticipantsByCids = 'get_participants_by_cids';
+const String conversationSearch = 'conversation_search';
 
 Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
   return SamaConnectionService.instance
@@ -31,5 +32,14 @@ Future<List<User>> fetchParticipants(List<String> cids) async {
       users = items.map((element) => User.fromJson(element)).toList();
     }
     return users;
+  });
+}
+
+Future<List<String>> searchConversationsIdsByName(String name) async {
+  return SamaConnectionService.instance.sendRequest(conversationSearch, {
+    'name': name,
+    'limit': 10,
+  }).then((response) {
+    return List.of(response['conversations']).cast<String>();
   });
 }
