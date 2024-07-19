@@ -3,13 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../db/models/conversation.dart';
+import '../../../navigation/constants.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_event.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
 import '../../../shared/ui/view/loading_overlay.dart';
-import '../../conversations_list/conversations.dart';
 import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
+import '../../conversations_list/conversations_list.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_event.dart';
@@ -116,13 +117,14 @@ class _SearchBody extends StatelessWidget {
     return BlocListener<ConversationCreateBloc, ConversationCreateState>(
       listener: (context, state) {
         if (state is ConversationCreatedLoading) {
-          loadingOverlay.show(context);
+          // loadingOverlay.show(context);// for now disable
         } else if (state is ConversationCreatedState) {
-          loadingOverlay.hide();
+          // loadingOverlay.hide();// for now disable
           ConversationModel conversation = state.conversation;
-          context.pop();
+          context.go('$conversationListScreenPath/$conversationScreenSubPath',
+              extra: conversation);
         } else if (state is ConversationCreatedStateError) {
-          loadingOverlay.hide();
+          // loadingOverlay.hide();// for now disable
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
