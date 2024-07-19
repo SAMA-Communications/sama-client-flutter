@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/ui/colors.dart';
-import '../conversations.dart';
+import '../conversations_list.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

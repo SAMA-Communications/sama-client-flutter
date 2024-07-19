@@ -59,7 +59,6 @@ class User extends Equatable {
   List<Object?> get props => [
         id,
         login,
-        email,
       ];
 
   static const empty = User();

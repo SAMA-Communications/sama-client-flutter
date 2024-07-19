@@ -9,9 +9,9 @@ import 'package:equatable/equatable.dart';
 import '../../../db/models/conversation.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 
-part 'conversation_event.dart';
+part 'conversations_list_event.dart';
 
-part 'conversation_state.dart';
+part 'conversations_list_state.dart';
 
 const throttleDuration = Duration(milliseconds: 100);
 

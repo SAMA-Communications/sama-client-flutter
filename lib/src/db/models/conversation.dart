@@ -24,6 +24,7 @@ class ConversationModel {
   final DateTime updatedAt; //updated_at
   final String type;
   final String? name;
+  final String? description;
   final int? unreadMessagesCount;
   final Message? lastMessage;
   final User? opponent;
@@ -37,5 +38,6 @@ class ConversationModel {
     required this.unreadMessagesCount,
     required this.lastMessage,
     required this.opponent,
+    this.description,
   });
 }

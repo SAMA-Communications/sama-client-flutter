@@ -29,6 +29,11 @@ class SamaConnectionService {
   Stream<ConnectionState> get connectionStateStream =>
       _connectionStateStreamController.stream;
 
+  final StreamController<Map<String, dynamic>> _dataController =
+      StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get dataStream => _dataController.stream;
+
   ConnectionState _connectionState = ConnectionState.idle;
 
   ConnectionState get connectionState => _connectionState;
@@ -108,6 +113,7 @@ class SamaConnectionService {
     getConnection().then((connection) {
       connection.sink.add(jsonEncode(request));
     }).catchError((onError) {
+      _updateConnectionState(ConnectionState.failed);
       if (onError is SocketException) {
         log('request', stringData: 'SocketException');
         requestCompleter.completeError(ResponseException.fromJson(
@@ -170,7 +176,7 @@ class SamaConnectionService {
         return;
       }
 
-      // TODO VT process realtime packages
+      _dataController.add(jsonData);
     } catch (e) {
       log(
         '[SamaConnectionService][_processData]',

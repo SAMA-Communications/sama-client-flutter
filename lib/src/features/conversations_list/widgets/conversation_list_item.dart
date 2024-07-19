@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../api/conversations/models/message.dart';
 import '../../../db/models/conversation.dart';
 import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../api/conversations/models/models.dart';
+import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import 'avatar_letter_icon.dart';
 import 'package:intl/intl.dart';
@@ -36,7 +39,10 @@ class ConversationListItem extends StatelessWidget {
         isThreeLine: true,
         dense: false,
         contentPadding: const EdgeInsets.fromLTRB(18.0, 0, 18.0, 4.0),
-        onTap: () {},
+        onTap: () {
+          context.go('$conversationListScreenPath/$conversationScreenSubPath',
+              extra: conversation);
+        },
       ),
     );
   }

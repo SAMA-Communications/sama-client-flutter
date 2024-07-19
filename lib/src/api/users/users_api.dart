@@ -1,12 +1,13 @@
 import '../connection/connection.dart';
 import '../connection/connection_manager.dart';
-import 'models/user.dart';
+import 'models/models.dart';
 
 const String userCreateRequestName = 'user_create';
 const String userLoginRequestName = 'user_login';
 const String userLogoutRequestName = 'user_logout';
 const String userEditRequestName = 'user_edit';
 const String userDeleteRequestName = 'user_delete';
+const String usersGetByIdsRequestName = 'get_users_by_ids';
 
 Future<User> createUser({
   required String login,
@@ -66,6 +67,15 @@ Future<bool> logout() {
     }
 
     return isSuccess;
+  });
+}
+
+Future<List<User>> getUsersByIds(Set<String> ids) {
+  return SamaConnectionService.instance.sendRequest(
+      usersGetByIdsRequestName, {'ids': ids.toList()}).then((response) {
+    return List.of(response['users'])
+        .map((user) => User.fromJson(user))
+        .toList();
   });
 }
 
