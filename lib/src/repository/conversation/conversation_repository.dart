@@ -1,8 +1,17 @@
 import '../../api/api.dart' as api;
 import '../../api/api.dart';
 import '../../db/models/conversation.dart';
+import 'conversation_data_source.dart';
 
 class ConversationRepository {
+  final ConversationLocalDataSource localDataSource;
+
+  ConversationRepository({
+    // required this.remoteDataSource,
+    required this.localDataSource,
+  });
+
+
   List<api.Conversation>? _conversations;
   List<api.User>? _participants;
 
@@ -42,6 +51,7 @@ class ConversationRepository {
           ),
         )
         .toList();
+    localDataSource.conversations = List.of(result);
     return result;
   }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
+import '../../../shared/ui/colors.dart';
 import '../conversations_list.dart';
 
 class HomePage extends StatelessWidget {
@@ -14,12 +17,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = context.select(
-      (AuthenticationBloc bloc) => bloc.state.user,
-    );
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: black,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Image.asset(
@@ -31,14 +31,14 @@ class HomePage extends StatelessWidget {
         ),
         title: const Text(
           'Chat',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: white),
         ),
         actions: <Widget>[
           IconButton(
             onPressed: () => _openSearch(context),
             icon: const Icon(
               Icons.search,
-              color: Colors.white,
+              color: white,
               size: 32,
             ),
           ),
@@ -56,5 +56,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  _openSearch(BuildContext context) {}
+  _openSearch(BuildContext context) {
+    context.push(globalSearchPath);
+  }
 }

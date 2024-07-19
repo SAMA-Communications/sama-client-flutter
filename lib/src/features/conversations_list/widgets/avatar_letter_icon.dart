@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/ui/colors.dart';
-
 class AvatarLetterIcon extends StatelessWidget {
   const AvatarLetterIcon({
     required this.name,

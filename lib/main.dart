@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'src/repository/conversation/conversation_data_source.dart';
+import 'src/repository/global_search/global_search_repository.dart';
 
 import 'src/navigation/app_router.dart';
 import 'src/repository/authentication/authentication_repository.dart';
@@ -25,13 +27,19 @@ class _AppState extends State<App> {
   late final UserRepository _userRepository;
   late final ConversationRepository _conversationRepository;
   late final MessagesRepository _messagesRepository;
+  late final GlobalSearchRepository _globalSearchRepository;
+  late final ConversationLocalDataSource _conversationLocalDataSource;
 
   @override
   void initState() {
     super.initState();
+    _conversationLocalDataSource = ConversationLocalDataSource();
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository();
-    _conversationRepository = ConversationRepository();
+    _conversationRepository =
+        ConversationRepository(localDataSource: _conversationLocalDataSource);
+    _globalSearchRepository =
+        GlobalSearchRepository(localDataSource: _conversationLocalDataSource);
     _messagesRepository = MessagesRepository(userRepository: _userRepository);
     _messagesRepository.initChatListeners();
   }
@@ -58,6 +66,9 @@ class _AppState extends State<App> {
         ),
         RepositoryProvider<MessagesRepository>(
           create: (context) => _messagesRepository,
+        ),
+        RepositoryProvider<GlobalSearchRepository>(
+          create: (context) => _globalSearchRepository,
         ),
       ],
       child: BlocProvider(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/ui/colors.dart';
+
 class AvatarGroupIcon extends StatelessWidget {
   const AvatarGroupIcon({super.key});
 
@@ -7,7 +9,7 @@ class AvatarGroupIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: black,
           borderRadius: BorderRadius.circular(5.0),
         ),
         padding: const EdgeInsets.all(4.0),
