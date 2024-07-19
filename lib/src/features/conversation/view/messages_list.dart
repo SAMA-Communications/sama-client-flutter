@@ -7,7 +7,7 @@ import '../bloc/conversation_bloc.dart';
 import '../models/models.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
-import '../widgets/unsupported_message_type_widget.dart';
+import '../widgets/unsupported_message.dart';
 
 class MessagesList extends StatefulWidget {
   const MessagesList({super.key});

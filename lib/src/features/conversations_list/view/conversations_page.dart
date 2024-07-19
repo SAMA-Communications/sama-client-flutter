@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
-import '../conversations.dart';
+import '../conversations_list.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

@@ -1,4 +1,4 @@
-part of 'conversation_bloc.dart';
+part of 'conversations_list_bloc.dart';
 
 sealed class ConversationEvent extends Equatable {
   const ConversationEvent();
