@@ -55,6 +55,7 @@ class ConversationPage extends StatelessWidget {
             padding: const EdgeInsets.only(top: 0.0),
             child: ListTile(
               title: Text(
+                overflow: TextOverflow.ellipsis,
                 currentConversation.name ??
                     getUserName(currentConversation.opponent),
                 style: const TextStyle(
@@ -93,9 +94,28 @@ class ConversationPage extends StatelessWidget {
     if (conversation.type == 'u') {
       if (conversation.opponent?.recentActivity != null) {
         var date = DateTime.fromMillisecondsSinceEpoch(
-            conversation.opponent!.recentActivity! * 1000);
+                conversation.opponent!.recentActivity! * 1000)
+            .toLocal();
 
-        return 'Last seen ${DateFormat().addPattern('dd.MM.yyyy').format(date)}';
+        DateTime justNow = DateTime.now().subtract(const Duration(minutes: 1));
+
+        String suffix;
+
+        if (!date.difference(justNow).isNegative) {
+          suffix = 'just now';
+        } else if (justNow.difference(date).inHours < 24) {
+          suffix = DateFormat().addPattern('\'a\'t HH:MM').format(date);
+          if (justNow.day != date.day) {
+            suffix = 'yesterday $suffix';
+          }
+        } else if (justNow.difference(date).inDays < 4) {
+          suffix = DateFormat().addPattern('E \'a\'t HH:MM').format(date);
+        } else {
+          suffix =
+              DateFormat().addPattern('dd/MM/yyyy \'a\'t HH:MM').format(date);
+        }
+
+        return 'Last seen $suffix';
       } else {
         return 'Last seen recently';
       }

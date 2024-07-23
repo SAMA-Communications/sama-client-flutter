@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
+import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../conversations_list.dart';
 
