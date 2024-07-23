@@ -54,7 +54,7 @@ class AuthenticationBloc
         );
       case AuthenticationStatus.unknown:
         return emit(const AuthenticationState.unknown());
-      case AuthenticationStatus.canAuthenticated:
+      case AuthenticationStatus.canBeAuthenticated:
         tryAuthUser();
     }
   }

@@ -5,7 +5,7 @@ import 'package:app_set_id/app_set_id.dart';
 import '../../api/api.dart' as api;
 import '../../shared/secure_storage.dart';
 
-enum AuthenticationStatus { unknown, canAuthenticated, authenticated, unauthenticated }
+enum AuthenticationStatus { unknown, canBeAuthenticated, authenticated, unauthenticated }
 
 class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
@@ -13,7 +13,7 @@ class AuthenticationRepository {
   Stream<AuthenticationStatus> get status async* {
     await Future<void>.delayed(const Duration(seconds: 1));
     if (await SecureStorage.instance.hasLocalUser()) {
-      yield AuthenticationStatus.canAuthenticated;
+      yield AuthenticationStatus.canBeAuthenticated;
     } else {
       yield AuthenticationStatus.unauthenticated;
     }
@@ -30,7 +30,7 @@ class AuthenticationRepository {
       api.User user = api.User(login: username, password: password, deviceId: deviceId);
       await api.login(user);
       api.ReconnectionManager.instance.init();
-      SecureStorage.instance.saveLocalUser(user);
+      SecureStorage.instance.saveLocalUserIfNotExist(user);
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {

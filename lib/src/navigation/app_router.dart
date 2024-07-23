@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sama_client_flutter/src/features/splash_page.dart';
 
 import '../features/conversations_list/view/conversations_page.dart';
 import '../features/login/view/login_page.dart';
 import '../features/search/view/search_page.dart';
+import '../features/splash_page.dart';
 import '../repository/authentication/authentication_repository.dart';
 import '../shared/auth/bloc/auth_bloc.dart';
 import 'constants.dart';
@@ -19,7 +19,8 @@ GoRouter router(BuildContext context) => GoRouter(
           builder: (context, state) => const HomePage(),
           redirect: (context, state) {
             final status = context.read<AuthenticationBloc>().state.status;
-            print('status = $status [router][$rootScreenPath] ${state.fullPath}');
+            print(
+                'status = $status [router][$rootScreenPath] ${state.fullPath}');
             return status == AuthenticationStatus.authenticated
                 ? state.fullPath
                 : loginScreenPath;
@@ -55,7 +56,8 @@ GoRouter router(BuildContext context) => GoRouter(
       ),
       redirect: (context, state) {
         final status = context.read<AuthenticationBloc>().state.status;
-        print('refreshListenable status = $status [router][redirect] ${state.fullPath}');
+        print(
+            'refreshListenable status = $status [router][redirect] ${state.fullPath}');
 
         if (status == AuthenticationStatus.authenticated) {
           return state.fullPath == loginScreenPath ||

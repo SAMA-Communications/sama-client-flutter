@@ -24,7 +24,7 @@ class CenterLoader extends StatelessWidget {
       child: SizedBox(
         height: 44,
         width: 44,
-        child: CircularProgressIndicator(strokeWidth: 1.5),
+        child: CircularProgressIndicator(strokeWidth: 3.5),
       ),
     );
   }
