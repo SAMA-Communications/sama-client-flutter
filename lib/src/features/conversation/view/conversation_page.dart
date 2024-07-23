@@ -105,6 +105,9 @@ class ConversationPage extends StatelessWidget {
           suffix = 'just now';
         } else if (justNow.difference(date).inHours < 24) {
           suffix = DateFormat().addPattern('\'a\'t HH:MM').format(date);
+          if (justNow.day != date.day) {
+            suffix = 'yesterday $suffix';
+          }
         } else if (justNow.difference(date).inDays < 4) {
           suffix = DateFormat().addPattern('E \'a\'t HH:MM').format(date);
         } else {
