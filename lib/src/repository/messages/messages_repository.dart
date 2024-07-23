@@ -26,8 +26,10 @@ class MessagesRepository {
     String cid, {
     Map<String, dynamic>? parameters,
   }) async {
-    var messages = await api
-        .getMessages({'cid': cid, if (parameters != null) ...parameters});
+    var messages = await api.getMessages({
+      'cid': cid,
+      if (parameters != null && parameters.isNotEmpty) ...parameters
+    });
 
     var currentUser = await userRepository.getUser();
 

@@ -5,6 +5,7 @@ import '../../../api/api.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../models/models.dart';
+import '../widgets/images_attachment.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
 import '../widgets/unsupported_message.dart';
@@ -77,9 +78,13 @@ class _MessagesListState extends State<MessagesList> {
 
   Widget buildMessageListItem(ChatMessage message) {
     if (message.attachments?.isNotEmpty ?? false) {
-      return UnsupportedMessage(
-        message: message,
-      );
+      try {
+        return ImagesAttachment.create(
+          message: message,
+        );
+      } catch (_) {
+        return UnsupportedMessage(message: message);
+      }
     } else if (message.extension?['type'] != null) {
       var type = message.extension?['type'];
 
