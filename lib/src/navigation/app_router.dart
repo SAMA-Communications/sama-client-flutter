@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sama_client_flutter/src/features/splash_page.dart';
 
 import '../features/conversations_list/view/conversations_page.dart';
 import '../features/login/view/login_page.dart';
@@ -17,12 +18,11 @@ GoRouter router(BuildContext context) => GoRouter(
           path: rootScreenPath,
           builder: (context, state) => const HomePage(),
           redirect: (context, state) {
-            return BlocProvider.of<AuthenticationBloc>(context)
-                .tryGetUser()
-                .then((currentUser) {
-              print('[router][$rootScreenPath] ${state.fullPath}');
-              return currentUser != null ? state.fullPath : loginScreenPath;
-            });
+            final status = context.read<AuthenticationBloc>().state.status;
+            print('status = $status [router][$rootScreenPath] ${state.fullPath}');
+            return status == AuthenticationStatus.authenticated
+                ? state.fullPath
+                : loginScreenPath;
           },
         ),
         GoRoute(
@@ -37,6 +37,12 @@ GoRouter router(BuildContext context) => GoRouter(
           },
         ),
         GoRoute(
+          path: splashScreenPath,
+          builder: (context, state) {
+            return const SplashPage();
+          },
+        ),
+        GoRoute(
           path: globalSearchPath,
           builder: (context, state) {
             return SearchPage.route();
@@ -48,16 +54,21 @@ GoRouter router(BuildContext context) => GoRouter(
         BlocProvider.of<AuthenticationBloc>(context),
       ),
       redirect: (context, state) {
-        return BlocProvider.of<AuthenticationBloc>(context)
-            .tryGetUser()
-            .then((currentUser) {
-          print('[router][redirect] ${state.fullPath}');
-          return currentUser != null
-              ? state.fullPath == loginScreenPath
-                  ? rootScreenPath
-                  : state.fullPath
-              : loginScreenPath;
-        });
+        final status = context.read<AuthenticationBloc>().state.status;
+        print('refreshListenable status = $status [router][redirect] ${state.fullPath}');
+
+        if (status == AuthenticationStatus.authenticated) {
+          return state.fullPath == loginScreenPath ||
+                  state.fullPath == splashScreenPath
+              ? rootScreenPath
+              : state.fullPath;
+        } else {
+          return BlocProvider.of<AuthenticationBloc>(context)
+              .tryGetHasLocalUser()
+              .then((hasUser) {
+            return hasUser ? splashScreenPath : state.fullPath;
+          });
+        }
       },
     );
 

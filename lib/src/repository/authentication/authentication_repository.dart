@@ -3,15 +3,20 @@ import 'dart:async';
 import 'package:app_set_id/app_set_id.dart';
 
 import '../../api/api.dart' as api;
+import '../../shared/secure_storage.dart';
 
-enum AuthenticationStatus { unknown, authenticated, unauthenticated }
+enum AuthenticationStatus { unknown, canAuthenticated, authenticated, unauthenticated }
 
 class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
 
   Stream<AuthenticationStatus> get status async* {
     await Future<void>.delayed(const Duration(seconds: 1));
-    yield AuthenticationStatus.unauthenticated;
+    if (await SecureStorage.instance.hasLocalUser()) {
+      yield AuthenticationStatus.canAuthenticated;
+    } else {
+      yield AuthenticationStatus.unauthenticated;
+    }
     yield* _controller.stream;
   }
 
@@ -22,9 +27,10 @@ class AuthenticationRepository {
     var deviceId = await AppSetId().getIdentifier();
 
     try {
-      await api.login(
-          api.User(login: username, password: password, deviceId: deviceId));
+      api.User user = api.User(login: username, password: password, deviceId: deviceId);
+      await api.login(user);
       api.ReconnectionManager.instance.init();
+      SecureStorage.instance.saveLocalUser(user);
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {
@@ -62,6 +68,7 @@ class AuthenticationRepository {
 
   Future<void> logOut() async {
     await api.logout().then((success) {
+      SecureStorage.instance.deleteLocalUser();
       api.ReconnectionManager.instance.destroy();
       _controller.add(AuthenticationStatus.unauthenticated);
     });
