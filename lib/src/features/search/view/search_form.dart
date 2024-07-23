@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../db/models/conversation.dart';
-import '../../conversations_list/conversations.dart';
 import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
+import '../../conversations_list/widgets/widgets.dart';
 import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_event.dart';
 import '../bloc/global_search_state.dart';

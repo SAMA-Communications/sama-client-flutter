@@ -22,7 +22,7 @@ class ReconnectionManager {
   Timer? _reconnectionTimer;
   bool _isReconnecting = false;
 
-  int _reconnectionTime = reconnectionTimeout;
+  int _reconnectionTime = 0;
 
   StreamSubscription<ConnectionState>? _connectionStateSubscription;
   StreamSubscription<ConnectivityState>? _networkConnectionStateSubscription;
@@ -45,14 +45,17 @@ class ReconnectionManager {
           stringData: 'network connection changed to $networkConnectionState');
 
       if (networkConnectionState == ConnectivityState.hasNetwork) {
-        _reconnect(force: true);
+        if (SamaConnectionService.instance.connectionState ==
+            ConnectionState.failed) {
+          _reconnect(force: true);
+        }
       }
     });
   }
 
   _reconnect({bool force = false}) {
     log('[ReconnectionManager][_reconnect]',
-        stringData: '${force ? 0 : _reconnectionTime}');
+        stringData: 'force: $force timeout: $_reconnectionTime');
 
     if (force) _reconnectionTime = 0;
 
@@ -68,10 +71,13 @@ class ReconnectionManager {
         SamaConnectionService.instance.reconnect().then((reconnected) async {
           if (reconnected) {
             log('[ReconnectionManager]', stringData: 'reconnected');
-            _reconnectionTime = reconnectionTimeout;
+            _reconnectionTime = 0;
             if (ConnectionManager.instance.token != null) {
               var deviceId = await AppSetId().getIdentifier();
-              loginWithToken(ConnectionManager.instance.token!, deviceId ?? '');
+              loginWithToken(ConnectionManager.instance.token!, deviceId ?? '')
+                  .then((_) {
+                SamaConnectionService.instance.resendAwaitingRequests();
+              });
             }
           } else {
             _reconnect();

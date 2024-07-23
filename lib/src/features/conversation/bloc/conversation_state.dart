@@ -5,31 +5,35 @@ enum ConversationStatus { initial, success, failure }
 final class ConversationState extends Equatable {
   const ConversationState({
     this.status = ConversationStatus.initial,
-    this.conversations = const <ConversationModel>[],
+    this.messages = const <ChatMessage>[],
+    this.participants = const <User>{},
     this.hasReachedMax = false,
   });
 
   final ConversationStatus status;
-  final List<ConversationModel> conversations;
+  final List<ChatMessage> messages;
+  final Set<User> participants;
   final bool hasReachedMax;
 
   ConversationState copyWith({
     ConversationStatus? status,
-    List<ConversationModel>? conversations,
+    List<ChatMessage>? messages,
+    Set<User>? participants,
     bool? hasReachedMax,
   }) {
     return ConversationState(
       status: status ?? this.status,
-      conversations: conversations ?? this.conversations,
+      messages: messages ?? this.messages,
+      participants: participants ?? this.participants,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
 
   @override
   String toString() {
-    return '''ConversationState { status: $status, hasReachedMax: $hasReachedMax, conversations: ${conversations.length} }''';
+    return '''PostState { status: $status, hasReachedMax: $hasReachedMax, messages: ${messages.length}, participants: ${participants.length} }''';
   }
 
   @override
-  List<Object> get props => [status, conversations, hasReachedMax];
+  List<Object> get props => [status, messages, hasReachedMax, participants];
 }
