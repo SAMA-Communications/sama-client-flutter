@@ -18,7 +18,7 @@ class SamaLogger {
 
 log(String subTag, {Map<dynamic, dynamic>? jsonData, String? stringData}) {
   if (SamaLogger.instance.printLogs) {
-    debugPrint(
+    print(
         '$samaLogTag: $subTag ${jsonData != null ? ':\n${const JsonEncoder.withIndent('  ').convert(jsonData)}' : stringData != null ? ': $stringData' : ''}');
   }
 }
