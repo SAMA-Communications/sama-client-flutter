@@ -65,7 +65,7 @@ class ConversationRepository {
         type: conversation.type!,
         name: conversation.type! == 'g' ? conversation.name! : null,
         opponent: participants
-            .where((user) => user.id == conversation.opponentId)
+            .where((user) => user.id == conversation.opponentId || user.id == conversation.ownerId)
             .firstOrNull,
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage);
