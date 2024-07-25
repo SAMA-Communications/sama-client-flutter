@@ -35,7 +35,8 @@ class ConversationRepository {
         conversations.map((element) => element.id!).toList();
     final List<User> users = await getParticipants(cids);
     final List<ConversationModel> result = conversations
-        .map((element) => ConversationModel(
+        .map(
+          (element) => ConversationModel(
             id: element.id!,
             createdAt: element.createdAt!,
             updatedAt: element.updatedAt!,
@@ -45,7 +46,10 @@ class ConversationRepository {
                 .where((user) => user.id == element.opponentId)
                 .firstOrNull,
             unreadMessagesCount: element.unreadMessagesCount,
-            lastMessage: element.lastMessage))
+            lastMessage: element.lastMessage,
+            description: element.description,
+          ),
+        )
         .toList();
     localDataSource.conversations = List.of(result);
     return result;

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/conversations_list/view/conversations_page.dart';
+import '../features/conversation/view/conversation_page.dart';
 import '../features/login/view/login_page.dart';
 import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
@@ -36,6 +37,14 @@ GoRouter router(BuildContext context) => GoRouter(
           builder: (context, state) {
             return const HomePage();
           },
+          routes: [
+            GoRoute(
+              path: conversationScreenSubPath,
+              builder: (context, state) {
+                return ConversationPage.route(state.extra);
+              },
+            )
+          ],
         ),
         GoRoute(
           path: splashScreenPath,

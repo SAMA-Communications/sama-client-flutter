@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../conversations.dart';
+import '../conversations_list.dart';
 
 class ConversationsList extends StatefulWidget {
   const ConversationsList({super.key});

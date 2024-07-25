@@ -11,6 +11,7 @@ class Conversation extends Equatable {
   final String? ownerId; //owner_id
   final String? type; //type 'u', 'g'
   final String? name; //name
+  final String? description; //description
   final int? unreadMessagesCount; //unread_messages_count
 
   const Conversation(
@@ -22,6 +23,7 @@ class Conversation extends Equatable {
       this.ownerId,
       this.type,
       this.name,
+      this.description,
       this.unreadMessagesCount});
 
   Conversation.fromJson(Map<String, dynamic> json)
@@ -35,6 +37,7 @@ class Conversation extends Equatable {
         ownerId = json['owner_id'],
         type = json['type'],
         name = json['name'],
+        description = json['description'],
         unreadMessagesCount = json['unread_messages_count'];
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +48,7 @@ class Conversation extends Equatable {
         'owner_id': ownerId,
         'type': type,
         'name': name,
+        'description': description,
         'unread_messages_count': unreadMessagesCount,
       };
 

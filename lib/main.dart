@@ -6,6 +6,7 @@ import 'src/repository/global_search/global_search_repository.dart';
 import 'src/navigation/app_router.dart';
 import 'src/repository/authentication/authentication_repository.dart';
 import 'src/repository/conversation/conversation_repository.dart';
+import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/ui/colors.dart';
@@ -25,6 +26,7 @@ class _AppState extends State<App> {
   late final AuthenticationRepository _authenticationRepository;
   late final UserRepository _userRepository;
   late final ConversationRepository _conversationRepository;
+  late final MessagesRepository _messagesRepository;
   late final GlobalSearchRepository _globalSearchRepository;
   late final ConversationLocalDataSource _conversationLocalDataSource;
 
@@ -38,31 +40,43 @@ class _AppState extends State<App> {
         ConversationRepository(localDataSource: _conversationLocalDataSource);
     _globalSearchRepository =
         GlobalSearchRepository(localDataSource: _conversationLocalDataSource);
+    _messagesRepository = MessagesRepository(userRepository: _userRepository);
+    _messagesRepository.initChatListeners();
   }
 
   @override
   void dispose() {
     _authenticationRepository.dispose();
+    _messagesRepository.destroyChatListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => _authenticationRepository,
-      child: BlocProvider(
-        create: (_) => AuthenticationBloc(
-          authenticationRepository: _authenticationRepository,
-          userRepository: _userRepository,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthenticationRepository>(
+          create: (context) => _authenticationRepository,
         ),
-        child: RepositoryProvider(
+        RepositoryProvider<UserRepository>(
+          create: (context) => _userRepository,
+        ),
+        RepositoryProvider<ConversationRepository>(
           create: (context) => _conversationRepository,
-          child: RepositoryProvider(
-            create: (context) => _globalSearchRepository,
-            child: const AppView(),
-          ),
         ),
-      ),
+        RepositoryProvider<MessagesRepository>(
+          create: (context) => _messagesRepository,
+        ),
+        RepositoryProvider<GlobalSearchRepository>(
+          create: (context) => _globalSearchRepository,
+        ),
+      ],
+      child: BlocProvider(
+          create: (_) => AuthenticationBloc(
+                authenticationRepository: _authenticationRepository,
+                userRepository: _userRepository,
+              ),
+          child: const AppView()),
     );
   }
 }

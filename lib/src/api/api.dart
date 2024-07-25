@@ -1,7 +1,13 @@
+export 'chats/messages_api.dart';
+export 'chats/realtime/messages_manager.dart';
+export 'chats/realtime/models/models.dart';
+export 'connection/connection.dart';
 export 'connection/connection_manager.dart';
 export 'connection/exceptions.dart';
-export 'conversations/models/conversation.dart';
+export 'conversations/models/models.dart';
 export 'conversations/conversations_api.dart';
-export 'users/models/user.dart';
+export 'users/models/models.dart';
 export 'users/users_api.dart';
+export 'utils/connectivity_manager.dart';
+export 'utils/logger.dart';
 export 'utils/reconnection_manager.dart';

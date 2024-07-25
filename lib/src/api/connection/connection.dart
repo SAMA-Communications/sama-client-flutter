@@ -21,13 +21,19 @@ class SamaConnectionService {
 
   Future<WebSocketChannel>? openConnectionFeature;
   WebSocketChannel? connection;
-  Map<String, Completer<Map<String, dynamic>>> awaitingRequests = {};
+
+  Map<String, RequestInfo> awaitingRequests = {};
 
   final StreamController<ConnectionState> _connectionStateStreamController =
       StreamController.broadcast();
 
   Stream<ConnectionState> get connectionStateStream =>
       _connectionStateStreamController.stream;
+
+  final StreamController<Map<String, dynamic>> _dataController =
+      StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get dataStream => _dataController.stream;
 
   ConnectionState _connectionState = ConnectionState.idle;
 
@@ -90,11 +96,20 @@ class SamaConnectionService {
   }
 
   Future<Map<String, dynamic>> sendRequest(
-      String requestName, Map<String, dynamic> requestData) {
-    var requestId = const Uuid().v4().toString();
+    String requestName,
+    Map<String, dynamic> requestData, {
+    String? retryRequestId,
+    Completer<Map<String, dynamic>>? retryCompleter,
+  }) {
+    var requestId = retryRequestId ??= const Uuid().v4().toString();
 
-    var requestCompleter = Completer<Map<String, dynamic>>();
-    awaitingRequests[requestId] = requestCompleter;
+    var requestCompleter = retryCompleter ??= Completer<Map<String, dynamic>>();
+
+    awaitingRequests[requestId] = RequestInfo(
+      name: requestName,
+      data: requestData,
+      completer: requestCompleter,
+    );
 
     var request = {
       'request': {
@@ -108,6 +123,8 @@ class SamaConnectionService {
     getConnection().then((connection) {
       connection.sink.add(jsonEncode(request));
     }).catchError((onError) {
+      _updateConnectionState(ConnectionState.failed);
+      awaitingRequests.remove(requestId);
       if (onError is SocketException) {
         log('request', stringData: 'SocketException');
         requestCompleter.completeError(ResponseException.fromJson(
@@ -117,6 +134,7 @@ class SamaConnectionService {
         requestCompleter.completeError(ResponseException.fromJson(
             {'status': -1, 'message': onError.message}));
       } else {
+        log('request', stringData: 'Exception: ${onError.toString()}');
         requestCompleter.completeError(ResponseException.fromJson({
           'status': -1,
           'message':
@@ -170,7 +188,7 @@ class SamaConnectionService {
         return;
       }
 
-      // TODO VT process realtime packages
+      _dataController.add(jsonData);
     } catch (e) {
       log(
         '[SamaConnectionService][_processData]',
@@ -181,15 +199,16 @@ class SamaConnectionService {
 
   void _processResponse(Map<String, dynamic> response) {
     log(
-      '[SamaConnectionService][_processData] response:',
+      '[SamaConnectionService][_processResponse] response:',
       jsonData: response,
     );
 
     var responseId = response['id'];
     var error = response['error'];
 
-    var completer = awaitingRequests.remove(responseId);
-    if (completer != null) {
+    var requestInfo = awaitingRequests.remove(responseId);
+    if (requestInfo != null) {
+      var completer = requestInfo.completer;
       if (error != null) {
         completer.completeError(ResponseException.fromJson(error));
       } else {
@@ -204,6 +223,28 @@ class SamaConnectionService {
       _connectionStateStreamController.add(state);
     }
   }
+
+  void resendAwaitingRequests() {
+    if (awaitingRequests.isNotEmpty) {
+      Map.of(awaitingRequests).forEach((requestId, requestInfo) {
+        sendRequest(
+          requestInfo.name,
+          requestInfo.data,
+          retryRequestId: requestId,
+          retryCompleter: requestInfo.completer,
+        );
+      });
+    }
+  }
 }
 
 enum ConnectionState { idle, connecting, connected, disconnected, failed }
+
+class RequestInfo {
+  final String name;
+  final Map<String, dynamic> data;
+  final Completer<Map<String, dynamic>> completer;
+
+  RequestInfo(
+      {required this.name, required this.data, required this.completer});
+}
