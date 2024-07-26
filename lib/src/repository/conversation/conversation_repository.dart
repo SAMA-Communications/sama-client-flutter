@@ -11,7 +11,6 @@ class ConversationRepository {
     required this.localDataSource,
   });
 
-
   List<api.Conversation>? _conversations;
   List<api.User>? _participants;
 
@@ -33,7 +32,7 @@ class ConversationRepository {
     final List<api.Conversation> conversations = await getConversations();
     final List<String> cids =
         conversations.map((element) => element.id!).toList();
-    final List<User> users = await getParticipants(cids);
+    final List<User> users = await getParticipants(cids); //turn into map
     final List<ConversationModel> result = conversations
         .map(
           (element) => ConversationModel(
@@ -53,5 +52,22 @@ class ConversationRepository {
         .toList();
     localDataSource.conversations = List.of(result);
     return result;
+  }
+
+  Future<ConversationModel> createConversation(
+      List<api.User> participants, String type) async {
+    final Conversation conversation = await api.createConversation(
+        participants.map((user) => user.id!).toList(), type);
+    return ConversationModel(
+        id: conversation.id!,
+        createdAt: conversation.createdAt!,
+        updatedAt: conversation.updatedAt!,
+        type: conversation.type!,
+        name: conversation.type! == 'g' ? conversation.name! : null,
+        opponent: participants
+            .where((user) => user.id == conversation.opponentId || user.id == conversation.ownerId)
+            .firstOrNull,
+        unreadMessagesCount: conversation.unreadMessagesCount,
+        lastMessage: conversation.lastMessage);
   }
 }
