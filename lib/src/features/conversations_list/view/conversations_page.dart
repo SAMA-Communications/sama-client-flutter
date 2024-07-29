@@ -27,7 +27,11 @@ class HomePage extends StatelessWidget {
             width: 32,
             fit: BoxFit.cover,
           ),
-          onPressed: () {},
+          onPressed: () {
+            context
+                .read<AuthenticationBloc>()
+                .add(AuthenticationLogoutRequested());
+          },
         ),
         title: const Text(
           'Chat',
