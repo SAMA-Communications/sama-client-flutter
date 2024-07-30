@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../main.dart';
 import '../conversations_list.dart';
 
 class ConversationsList extends StatefulWidget {
@@ -10,13 +11,25 @@ class ConversationsList extends StatefulWidget {
   State<ConversationsList> createState() => _ConversationsListState();
 }
 
-class _ConversationsListState extends State<ConversationsList> {
+class _ConversationsListState extends State<ConversationsList> with RouteAware {
   final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
+  @override
+  void didPopNext() {
+    // ToDo RP later can be changed or removed
+    context.read<ConversationBloc>().add(ConversationRefreshed());
   }
 
   @override
@@ -53,6 +66,7 @@ class _ConversationsListState extends State<ConversationsList> {
 
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
