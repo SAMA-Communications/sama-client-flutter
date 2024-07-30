@@ -103,7 +103,7 @@ Widget _buildImagesGrid(
       mainAxisSpacing: 6,
       crossAxisSpacing: 6,
       repeatPattern: QuiltedGridRepeatPattern.inverted,
-      pattern: _getPattenForCount(attachments.length),
+      pattern: getGridPattenForCount(attachments.length),
     ),
     childrenDelegate: SliverChildBuilderDelegate(
       childCount: attachments.length,
@@ -178,63 +178,4 @@ Widget _buildImageItem(ChatAttachment attachment) {
       ),
     ),
   );
-}
-
-List<QuiltedGridTile> _getPattenForCount(int count) {
-  switch (count) {
-    case 1:
-      return [
-        const QuiltedGridTile(4, 4),
-      ];
-
-    case 2:
-      return [
-        const QuiltedGridTile(3, 2),
-        const QuiltedGridTile(3, 2),
-      ];
-    case 3:
-      return [
-        const QuiltedGridTile(3, 2),
-        const QuiltedGridTile(1, 2),
-        const QuiltedGridTile(2, 2),
-      ];
-    case 4:
-      return [
-        const QuiltedGridTile(3, 2),
-        const QuiltedGridTile(1, 1),
-        const QuiltedGridTile(1, 1),
-        const QuiltedGridTile(2, 2),
-      ];
-
-    case 5:
-    case 0:
-      return [
-        const QuiltedGridTile(2, 2),
-        const QuiltedGridTile(1, 1),
-        const QuiltedGridTile(1, 1),
-        const QuiltedGridTile(2, 2),
-        const QuiltedGridTile(1, 2),
-      ];
-
-    case 6:
-      return _getPattenForCount(3);
-
-    case 7:
-      return [
-        const QuiltedGridTile(2, 2),
-        const QuiltedGridTile(1, 1),
-        const QuiltedGridTile(1, 1),
-        const QuiltedGridTile(1, 2),
-        const QuiltedGridTile(1, 2),
-        const QuiltedGridTile(2, 2),
-        const QuiltedGridTile(1, 2),
-      ];
-
-    case 8:
-      return _getPattenForCount(4);
-    case 9:
-      return [..._getPattenForCount(5), ..._getPattenForCount(4)];
-  }
-
-  return _getPattenForCount(count ~/ 10);
 }
