@@ -45,7 +45,7 @@ class _ConversationsListState extends State<ConversationsList> {
                       height: 5,
                     ));
           case ConversationStatus.initial:
-            return const Center(child: CircularProgressIndicator());
+            return const CenterLoader();
         }
       },
     );
