@@ -28,6 +28,7 @@ class ConversationModel {
   final int? unreadMessagesCount;
   final Message? lastMessage;
   final User? opponent;
+  final User? owner;
 
   ConversationModel({
     required this.id,
@@ -38,6 +39,7 @@ class ConversationModel {
     required this.unreadMessagesCount,
     required this.lastMessage,
     required this.opponent,
+    required this.owner,
     this.description,
   });
 }

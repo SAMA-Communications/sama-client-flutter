@@ -30,6 +30,7 @@ class ConversationRepository {
 
   Future<List<ConversationModel>> getConversationsWithParticipants() async {
     final List<api.Conversation> conversations = await getConversations();
+    conversations.removeWhere((i) => i.type == 'u' && i.lastMessage == null);
     final List<String> cids =
         conversations.map((element) => element.id!).toList();
     final List<User> users = await getParticipants(cids); //turn into map
@@ -44,6 +45,8 @@ class ConversationRepository {
             opponent: users
                 .where((user) => user.id == element.opponentId)
                 .firstOrNull,
+            owner:
+                users.where((user) => user.id == element.ownerId).firstOrNull,
             unreadMessagesCount: element.unreadMessagesCount,
             lastMessage: element.lastMessage,
             description: element.description,
@@ -65,7 +68,10 @@ class ConversationRepository {
         type: conversation.type!,
         name: conversation.type! == 'g' ? conversation.name! : null,
         opponent: participants
-            .where((user) => user.id == conversation.opponentId || user.id == conversation.ownerId)
+            .where((user) => user.id == conversation.opponentId)
+            .firstOrNull,
+        owner: participants
+            .where((user) => user.id == conversation.ownerId)
             .firstOrNull,
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage);
