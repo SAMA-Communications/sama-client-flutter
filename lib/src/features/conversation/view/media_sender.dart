@@ -194,7 +194,7 @@ Widget _buildPreviewGrid(
       mainAxisSpacing: 6,
       crossAxisSpacing: 6,
       repeatPattern: QuiltedGridRepeatPattern.inverted,
-      pattern: getGridPattenForCount(selectedFiles.length),
+      pattern: getGridPatternForCount(selectedFiles.length),
     ),
     childrenDelegate: SliverChildBuilderDelegate(
       childCount: selectedFiles.length,

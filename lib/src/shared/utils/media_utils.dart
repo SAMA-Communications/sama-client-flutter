@@ -46,7 +46,7 @@ Future<File> compressImageFile(File imageFile) async {
   }
 }
 
-List<QuiltedGridTile> getGridPattenForCount(int count) {
+List<QuiltedGridTile> getGridPatternForCount(int count) {
   switch (count) {
     case 1:
       return [
@@ -97,9 +97,9 @@ List<QuiltedGridTile> getGridPattenForCount(int count) {
       ];
 
     case 9:
-      return [...getGridPattenForCount(5), ...getGridPattenForCount(4)];
+      return [...getGridPatternForCount(5), ...getGridPatternForCount(4)];
   }
 
   // TODO VT develop an algorithm for building a grid for more than 10 items
-  return getGridPattenForCount(count ~/ 10);
+  return getGridPatternForCount(count ~/ 10);
 }

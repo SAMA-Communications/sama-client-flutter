@@ -103,7 +103,7 @@ Widget _buildImagesGrid(
       mainAxisSpacing: 6,
       crossAxisSpacing: 6,
       repeatPattern: QuiltedGridRepeatPattern.inverted,
-      pattern: getGridPattenForCount(attachments.length),
+      pattern: getGridPatternForCount(attachments.length),
     ),
     childrenDelegate: SliverChildBuilderDelegate(
       childCount: attachments.length,
