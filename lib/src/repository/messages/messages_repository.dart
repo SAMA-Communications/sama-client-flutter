@@ -42,7 +42,7 @@ class MessagesRepository {
 
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-      var sender = participants[message.from]!;
+      var sender = participants[message.from] ?? api.User.empty;
 
       var chatMessage = ChatMessage(
           sender: sender,
