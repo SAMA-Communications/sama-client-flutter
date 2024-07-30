@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import '../../../api/api.dart' as api;
 import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/user/user_repository.dart';
+import '../../secure_storage.dart';
 
 part 'auth_event.dart';
 
@@ -53,6 +54,8 @@ class AuthenticationBloc
         );
       case AuthenticationStatus.unknown:
         return emit(const AuthenticationState.unknown());
+      case AuthenticationStatus.canBeAuthenticated:
+        tryAuthUser();
     }
   }
 
@@ -68,10 +71,25 @@ class AuthenticationBloc
 
   Future<api.User?> tryGetUser() async {
     try {
-      final user = await _userRepository.getUser();
-      return user;
+      return await _userRepository.getUser();
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<void> tryAuthUser() async {
+    try {
+      final user = await SecureStorage.instance.getLocalUser();
+      await _authenticationRepository.logIn(
+          username: user!.login!, password: user.password!);
+    } catch (_) {}
+  }
+
+  Future<bool> tryGetHasLocalUser() async {
+    try {
+      return await SecureStorage.instance.hasLocalUser();
+    } catch (_) {
+      return false;
     }
   }
 }
