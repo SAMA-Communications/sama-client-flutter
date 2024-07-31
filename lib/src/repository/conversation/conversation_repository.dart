@@ -31,9 +31,14 @@ class ConversationRepository {
   Future<List<ConversationModel>> getConversationsWithParticipants() async {
     final List<api.Conversation> conversations = await getConversations();
     conversations.removeWhere((i) => i.type == 'u' && i.lastMessage == null);
+    conversations.sort((a, b) => (b.lastMessage?.createdAt ?? b.updatedAt!)
+        .compareTo(a.lastMessage?.createdAt ?? a.updatedAt!));
+
     final List<String> cids =
         conversations.map((element) => element.id!).toList();
-    final List<User> users = await getParticipants(cids); //turn into map
+    final List<User> participants = await getParticipants(cids);
+    Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
+
     final List<ConversationModel> result = conversations
         .map(
           (element) => ConversationModel(
@@ -42,11 +47,8 @@ class ConversationRepository {
             updatedAt: element.updatedAt!,
             type: element.type!,
             name: element.type! == 'g' ? element.name! : null,
-            opponent: users
-                .where((user) => user.id == element.opponentId)
-                .firstOrNull,
-            owner:
-                users.where((user) => user.id == element.ownerId).firstOrNull,
+            opponent: participantsMap[element.opponentId],
+            owner: participantsMap[element.ownerId],
             unreadMessagesCount: element.unreadMessagesCount,
             lastMessage: element.lastMessage,
             description: element.description,
@@ -61,18 +63,15 @@ class ConversationRepository {
       List<api.User> participants, String type) async {
     final Conversation conversation = await api.createConversation(
         participants.map((user) => user.id!).toList(), type);
+    Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
     return ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
         name: conversation.type! == 'g' ? conversation.name! : null,
-        opponent: participants
-            .where((user) => user.id == conversation.opponentId)
-            .firstOrNull,
-        owner: participants
-            .where((user) => user.id == conversation.ownerId)
-            .firstOrNull,
+        opponent: participantsMap[conversation.opponentId],
+        owner: participantsMap[conversation.ownerId],
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage);
   }
