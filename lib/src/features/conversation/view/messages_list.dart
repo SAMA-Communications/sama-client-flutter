@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -32,10 +33,34 @@ class _MessagesListState extends State<MessagesList> {
       builder: (context, state) {
         switch (state.status) {
           case ConversationStatus.failure:
-            return const Center(child: Text('failed to fetch messages'));
+            return Center(
+              child: Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.all(24),
+                child: const Text(
+                  'The chat is unavailable. Please check your Internet connection.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            );
           case ConversationStatus.success:
             if (state.messages.isEmpty) {
-              return const Center(child: Text('Write the first message...', style: TextStyle(fontSize: 15),));
+              return Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: const Text(
+                    'Write the first message...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              );
             }
             return ListView.separated(
               reverse: true,
