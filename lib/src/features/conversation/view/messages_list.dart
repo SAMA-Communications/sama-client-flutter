@@ -35,7 +35,7 @@ class _MessagesListState extends State<MessagesList> {
             return const Center(child: Text('failed to fetch messages'));
           case ConversationStatus.success:
             if (state.messages.isEmpty) {
-              return const Center(child: Text('no messages'));
+              return const Center(child: Text('Write the first message...', style: TextStyle(fontSize: 15),));
             }
             return ListView.separated(
               reverse: true,
