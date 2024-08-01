@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../main.dart';
 import '../features/conversations_list/view/conversations_page.dart';
 import '../features/conversation/view/conversation_page.dart';
 import '../features/login/view/login_page.dart';
@@ -12,6 +11,7 @@ import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
 import '../repository/authentication/authentication_repository.dart';
 import '../shared/auth/bloc/auth_bloc.dart';
+import '../shared/utils/observer_utils.dart';
 import 'constants.dart';
 
 GoRouter router(BuildContext context) => GoRouter(

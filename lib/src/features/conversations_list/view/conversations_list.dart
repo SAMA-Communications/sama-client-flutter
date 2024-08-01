@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../main.dart';
+import '../../../shared/utils/observer_utils.dart';
 import '../conversations_list.dart';
 
 class ConversationsList extends StatefulWidget {

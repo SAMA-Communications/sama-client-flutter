@@ -9,6 +9,7 @@ import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/string_utils.dart';
 import 'avatar_letter_icon.dart';
 import 'package:intl/intl.dart';
 
@@ -57,13 +58,7 @@ class ConversationListItem extends StatelessWidget {
         ? conversation.owner
         : conversation.opponent;
 
-    if (user?.firstName != null && user?.lastName != null) {
-      return "${user?.firstName!} ${user?.lastName!}";
-    } else if (user?.firstName != null) {
-      return user!.firstName!;
-    } else {
-      return user?.login ?? "Deleted account";
-    }
+    return getUserName(user);
   }
 }
 
