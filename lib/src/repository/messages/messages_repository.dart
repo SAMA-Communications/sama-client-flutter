@@ -26,8 +26,10 @@ class MessagesRepository {
     String cid, {
     Map<String, dynamic>? parameters,
   }) async {
-    var messages = await api
-        .getMessages({'cid': cid, if (parameters != null) ...parameters});
+    var messages = await api.getMessages({
+      'cid': cid,
+      if (parameters != null && parameters.isNotEmpty) ...parameters
+    });
 
     var currentUser = await userRepository.getUser();
 
@@ -140,6 +142,39 @@ class MessagesRepository {
     incomingMessagesSubscription?.cancel();
     incomingMessagesSubscription = null;
     api.MessagesManager.instance.destroy();
+  }
+
+  Future<void> sendMediaMessage(cid,
+      {String? body, List<api.Attachment> attachments = const []}) {
+    var message = api.Message(
+        cid: cid,
+        body: body?.trim(),
+        attachments: attachments,
+        id: const Uuid().v1(),
+        t: DateTime.now().millisecondsSinceEpoch ~/ 1000);
+
+    return api.sendMessage(message: message).then(
+      (_) async {
+        var currentUser = await userRepository.getUser();
+
+        _incomingMessagesController.add(ChatMessage(
+            sender: currentUser!,
+            isOwn: true,
+            //will be calculated before add to list
+            isFirstUserMessage: true,
+            //will be calculated before add to list
+            isLastUserMessage: true,
+            id: message.id,
+            from: currentUser.id,
+            cid: message.cid,
+            status: message.status,
+            body: message.body,
+            attachments: message.attachments,
+            createdAt: message.createdAt,
+            t: message.t,
+            extension: message.extension));
+      },
+    );
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../shared/ui/colors.dart';
 import '../bloc/send_message/send_message_bloc.dart';
+import 'media_sender.dart';
 
 class MessageInput extends StatelessWidget {
   final TextEditingController textEditingController = TextEditingController();
@@ -25,17 +26,41 @@ class MessageInput extends StatelessWidget {
         }
       },
       child: BlocBuilder<SendMessageBloc, SendMessageState>(
-        builder: (context, state) {
+        builder: (rootContext, state) {
           return Container(
             constraints: const BoxConstraints(maxHeight: 120.0),
             margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-            padding: const EdgeInsets.only(left: 8.0, right: 0.0),
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(12.0)),
               color: gainsborough,
             ),
             child: Row(
               children: [
+                IconButton(
+                  icon: const Icon(Icons.attach_file_outlined),
+                  color: dullGray,
+                  onPressed: () {
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 10.0),
+                          actionsPadding: EdgeInsets.zero,
+                          buttonPadding: EdgeInsets.zero,
+                          content: SizedBox(
+                            width: double.maxFinite,
+                            child: MediaSender.create(
+                                currentConversation: rootContext
+                                    .watch<SendMessageBloc>()
+                                    .currentConversation),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
                 Flexible(
                   child: TextField(
                     keyboardType: TextInputType.multiline,
@@ -47,7 +72,7 @@ class MessageInput extends StatelessWidget {
                       hintStyle: TextStyle(color: dullGray),
                     ),
                     onChanged: (text) {
-                      BlocProvider.of<SendMessageBloc>(context)
+                      BlocProvider.of<SendMessageBloc>(rootContext)
                           .add(TextMessageChanged(text));
                     },
                   ),
@@ -57,7 +82,7 @@ class MessageInput extends StatelessWidget {
                   onPressed: state.isTextEmpty
                       ? null
                       : () => onSendChatMessage(
-                          context, textEditingController.text),
+                          rootContext, textEditingController.text),
                   color: dullGray,
                 ),
               ],

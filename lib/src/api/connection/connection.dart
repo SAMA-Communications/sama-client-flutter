@@ -95,9 +95,10 @@ class SamaConnectionService {
     return openConnectionFeature!;
   }
 
+  /// [requestData] should be represented as the List or Map object that can be encoded to the JSON object
   Future<Map<String, dynamic>> sendRequest(
     String requestName,
-    Map<String, dynamic> requestData, {
+    dynamic requestData, {
     String? retryRequestId,
     Completer<Map<String, dynamic>>? retryCompleter,
   }) {
@@ -242,7 +243,7 @@ enum ConnectionState { idle, connecting, connected, disconnected, failed }
 
 class RequestInfo {
   final String name;
-  final Map<String, dynamic> data;
+  final dynamic data;
   final Completer<Map<String, dynamic>> completer;
 
   RequestInfo(

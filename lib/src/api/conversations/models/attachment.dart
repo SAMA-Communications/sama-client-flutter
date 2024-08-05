@@ -23,9 +23,7 @@ class Attachment extends Equatable {
       };
 
   @override
-  List<Object?> get props => [
-        fileId,
-      ];
+  List<Object?> get props => [fileId, fileName, fileBlurHash];
 
   static const empty = Attachment();
 }

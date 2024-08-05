@@ -1,3 +1,4 @@
+export 'chats/attachments_api.dart';
 export 'chats/messages_api.dart';
 export 'chats/realtime/messages_manager.dart';
 export 'chats/realtime/models/models.dart';
