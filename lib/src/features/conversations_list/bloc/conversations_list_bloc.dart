@@ -22,6 +22,9 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
 }
 
 class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
+  final ConversationRepository _conversationRepository;
+  StreamSubscription<ConversationModel>? updateConversationStreamSubscription;
+
   ConversationBloc({
     required ConversationRepository conversationRepository,
   })  : _conversationRepository = conversationRepository,
@@ -33,9 +36,14 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ConversationRefreshed>(
       _onConversationRefreshed,
     );
-  }
 
-  final ConversationRepository _conversationRepository;
+    updateConversationStreamSubscription =
+        conversationRepository.updateConversationStream.listen((chat) async {
+      if (!isClosed) {
+        add(ConversationRefreshed());
+      }
+    });
+  }
 
   Future<void> _onConversationFetched(
       ConversationFetched event, Emitter<ConversationState> emit) async {
@@ -76,12 +84,18 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   Future<void> _onConversationRefreshed(
       ConversationRefreshed event, Emitter<ConversationState> emit) async {
     final conversations =
-        await _conversationRepository.getConversationsWithParticipants();
+        await _conversationRepository.getStoredConversations();
     return emit(
       state.copyWith(
           status: ConversationStatus.success,
           conversations: conversations,
           hasReachedMax: true),
     );
+  }
+
+  @override
+  Future<void> close() {
+    updateConversationStreamSubscription?.cancel();
+    return super.close();
   }
 }

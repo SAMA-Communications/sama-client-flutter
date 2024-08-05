@@ -60,12 +60,6 @@ GoRouter router(BuildContext context) => GoRouter(
             return SearchPage.route();
           },
         ),
-        GoRoute(
-          path: globalSearchPath,
-          builder: (context, state) {
-            return SearchPage.route();
-          },
-        ),
       ],
       refreshListenable:
           GoRouterRefreshBloc<AuthenticationBloc, AuthenticationState>(

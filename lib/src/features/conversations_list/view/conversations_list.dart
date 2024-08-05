@@ -28,8 +28,8 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
 
   @override
   void didPopNext() {
-    // ToDo RP later can be changed or removed
-    context.read<ConversationBloc>().add(ConversationRefreshed());
+    // ToDo RP for now not using
+    // context.read<ConversationBloc>().add(ConversationRefreshed());
   }
 
   @override
