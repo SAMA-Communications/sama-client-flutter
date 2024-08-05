@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
@@ -26,6 +26,7 @@ class MessageBubble extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(left: 8.0, right: 8.0),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment:
             isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -42,36 +43,32 @@ class MessageBubble extends StatelessWidget {
             const SizedBox(
               width: 40,
             ),
-          Flexible(
-            child: CustomPaint(
-              painter: CustomChatBubble(
-                  color: isOwn ? slateBlue : gainsborough,
-                  isOwn: isOwn,
-                  withTail: isLast),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                padding: const EdgeInsets.all(6.0),
-                child: Container(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (isFirst && !isOwn)
-                        Text(
-                          getUserName(sender),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isOwn ? gainsborough : slateBlue,
-                          ),
-                        ),
-                      Container(
-                        constraints: const BoxConstraints(maxWidth: 300.0),
-                        child: child,
+          CustomPaint(
+            painter: CustomChatBubble(
+                color: isOwn ? slateBlue : gainsborough,
+                isOwn: isOwn,
+                withTail: isLast),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 300.0),
+              margin: const EdgeInsets.symmetric(vertical: 4.0),
+              padding: EdgeInsets.only(
+                  left: isOwn ? 4.0 : 20.0,
+                  right: isOwn ? 20.0 : 4.0,
+                  top: 4.0,
+                  bottom: 4.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isFirst && !isOwn)
+                    Text(
+                      getUserName(sender),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isOwn ? gainsborough : slateBlue,
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  child,
+                ],
               ),
             ),
           ),

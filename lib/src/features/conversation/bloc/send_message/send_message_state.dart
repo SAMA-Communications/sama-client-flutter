@@ -23,7 +23,7 @@ final class SendMessageState extends Equatable {
 
   @override
   String toString() {
-    return '''PostState { status: $status }''';
+    return '''SendMessageState { status: $status }''';
   }
 
   @override
