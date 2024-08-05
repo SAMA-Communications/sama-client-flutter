@@ -64,7 +64,8 @@ class ConversationRepository {
     final Conversation conversation = await api.createConversation(
         participants.map((user) => user.id!).toList(), type);
     Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
-    return ConversationModel(
+
+    final result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
@@ -74,5 +75,7 @@ class ConversationRepository {
         owner: participantsMap[conversation.ownerId],
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage);
+    localDataSource.conversations?.add(result);
+    return result;
   }
 }

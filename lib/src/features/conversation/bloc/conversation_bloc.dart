@@ -133,7 +133,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     messages.insert(
       0,
       event.message.copyWith(
-        isFirstUserMessage: isServiceMessage(messages.first) ||
+        isFirstUserMessage: isServiceMessage(
+                messages.isEmpty ? Message.empty : messages.first) ||
             messages.isEmpty ||
             event.message.from != messages.first.from,
         isLastUserMessage: true,
