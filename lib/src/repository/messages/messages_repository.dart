@@ -42,10 +42,10 @@ class MessagesRepository {
 
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-      var sender = participants[message.from]!;
+      var sender = participants[message.from];
 
       var chatMessage = ChatMessage(
-          sender: sender,
+          sender: sender ?? api.User.empty,
           isOwn: currentUser?.id == message.from,
           isLastUserMessage: i == 0 ||
               isServiceMessage(messages[i - 1]) ||

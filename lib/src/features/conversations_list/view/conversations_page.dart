@@ -27,6 +27,7 @@ class HomePage extends StatelessWidget {
             width: 32,
             fit: BoxFit.cover,
           ),
+          tooltip: 'Logout',
           onPressed: () {
             context
                 .read<AuthenticationBloc>()
