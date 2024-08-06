@@ -30,6 +30,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _onConversationFetched,
       transformer: throttleDroppable(throttleDuration),
     );
+    on<ConversationRefreshed>(
+      _onConversationRefreshed,
+    );
   }
 
   final ConversationRepository _conversationRepository;
@@ -68,5 +71,17 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       print("_onConversationFetched err= $err");
       emit(state.copyWith(status: ConversationStatus.failure));
     }
+  }
+
+  Future<void> _onConversationRefreshed(
+      ConversationRefreshed event, Emitter<ConversationState> emit) async {
+    final conversations =
+        await _conversationRepository.getConversationsWithParticipants();
+    return emit(
+      state.copyWith(
+          status: ConversationStatus.success,
+          conversations: conversations,
+          hasReachedMax: true),
+    );
   }
 }

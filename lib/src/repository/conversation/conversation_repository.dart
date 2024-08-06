@@ -30,6 +30,7 @@ class ConversationRepository {
 
   Future<List<ConversationModel>> getConversationsWithParticipants() async {
     final List<api.Conversation> conversations = await getConversations();
+    conversations.removeWhere((i) => i.type == 'u' && i.lastMessage == null);
     conversations.sort((a, b) => (b.lastMessage?.createdAt ?? b.updatedAt!)
         .compareTo(a.lastMessage?.createdAt ?? a.updatedAt!));
 
@@ -47,6 +48,7 @@ class ConversationRepository {
             type: element.type!,
             name: element.type! == 'g' ? element.name! : null,
             opponent: participantsMap[element.opponentId],
+            owner: participantsMap[element.ownerId],
             unreadMessagesCount: element.unreadMessagesCount,
             lastMessage: element.lastMessage,
             description: element.description,
@@ -62,15 +64,18 @@ class ConversationRepository {
     final Conversation conversation = await api.createConversation(
         participants.map((user) => user.id!).toList(), type);
     Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
-    return ConversationModel(
+
+    final result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
         name: conversation.type! == 'g' ? conversation.name! : null,
-        opponent: participantsMap[conversation.opponentId] ??
-            participantsMap[conversation.ownerId],
+        opponent: participantsMap[conversation.opponentId],
+        owner: participantsMap[conversation.ownerId],
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage);
+    localDataSource.conversations?.add(result);
+    return result;
   }
 }
