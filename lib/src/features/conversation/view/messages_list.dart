@@ -124,18 +124,24 @@ class _MessagesListState extends State<MessagesList> {
           notification = ' has been removed from the group';
           break;
 
+        case 'update_image':
+          notification = 'Group chat image was updated';
+          break;
+
         default:
           notification = '';
       }
 
-      var user = User.fromJson((message.extension?['user']));
+      User? user = message.extension?['user'] != null
+          ? User.fromJson((message.extension?['user']))
+          : null;
       return ServiceMessageBubble(
         child: RichText(
           text: TextSpan(
             style: DefaultTextStyle.of(context).style,
             children: <TextSpan>[
               TextSpan(
-                  text: getUserName(user),
+                  text: user != null ? getUserName(user) : null,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(
                 text: notification,
