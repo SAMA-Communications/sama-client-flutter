@@ -65,6 +65,9 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
     emit(state.copyWith(status: MediaSelectorStatus.mediaSelected));
     var existFiles = [...state.selectedFiles];
     var newFiles = event.selectedFiles;
+
+    if (newFiles.isEmpty) return Future.value(null);
+
     newFiles.removeWhere((file) => existFiles.contains(file));
     if (existFiles.length + newFiles.length > 10) {
       emit(state.copyWith(
@@ -154,6 +157,8 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
             []);
         add(_AddFiles(files));
       }
+    }).catchError((onError) {
+      add(const _AddFiles([]));
     });
   }
 
