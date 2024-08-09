@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'src/repository/user/user_data_source.dart';
-import 'src/repository/conversation/conversation_data_source.dart';
-import 'src/repository/global_search/global_search_repository.dart';
 
 import 'src/navigation/app_router.dart';
+import 'src/repository/attachments/attachments_repository.dart';
 import 'src/repository/authentication/authentication_repository.dart';
+import 'src/repository/conversation/conversation_data_source.dart';
 import 'src/repository/conversation/conversation_repository.dart';
+import 'src/repository/global_search/global_search_repository.dart';
 import 'src/repository/messages/messages_repository.dart';
+import 'src/repository/user/user_data_source.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/ui/colors.dart';
@@ -30,6 +31,7 @@ class _AppState extends State<App> {
   late final MessagesRepository _messagesRepository;
   late final GlobalSearchRepository _globalSearchRepository;
   late final ConversationLocalDataSource _conversationLocalDataSource;
+  late final AttachmentsRepository _attachmentsRepository;
   late final UserLocalDataSource _userLocalDataSource;
 
   @override
@@ -40,6 +42,7 @@ class _AppState extends State<App> {
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository(localDataSource: _userLocalDataSource);
     _messagesRepository = MessagesRepository(userRepository: _userRepository);
+    _attachmentsRepository = AttachmentsRepository();
     _conversationRepository = ConversationRepository(
         localDataSource: _conversationLocalDataSource,
         userRepository: _userRepository,
@@ -74,6 +77,9 @@ class _AppState extends State<App> {
         ),
         RepositoryProvider<GlobalSearchRepository>(
           create: (context) => _globalSearchRepository,
+        ),
+        RepositoryProvider<AttachmentsRepository>(
+          create: (context) => _attachmentsRepository,
         ),
       ],
       child: BlocProvider(

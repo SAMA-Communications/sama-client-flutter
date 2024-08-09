@@ -79,7 +79,7 @@ GoRouter router(BuildContext context) => GoRouter(
           return BlocProvider.of<AuthenticationBloc>(context)
               .tryGetHasLocalUser()
               .then((hasUser) {
-            return hasUser ? splashScreenPath : state.fullPath;
+            return hasUser ? splashScreenPath : loginScreenPath;
           });
         }
       },

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -5,6 +6,7 @@ import '../../../api/api.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../models/models.dart';
+import '../widgets/images_attachment.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
 import '../widgets/unsupported_message.dart';
@@ -31,10 +33,34 @@ class _MessagesListState extends State<MessagesList> {
       builder: (context, state) {
         switch (state.status) {
           case ConversationStatus.failure:
-            return const Center(child: Text('failed to fetch messages'));
+            return Center(
+              child: Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.all(24),
+                child: const Text(
+                  'The chat is unavailable. Please check your Internet connection.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            );
           case ConversationStatus.success:
             if (state.messages.isEmpty) {
-              return const Center(child: Text('no messages'));
+              return Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: const Text(
+                    'Write the first message...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              );
             }
             return ListView.separated(
               reverse: true,
@@ -77,9 +103,13 @@ class _MessagesListState extends State<MessagesList> {
 
   Widget buildMessageListItem(ChatMessage message) {
     if (message.attachments?.isNotEmpty ?? false) {
-      return UnsupportedMessage(
-        message: message,
-      );
+      try {
+        return ImagesAttachment.create(
+          message: message,
+        );
+      } catch (_) {
+        return UnsupportedMessage(message: message);
+      }
     } else if (message.extension?['type'] != null) {
       var type = message.extension?['type'];
 
@@ -94,18 +124,24 @@ class _MessagesListState extends State<MessagesList> {
           notification = ' has been removed from the group';
           break;
 
+        case 'update_image':
+          notification = 'Group chat image was updated';
+          break;
+
         default:
           notification = '';
       }
 
-      var user = User.fromJson((message.extension?['user']));
+      User? user = message.extension?['user'] != null
+          ? User.fromJson((message.extension?['user']))
+          : null;
       return ServiceMessageBubble(
         child: RichText(
           text: TextSpan(
             style: DefaultTextStyle.of(context).style,
             children: <TextSpan>[
               TextSpan(
-                  text: getUserName(user),
+                  text: user != null ? getUserName(user) : null,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(
                 text: notification,
