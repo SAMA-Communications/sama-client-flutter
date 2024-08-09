@@ -9,8 +9,9 @@ class MediaSenderEvent extends Equatable {
 
 final class _AddFiles extends MediaSenderEvent {
   final List<File> selectedFiles;
+  final String? error;
 
-  const _AddFiles(this.selectedFiles);
+  const _AddFiles(this.selectedFiles, {this.error});
 }
 
 final class PickMoreFiles extends MediaSenderEvent {

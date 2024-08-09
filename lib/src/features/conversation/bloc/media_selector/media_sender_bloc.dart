@@ -63,6 +63,13 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
   FutureOr<void> _onFilesAdded(
       _AddFiles event, Emitter<MediaSenderState> emit) {
     emit(state.copyWith(status: MediaSelectorStatus.mediaSelected));
+    if (event.error?.isNotEmpty ?? false) {
+      emit(state.copyWith(error: event.error));
+      Timer(const Duration(seconds: 4), () {
+        add(const _CleanError());
+      });
+    }
+
     var existFiles = [...state.selectedFiles];
     var newFiles = event.selectedFiles;
 
@@ -158,7 +165,8 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
         add(_AddFiles(files));
       }
     }).catchError((onError) {
-      add(const _AddFiles([]));
+      add(const _AddFiles([],
+          error: 'Please allow permission access to Gallery'));
     });
   }
 
