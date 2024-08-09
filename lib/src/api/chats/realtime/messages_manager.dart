@@ -110,8 +110,7 @@ class MessagesManager {
 
   void _processSystemMessagePackage(Map<String, dynamic> data) {
     if (data['x'] != null) {
-      //RP check without != null - just if(data['x'])
-      var systemMessage = SystemChatMessage.fromJson(data['x']);
+      var systemMessage = SystemChatMessage.fromJson(data);
       _systemChatMessagesController.add(systemMessage);
     }
   }

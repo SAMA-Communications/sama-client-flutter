@@ -74,7 +74,8 @@ class MessagesRepository {
         body: body.trim(),
         cid: cid,
         id: const Uuid().v1(),
-        t: DateTime.now().millisecondsSinceEpoch ~/ 1000);
+        t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        createdAt: DateTime.now());
 
     return api.sendMessage(message: message).then((_) async {
       var currentUser = await userRepository.getUser();

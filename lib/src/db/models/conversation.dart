@@ -68,4 +68,15 @@ class ConversationModel {
       owner: owner ?? this.owner,
     );
   }
+
+  ConversationModel copyWithItem({
+    required ConversationModel item,
+  }) {
+    return copyWith(
+      updatedAt: updatedAt != item.updatedAt ? item.updatedAt : updatedAt,
+      name: name != item.name ? item.name : name,
+      description:
+          description != item.description ? item.description : description,
+    );
+  }
 }

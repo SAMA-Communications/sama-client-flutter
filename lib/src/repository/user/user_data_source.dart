@@ -1,17 +1,27 @@
 import '../../api/api.dart';
 
 class UserLocalDataSource {
-  Map<String, User> allUsers = {};
+  final Map<String, User> _allUsers = {};
 
-  void updateUsers(List<User> users) {
-    allUsers.addEntries(users.map((user) => MapEntry(user.id!, user)));
+  void addUsersList(List<User> items) {
+    _allUsers.addEntries(items.map((user) => MapEntry(user.id!, user)));
+  }
+
+  void addUser(User item) {
+    if (!_allUsers.containsKey(item.id)) {
+      _allUsers[item.id!] = item;
+    }
+  }
+
+  void addUsers(Map<String, User> items) {
+    _allUsers.addAll(items);
   }
 
   Map<String, User?> getUsers() {
-    return Map.of(allUsers);
+    return Map.of(_allUsers);
   }
 
   Map<String, User?> getUsersByIds(List<String> ids) {
-    return {for (var item in ids) item: allUsers[item]};
+    return {for (var item in ids) item: _allUsers[item]};
   }
 }

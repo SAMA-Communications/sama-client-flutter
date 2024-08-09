@@ -19,8 +19,6 @@ class ConversationRepository {
     initChatListeners();
   }
 
-  final Map<String, api.User> _participants = {};
-
   StreamSubscription<api.SystemMessage>? incomingSystemMessagesSubscription;
 
   final StreamController<ConversationModel> _incomingMessageController =
@@ -37,14 +35,11 @@ class ConversationRepository {
     incomingSystemMessagesSubscription = api
         .MessagesManager.instance.systemChatMessagesStream
         .listen((message) async {
-      var sender = _participants[message.from];
-
-      if (sender == null) {
-        await api.getUsersByIds({message.from!}).then((users) {
-          _participants
-              .addEntries(users.map((user) => MapEntry(user.id!, user)));
-        });
-      }
+      Map<String, User> participants = await userRepository.getUsersByIds([
+        message.from!,
+        if (message.conversation?.opponentId != null)
+          message.conversation!.opponentId!
+      ]);
 
       final conversation = ConversationModel(
           id: message.conversation!.id!,
@@ -54,12 +49,23 @@ class ConversationRepository {
           name: message.conversation!.type! == 'g'
               ? message.conversation!.name!
               : null,
-          opponent: _participants[message.conversation!.opponentId],
-          owner: _participants[message.conversation!.ownerId],
+          opponent: participants[message.conversation!.opponentId],
+          owner: participants[message.conversation!.ownerId],
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
-          lastMessage: message.conversation!.lastMessage);
+          lastMessage: message.conversation!.lastMessage,
+          description: message.conversation!.description);
       if (message.type == SystemChatMessageType.conversationCreated) {
         localDataSource.addConversation(conversation);
+      } else if (message.type == SystemChatMessageType.conversationUpdated) {
+        final conversationStored =
+            localDataSource.getConversationsMap()[message.cid];
+        if (conversationStored != null) {
+          var updatedConversation =
+              conversationStored.copyWithItem(item: conversation);
+          localDataSource.updateConversation(updatedConversation);
+        } else {
+          localDataSource.addConversation(conversation);
+        }
       }
       _incomingMessageController.add(conversation);
     });
@@ -91,6 +97,7 @@ class ConversationRepository {
 
   Future<List<ConversationModel>> getStoredConversations() async {
     var conversations = localDataSource.getConversationsList();
+    _removeEmptyPrivateConversations(conversations);
     _sortConversations(conversations);
     return conversations;
   }
@@ -133,8 +140,9 @@ class ConversationRepository {
           ),
         )
         .toList();
-    _sortConversations(result);
+
     localDataSource.setConversations({for (var v in result) v.id: v});
+    _sortConversations(result);
     _removeEmptyPrivateConversations(result);
     return result;
   }

@@ -1,4 +1,4 @@
-import 'package:sama_client_flutter/src/api/api.dart';
+import '../../../../api/api.dart';
 
 abstract class SystemMessage {
   String cid;
@@ -21,15 +21,16 @@ class SystemChatMessage extends SystemMessage {
   SystemChatMessageType type = SystemChatMessageType.none;
 
   SystemChatMessage.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
-    if (json['conversation_created'] != null) {
+    final extension = json['x'];
+    if (extension['conversation_created'] != null) {
       type = SystemChatMessageType.conversationCreated;
-      conversation = json['conversation_created'];
-    } else if (json['conversation_updated'] != null) {
+      conversation = Conversation.fromJson(extension['conversation_created']);
+    } else if (extension['conversation_updated'] != null) {
       type = SystemChatMessageType.conversationUpdated;
-      conversation = json['conversation_updated'];
-    } else if (json['conversationKicked'] != null) {
+      conversation = Conversation.fromJson(extension['conversation_updated']);
+    } else if (extension['conversationKicked'] != null) {
       type = SystemChatMessageType.conversationKicked;
-      conversation = json['conversationKicked'];
+      conversation = Conversation.fromJson(extension['conversationKicked']);
     }
   }
 }

@@ -29,17 +29,17 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
   @override
   void didPopNext() {
     // ToDo RP for now not using
-    // context.read<ConversationBloc>().add(ConversationRefreshed());
+    // context.read<ConversationsBloc>().add(ConversationsRefreshed());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConversationBloc, ConversationState>(
+    return BlocBuilder<ConversationsBloc, ConversationsState>(
       builder: (context, state) {
         switch (state.status) {
-          case ConversationStatus.failure:
+          case ConversationsStatus.failure:
             return const Center(child: Text('failed to fetch conversations'));
-          case ConversationStatus.success:
+          case ConversationsStatus.success:
             if (state.conversations.isEmpty) {
               return const Center(child: Text('no conversations'));
             }
@@ -57,7 +57,7 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
                 separatorBuilder: (context, index) => const SizedBox(
                       height: 5,
                     ));
-          case ConversationStatus.initial:
+          case ConversationsStatus.initial:
             return const CenterLoader();
         }
       },
@@ -74,7 +74,8 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
   }
 
   void _onScroll() {
-    if (_isBottom) context.read<ConversationBloc>().add(ConversationFetched());
+    if (_isBottom)
+      context.read<ConversationsBloc>().add(ConversationsFetched());
   }
 
   bool get _isBottom {

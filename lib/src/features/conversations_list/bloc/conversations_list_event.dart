@@ -1,12 +1,12 @@
 part of 'conversations_list_bloc.dart';
 
-sealed class ConversationEvent extends Equatable {
-  const ConversationEvent();
+sealed class ConversationsEvent extends Equatable {
+  const ConversationsEvent();
 
   @override
   List<Object> get props => [];
 }
 
-final class ConversationFetched extends ConversationEvent {}
+final class ConversationsFetched extends ConversationsEvent {}
 
-final class ConversationRefreshed extends ConversationEvent {}
+final class ConversationsRefreshed extends ConversationsEvent {}
