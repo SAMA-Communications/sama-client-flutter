@@ -1,5 +1,6 @@
 part of 'conversations_list_bloc.dart';
 
+//ToDo RP rename to ConversationsStatus
 enum ConversationStatus { initial, success, failure }
 
 final class ConversationState extends Equatable {

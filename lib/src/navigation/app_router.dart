@@ -11,9 +11,11 @@ import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
 import '../repository/authentication/authentication_repository.dart';
 import '../shared/auth/bloc/auth_bloc.dart';
+import '../shared/utils/observer_utils.dart';
 import 'constants.dart';
 
 GoRouter router(BuildContext context) => GoRouter(
+      observers: [routeObserver],
       routes: <RouteBase>[
         GoRoute(
           path: rootScreenPath,
@@ -83,7 +85,7 @@ GoRouter router(BuildContext context) => GoRouter(
           return BlocProvider.of<AuthenticationBloc>(context)
               .tryGetHasLocalUser()
               .then((hasUser) {
-            return hasUser ? splashScreenPath : state.fullPath;
+            return hasUser ? splashScreenPath : loginScreenPath;
           });
         }
       },

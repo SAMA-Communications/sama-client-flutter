@@ -8,3 +8,5 @@ sealed class ConversationEvent extends Equatable {
 }
 
 final class ConversationFetched extends ConversationEvent {}
+
+final class ConversationRefreshed extends ConversationEvent {}
