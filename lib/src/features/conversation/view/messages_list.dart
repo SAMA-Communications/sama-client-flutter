@@ -124,25 +124,45 @@ class _MessagesListState extends State<MessagesList> {
           notification = ' has been removed from the group';
           break;
 
+        case 'left_participants':
+          notification = ' has left the group';
+          break;
+
         case 'update_image':
           notification = 'Group chat image was updated';
+          break;
+
+        case 'create':
+          notification = ' created a new conversation';
+          break;
+
+        case 'update':
+          notification = ' added you to conversation';
+          break;
+
+        case 'delete':
+          notification = ' removed you from conversation';
           break;
 
         default:
           notification = '';
       }
 
-      User? user = message.extension?['user'] != null
-          ? User.fromJson((message.extension?['user']))
-          : null;
+      User? initiator;
+
+      if (message.extension?['user'] != null) {
+        initiator = User.fromJson((message.extension?['user']));
+      }
+
       return ServiceMessageBubble(
         child: RichText(
           text: TextSpan(
             style: DefaultTextStyle.of(context).style,
             children: <TextSpan>[
-              TextSpan(
-                  text: user != null ? getUserName(user) : null,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              if (initiator != null)
+                TextSpan(
+                    text: getUserName(initiator),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(
                 text: notification,
               ),
