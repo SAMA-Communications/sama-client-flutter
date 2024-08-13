@@ -46,8 +46,9 @@ Future<List<String>> searchConversationsIdsByName(String name) async {
 }
 
 Future<Conversation> createConversation(
-    List<String> participants, String type) async {
+    List<String> participants, String type, String? name) async {
   return SamaConnectionService.instance.sendRequest(conversationCreate, {
+    if (name != null) 'name': name,
     'type': type,
     'participants': participants,
   }).then((response) {

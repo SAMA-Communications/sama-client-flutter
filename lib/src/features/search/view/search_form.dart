@@ -7,13 +7,13 @@ import '../../../navigation/constants.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_event.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
+import '../../../features/search/view/search_bar.dart';
 import '../../../shared/ui/view/loading_overlay.dart';
 import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
 import '../../conversations_list/conversations_list.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../bloc/global_search_bloc.dart';
-import '../bloc/global_search_event.dart';
 import '../bloc/global_search_state.dart';
 
 class SearchForm extends StatelessWidget {
@@ -23,89 +23,10 @@ class SearchForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        _SearchBar(),
+        const GlobalSearchBar(),
         _SearchBody(),
       ],
     );
-  }
-}
-
-class _SearchBar extends StatefulWidget implements PreferredSizeWidget {
-  @override
-  State<_SearchBar> createState() => _SearchBarState();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
-
-class _SearchBarState extends State<_SearchBar> {
-  final _textController = TextEditingController();
-  late GlobalSearchBloc _globalSearchBloc;
-
-  @override
-  void initState() {
-    super.initState();
-    _globalSearchBloc = context.read<GlobalSearchBloc>();
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: black,
-      // titleSpacing: 0,
-      leading: IconButton(
-        icon: Image.asset(
-          'assets/images/vector_logo.png',
-          width: 32,
-          fit: BoxFit.cover,
-        ),
-        onPressed: () {},
-      ),
-      title: SizedBox(
-        height: kToolbarHeight - 18,
-        child: TextField(
-          controller: _textController,
-          autocorrect: false,
-          onChanged: (text) {
-            if (text.length >= 2) {
-              _globalSearchBloc.add(
-                TextChanged(text: text),
-              );
-            }
-          },
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: white,
-            contentPadding: const EdgeInsets.only(top: 14.0),
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: GestureDetector(
-              onTap: _onClearTapped,
-              child: const Icon(Icons.clear),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            hintText: 'Search',
-          ),
-        ),
-      ),
-      centerTitle: false,
-    );
-  }
-
-  void _onClearTapped() {
-    if (_textController.text.isNotEmpty) {
-      _textController.text = '';
-      _globalSearchBloc.add(const TextChanged(text: ''));
-    } else {
-      context.pop();
-    }
   }
 }
 

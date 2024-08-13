@@ -6,6 +6,7 @@ import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
+import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../conversations_list.dart';
 
 class HomePage extends StatelessWidget {
@@ -18,47 +19,52 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: black,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: Image.asset(
-            'assets/images/vector_logo.png',
-            width: 32,
-            fit: BoxFit.cover,
+        appBar: AppBar(
+          backgroundColor: black,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+              icon: Image.asset(
+                'assets/images/vector_logo.png',
+                width: 32,
+                fit: BoxFit.cover,
+              ),
+              onPressed: () {
+                context
+                    .read<AuthenticationBloc>()
+                    .add(AuthenticationLogoutRequested());
+              },
           ),
-          tooltip: 'Logout',
-          onPressed: () {
-            context
-                .read<AuthenticationBloc>()
-                .add(AuthenticationLogoutRequested());
-          },
-        ),
-        title: const Text(
-          'Chat',
-          style: TextStyle(color: white),
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () => _openSearch(context),
-            icon: const Icon(
-              Icons.search,
-              color: white,
-              size: 32,
+          title: const Text(
+            'Chat',
+            style: TextStyle(color: white),
+          ),
+          actions: <Widget>[
+            IconButton(
+              onPressed: () => _openSearch(context),
+              icon: const Icon(
+                Icons.search,
+                color: white,
+                size: 32,
+              ),
             ),
+          ],
+        ),
+        body: MultiBlocProvider(providers: [
+          BlocProvider<ConversationsBloc>(
+            create: (context) =>
+            ConversationsBloc(
+                conversationRepository:
+                RepositoryProvider.of<ConversationRepository>(context))
+              ..add(ConversationsFetched()),
           ),
-        ],
-      ),
-      body: BlocProvider(
-        create: (context) {
-          return ConversationsBloc(
-              conversationRepository:
-                  RepositoryProvider.of<ConversationRepository>(context))
-            ..add(ConversationsFetched());
-        },
-        child: const ConversationsList(),
-      ),
-    );
+          BlocProvider<ConversationCreateBloc>(
+            create: (context) =>
+                ConversationCreateBloc(
+                  conversationRepository:
+                  RepositoryProvider.of<ConversationRepository>(context),
+                ),
+          ),
+        ], child: const ConversationsList()));
   }
 
   _openSearch(BuildContext context) {

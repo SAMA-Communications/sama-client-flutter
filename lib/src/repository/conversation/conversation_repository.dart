@@ -148,10 +148,10 @@ class ConversationRepository {
   }
 
   Future<ConversationModel> createConversation(
-      List<api.User> participants, String type) async {
+      List<api.User> participants, String type, [String? name]) async {
     final Conversation conversation = await api.createConversation(
-        participants.map((user) => user.id!).toList(), type);
-    Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
+        participants.map((user) => user.id!).toList(), type, name);
+    final participantsMap = {for (var v in participants) v.id!: v};
 
     var result = ConversationModel(
         id: conversation.id!,

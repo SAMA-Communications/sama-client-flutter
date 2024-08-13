@@ -4,6 +4,9 @@ import '../../../api/api.dart';
 
 sealed class ConversationCreateEvent extends Equatable {
   const ConversationCreateEvent();
+
+  @override
+  List<Object> get props => [];
 }
 
 final class ConversationCreated extends ConversationCreateEvent {
@@ -17,4 +20,18 @@ final class ConversationCreated extends ConversationCreateEvent {
 
   @override
   String toString() => 'ConversationCreated { user: $user }';
+}
+
+final class ConversationGroupCreated extends ConversationCreateEvent {
+  const ConversationGroupCreated({required this.users, required this.type, required this.name});
+
+  final List<User> users;
+  final String type;
+  final String name;
+
+  @override
+  List<Object> get props => [users];
+
+  @override
+  String toString() => 'ConversationGroupCreated { user: $users }';
 }
