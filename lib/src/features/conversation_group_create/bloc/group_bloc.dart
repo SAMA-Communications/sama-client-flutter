@@ -20,7 +20,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     on<GroupAvatarPicked>(_onGroupAvatarPicked);
     on<GroupParticipantsAdded>(_onGroupParticipantsAdded);
     on<GroupParticipantsRemoved>(_onGroupParticipantsRemoved);
-    on<GroupSubmitted>(_onSubmitted);
+    on<GroupSubmitted>(_onGroupSubmitted);
   }
 
   void _onGroupnameChanged(
@@ -99,20 +99,19 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     );
   }
 
-  Future<void> _onSubmitted(
+  Future<void> _onGroupSubmitted(
     GroupSubmitted event,
     Emitter<GroupState> emit,
   ) async {
     if (state.isValid) {
       emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
       try {
-        emit(state.copyWith(
-            status: FormzSubmissionStatus.success,
-            informationMessage: ' Group can be created'));
+        emit(state.copyWith(status: FormzSubmissionStatus.success));
       } catch (_) {}
     } else {
       emit(state.copyWith(
-          status: FormzSubmissionStatus.failure, errorMessage: 'no data'));
+          status: FormzSubmissionStatus.failure,
+          errorMessage: 'Not enough data'));
     }
   }
 }

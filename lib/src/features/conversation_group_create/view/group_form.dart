@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import '../../../api/api.dart';
 
+import '../../../api/api.dart';
+import '../../../features/conversation_create/bloc/conversation_create_event.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../../search/bloc/global_search_bloc.dart';
 import '../../search/bloc/global_search_state.dart';
 import '../bloc/group_bloc.dart';
 import '../models/groupname.dart';
 
-class GroupNameForm extends StatefulWidget {
-  const GroupNameForm({super.key});
+class GroupForm extends StatefulWidget {
+  const GroupForm({super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return GroupNameFormState();
+    return GroupFormState();
   }
 }
 
-class GroupNameFormState extends State<GroupNameForm> {
+class GroupFormState extends State<GroupForm> {
   @override
   void initState() {
     super.initState();
@@ -37,14 +39,13 @@ class GroupNameFormState extends State<GroupNameForm> {
               ..showSnackBar(
                 SnackBar(content: Text(state.errorMessage ?? '')),
               );
-          } else if (state.status.isSuccess &&
-              state.informationMessage != null) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(content: Text(state.informationMessage ?? '')),
-              );
-            //can proceed create chat
+          } else if (state.status.isSuccess) {
+            context.read<ConversationCreateBloc>().add(ConversationGroupCreated(
+                  users: state.participants.value.toList(),
+                  type: 'g',
+                  name: state.groupname.value,
+                  avatarUrl: state.avatar.value,
+                ));
           }
         },
         child: Column(
@@ -193,7 +194,8 @@ class _ParticipantsState extends State<_ParticipantsGrid> {
         var users = state.participants.value;
         return GridView.count(
           shrinkWrap: true,
-          childAspectRatio: 4 / 4, //or 5 / 4 for crossAxisCount: 4
+          childAspectRatio: 4 / 4,
+          //or 5 / 4 for crossAxisCount: 4
           crossAxisCount: 5,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,

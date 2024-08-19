@@ -43,18 +43,19 @@ class ConversationCreateBloc
   }
 
   Future<void> _onConversationGroupCreated(
-      ConversationGroupCreated event,
+    ConversationGroupCreated event,
     Emitter<ConversationCreateState> emit,
   ) async {
     final users = event.users;
     final type = event.type;
     final name = event.name;
+    final avatarUrl = event.avatarUrl;
 
     emit(ConversationCreatedLoading());
 
     try {
-      final conversation =
-          await conversationRepository.createConversation(users, type, name);
+      final conversation = await conversationRepository.createConversation(
+          users, type, name, avatarUrl);
       emit(ConversationCreatedState(conversation));
     } catch (error) {
       emit(

@@ -23,16 +23,16 @@ class HomePage extends StatelessWidget {
           backgroundColor: black,
           automaticallyImplyLeading: false,
           leading: IconButton(
-              icon: Image.asset(
-                'assets/images/vector_logo.png',
-                width: 32,
-                fit: BoxFit.cover,
-              ),
-              onPressed: () {
-                context
-                    .read<AuthenticationBloc>()
-                    .add(AuthenticationLogoutRequested());
-              },
+            icon: Image.asset(
+              'assets/images/vector_logo.png',
+              width: 32,
+              fit: BoxFit.cover,
+            ),
+            onPressed: () {
+              context
+                  .read<AuthenticationBloc>()
+                  .add(AuthenticationLogoutRequested());
+            },
           ),
           title: const Text(
             'Chat',
@@ -51,18 +51,16 @@ class HomePage extends StatelessWidget {
         ),
         body: MultiBlocProvider(providers: [
           BlocProvider<ConversationsBloc>(
-            create: (context) =>
-            ConversationsBloc(
+            create: (context) => ConversationsBloc(
                 conversationRepository:
-                RepositoryProvider.of<ConversationRepository>(context))
+                    RepositoryProvider.of<ConversationRepository>(context))
               ..add(ConversationsFetched()),
           ),
           BlocProvider<ConversationCreateBloc>(
-            create: (context) =>
-                ConversationCreateBloc(
-                  conversationRepository:
+            create: (context) => ConversationCreateBloc(
+              conversationRepository:
                   RepositoryProvider.of<ConversationRepository>(context),
-                ),
+            ),
           ),
         ], child: const ConversationsList()));
   }

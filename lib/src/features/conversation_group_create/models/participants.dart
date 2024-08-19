@@ -9,8 +9,7 @@ enum ParticipantsValidationError {
 
 const int maxLength = 50;
 
-class Participants
-    extends FormzInput<Set<User>, ParticipantsValidationError> {
+class Participants extends FormzInput<Set<User>, ParticipantsValidationError> {
   const Participants.pure() : super.pure(const {});
 
   const Participants.dirty([super.value = const {}]) : super.dirty();

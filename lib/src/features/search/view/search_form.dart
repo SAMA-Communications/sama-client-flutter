@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../api/api.dart';
 import '../../../db/models/conversation.dart';
+import '../../../features/search/view/search_bar.dart';
 import '../../../navigation/constants.dart';
+import '../../../shared/ui/colors.dart';
+import '../../../shared/ui/view/loading_overlay.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_event.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
-import '../../../features/search/view/search_bar.dart';
-import '../../../shared/ui/view/loading_overlay.dart';
-import '../../../api/api.dart';
-import '../../../shared/ui/colors.dart';
 import '../../conversations_list/conversations_list.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../bloc/global_search_bloc.dart';
@@ -33,7 +33,7 @@ class SearchForm extends StatelessWidget {
 class _SearchBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final LoadingOverlay loadingOverlay = LoadingOverlay();
+    // final LoadingOverlay loadingOverlay = LoadingOverlay();
 
     return BlocListener<ConversationCreateBloc, ConversationCreateState>(
       listener: (context, state) {
