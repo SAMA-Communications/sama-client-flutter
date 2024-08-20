@@ -9,8 +9,9 @@ import 'package:path/path.dart';
 import '../../../db/models/conversation.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
-import '../bloc/media_selector/media_sender_bloc.dart';
+import '../bloc/media_sender/media_sender_bloc.dart';
 
 class MediaSender extends StatelessWidget {
   const MediaSender({super.key});
@@ -224,17 +225,32 @@ Widget _buildPreviewItem(
 ) {
   return ClipRRect(
     borderRadius: const BorderRadius.all(Radius.circular(6)),
-    child: isImage(file.path)
+    child: isImage(file.path) || isVideo(file.path)
         ? Stack(
             alignment: Alignment.center,
             children: [
-              // Expanded(child:
-              Image.file(
-                height: double.infinity,
-                width: double.infinity,
-                file,
-                fit: BoxFit.cover,
-                // ),
+              FutureBuilder<File>(
+                future: isImage(file.path)
+                    ? Future.value(file)
+                    : getVideoThumbnail(file),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Image.file(
+                      height: double.infinity,
+                      width: double.infinity,
+                      snapshot.data!,
+                      fit: BoxFit.cover,
+                      cacheHeight: 480,
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Text('⚠️');
+                  } else {
+                    return const CircularProgressIndicator(
+                      color: slateBlue,
+                      strokeWidth: 3,
+                    );
+                  }
+                },
               ),
               if (status == MediaSelectorStatus.processing)
                 Align(
@@ -251,6 +267,47 @@ Widget _buildPreviewItem(
                               : null,
                         );
                       }),
+                ),
+              if (isVideo(file.path))
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: const EdgeInsets.all(2),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(6)),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        color: black.withAlpha(150),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            FutureBuilder<double?>(
+                                future: getVideoDuration(file),
+                                builder: (context, snapshot) {
+                                  String stringDuration = '--:--';
+
+                                  if (snapshot.hasData) {
+                                    stringDuration = formatHHMMSS(
+                                        (snapshot.data! / 1000).toInt());
+                                  }
+
+                                  return Text(
+                                    stringDuration,
+                                    style: const TextStyle(
+                                        color: white, fontSize: 12),
+                                  );
+                                }),
+                            const Icon(
+                              Icons.video_file,
+                              color: white,
+                              size: 12,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               Align(
                 alignment: Alignment.topRight,

@@ -9,11 +9,15 @@ import 'package:path/path.dart';
 import '../../../../api/api.dart';
 import '../../../../db/models/conversation.dart';
 import '../../../../repository/messages/messages_repository.dart';
+import '../../../../shared/utils/file_utils.dart';
 import '../../../../shared/utils/media_utils.dart';
 
 part 'media_sender_event.dart';
 
 part 'media_sender_state.dart';
+
+const maxAttachmentSize = 100; // in MB
+const maxAttachmentsCount = 10;
 
 class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
   final ConversationModel currentConversation;
@@ -75,15 +79,31 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
 
     if (newFiles.isEmpty) return Future.value(null);
 
-    newFiles.removeWhere((file) => existFiles.contains(file));
-    if (existFiles.length + newFiles.length > 10) {
-      emit(state.copyWith(
-          error: 'A maximum of 10 files are available for sending'));
+    Set<String> errors = {};
+
+    newFiles.removeWhere((file) {
+      if (file.lengthSync() > maxAttachmentSize * megaByte) {
+        errors.add(
+            'One or more files are larger than $maxAttachmentSize megabytes');
+        return true;
+      }
+
+      return existFiles.contains(file);
+    });
+
+    if (existFiles.length + newFiles.length > maxAttachmentsCount) {
+      errors.add(
+          'A maximum of $maxAttachmentsCount files are available for sending');
+    }
+
+    if (errors.isNotEmpty) {
+      emit(state.copyWith(error: errors.join('\n')));
       Timer(const Duration(seconds: 4), () {
         add(const _CleanError());
       });
     }
-    newFiles = newFiles.take(10 - existFiles.length).toList();
+
+    newFiles = newFiles.take(maxAttachmentsCount - existFiles.length).toList();
 
     emit(state.copyWith(selectedFiles: [...state.selectedFiles, ...newFiles]));
   }
@@ -111,14 +131,14 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
 
       var selectedFiles = state.selectedFiles;
       var filesToUpload = <File>[];
-      var filesBlurHash = <String, String>{};
+      var filesBlurHash = <String, String?>{};
 
       for (var file in selectedFiles) {
-        var compressedFile = await compressImageFile(file);
+        var compressedFile = await compressFile(file);
         filesToUpload.add(compressedFile);
 
-        filesBlurHash[basename(file.path)] =
-            await getImageHashAsync(compressedFile);
+        filesBlurHash[basename(compressedFile.path)] =
+            await getMediaBlurHash(compressedFile);
       }
 
       await uploadFiles(filesToUpload, (fileName, progress) {
@@ -152,7 +172,14 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
 
   void _pickMedia() {
     FilePicker.platform
-        .pickFiles(type: FileType.image, allowMultiple: true)
+        .pickFiles(
+            type: FileType.custom,
+            allowedExtensions: [
+              ...supportedImageAttachmentExtentions,
+              ...supportedVideoAttachmentExtentions
+            ],
+            allowMultiple: true,
+            compressionQuality: 0)
         .then((result) {
       var files = result?.files;
       if (files?.isEmpty ?? true) {
