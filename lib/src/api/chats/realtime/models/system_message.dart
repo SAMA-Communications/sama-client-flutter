@@ -28,9 +28,9 @@ class SystemChatMessage extends SystemMessage {
     } else if (extension['conversation_updated'] != null) {
       type = SystemChatMessageType.conversationUpdated;
       conversation = Conversation.fromJson(extension['conversation_updated']);
-    } else if (extension['conversationKicked'] != null) {
+    } else if (extension['conversation_kicked'] != null) {
       type = SystemChatMessageType.conversationKicked;
-      conversation = Conversation.fromJson(extension['conversationKicked']);
+      conversation = Conversation.fromJson(extension['conversation_kicked']);
     }
   }
 }

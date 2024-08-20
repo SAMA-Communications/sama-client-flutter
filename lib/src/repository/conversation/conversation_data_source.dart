@@ -23,6 +23,10 @@ class ConversationLocalDataSource {
     _conversations[item.id] = item;
   }
 
+  void removeConversation(String id) {
+    _conversations.remove(id);
+  }
+
   List<ConversationModel> getConversationsList() {
     return _conversations.values.toList();
   }

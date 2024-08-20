@@ -150,7 +150,7 @@ class DateFormatter {
     DateTime localDateTime = dateTime.toLocal();
 
     if (!localDateTime.difference(justNow).isNegative) {
-      return 'Just now';
+      return DateFormat('jm').format(dateTime);
     }
 
     String roughTimeString = DateFormat('jm').format(dateTime);
