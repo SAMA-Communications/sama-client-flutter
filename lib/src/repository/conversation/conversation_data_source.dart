@@ -14,9 +14,7 @@ class ConversationLocalDataSource {
   }
 
   void addConversation(ConversationModel item) {
-    if (!_conversations.containsKey(item.id)) {
-      _conversations[item.id] = item;
-    }
+    _conversations.putIfAbsent(item.id, () => item);
   }
 
   void updateConversation(ConversationModel item) {

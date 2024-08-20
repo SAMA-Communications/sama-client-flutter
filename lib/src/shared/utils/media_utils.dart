@@ -30,7 +30,7 @@ Future<String> getImageHashAsync(File imageFile) async {
 Future<File> compressImageFile(File imageFile,
     [Size size = const Size(1080, 720)]) async {
   var tempPath =
-      '${(await getTemporaryDirectory()).path}/images/attachments/${basename(imageFile.path)}';
+      '${(await getTemporaryDirectory()).path}/images/attachments/compressed/${basename(imageFile.path)}';
 
   var compressedFile = File(tempPath);
   await compressedFile.create(recursive: true);
@@ -60,11 +60,8 @@ String _getImageHashAsync(img.Image image) {
 }
 
 Future<img.Image> _compressWithFile(File imageFile) async {
-  var imageData = await FlutterImageCompress.compressWithFile(
-    imageFile.path,
-    minHeight: 360,
-    minWidth: 480,
-  );
+  var imageData = await FlutterImageCompress.compressWithFile(imageFile.path,
+      minHeight: 24, minWidth: 32);
   return img.decodeImage(imageData!)!;
 }
 

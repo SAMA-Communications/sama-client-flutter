@@ -7,7 +7,7 @@ enum ParticipantsValidationError {
   long,
 }
 
-const int maxLength = 50;
+const int maxParticipantsCount = 50;
 
 class Participants extends FormzInput<Set<User>, ParticipantsValidationError> {
   const Participants.pure() : super.pure(const {});
@@ -17,7 +17,7 @@ class Participants extends FormzInput<Set<User>, ParticipantsValidationError> {
   @override
   ParticipantsValidationError? validator(Set<User> value) {
     if (value.isEmpty) return ParticipantsValidationError.empty;
-    if (value.length > maxLength) ParticipantsValidationError.long;
+    if (value.length > maxParticipantsCount) ParticipantsValidationError.long;
     return null;
   }
 }

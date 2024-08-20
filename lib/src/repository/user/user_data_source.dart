@@ -8,9 +8,7 @@ class UserLocalDataSource {
   }
 
   void addUser(User item) {
-    if (!_allUsers.containsKey(item.id)) {
-      _allUsers[item.id!] = item;
-    }
+    _allUsers.putIfAbsent(item.id!, () => item);
   }
 
   void addUsers(Map<String, User> items) {
