@@ -40,7 +40,7 @@ class ConversationRepository {
     incomingSystemMessagesSubscription = api
         .MessagesManager.instance.systemChatMessagesStream
         .listen((message) async {
-      Map<String, User> participants = await userRepository.getUsersByIds([
+      Map<String, User?> participants = await userRepository.getUsersByIds([
         message.from!,
         if (message.conversation?.opponentId != null)
           message.conversation!.opponentId!
@@ -71,6 +71,8 @@ class ConversationRepository {
         } else {
           localDataSource.addConversation(conversation);
         }
+      } else if (message.type == SystemChatMessageType.conversationKicked) {
+        localDataSource.removeConversation(message.cid);
       }
       _incomingMessageController.add(conversation);
     });

@@ -114,7 +114,9 @@ class MediaSender extends StatelessWidget {
                       children: [
                         TextButton(
                           onPressed: () {
-                            if (state.selectedFiles.length < 10) {
+                            if (state.selectedFiles.length < 10 &&
+                                state.status !=
+                                    MediaSelectorStatus.processing) {
                               BlocProvider.of<MediaSenderBloc>(context)
                                   .add(const PickMoreFiles());
                             }
@@ -122,7 +124,9 @@ class MediaSender extends StatelessWidget {
                           child: Text(
                             'Add',
                             style: TextStyle(
-                                color: state.selectedFiles.length < 10
+                                color: state.selectedFiles.length < 10 &&
+                                        state.status !=
+                                            MediaSelectorStatus.processing
                                     ? slateBlue
                                     : whiteAluminum),
                           ),
@@ -139,7 +143,9 @@ class MediaSender extends StatelessWidget {
                             )),
                         TextButton(
                           onPressed: () {
-                            if (state.selectedFiles.isNotEmpty) {
+                            if (state.selectedFiles.isNotEmpty &&
+                                state.status !=
+                                    MediaSelectorStatus.processing) {
                               BlocProvider.of<MediaSenderBloc>(context)
                                   .add(const SendMessage());
                             }
@@ -147,7 +153,9 @@ class MediaSender extends StatelessWidget {
                           child: Text(
                             'Send',
                             style: TextStyle(
-                                color: state.selectedFiles.isNotEmpty
+                                color: state.selectedFiles.isNotEmpty &&
+                                        state.status !=
+                                            MediaSelectorStatus.processing
                                     ? slateBlue
                                     : whiteAluminum),
                           ),

@@ -17,7 +17,7 @@ class UserRepository {
   }
 
   //ToDo RP finish later
-  Future<Map<String, User>> getUsersByIds(List<String> ids) async {
+  Future<Map<String, User?>> getUsersByIds(List<String> ids) async {
     Map<String, User?> participants = localDataSource.getUsersByIds(ids);
     Set<String> idsNone =
         participants.keys.where((key) => participants[key] == null).toSet();
@@ -28,7 +28,7 @@ class UserRepository {
         localDataSource.addUsersList(users);
       });
     }
-    return participants.map((key, value) => MapEntry(key, value!));
+    return participants;
   }
 
   Map<String, User?> getStoredUsersByIds(List<String> ids) {

@@ -28,6 +28,7 @@ class HomePage extends StatelessWidget {
               width: 32,
               fit: BoxFit.cover,
             ),
+            tooltip: 'Logout',
             onPressed: () {
               context
                   .read<AuthenticationBloc>()
@@ -49,20 +50,16 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-        body: MultiBlocProvider(providers: [
-          BlocProvider<ConversationsBloc>(
-            create: (context) => ConversationsBloc(
-                conversationRepository:
-                    RepositoryProvider.of<ConversationRepository>(context))
-              ..add(ConversationsFetched()),
-          ),
-          BlocProvider<ConversationCreateBloc>(
-            create: (context) => ConversationCreateBloc(
+      body: BlocProvider(
+        create: (context) {
+          return ConversationsBloc(
               conversationRepository:
-                  RepositoryProvider.of<ConversationRepository>(context),
-            ),
-          ),
-        ], child: const ConversationsList()));
+              RepositoryProvider.of<ConversationRepository>(context))
+            ..add(ConversationsFetched());
+        },
+        child: const ConversationsList(),
+      ),
+    );
   }
 
   _openSearch(BuildContext context) {

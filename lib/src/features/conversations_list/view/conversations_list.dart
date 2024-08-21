@@ -40,10 +40,32 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
       builder: (context, state) {
         switch (state.status) {
           case ConversationsStatus.failure:
-            return const Center(child: Text('failed to fetch conversations'));
+            return Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(24),
+              child: const Text(
+                'The chats are unavailable. Please check your Internet connection.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+            );
           case ConversationsStatus.success:
             if (state.conversations.isEmpty) {
-              return const Center(child: Text('no conversations'));
+              return Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: const Text(
+                    'No conversations yet...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              );
             }
             return Scaffold(
                 floatingActionButton: FloatingActionButton(

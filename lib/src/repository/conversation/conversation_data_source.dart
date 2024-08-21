@@ -32,4 +32,8 @@ class ConversationLocalDataSource {
   List<ConversationModel> getConversationsByIds(List<String> ids) {
     return {for (var v in ids) _conversations[v]}.whereNotNull().toList();
   }
+
+  void removeConversation(String id) {
+    _conversations.remove(id);
+  }
 }
