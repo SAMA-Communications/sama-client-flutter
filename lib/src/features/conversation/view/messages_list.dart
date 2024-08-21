@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../api/api.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
 import '../widgets/images_attachment.dart';
 import '../widgets/service_message_bubble.dart';
@@ -62,6 +63,7 @@ class _MessagesListState extends State<MessagesList> {
                 ),
               );
             }
+            markAsReadIfNeed();
             return ListView.separated(
               reverse: true,
               itemBuilder: (BuildContext context, int index) {
@@ -86,6 +88,13 @@ class _MessagesListState extends State<MessagesList> {
       ..removeListener(_onScroll)
       ..dispose();
     super.dispose();
+  }
+
+  void markAsReadIfNeed() {
+    var conversation = context.read<ConversationBloc>().state.conversation;
+    if (conversation.unreadMessagesCount != 0) {
+      context.read<SendMessageBloc>().add(const SendStatusReadMessage());
+    }
   }
 
   void _onScroll() {

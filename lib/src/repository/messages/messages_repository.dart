@@ -98,6 +98,10 @@ class MessagesRepository {
     });
   }
 
+  Future<bool> sendStatusReadMessage(String cid) {
+    return api.readMessages(api.ReadMessagesStatus.fromJson({'cid': cid}));
+  }
+
   void initChatListeners() {
     if (incomingMessagesSubscription != null) return;
 
