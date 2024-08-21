@@ -42,4 +42,41 @@ class ConversationModel {
     required this.owner,
     this.description,
   });
+
+  ConversationModel copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? type,
+    String? name,
+    String? description,
+    int? unreadMessagesCount,
+    Message? lastMessage,
+    User? opponent,
+    User? owner,
+  }) {
+    return ConversationModel(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      type: type ?? this.type,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
+      lastMessage: lastMessage ?? this.lastMessage,
+      opponent: opponent ?? this.opponent,
+      owner: owner ?? this.owner,
+    );
+  }
+
+  ConversationModel copyWithItem({
+    required ConversationModel item,
+  }) {
+    return copyWith(
+      updatedAt: updatedAt != item.updatedAt ? item.updatedAt : updatedAt,
+      name: name != item.name ? item.name : name,
+      description:
+          description != item.description ? item.description : description,
+    );
+  }
 }

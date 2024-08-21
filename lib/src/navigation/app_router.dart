@@ -60,12 +60,6 @@ GoRouter router(BuildContext context) => GoRouter(
             return SearchPage.route();
           },
         ),
-        GoRoute(
-          path: globalSearchPath,
-          builder: (context, state) {
-            return SearchPage.route();
-          },
-        ),
       ],
       refreshListenable:
           GoRouterRefreshBloc<AuthenticationBloc, AuthenticationState>(
@@ -98,7 +92,7 @@ class GoRouterRefreshBloc<BLOC extends BlocBase<STATE>, STATE>
   GoRouterRefreshBloc(BLOC bloc) {
     _blocStream = bloc.stream.listen(
       (STATE state) {
-        print('[GoRouterRefreshBloc][listen] state: state');
+        print('[GoRouterRefreshBloc][listen] state: $state');
         if (state is AuthenticationState) {
           var authenticationState = state as AuthenticationState;
           if (authenticationState.status ==

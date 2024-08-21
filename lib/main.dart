@@ -8,6 +8,7 @@ import 'src/repository/conversation/conversation_data_source.dart';
 import 'src/repository/conversation/conversation_repository.dart';
 import 'src/repository/global_search/global_search_repository.dart';
 import 'src/repository/messages/messages_repository.dart';
+import 'src/repository/user/user_data_source.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/ui/colors.dart';
@@ -31,26 +32,30 @@ class _AppState extends State<App> {
   late final GlobalSearchRepository _globalSearchRepository;
   late final ConversationLocalDataSource _conversationLocalDataSource;
   late final AttachmentsRepository _attachmentsRepository;
+  late final UserLocalDataSource _userLocalDataSource;
 
   @override
   void initState() {
     super.initState();
     _conversationLocalDataSource = ConversationLocalDataSource();
+    _userLocalDataSource = UserLocalDataSource();
     _authenticationRepository = AuthenticationRepository();
-    _userRepository = UserRepository();
-    _conversationRepository =
-        ConversationRepository(localDataSource: _conversationLocalDataSource);
+    _userRepository = UserRepository(localDataSource: _userLocalDataSource);
+    _messagesRepository = MessagesRepository(userRepository: _userRepository);
+    _attachmentsRepository = AttachmentsRepository();
+    _conversationRepository = ConversationRepository(
+        localDataSource: _conversationLocalDataSource,
+        userRepository: _userRepository,
+        messagesRepository: _messagesRepository);
     _globalSearchRepository =
         GlobalSearchRepository(localDataSource: _conversationLocalDataSource);
-    _messagesRepository = MessagesRepository(userRepository: _userRepository);
-    _messagesRepository.initChatListeners();
-    _attachmentsRepository = AttachmentsRepository();
   }
 
   @override
   void dispose() {
     _authenticationRepository.dispose();
-    _messagesRepository.destroyChatListeners();
+    _messagesRepository.dispose();
+    _conversationRepository.dispose();
     super.dispose();
   }
 

@@ -51,10 +51,10 @@ class HomePage extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (context) {
-          return ConversationBloc(
+          return ConversationsBloc(
               conversationRepository:
                   RepositoryProvider.of<ConversationRepository>(context))
-            ..add(ConversationFetched());
+            ..add(ConversationsFetched());
         },
         child: const ConversationsList(),
       ),

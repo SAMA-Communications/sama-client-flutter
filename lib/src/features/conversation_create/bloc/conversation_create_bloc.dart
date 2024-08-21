@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
-import 'package:sama_client_flutter/src/repository/conversation/conversation_repository.dart';
 
 import 'conversation_create_event.dart';
 import 'conversation_create_state.dart';
+import '../../../repository/conversation/conversation_repository.dart';
 
 class ConversationCreateBloc
     extends Bloc<ConversationCreateEvent, ConversationCreateState> {
@@ -23,8 +23,9 @@ class ConversationCreateBloc
     emit(ConversationCreatedLoading());
 
     try {
-      var conversation = conversationRepository.localDataSource.conversations
-          ?.firstWhereOrNull((item) =>
+      var conversation = conversationRepository.localDataSource
+          .getConversationsList()
+          .firstWhereOrNull((item) =>
               item.type == type &&
               (item.opponent?.id == user.id || item.owner?.id == user.id));
       conversation ??=
