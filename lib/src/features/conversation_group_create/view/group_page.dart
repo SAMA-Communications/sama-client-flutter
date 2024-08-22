@@ -71,7 +71,7 @@ class GroupPage extends StatelessWidget {
           floatingActionButton: Visibility(
             visible: !keyboardIsOpen,
             child: FloatingActionButton(
-              backgroundColor: whiteAluminum,
+              backgroundColor: dullGray,
               tooltip: 'Create chat',
               onPressed: () {
                 context.read<GroupBloc>().add(GroupSubmitted());

@@ -81,9 +81,12 @@ class GroupFormState extends State<GroupForm> {
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: _ParticipantsGrid(),
+            LimitedBox(
+              maxHeight: 128,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: _ParticipantsGrid(),
+              ),
             ),
             const Align(
               alignment: Alignment.centerLeft,
@@ -151,6 +154,7 @@ class _GroupNameInput extends StatelessWidget {
                 context.read<GroupBloc>().add(GroupnameChanged(groupname)),
             decoration: InputDecoration(
               border: InputBorder.none,
+              contentPadding: const EdgeInsets.only(bottom: 4),
               label: const Row(
                 children: [
                   Icon(
