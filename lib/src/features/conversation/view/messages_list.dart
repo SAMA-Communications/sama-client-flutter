@@ -93,7 +93,7 @@ class _MessagesListState extends State<MessagesList> {
   void markAsReadIfNeed() {
     var conversation = context.read<ConversationBloc>().state.conversation;
     if (conversation.unreadMessagesCount != 0) {
-      context.read<SendMessageBloc>().add(const SendStatusReadMessage());
+      context.read<SendMessageBloc>().add(const SendStatusReadMessages());
     }
   }
 

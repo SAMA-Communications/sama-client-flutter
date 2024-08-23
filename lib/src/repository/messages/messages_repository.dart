@@ -98,7 +98,7 @@ class MessagesRepository {
     });
   }
 
-  Future<bool> sendStatusReadMessage(String cid) {
+  Future<bool> sendStatusReadMessages(String cid) {
     return api.readMessages(api.ReadMessagesStatus.fromJson({'cid': cid}));
   }
 

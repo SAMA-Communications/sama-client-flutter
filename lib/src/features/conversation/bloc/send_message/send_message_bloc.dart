@@ -27,8 +27,8 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<SendTextMessage>(
       _onSendTextMessage,
     );
-    on<SendStatusReadMessage>(
-      _onSendStatusReadMessage,
+    on<SendStatusReadMessages>(
+      _onSendStatusReadMessages,
     );
   }
 
@@ -48,11 +48,11 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     emit(state.copyWith(isTextEmpty: event.text.trim().isEmpty));
   }
 
-  Future<FutureOr<void>> _onSendStatusReadMessage(
-      SendStatusReadMessage event, Emitter<SendMessageState> emit) async {
+  Future<FutureOr<void>> _onSendStatusReadMessages(
+      SendStatusReadMessages event, Emitter<SendMessageState> emit) async {
     try {
       final success = await messagesRepository
-          .sendStatusReadMessage(currentConversation.id);
+          .sendStatusReadMessages(currentConversation.id);
       if (success) {
         conversationRepository.resetUnreadMessagesCount(currentConversation);
       }
