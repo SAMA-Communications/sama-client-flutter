@@ -7,11 +7,30 @@ import 'package:image/image.dart' as img;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_compress/video_compress.dart';
+
+import 'file_utils.dart';
 
 bool isImage(String path) {
   final mimeType = lookupMimeType(path);
-
   return mimeType?.startsWith('image/') ?? false;
+}
+
+bool isVideo(String path) {
+  final mimeType = lookupMimeType(path);
+
+  return mimeType?.startsWith('video/') ?? false;
+}
+
+Future<String?> getMediaBlurHash(File file) async {
+  if (isImage(file.path)) {
+    return getImageHashAsync(file);
+  } else if (isVideo(file.path)) {
+    return getVideoHashAsync(file);
+  } else {
+    // TODO VT add blurhash generation for other types of file
+    return null;
+  }
 }
 
 Future<String> getImageHashAsync(File imageFile) async {
@@ -23,6 +42,20 @@ Future<String> getImageHashAsync(File imageFile) async {
 
   var image = img.decodeImage(imageData!);
   return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+}
+
+Future<String> getVideoHashAsync(File videoFile) async {
+  var imageData = await VideoCompress.getByteThumbnail(videoFile.path,
+      quality: 10, position: -1);
+
+  var image = img.decodeImage(imageData!);
+  return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+}
+
+Future<double?> getVideoDuration(File videoFile) async {
+  return VideoCompress.getMediaInfo(videoFile.path).then((mediaInfo) {
+    return mediaInfo.duration;
+  });
 }
 
 Future<File> compressImageFile(File imageFile) async {
@@ -43,6 +76,43 @@ Future<File> compressImageFile(File imageFile) async {
     return compressedFile;
   } catch (e) {
     return imageFile;
+  }
+}
+
+Future<File> compressVideoFile(File videoFile) async {
+  try {
+    MediaInfo? mediaInfo = await VideoCompress.compressVideo(
+      videoFile.path,
+      quality: VideoQuality.MediumQuality,
+      includeAudio: true,
+    );
+
+    var result = mediaInfo?.file ?? videoFile;
+    if (basename(result.path) != basename(videoFile.path)) {
+      result = changeFileNameOnly(result, basename(videoFile.path));
+    }
+
+    return result;
+  } catch (e) {
+    return videoFile;
+  }
+}
+
+Future<File> getVideoThumbnail(File videoFile) async {
+  return VideoCompress.getFileThumbnail(
+    videoFile.path,
+    quality: 50,
+  );
+}
+
+Future<File> compressFile(File file) async {
+  if (isImage(file.path)) {
+    return compressImageFile(file);
+  } else if (isVideo(file.path)) {
+    return compressVideoFile(file);
+  } else {
+    // TODO VT return original file if compressing is not required
+    return file;
   }
 }
 
@@ -103,3 +173,18 @@ List<QuiltedGridTile> getGridPatternForCount(int count) {
   // TODO VT develop an algorithm for building a grid for more than 10 items
   return getGridPatternForCount(count ~/ 10);
 }
+
+const supportedImageAttachmentExtentions = [
+  'heic',
+  'jpeg',
+  'jpg',
+  'png',
+  'gif',
+  'bmp',
+];
+
+const supportedVideoAttachmentExtentions = [
+  'mp4',
+  'webm',
+  'quicktime',
+];
