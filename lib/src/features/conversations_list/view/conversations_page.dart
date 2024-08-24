@@ -27,11 +27,9 @@ class HomePage extends StatelessWidget {
             width: 32,
             fit: BoxFit.cover,
           ),
-          tooltip: 'Logout',
+          tooltip: 'Profile',
           onPressed: () {
-            context
-                .read<AuthenticationBloc>()
-                .add(AuthenticationLogoutRequested());
+            context.push(profilePath);
           },
         ),
         title: const Text(

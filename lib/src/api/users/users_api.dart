@@ -79,8 +79,8 @@ Future<List<User>> getUsersByIds(Set<String> ids) {
   });
 }
 
-Future<User> edit(
-  String login, {
+Future<User> userEdit({
+  String? login,
   String? currentPassword,
   String? newPassword,
   String? firstName,
@@ -89,7 +89,7 @@ Future<User> edit(
   String? phone,
 }) {
   var requestData = {
-    'login': login,
+    if (login?.isNotEmpty ?? false) 'login': login,
     if (email?.isNotEmpty ?? false) 'email': email,
     if (phone?.isNotEmpty ?? false) 'phone': phone,
     if (firstName?.isNotEmpty ?? false) 'first_name': firstName,

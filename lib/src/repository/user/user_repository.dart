@@ -16,6 +16,21 @@ class UserRepository {
     return ConnectionManager.instance.currentUser;
   }
 
+  Future<User> updateLocalUser(
+      {String? firstName,
+      String? lastName,
+      String? email,
+      String? phone}) async {
+    User result = await api.userEdit(
+        firstName: firstName, lastName: lastName, email: email, phone: phone);
+    localDataSource.updateLocalUser(result);
+    return result;
+  }
+
+  Future<User> getLocalUser() async {
+    return localDataSource.getLocalUser();
+  }
+
   //ToDo RP finish later
   Future<Map<String, User?>> getUsersByIds(List<String> ids) async {
     Map<String, User?> participants = localDataSource.getUsersByIds(ids);

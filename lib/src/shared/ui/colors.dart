@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 const Color white = Color(0xFFFFFFFF);
+const Color lightWhite = Color(0xFFF9F9F9);
 const Color smokyWhite = Color(0xFFF6F6F6);
 const Color gainsborough = Color(0xFFE7E7E7);
 const Color whiteAluminum = Color(0xFFB0B0B0);

@@ -4,3 +4,4 @@ const String splashScreenPath = '/splash';
 const String conversationListScreenPath = '/conversations';
 const String conversationScreenSubPath = 'conversation';
 const String globalSearchPath = '/global_search';
+const String profilePath = '/profile';
