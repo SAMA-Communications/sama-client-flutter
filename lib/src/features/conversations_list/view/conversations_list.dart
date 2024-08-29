@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../navigation/constants.dart';
 import '../../../shared/utils/observer_utils.dart';
 import '../conversations_list.dart';
 
@@ -65,22 +67,29 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
                 ),
               );
             }
-            return ListView.separated(
-                itemBuilder: (BuildContext context, int index) {
-                  return index >= state.conversations.length
-                      ? const BottomLoader()
-                      : ConversationListItem(
-                          conversation: state.conversations[index]);
-                },
-                itemCount: state.hasReachedMax
-                    ? state.conversations.length
-                    : state.conversations.length + 1,
-                controller: _scrollController,
-                separatorBuilder: (context, index) => const SizedBox(
-                      height: 5,
-                    ));
+            return Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  child: const Icon(Icons.add_comment_outlined, size: 35.0),
+                  onPressed: () {
+                    context.push(groupCreateScreenPath);
+                  },
+                ),
+                body: ListView.separated(
+                    itemBuilder: (BuildContext context, int index) {
+                      return index >= state.conversations.length
+                          ? const BottomLoader()
+                          : ConversationListItem(
+                              conversation: state.conversations[index]);
+                    },
+                    itemCount: state.hasReachedMax
+                        ? state.conversations.length
+                        : state.conversations.length + 1,
+                    controller: _scrollController,
+                    separatorBuilder: (context, index) => const SizedBox(
+                          height: 5,
+                        )));
           case ConversationsStatus.initial:
-            return const CenterLoader();
+            return const Center(child: CircularProgressIndicator());
         }
       },
     );
