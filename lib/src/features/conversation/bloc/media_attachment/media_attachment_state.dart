@@ -1,16 +1,16 @@
-part of 'images_attachment_bloc.dart';
+part of 'media_attachment_bloc.dart';
 
-final class ImagesAttachmentState extends Equatable {
+final class MediaAttachmentState extends Equatable {
   final Map<String, String> urls;
 
-  const ImagesAttachmentState({
+  const MediaAttachmentState({
     this.urls = const {},
   });
 
-  ImagesAttachmentState copyWith({
+  MediaAttachmentState copyWith({
     Map<String, String>? urls,
   }) {
-    return ImagesAttachmentState(
+    return MediaAttachmentState(
       urls: urls ?? this.urls,
     );
   }

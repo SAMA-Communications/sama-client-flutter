@@ -6,19 +6,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../repository/attachments/attachments_repository.dart';
 import '../../models/models.dart';
 
-part 'images_attachment_event.dart';
+part 'media_attachment_event.dart';
 
-part 'images_attachment_state.dart';
+part 'media_attachment_state.dart';
 
-class ImagesAttachmentBloc
-    extends Bloc<ImagesAttachmentEvent, ImagesAttachmentState> {
+class MediaAttachmentBloc
+    extends Bloc<MediaAttachmentEvent, MediaAttachmentState> {
   final ChatMessage message;
   final AttachmentsRepository attachmentsRepository;
 
-  ImagesAttachmentBloc({
+  MediaAttachmentBloc({
     required this.message,
     required this.attachmentsRepository,
-  }) : super(const ImagesAttachmentState()) {
+  }) : super(const MediaAttachmentState()) {
     on<_AttachmentsUrlsReceived>(
       _onAttachmentsUrlsReceived,
     );
@@ -27,7 +27,7 @@ class ImagesAttachmentBloc
   }
 
   FutureOr<void> _onAttachmentsUrlsReceived(
-      _AttachmentsUrlsReceived event, Emitter<ImagesAttachmentState> emit) {
+      _AttachmentsUrlsReceived event, Emitter<MediaAttachmentState> emit) {
     emit(state.copyWith(urls: Map.from(event.urls)));
   }
 

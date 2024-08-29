@@ -8,6 +8,7 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_compress/video_compress.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 import 'file_utils.dart';
 
@@ -58,6 +59,10 @@ Future<double?> getVideoDuration(File videoFile) async {
   });
 }
 
+Future<double?> getVideoDurationByUrl(String url) async {
+  return 0;
+}
+
 Future<File> compressImageFile(File imageFile) async {
   var tempPath =
       '${(await getTemporaryDirectory()).path}/images/attachments/${basename(imageFile.path)}';
@@ -103,6 +108,29 @@ Future<File> getVideoThumbnail(File videoFile) async {
     videoFile.path,
     quality: 50,
   );
+}
+
+Future<String?> getVideoThumbnailByUrl(String url, String fileId) async {
+  final Directory cacheDir = await getTemporaryDirectory();
+
+  final String target = File('${cacheDir.path}/video/thumbnails/$fileId').path;
+  if (File(target).existsSync()) {
+    return target;
+  } else {
+    File(target).createSync(recursive: true);
+  }
+
+  return VideoThumbnail.thumbnailFile(
+    video: url,
+    thumbnailPath: cacheDir.path,
+    imageFormat: ImageFormat.JPEG,
+    maxHeight: 640,
+    quality: 80,
+  ).then((path){
+    return File(path!).rename(target).then((file) {
+      return file.path;
+    });
+  });
 }
 
 Future<File> compressFile(File file) async {
