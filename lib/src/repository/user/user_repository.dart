@@ -1,13 +1,37 @@
 import 'dart:async';
 
+import '../../api/api.dart';
 import '../../api/api.dart' as api;
+import '../../repository/user/user_data_source.dart';
 
 class UserRepository {
-  api.User? _user;
+  User? _user;
+  final UserLocalDataSource localDataSource;
 
-  Future<api.User?> getUser() async {
+  UserRepository({required this.localDataSource});
+
+  Future<User?> getUser() async {
     if (_user != null) return _user;
 
-    return api.ConnectionManager.instance.currentUser;
+    return ConnectionManager.instance.currentUser;
+  }
+
+  //ToDo RP finish later
+  Future<Map<String, User?>> getUsersByIds(List<String> ids) async {
+    Map<String, User?> participants = localDataSource.getUsersByIds(ids);
+    Set<String> idsNone =
+        participants.keys.where((key) => participants[key] == null).toSet();
+
+    if (idsNone.isNotEmpty) {
+      await api.getUsersByIds(idsNone).then((users) {
+        participants.addEntries(users.map((user) => MapEntry(user.id!, user)));
+        localDataSource.addUsersList(users);
+      });
+    }
+    return participants;
+  }
+
+  Map<String, User?> getStoredUsersByIds(List<String> ids) {
+    return localDataSource.getUsersByIds(ids);
   }
 }

@@ -1,25 +1,24 @@
 part of 'conversations_list_bloc.dart';
 
-//ToDo RP rename to ConversationsStatus
-enum ConversationStatus { initial, success, failure }
+enum ConversationsStatus { initial, success, failure }
 
-final class ConversationState extends Equatable {
-  const ConversationState({
-    this.status = ConversationStatus.initial,
+final class ConversationsState extends Equatable {
+  const ConversationsState({
+    this.status = ConversationsStatus.initial,
     this.conversations = const <ConversationModel>[],
     this.hasReachedMax = false,
   });
 
-  final ConversationStatus status;
+  final ConversationsStatus status;
   final List<ConversationModel> conversations;
   final bool hasReachedMax;
 
-  ConversationState copyWith({
-    ConversationStatus? status,
+  ConversationsState copyWith({
+    ConversationsStatus? status,
     List<ConversationModel>? conversations,
     bool? hasReachedMax,
   }) {
-    return ConversationState(
+    return ConversationsState(
       status: status ?? this.status,
       conversations: conversations ?? this.conversations,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
@@ -28,7 +27,7 @@ final class ConversationState extends Equatable {
 
   @override
   String toString() {
-    return '''ConversationState { status: $status, hasReachedMax: $hasReachedMax, conversations: ${conversations.length} }''';
+    return '''ConversationsState { status: $status, hasReachedMax: $hasReachedMax, conversations: ${conversations.length} }''';
   }
 
   @override

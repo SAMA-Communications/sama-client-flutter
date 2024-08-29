@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
@@ -58,9 +60,10 @@ Future<double?> getVideoDuration(File videoFile) async {
   });
 }
 
-Future<File> compressImageFile(File imageFile) async {
+Future<File> compressImageFile(File imageFile,
+    [Size size = const Size(1080, 720)]) async {
   var tempPath =
-      '${(await getTemporaryDirectory()).path}/images/attachments/${basename(imageFile.path)}';
+      '${(await getTemporaryDirectory()).path}/images/attachments/compressed/${basename(imageFile.path)}';
 
   var compressedFile = File(tempPath);
   await compressedFile.create(recursive: true);
@@ -69,14 +72,30 @@ Future<File> compressImageFile(File imageFile) async {
     await FlutterImageCompress.compressAndGetFile(
       imageFile.path,
       compressedFile.path,
-      minHeight: 720,
-      minWidth: 1080,
+      minHeight: size.height.toInt(),
+      minWidth: size.width.toInt(),
     );
 
     return compressedFile;
   } catch (e) {
     return imageFile;
   }
+}
+
+Future<String> getImageHashInIsolate(File imageFile) async {
+  var img = await _compressWithFile(imageFile);
+  return compute(_getImageHashAsync, img);
+}
+
+String _getImageHashAsync(img.Image image) {
+  String blur = BlurHash.encode(image, numCompX: 4, numCompY: 3).hash;
+  return blur;
+}
+
+Future<img.Image> _compressWithFile(File imageFile) async {
+  var imageData = await FlutterImageCompress.compressWithFile(imageFile.path,
+      minHeight: 24, minWidth: 32);
+  return img.decodeImage(imageData!)!;
 }
 
 Future<File> compressVideoFile(File videoFile) async {

@@ -1,5 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:http/http.dart';
+import 'package:mime/mime.dart';
+import 'package:path/path.dart';
+
 import '../api.dart';
-import '../connection/connection.dart';
 
 const String conversationsRequest = 'conversation_list';
 const String getParticipantsByCids = 'get_participants_by_cids';
@@ -45,12 +51,59 @@ Future<List<String>> searchConversationsIdsByName(String name) async {
   });
 }
 
-Future<Conversation> createConversation(
-    List<String> participants, String type) async {
+Future<Conversation> createConversation(List<String> participants, String type,
+    String? name, Avatar? avatar) async {
   return SamaConnectionService.instance.sendRequest(conversationCreate, {
+    if (name != null) 'name': name,
     'type': type,
     'participants': participants,
+    if (avatar != null) 'image_object': avatar.toImageObjectJson(),
   }).then((response) {
     return Conversation.fromJson(response['conversation']);
   });
+}
+
+Future<String> uploadAvatarFile(File file) async {
+  List<Map<String, dynamic>> requestData = [
+    {
+      'name': basename(file.path),
+      'size': file.lengthSync(),
+      'content_type': lookupMimeType(file.path),
+    }
+  ];
+  var responseFile = await SamaConnectionService.instance
+      .sendRequest(createFilesRequestName, jsonDecode(jsonEncode(requestData)));
+  var rawFiles = List.of(responseFile['files'])
+      .map((rawFile) => Map<String, dynamic>.of(rawFile))
+      .toList();
+
+  final rawFile = rawFiles.first;
+
+  var uri = Uri.tryParse(rawFile['upload_url']);
+
+  var fileId = rawFile['object_id'];
+  var contentType = rawFile['content_type'];
+  var contentLength = rawFile['size'];
+
+  if (uri != null) {
+    ByteStream stream = ByteStream(file.openRead());
+
+    Map<String, String> headers = {
+      'Content-Length': contentLength.toString(),
+      'Content-Type': contentType,
+    };
+
+    var request = StreamedRequest(
+      'PUT',
+      uri,
+    )
+      ..headers.addAll(headers)
+      ..contentLength = contentLength;
+
+    request.sink.addStream(stream).then((_) async {
+      await request.sink.close();
+    });
+    await request.send();
+  }
+  return fileId;
 }

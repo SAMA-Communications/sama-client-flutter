@@ -1,32 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 
 import '../../connection/connection.dart';
 import '../../conversations/models/models.dart';
-import '../../utils/logger.dart';
 import 'models/models.dart';
 
-Future<void> sendMessage({
-  required Message message,
-}) {
-  return SamaConnectionService.instance.getConnection().then((connection) {
-    var dataToSend = {
-      'message': {
-        'id': message.id,
-        'cid': message.cid,
-        if (message.body != null) 'body': message.body,
-        if (message.extension != null) 'x': message.extension,
-        if (message.attachments != null) 'attachments': message.attachments,
-      },
-    };
-
-    log('[MessagesManager][sendMessage]', jsonData: dataToSend);
-    connection.sink.add(jsonEncode(dataToSend));
-  });
-}
-
 class MessagesManager {
-  MessagesManager._();
+  MessagesManager._() {
+    _init();
+  }
 
   static final _instance = MessagesManager._();
 
@@ -41,6 +22,12 @@ class MessagesManager {
 
   Stream<Message> get incomingMessagesStream =>
       _incomingMessagesController.stream;
+
+  final StreamController<SystemChatMessage> _systemChatMessagesController =
+      StreamController.broadcast();
+
+  Stream<SystemChatMessage> get systemChatMessagesStream =>
+      _systemChatMessagesController.stream;
 
   final StreamController<SentMessageStatus> _sentMessageStatusController =
       StreamController.broadcast();
@@ -66,7 +53,7 @@ class MessagesManager {
   Stream<DeleteMessagesStatus> get deletedMessageStatusStream =>
       _deletedMessagesStatusController.stream;
 
-  init() {
+  _init() {
     if (dataListener != null) return;
 
     dataListener = SamaConnectionService.instance.dataStream.listen((data) {
@@ -80,12 +67,15 @@ class MessagesManager {
         _processReadMessagePackage(data['message_read']);
       } else if (data['message_delete'] != null) {
         _processDeleteMessagePackage(data['message_delete']);
+      } else if (data['system_message'] != null) {
+        _processSystemMessagePackage(data['system_message']);
       }
     });
   }
 
   destroy() {
     dataListener?.cancel();
+    dataListener = null;
   }
 
   void _processIncomingMessage(Map<String, dynamic> data) {
@@ -116,5 +106,12 @@ class MessagesManager {
     var deletedMessagesStatus = DeleteMessagesStatus.fromJson(data);
 
     _deletedMessagesStatusController.add(deletedMessagesStatus);
+  }
+
+  void _processSystemMessagePackage(Map<String, dynamic> data) {
+    if (data['x'] != null) {
+      var systemMessage = SystemChatMessage.fromJson(data);
+      _systemChatMessagesController.add(systemMessage);
+    }
   }
 }

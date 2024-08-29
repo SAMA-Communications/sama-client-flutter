@@ -24,7 +24,7 @@ class ConversationListItem extends StatelessWidget {
     return Material(
       child: ListTile(
         leading: conversation.type == 'u'
-            ? AvatarLetterIcon(
+            ? AvatarLetterIcon(//ToDO RP replace with getUserName
                 name: conversation.opponent?.firstName ??
                     conversation.opponent?.login ??
                     "Deleted account",
@@ -150,7 +150,7 @@ class DateFormatter {
     DateTime localDateTime = dateTime.toLocal();
 
     if (!localDateTime.difference(justNow).isNegative) {
-      return 'Just now';
+      return DateFormat('jm').format(dateTime);
     }
 
     String roughTimeString = DateFormat('jm').format(dateTime);

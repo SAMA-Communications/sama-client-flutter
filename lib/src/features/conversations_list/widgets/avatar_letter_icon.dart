@@ -9,6 +9,7 @@ class AvatarLetterIcon extends StatelessWidget {
     super.key,
     this.size = const Size(55, 60),
     this.borderRadius = 5.0,
+    this.padding = const EdgeInsets.all(4.0),
     this.backgroundColor = black,
     this.textColor = dullGray,
   });
@@ -18,6 +19,7 @@ class AvatarLetterIcon extends StatelessWidget {
   final String? lastName;
   final Size size;
   final double borderRadius;
+  final EdgeInsetsGeometry padding;
   final Color backgroundColor;
   final Color textColor;
 
@@ -36,7 +38,7 @@ class AvatarLetterIcon extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      padding: const EdgeInsets.all(4.0),
+      padding: padding,
       height: size.height,
       width: size.width,
       child: Center(

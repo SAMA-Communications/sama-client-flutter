@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'avatar.dart';
 import 'message.dart';
 
 class Conversation extends Equatable {
@@ -13,6 +14,7 @@ class Conversation extends Equatable {
   final String? name; //name
   final String? description; //description
   final int? unreadMessagesCount; //unread_messages_count
+  final Avatar? avatar; //unread_messages_count
 
   const Conversation(
       {this.id,
@@ -24,7 +26,8 @@ class Conversation extends Equatable {
       this.type,
       this.name,
       this.description,
-      this.unreadMessagesCount});
+      this.unreadMessagesCount,
+      this.avatar});
 
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json['_id'],
@@ -38,7 +41,8 @@ class Conversation extends Equatable {
         type = json['type'],
         name = json['name'],
         description = json['description'],
-        unreadMessagesCount = json['unread_messages_count'];
+        unreadMessagesCount = json['unread_messages_count'],
+        avatar = Avatar.fromJson(json);
 
   Map<String, dynamic> toJson() => {
         '_id': id,
@@ -50,6 +54,7 @@ class Conversation extends Equatable {
         'name': name,
         'description': description,
         'unread_messages_count': unreadMessagesCount,
+        'image_object': avatar?.toImageObjectJson(),
       };
 
   @override

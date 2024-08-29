@@ -1,7 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../api/api.dart';
-import '../../api/conversations/models/message.dart';
 
 //FixME RP later
 class ConversationFields {
@@ -16,6 +15,7 @@ class ConversationFields {
   static const int unreadMessagesCount = 0;
   static const Message lastMessage = Message.empty; //last_message
   static const List<String> participantsIds = []; //last_message
+  static const Avatar avatar = Avatar.empty; //last_message
 }
 
 class ConversationModel {
@@ -29,6 +29,7 @@ class ConversationModel {
   final Message? lastMessage;
   final User? opponent;
   final User? owner;
+  final Avatar? avatar;
 
   ConversationModel({
     required this.id,
@@ -41,5 +42,45 @@ class ConversationModel {
     required this.opponent,
     required this.owner,
     this.description,
+    this.avatar,
   });
+
+  ConversationModel copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? type,
+    String? name,
+    String? description,
+    int? unreadMessagesCount,
+    Message? lastMessage,
+    User? opponent,
+    User? owner,
+    Avatar? avatar,
+  }) {
+    return ConversationModel(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      type: type ?? this.type,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
+      lastMessage: lastMessage ?? this.lastMessage,
+      opponent: opponent ?? this.opponent,
+      owner: owner ?? this.owner,
+      avatar: avatar ?? this.avatar,
+    );
+  }
+
+  ConversationModel copyWithItem({
+    required ConversationModel item,
+  }) {
+    return copyWith(
+      updatedAt: updatedAt != item.updatedAt ? item.updatedAt : updatedAt,
+      name: name != item.name ? item.name : name,
+      description:
+          description != item.description ? item.description : description,
+    );
+  }
 }

@@ -19,7 +19,7 @@ class GlobalSearchRepository {
     final List<User> users = await api.searchUsersByLogin(term);
     final List<String> ids = await api.searchConversationsIdsByName(term);
     final List<ConversationModel> conversations =
-        localDataSource.getConversations(ids);
+        localDataSource.getConversationsByIds(ids);
 
     return SearchResult.from(users, conversations);
   }

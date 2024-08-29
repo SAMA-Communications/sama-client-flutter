@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../navigation/constants.dart';
 import '../../../shared/utils/observer_utils.dart';
 import '../conversations_list.dart';
 
@@ -28,37 +30,66 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
 
   @override
   void didPopNext() {
-    // ToDo RP later can be changed or removed
-    context.read<ConversationBloc>().add(ConversationRefreshed());
+    // ToDo RP for now not using
+    // context.read<ConversationsBloc>().add(ConversationsRefreshed());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConversationBloc, ConversationState>(
+    return BlocBuilder<ConversationsBloc, ConversationsState>(
       builder: (context, state) {
         switch (state.status) {
-          case ConversationStatus.failure:
-            return const Center(child: Text('failed to fetch conversations'));
-          case ConversationStatus.success:
+          case ConversationsStatus.failure:
+            return Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(24),
+              child: const Text(
+                'The chats are unavailable. Please check your Internet connection.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+            );
+          case ConversationsStatus.success:
             if (state.conversations.isEmpty) {
-              return const Center(child: Text('no conversations'));
+              return Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: const Text(
+                    'No conversations yet...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              );
             }
-            return ListView.separated(
-                itemBuilder: (BuildContext context, int index) {
-                  return index >= state.conversations.length
-                      ? const BottomLoader()
-                      : ConversationListItem(
-                          conversation: state.conversations[index]);
-                },
-                itemCount: state.hasReachedMax
-                    ? state.conversations.length
-                    : state.conversations.length + 1,
-                controller: _scrollController,
-                separatorBuilder: (context, index) => const SizedBox(
-                      height: 5,
-                    ));
-          case ConversationStatus.initial:
-            return const CenterLoader();
+            return Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  child: const Icon(Icons.add_comment_outlined, size: 35.0),
+                  onPressed: () {
+                    context.push(groupCreateScreenPath);
+                  },
+                ),
+                body: ListView.separated(
+                    itemBuilder: (BuildContext context, int index) {
+                      return index >= state.conversations.length
+                          ? const BottomLoader()
+                          : ConversationListItem(
+                              conversation: state.conversations[index]);
+                    },
+                    itemCount: state.hasReachedMax
+                        ? state.conversations.length
+                        : state.conversations.length + 1,
+                    controller: _scrollController,
+                    separatorBuilder: (context, index) => const SizedBox(
+                          height: 5,
+                        )));
+          case ConversationsStatus.initial:
+            return const Center(child: CircularProgressIndicator());
         }
       },
     );
@@ -74,7 +105,8 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
   }
 
   void _onScroll() {
-    if (_isBottom) context.read<ConversationBloc>().add(ConversationFetched());
+    if (_isBottom)
+      context.read<ConversationsBloc>().add(ConversationsFetched());
   }
 
   bool get _isBottom {

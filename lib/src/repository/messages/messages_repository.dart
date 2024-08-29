@@ -10,9 +10,9 @@ class MessagesRepository {
   final UserRepository userRepository;
   final Map<String, api.User> participants = {};
 
-  MessagesRepository({
-    required this.userRepository,
-  });
+  MessagesRepository({required this.userRepository}) {
+    initChatListeners();
+  }
 
   StreamSubscription<api.Message>? incomingMessagesSubscription;
 
@@ -74,7 +74,8 @@ class MessagesRepository {
         body: body.trim(),
         cid: cid,
         id: const Uuid().v1(),
-        t: DateTime.now().millisecondsSinceEpoch ~/ 1000);
+        t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        createdAt: DateTime.now());
 
     return api.sendMessage(message: message).then((_) async {
       var currentUser = await userRepository.getUser();
@@ -100,7 +101,6 @@ class MessagesRepository {
   void initChatListeners() {
     if (incomingMessagesSubscription != null) return;
 
-    api.MessagesManager.instance.init();
     incomingMessagesSubscription = api
         .MessagesManager.instance.incomingMessagesStream
         .listen((message) async {
@@ -138,7 +138,7 @@ class MessagesRepository {
     });
   }
 
-  void destroyChatListeners() {
+  void dispose() {
     incomingMessagesSubscription?.cancel();
     incomingMessagesSubscription = null;
     api.MessagesManager.instance.destroy();

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/conversation_group_create/view/group_page.dart';
 import '../features/conversations_list/view/conversations_page.dart';
 import '../features/conversation/view/conversation_page.dart';
 import '../features/login/view/login_page.dart';
@@ -61,9 +62,9 @@ GoRouter router(BuildContext context) => GoRouter(
           },
         ),
         GoRoute(
-          path: globalSearchPath,
+          path: groupCreateScreenPath,
           builder: (context, state) {
-            return SearchPage.route();
+            return GroupPage.route();
           },
         ),
       ],
@@ -98,7 +99,7 @@ class GoRouterRefreshBloc<BLOC extends BlocBase<STATE>, STATE>
   GoRouterRefreshBloc(BLOC bloc) {
     _blocStream = bloc.stream.listen(
       (STATE state) {
-        print('[GoRouterRefreshBloc][listen] state: state');
+        print('[GoRouterRefreshBloc][listen] state: $state');
         if (state is AuthenticationState) {
           var authenticationState = state as AuthenticationState;
           if (authenticationState.status ==
