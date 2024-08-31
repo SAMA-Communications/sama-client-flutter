@@ -9,3 +9,5 @@ final double widthScreen =
 final double heightScreen =
     WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.height /
         WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+
+double keyboardHeight(BuildContext ctx) => MediaQuery.of(ctx).viewInsets.bottom;

@@ -75,10 +75,22 @@ class AuthenticationRepository {
 
   Future<void> logOut() async {
     await api.logout().then((success) {
-      SecureStorage.instance.deleteLocalUser();
-      api.ReconnectionManager.instance.destroy();
-      _controller.add(AuthenticationStatus.unauthenticated);
+      _disposeLocalUser();
     });
+  }
+
+  Future<void> signOut() async {
+    await api.signOut().then((success) {
+      _disposeLocalUser();
+    });
+  }
+
+  _disposeLocalUser() {
+    SecureStorage.instance.deleteLocalUser();
+    api.ReconnectionManager.instance.destroy();
+    api.ConnectionManager.instance.currentUser = null;
+    api.ConnectionManager.instance.token = null;
+    _controller.add(AuthenticationStatus.unauthenticated);
   }
 
   void dispose() => _controller.close();

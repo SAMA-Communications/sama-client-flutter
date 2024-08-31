@@ -25,6 +25,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<ProfileUserLastnameChanged>(_onUserLastnameChanged);
     on<ProfilePhoneChanged>(_onPhoneChanged);
     on<ProfileEmailChanged>(_onEmailChanged);
+    on<ProfilePasswordChanged>(_onPasswordChanged);
     on<ProfileResetChanges>(_onResetChanges);
     on<ProfileSubmitted>(_onSubmitted);
 
@@ -139,6 +140,21 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     );
   }
 
+  void _onPasswordChanged(
+    ProfilePasswordChanged event,
+    Emitter<ProfileState> emit,
+  ) {
+    final password = UserPassword.dirty(
+        currentPsw: event.currentPassword, value: event.newPassword);
+    emit(
+      state.copyWith(
+        status: FormzSubmissionStatus.initial,
+        userPassword: password,
+        isValid: Formz.validate([password]),
+      ),
+    );
+  }
+
   Future<void> _onResetChanges(
     ProfileResetChanges event,
     Emitter<ProfileState> emit,
@@ -147,10 +163,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(
       state.copyWith(
           status: FormzSubmissionStatus.canceled,
+          isValid: false,
           userFirstname: UserFirstname.pure(user.firstName ?? ''),
           userLastname: UserLastname.pure(user.lastName ?? ''),
           userPhone: UserPhone.pure(user.phone ?? ''),
-          userEmail: UserEmail.pure(user.email ?? '')),
+          userEmail: UserEmail.pure(user.email ?? ''),
+          userPassword: const UserPassword.pure()),
     );
   }
 
@@ -161,22 +179,48 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     if (state.isValid) {
       emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
 
-      String? firstName =
-          state.userFirstname.isValid ? state.userFirstname.value : null;
-      String? lastName =
-          state.userLastname.isValid ? state.userLastname.value : null;
-      String? email = state.userEmail.isValid ? state.userEmail.value : null;
-      String? phone = state.userPhone.isValid ? state.userPhone.value : null;
-
-      User user = await _userRepository.updateLocalUser(
-          firstName: firstName, lastName: lastName, email: email, phone: phone);
-      emit(state.copyWith(
-          status: FormzSubmissionStatus.success,
-          userFirstname: UserFirstname.pure(user.firstName ?? ''),
-          userLastname: UserLastname.pure(user.lastName ?? ''),
-          userPhone: UserPhone.pure(user.phone ?? ''),
-          userEmail: UserEmail.pure(user.email ?? ''),
-          informationMessage: 'User was successfully updated'));
+      try {
+        User user = await _userRepository.updateLocalUser(
+            currentPsw: state.userPassword.isValid
+                ? state.userPassword.currentPsw
+                : null,
+            newPassword:
+                state.userPassword.isValid && !state.userPassword.isPure
+                    ? state.userPassword.value
+                    : null,
+            firstName:
+                state.userFirstname.isValid && !state.userFirstname.isPure
+                    ? state.userFirstname.value
+                    : null,
+            lastName: state.userLastname.isValid && !state.userLastname.isPure
+                ? state.userLastname.value
+                : null,
+            email: state.userEmail.isValid && !state.userEmail.isPure
+                ? state.userEmail.value
+                : null,
+            phone: state.userPhone.isValid && !state.userPhone.isPure
+                ? state.userPhone.value
+                : null);
+        emit(state.copyWith(
+            status: FormzSubmissionStatus.success,
+            isValid: false,
+            userFirstname: UserFirstname.pure(user.firstName ?? ''),
+            userLastname: UserLastname.pure(user.lastName ?? ''),
+            userPhone: UserPhone.pure(user.phone ?? ''),
+            userEmail: UserEmail.pure(user.email ?? ''),
+            informationMessage: 'User was successfully updated'));
+      } catch (e) {
+        User user = await _userRepository.getLocalUser();
+        emit(state.copyWith(
+            status: FormzSubmissionStatus.failure,
+            isValid: false,
+            userFirstname: UserFirstname.pure(user.firstName ?? ''),
+            userLastname: UserLastname.pure(user.lastName ?? ''),
+            userPhone: UserPhone.pure(user.phone ?? ''),
+            userEmail: UserEmail.pure(user.email ?? ''),
+            userPassword: const UserPassword.pure(),
+            errorMessage: 'User wasn\'t updated: $e'));
+      }
     }
   }
 }

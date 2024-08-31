@@ -22,6 +22,7 @@ class AuthenticationBloc
         super(const AuthenticationState.unknown()) {
     on<_AuthenticationStatusChanged>(_onAuthenticationStatusChanged);
     on<AuthenticationLogoutRequested>(_onAuthenticationLogoutRequested);
+    on<AuthenticationSignOutRequested>(_onAuthenticationSignOutRequested);
     _authenticationStatusSubscription = _authenticationRepository.status.listen(
       (status) => add(_AuthenticationStatusChanged(status)),
     );
@@ -69,9 +70,19 @@ class AuthenticationBloc
     } catch (_) {}
   }
 
+  Future<void> _onAuthenticationSignOutRequested(
+      AuthenticationSignOutRequested event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    try {
+      await _authenticationRepository.signOut();
+      emit(const AuthenticationState.unauthenticated());
+    } catch (_) {}
+  }
+
   Future<api.User?> tryGetUser() async {
     try {
-      return await _userRepository.getUser();
+      return await _userRepository.getLocalUser();
     } catch (_) {
       return null;
     }

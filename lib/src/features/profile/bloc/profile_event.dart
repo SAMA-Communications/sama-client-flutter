@@ -54,6 +54,16 @@ final class ProfileEmailChanged extends ProfileEvent {
   List<Object> get props => [email];
 }
 
+final class ProfilePasswordChanged extends ProfileEvent {
+  const ProfilePasswordChanged(this.currentPassword, this.newPassword);
+
+  final String currentPassword;
+  final String newPassword;
+
+  @override
+  List<Object> get props => [currentPassword, newPassword];
+}
+
 final class ProfileResetChanges extends ProfileEvent {}
 
 final class ProfileSubmitted extends ProfileEvent {}

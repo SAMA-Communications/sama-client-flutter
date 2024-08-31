@@ -3,32 +3,35 @@ import 'dart:async';
 import '../../api/api.dart';
 import '../../api/api.dart' as api;
 import '../../repository/user/user_data_source.dart';
+import '../../shared/secure_storage.dart';
 
 class UserRepository {
-  User? _user;
   final UserLocalDataSource localDataSource;
 
   UserRepository({required this.localDataSource});
 
-  Future<User?> getUser() async {
-    if (_user != null) return _user;
-
+  Future<User?> getLocalUser() async {
     return ConnectionManager.instance.currentUser;
   }
 
   Future<User> updateLocalUser(
-      {String? firstName,
+      {String? currentPsw,
+      String? newPassword,
+      String? firstName,
       String? lastName,
       String? email,
       String? phone}) async {
     User result = await api.userEdit(
-        firstName: firstName, lastName: lastName, email: email, phone: phone);
-    localDataSource.updateLocalUser(result);
-    return result;
-  }
+        currentPassword: currentPsw,
+        newPassword: newPassword,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone);
 
-  Future<User> getLocalUser() async {
-    return localDataSource.getLocalUser();
+    SecureStorage.instance.saveLocalUserIfNeed(result);
+    ConnectionManager.instance.currentUser = result;
+    return result;
   }
 
   //ToDo RP finish later

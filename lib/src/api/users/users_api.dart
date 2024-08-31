@@ -59,14 +59,15 @@ Future<User> loginWithToken(String token, String deviceId) {
 Future<bool> logout() {
   return SamaConnectionService.instance
       .sendRequest(userLogoutRequestName, {}).then((response) {
-    var isSuccess =
-        bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
-    if (isSuccess) {
-      ConnectionManager.instance.currentUser = null;
-      ConnectionManager.instance.token = null;
-    }
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+    ;
+  });
+}
 
-    return isSuccess;
+Future<bool> signOut() {
+  return SamaConnectionService.instance
+      .sendRequest(userDeleteRequestName, {}).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
 
@@ -106,13 +107,6 @@ Future<User> userEdit({
       .sendRequest(userEditRequestName, requestData)
       .then((response) {
     return User.fromJson(response['user']);
-  });
-}
-
-Future<bool> delete() {
-  return SamaConnectionService.instance
-      .sendRequest(userDeleteRequestName, {}).then((response) {
-    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
 

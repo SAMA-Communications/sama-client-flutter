@@ -20,7 +20,7 @@ class ConversationListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var localUser = context.read<AuthenticationBloc>().state.user;
+    final localUser = ConnectionManager.instance.currentUser!;
     return Material(
       child: ListTile(
         leading: conversation.type == 'u'

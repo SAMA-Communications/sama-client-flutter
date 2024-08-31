@@ -1,9 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../features/profile/bloc/profile_bloc.dart';
+import '../../../api/utils/screen_factor.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../models/models.dart';
@@ -376,7 +379,16 @@ class AccountForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (_) {
+                      return BlocProvider.value(
+                        value: BlocProvider.of<ProfileBloc>(context),
+                        child: _ChangePasswordInput(),
+                      );
+                    });
+              },
               icon: const Icon(Icons.lock_reset_outlined,
                   color: dullGray, size: 25),
               style: TextButton.styleFrom(
@@ -389,7 +401,35 @@ class AccountForm extends StatelessWidget {
               ),
             ),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (_) {
+                      return BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                          child: AlertDialog(
+                            title: const Text('Delete account',
+                                style: TextStyle(fontSize: 20)),
+                            content: const Text(
+                                'Are you sure you want to delete this user?',
+                                style: TextStyle(fontSize: 16)),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text("Cancel"),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                              TextButton(
+                                child: const Text("Ok"),
+                                onPressed: () {
+                                  context
+                                      .read<AuthenticationBloc>()
+                                      .add(AuthenticationSignOutRequested());
+                                },
+                              ),
+                            ],
+                          ));
+                    });
+              },
               icon: const Icon(Icons.delete_forever_outlined,
                   color: red, size: 25),
               style: TextButton.styleFrom(
@@ -444,87 +484,73 @@ class NameDialogInput extends StatelessWidget {
             previous.userLastname != current.userLastname,
         builder: (context, state) {
           return AlertDialog(
-            title: const Text('Edit your name'),
-            actionsPadding: const EdgeInsets.only(bottom: 8),
-            contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            content: Column(mainAxisSize: MainAxisSize.min, children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                  color: gainsborough,
-                ),
-                child: TextField(
-                  keyboardType: TextInputType.text,
-                  controller: firstNameTxt,
-                  style: const TextStyle(fontSize: 18),
-                  onChanged: (firstName) => context
-                      .read<ProfileBloc>()
-                      .add(ProfileUserFirstnameChanged(firstName)),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.only(bottom: 4),
-                    label: const Text(
-                      'First name',
-                      style: TextStyle(color: dullGray, fontSize: 16),
+              title: const Text('Edit your name'),
+              actionsPadding: const EdgeInsets.only(bottom: 8),
+              contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              content: Column(mainAxisSize: MainAxisSize.min, children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    color: gainsborough,
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.text,
+                    controller: firstNameTxt,
+                    style: const TextStyle(fontSize: 18),
+                    onSubmitted: (value) =>
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                    onChanged: (firstName) => context
+                        .read<ProfileBloc>()
+                        .add(ProfileUserFirstnameChanged(firstName)),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.only(bottom: 4),
+                      label: const Text(
+                        'First name',
+                        style: TextStyle(color: dullGray, fontSize: 16),
+                      ),
+                      errorText: !state.userFirstname.isPure &&
+                              state.userFirstname.displayError ==
+                                  UserFirstnameValidationError.empty
+                          ? 'user first name is empty'
+                          : null,
                     ),
-                    errorText: !state.userFirstname.isPure &&
-                            state.userFirstname.displayError ==
-                                UserFirstnameValidationError.empty
-                        ? 'Please make changes to the data.'
-                        : null,
                   ),
                 ),
-              ),
-              const SizedBox(height: columnItemMargin),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                  color: gainsborough,
-                ),
-                child: TextField(
-                  keyboardType: TextInputType.text,
-                  controller: lastNameTxt,
-                  style: const TextStyle(fontSize: 18),
-                  onChanged: (lastName) => context
-                      .read<ProfileBloc>()
-                      .add(ProfileUserLastnameChanged(lastName)),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.only(bottom: 4),
-                    label: const Text(
-                      'Last name',
-                      style: TextStyle(color: dullGray, fontSize: 16),
+                const SizedBox(height: columnItemMargin),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    color: gainsborough,
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.text,
+                    controller: lastNameTxt,
+                    style: const TextStyle(fontSize: 18),
+                    onSubmitted: (value) =>
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                    onChanged: (lastName) => context
+                        .read<ProfileBloc>()
+                        .add(ProfileUserLastnameChanged(lastName)),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.only(bottom: 4),
+                      label: const Text(
+                        'Last name',
+                        style: TextStyle(color: dullGray, fontSize: 16),
+                      ),
+                      errorText: !state.userLastname.isPure &&
+                              state.userLastname.displayError ==
+                                  UserLastnameValidationError.empty
+                          ? 'user last name is empty'
+                          : null,
                     ),
-                    errorText: !state.userLastname.isPure &&
-                            state.userLastname.displayError ==
-                                UserLastnameValidationError.empty
-                        ? 'The format of the email address is incorrect.'
-                        : null,
                   ),
                 ),
-              ),
-            ]),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  context.read<ProfileBloc>().add(ProfileResetChanges());
-                  Navigator.pop(context, 'Cancel');
-                },
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (state.isValid) {
-                    context.read<ProfileBloc>().add(ProfileSubmitted());
-                    Navigator.pop(context, 'Save');
-                  }
-                },
-                child: const Text('Save'),
-              ),
-            ],
-          );
+              ]),
+              actions: _formActions(context));
         });
   }
 }
@@ -545,103 +571,221 @@ class InfoDialogInput extends StatelessWidget {
             previous.userEmail != current.userEmail,
         builder: (context, state) {
           return AlertDialog(
-            title: const Text('Edit personal info'),
-            actionsPadding: const EdgeInsets.only(bottom: 8),
-            contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            content: Column(mainAxisSize: MainAxisSize.min, children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                  color: gainsborough,
-                ),
-                child: TextField(
-                  keyboardType: TextInputType.phone,
-                  controller: phoneTxt,
-                  style: const TextStyle(fontSize: 18),
-                  onChanged: (phone) => context
-                      .read<ProfileBloc>()
-                      .add(ProfilePhoneChanged(phone)),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.only(bottom: 4),
-                    label: const Row(
-                      children: [
-                        Icon(
-                          Icons.local_phone_outlined,
-                          size: 16,
-                          color: dullGray,
-                        ),
-                        Text(
-                          ' Mobile phone',
-                          style: TextStyle(color: dullGray, fontSize: 16),
-                        )
-                      ],
+              title: const Text('Edit personal info'),
+              actionsPadding: const EdgeInsets.only(bottom: 8),
+              contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              content: Column(mainAxisSize: MainAxisSize.min, children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    color: gainsborough,
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.phone,
+                    controller: phoneTxt,
+                    style: const TextStyle(fontSize: 18),
+                    onSubmitted: (value) =>
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                    onChanged: (phone) => context
+                        .read<ProfileBloc>()
+                        .add(ProfilePhoneChanged(phone)),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.only(bottom: 4),
+                      label: const Row(
+                        children: [
+                          Icon(
+                            Icons.local_phone_outlined,
+                            size: 16,
+                            color: dullGray,
+                          ),
+                          Text(
+                            ' Mobile phone',
+                            style: TextStyle(color: dullGray, fontSize: 16),
+                          )
+                        ],
+                      ),
+                      errorText: state.userPhone.displayError ==
+                              UserPhoneValidationError.outOfRange
+                          ? 'The phone number should be 3 to 15 digits in length.'
+                          : null,
                     ),
-                    errorText: state.userPhone.displayError ==
-                            UserPhoneValidationError.outOfRange
-                        ? 'The phone number should be 3 to 15 digits in length.'
-                        : null,
                   ),
                 ),
-              ),
-              const SizedBox(height: columnItemMargin),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                  color: gainsborough,
-                ),
-                child: TextField(
-                  keyboardType: TextInputType.emailAddress,
-                  controller: emailTxt,
-                  style: const TextStyle(fontSize: 18),
-                  onChanged: (phone) => context
-                      .read<ProfileBloc>()
-                      .add(ProfileEmailChanged(phone)),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.only(bottom: 4),
-                    label: const Row(
-                      children: [
-                        Icon(
-                          Icons.email_outlined,
-                          size: 16,
-                          color: dullGray,
-                        ),
-                        Text(
-                          ' Email address',
-                          style: TextStyle(color: dullGray, fontSize: 16),
-                        )
-                      ],
+                const SizedBox(height: columnItemMargin),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    color: gainsborough,
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.emailAddress,
+                    controller: emailTxt,
+                    style: const TextStyle(fontSize: 18),
+                    onSubmitted: (value) =>
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                    onChanged: (phone) => context
+                        .read<ProfileBloc>()
+                        .add(ProfileEmailChanged(phone)),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.only(bottom: 4),
+                      label: const Row(
+                        children: [
+                          Icon(
+                            Icons.email_outlined,
+                            size: 16,
+                            color: dullGray,
+                          ),
+                          Text(
+                            ' Email address',
+                            style: TextStyle(color: dullGray, fontSize: 16),
+                          )
+                        ],
+                      ),
+                      errorText: state.userEmail.displayError ==
+                              UserEmailValidationError.incorrect
+                          ? 'The format of the email address is incorrect.'
+                          : null,
                     ),
-                    errorText: state.userEmail.displayError ==
-                            UserEmailValidationError.incorrect
-                        ? 'The format of the email address is incorrect.'
-                        : null,
                   ),
                 ),
-              ),
-            ]),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  context.read<ProfileBloc>().add(ProfileResetChanges());
-                  Navigator.pop(context, 'Cancel');
-                },
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (state.isValid) {
-                    context.read<ProfileBloc>().add(ProfileSubmitted());
-                    Navigator.pop(context, 'Save');
-                  }
-                },
-                child: const Text('Save'),
-              ),
-            ],
-          );
+              ]),
+              actions: _formActions(context));
         });
   }
+}
+
+class _ChangePasswordInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var currentPswTxt = TextEditingController();
+    var newPswTxt = TextEditingController();
+
+    return BlocBuilder<ProfileBloc, ProfileState>(
+        buildWhen: (previous, current) =>
+            previous.userPassword != current.userPassword,
+        builder: (context, state) {
+          return AlertDialog(
+              title: const Text('Change password'),
+              actionsPadding: const EdgeInsets.only(bottom: 8),
+              contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              content: Column(mainAxisSize: MainAxisSize.min, children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    color: gainsborough,
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: currentPswTxt,
+                    style: const TextStyle(fontSize: 18),
+                    onSubmitted: (value) =>
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                    onChanged: (currentPsw) => context.read<ProfileBloc>().add(
+                        ProfilePasswordChanged(currentPsw, newPswTxt.text)),
+                    obscureText: true,
+                    obscuringCharacter: '*',
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.only(bottom: 4),
+                      label: Row(
+                        children: [
+                          Icon(
+                            Icons.lock_open_outlined,
+                            size: 16,
+                            color: dullGray,
+                          ),
+                          Text(
+                            ' Enter current password:',
+                            style: TextStyle(color: dullGray, fontSize: 16),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: columnItemMargin),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    color: gainsborough,
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.visiblePassword,
+                    style: const TextStyle(fontSize: 18),
+                    controller: newPswTxt,
+                    onSubmitted: (value) =>
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                    onChanged: (newPsw) => context.read<ProfileBloc>().add(
+                        ProfilePasswordChanged(currentPswTxt.text, newPsw)),
+                    obscureText: true,
+                    obscuringCharacter: '*',
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.only(bottom: 4),
+                      label: const Row(
+                        children: [
+                          Icon(
+                            Icons.lock_outline,
+                            size: 16,
+                            color: dullGray,
+                          ),
+                          Text(
+                            ' Enter a new password:',
+                            style: TextStyle(color: dullGray, fontSize: 16),
+                          )
+                        ],
+                      ),
+                      errorText: state.userPassword.value.isNotEmpty &&
+                              state.userPassword.displayError ==
+                                  UserPasswordValidationError.outOfRange
+                          ? 'The password length must be in the range from 3 to 40.'
+                          : null,
+                    ),
+                  ),
+                ),
+              ]),
+              actions: _formActions(context));
+        });
+  }
+}
+
+List<Widget> _formActions(BuildContext context) {
+  return [
+    TextButton(
+      onPressed: () {
+        context.read<ProfileBloc>().add(ProfileResetChanges());
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        Navigator.pop(context, 'Cancel');
+      },
+      child: const Text('Cancel'),
+    ),
+    TextButton(
+      onPressed: () {
+        if (context.read<ProfileBloc>().state.isValid) {
+          context.read<ProfileBloc>().add(ProfileSubmitted());
+          Navigator.pop(context, 'Save');
+        } else {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  margin: EdgeInsets.only(bottom: keyboardHeight(context)),
+                  content: const Text('Please make changes to the data.')),
+            );
+        }
+      },
+      child: const Text('Save'),
+    ),
+  ];
 }

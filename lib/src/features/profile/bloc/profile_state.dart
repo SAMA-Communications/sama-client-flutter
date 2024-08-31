@@ -9,6 +9,7 @@ final class ProfileState extends Equatable {
     this.userLastname = const UserLastname.pure(),
     this.userPhone = const UserPhone.pure(),
     this.userEmail = const UserEmail.pure(),
+    this.userPassword = const UserPassword.pure(),
     this.isValid = false,
     this.errorMessage,
     this.informationMessage,
@@ -21,6 +22,7 @@ final class ProfileState extends Equatable {
   final UserLastname userLastname;
   final UserPhone userPhone;
   final UserEmail userEmail;
+  final UserPassword userPassword;
   final bool isValid;
   final String? errorMessage;
   final String? informationMessage;
@@ -33,6 +35,7 @@ final class ProfileState extends Equatable {
     UserLastname? userLastname,
     UserPhone? userPhone,
     UserEmail? userEmail,
+    UserPassword? userPassword,
     bool? isValid,
     String? errorMessage,
     String? informationMessage,
@@ -45,6 +48,7 @@ final class ProfileState extends Equatable {
       userLastname: userLastname ?? this.userLastname,
       userPhone: userPhone ?? this.userPhone,
       userEmail: userEmail ?? this.userEmail,
+      userPassword: userPassword ?? this.userPassword,
       isValid: isValid ?? this.isValid,
       errorMessage: errorMessage ?? this.errorMessage,
       informationMessage: informationMessage ?? this.informationMessage,
@@ -53,5 +57,5 @@ final class ProfileState extends Equatable {
 
   @override
   List<Object> get props =>
-      [status, userAvatar, userFirstname, userLastname, userPhone, userEmail];
+      [status, userAvatar, userFirstname, userLastname, userPhone, userEmail, userPassword];
 }
