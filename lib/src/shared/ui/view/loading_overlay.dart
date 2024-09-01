@@ -11,11 +11,9 @@ class LoadingOverlay {
     if (_overlay == null) {
       _overlay = OverlayEntry(
         builder: (context) => const ColoredBox(
-          color: white,
+          color: semiBlack,
           child: Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.white),
-            ),
+            child: CircularProgressIndicator(),
           ),
         ),
       );

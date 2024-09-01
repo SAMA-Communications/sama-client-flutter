@@ -20,7 +20,7 @@ class ConversationListItem extends StatelessWidget {
     return Material(
       child: ListTile(
         leading: conversation.type == 'u'
-            ? AvatarLetterIcon(
+            ? AvatarLetterIcon(//ToDO RP replace with getUserName
                 name: conversation.opponent?.firstName ??
                     conversation.opponent?.login ??
                     "Deleted account",

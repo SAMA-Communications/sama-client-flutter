@@ -1,9 +1,14 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
+
+import 'package:path/path.dart';
 
 import '../../api/api.dart' as api;
 import '../../api/api.dart';
 import '../../db/models/conversation.dart';
 import '../../repository/messages/messages_repository.dart';
+import '../../shared/utils/media_utils.dart';
 import '../../shared/utils/string_utils.dart';
 import '../user/user_repository.dart';
 import 'conversation_data_source.dart';
@@ -156,10 +161,21 @@ class ConversationRepository {
   }
 
   Future<ConversationModel> createConversation(
-      List<api.User> participants, String type) async {
+      List<api.User> participants, String type,
+      [String? name, File? avatarUrl]) async {
+    Avatar? avatar;
+    if (avatarUrl != null) {
+      var compressedFile =
+          await compressImageFile(avatarUrl, const Size(640, 480));
+      final blur = await getImageHashInIsolate(compressedFile);
+      final id = await api.uploadAvatarFile(compressedFile);
+      final name = basename(compressedFile.path);
+      avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
+    }
+
     final Conversation conversation = await api.createConversation(
-        participants.map((user) => user.id!).toList(), type);
-    Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
+        participants.map((user) => user.id!).toList(), type, name, avatar);
+    final participantsMap = {for (var v in participants) v.id!: v};
 
     var localUser = await userRepository.getLocalUser();
     final opponent = participantsMap[conversation.opponentId];
@@ -174,7 +190,9 @@ class ConversationRepository {
         opponent: opponent,
         owner: owner,
         unreadMessagesCount: conversation.unreadMessagesCount,
-        lastMessage: conversation.lastMessage);
+        lastMessage: conversation.lastMessage,
+        avatar: conversation.avatar);
+
     localDataSource.addConversation(result);
     return result;
   }

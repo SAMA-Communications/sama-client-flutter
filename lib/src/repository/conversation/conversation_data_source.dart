@@ -14,17 +14,11 @@ class ConversationLocalDataSource {
   }
 
   void addConversation(ConversationModel item) {
-    if (!_conversations.containsKey(item.id)) {
-      _conversations[item.id] = item;
-    }
+    _conversations.putIfAbsent(item.id, () => item);
   }
 
   void updateConversation(ConversationModel item) {
     _conversations[item.id] = item;
-  }
-
-  void removeConversation(String id) {
-    _conversations.remove(id);
   }
 
   List<ConversationModel> getConversationsList() {
@@ -37,5 +31,9 @@ class ConversationLocalDataSource {
 
   List<ConversationModel> getConversationsByIds(List<String> ids) {
     return {for (var v in ids) _conversations[v]}.whereNotNull().toList();
+  }
+
+  void removeConversation(String id) {
+    _conversations.remove(id);
   }
 }
