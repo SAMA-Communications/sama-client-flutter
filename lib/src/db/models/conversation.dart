@@ -23,7 +23,7 @@ class ConversationModel {
   final DateTime createdAt; //created_at
   final DateTime updatedAt; //updated_at
   final String type;
-  final String? name;
+  final String name;
   final String? description;
   final int? unreadMessagesCount;
   final Message? lastMessage;

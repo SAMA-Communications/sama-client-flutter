@@ -43,11 +43,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(
       state.copyWith(
           status: FormzSubmissionStatus.initial,
-          userLogin: event.user.login,
-          userFirstname: UserFirstname.pure(event.user.firstName ?? ''),
-          userLastname: UserLastname.pure(event.user.lastName ?? ''),
-          userPhone: UserPhone.pure(event.user.phone ?? ''),
-          userEmail: UserEmail.pure(event.user.email ?? '')),
+          userLogin: event.user?.login,
+          userFirstname: UserFirstname.pure(event.user?.firstName ?? ''),
+          userLastname: UserLastname.pure(event.user?.lastName ?? ''),
+          userPhone: UserPhone.pure(event.user?.phone ?? ''),
+          userEmail: UserEmail.pure(event.user?.email ?? '')),
     );
   }
 
@@ -159,15 +159,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileResetChanges event,
     Emitter<ProfileState> emit,
   ) async {
-    User user = await _userRepository.getLocalUser();
+    User? user = await _userRepository.getLocalUser();
     emit(
       state.copyWith(
           status: FormzSubmissionStatus.canceled,
           isValid: false,
-          userFirstname: UserFirstname.pure(user.firstName ?? ''),
-          userLastname: UserLastname.pure(user.lastName ?? ''),
-          userPhone: UserPhone.pure(user.phone ?? ''),
-          userEmail: UserEmail.pure(user.email ?? ''),
+          userFirstname: UserFirstname.pure(user?.firstName ?? ''),
+          userLastname: UserLastname.pure(user?.lastName ?? ''),
+          userPhone: UserPhone.pure(user?.phone ?? ''),
+          userEmail: UserEmail.pure(user?.email ?? ''),
           userPassword: const UserPassword.pure()),
     );
   }
@@ -210,14 +210,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             userEmail: UserEmail.pure(user.email ?? ''),
             informationMessage: 'User was successfully updated'));
       } catch (e) {
-        User user = await _userRepository.getLocalUser();
+        User? user = await _userRepository.getLocalUser();
         emit(state.copyWith(
             status: FormzSubmissionStatus.failure,
             isValid: false,
-            userFirstname: UserFirstname.pure(user.firstName ?? ''),
-            userLastname: UserLastname.pure(user.lastName ?? ''),
-            userPhone: UserPhone.pure(user.phone ?? ''),
-            userEmail: UserEmail.pure(user.email ?? ''),
+            userFirstname: UserFirstname.pure(user?.firstName ?? ''),
+            userLastname: UserLastname.pure(user?.lastName ?? ''),
+            userPhone: UserPhone.pure(user?.phone ?? ''),
+            userEmail: UserEmail.pure(user?.email ?? ''),
             userPassword: const UserPassword.pure(),
             errorMessage: 'User wasn\'t updated: $e'));
       }

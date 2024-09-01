@@ -4,6 +4,7 @@ import '../../api/api.dart' as api;
 import '../../api/api.dart';
 import '../../db/models/conversation.dart';
 import '../../repository/messages/messages_repository.dart';
+import '../../shared/utils/string_utils.dart';
 import '../user/user_repository.dart';
 import 'conversation_data_source.dart';
 
@@ -41,16 +42,19 @@ class ConversationRepository {
           message.conversation!.opponentId!
       ]);
 
+      var localUser = await userRepository.getLocalUser();
+      final opponent = participants[message.conversation!.opponentId];
+      final owner = participants[message.conversation!.ownerId];
+
       final conversation = ConversationModel(
           id: message.conversation!.id!,
           createdAt: message.conversation!.createdAt!,
           updatedAt: message.conversation!.updatedAt!,
           type: message.conversation!.type!,
-          name: message.conversation!.type! == 'g'
-              ? message.conversation!.name!
-              : null,
-          opponent: participants[message.conversation!.opponentId],
-          owner: participants[message.conversation!.ownerId],
+          name: getConversationName(
+              message.conversation!, opponent, owner, localUser?.id),
+          opponent: opponent,
+          owner: owner,
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
           lastMessage: message.conversation!.lastMessage,
           description: message.conversation!.description);
@@ -126,22 +130,24 @@ class ConversationRepository {
     final List<User> participants = await getParticipants(cids);
     Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
 
-    final List<ConversationModel> result = conversations
-        .map(
-          (element) => ConversationModel(
-            id: element.id!,
-            createdAt: element.createdAt!,
-            updatedAt: element.updatedAt!,
-            type: element.type!,
-            name: element.type! == 'g' ? element.name! : null,
-            opponent: participantsMap[element.opponentId],
-            owner: participantsMap[element.ownerId],
-            unreadMessagesCount: element.unreadMessagesCount,
-            lastMessage: element.lastMessage,
-            description: element.description,
-          ),
-        )
-        .toList();
+    var localUser = await userRepository.getLocalUser();
+
+    final List<ConversationModel> result = conversations.map((element) {
+      final opponent = participantsMap[element.opponentId];
+      final owner = participantsMap[element.ownerId];
+      return ConversationModel(
+        id: element.id!,
+        createdAt: element.createdAt!,
+        updatedAt: element.updatedAt!,
+        type: element.type!,
+        name: getConversationName(element, opponent, owner, localUser?.id),
+        opponent: opponent,
+        owner: owner,
+        unreadMessagesCount: element.unreadMessagesCount,
+        lastMessage: element.lastMessage,
+        description: element.description,
+      );
+    }).toList();
 
     localDataSource.setConversations({for (var v in result) v.id: v});
     _sortConversations(result);
@@ -155,14 +161,18 @@ class ConversationRepository {
         participants.map((user) => user.id!).toList(), type);
     Map<String, User> participantsMap = {for (var v in participants) v.id!: v};
 
+    var localUser = await userRepository.getLocalUser();
+    final opponent = participantsMap[conversation.opponentId];
+    final owner = participantsMap[conversation.ownerId];
+
     var result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: conversation.type! == 'g' ? conversation.name! : null,
-        opponent: participantsMap[conversation.opponentId],
-        owner: participantsMap[conversation.ownerId],
+        name: getConversationName(conversation, opponent, owner, localUser?.id),
+        opponent: opponent,
+        owner: owner,
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage);
     localDataSource.addConversation(result);
