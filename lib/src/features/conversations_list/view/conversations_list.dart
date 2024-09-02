@@ -69,7 +69,7 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
             }
             return Scaffold(
                 floatingActionButton: FloatingActionButton(
-                  child: const Icon(Icons.add_comment_outlined, size: 35.0),
+                  child: const Icon(Icons.add_comment_outlined, size: 32.0),
                   onPressed: () {
                     context.push(groupCreateScreenPath);
                   },

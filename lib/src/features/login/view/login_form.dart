@@ -50,45 +50,48 @@ class LoginFormState extends State<LoginForm> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Align(
-              alignment: Alignment.center,
-              child: ToggleButtons(
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
-                borderColor: Colors.transparent,
-                fillColor: Colors.transparent,
-                selectedBorderColor: Colors.transparent,
-                selectedColor: Colors.transparent,
-                onPressed: (int index) {
-                  setState(() {
-                    for (int i = 0; i < loginSignupSelection.length; i++) {
-                      loginSignupSelection[i] = i == index;
-                    }
-                    isSignupSelected = loginSignupSelection[1];
-                  });
-                },
-                isSelected: loginSignupSelection,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 4, horizontal: 6.0),
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                          color: isSignupSelected ? gainsborough : black,
-                          fontSize: 54),
+            FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Align(
+                alignment: Alignment.center,
+                child: ToggleButtons(
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  borderColor: Colors.transparent,
+                  fillColor: Colors.transparent,
+                  selectedBorderColor: Colors.transparent,
+                  selectedColor: Colors.transparent,
+                  onPressed: (int index) {
+                    setState(() {
+                      for (int i = 0; i < loginSignupSelection.length; i++) {
+                        loginSignupSelection[i] = i == index;
+                      }
+                      isSignupSelected = loginSignupSelection[1];
+                    });
+                  },
+                  isSelected: loginSignupSelection,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 4, horizontal: 6.0),
+                      child: Text(
+                        'Login',
+                        style: TextStyle(
+                            color: isSignupSelected ? gainsborough : black,
+                            fontSize: 54),
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 4, horizontal: 6.0),
-                    child: Text(
-                      'SignUp',
-                      style: TextStyle(
-                          color: isSignupSelected ? black : gainsborough,
-                          fontSize: 54),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 4, horizontal: 6.0),
+                      child: Text(
+                        'SignUp',
+                        style: TextStyle(
+                            color: isSignupSelected ? black : gainsborough,
+                            fontSize: 54),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             _UsernameInput(),
