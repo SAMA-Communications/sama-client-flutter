@@ -16,7 +16,7 @@ class UserRepository {
     return ConnectionManager.instance.currentUser;
   }
 
-  //ToDo RP finish later
+  // TODO RP finish later
   Future<Map<String, User?>> getUsersByIds(List<String> ids) async {
     Map<String, User?> participants = localDataSource.getUsersByIds(ids);
     Set<String> idsNone =

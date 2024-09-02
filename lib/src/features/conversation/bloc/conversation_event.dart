@@ -29,3 +29,9 @@ final class _ParticipantsReceived extends ConversationEvent {
 
   const _ParticipantsReceived(this.participants);
 }
+
+final class _ConversationUpdated extends ConversationEvent {
+  final ConversationModel conversation;
+
+  const _ConversationUpdated(this.conversation);
+}
