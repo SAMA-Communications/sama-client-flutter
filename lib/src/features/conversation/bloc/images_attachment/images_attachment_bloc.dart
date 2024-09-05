@@ -12,26 +12,31 @@ part 'images_attachment_state.dart';
 
 class ImagesAttachmentBloc
     extends Bloc<ImagesAttachmentEvent, ImagesAttachmentState> {
-  final ChatMessage message;
   final AttachmentsRepository attachmentsRepository;
 
   ImagesAttachmentBloc({
-    required this.message,
     required this.attachmentsRepository,
   }) : super(const ImagesAttachmentState()) {
+    on<AttachmentsUrlsRequested>(
+      _onAttachmentsUrlsRequested,
+    );
     on<_AttachmentsUrlsReceived>(
       _onAttachmentsUrlsReceived,
     );
+  }
 
-    _requestAttachmentsUrls();
+  FutureOr<void> _onAttachmentsUrlsRequested(
+      AttachmentsUrlsRequested event, Emitter<ImagesAttachmentState> emit) {
+    _requestAttachmentsUrls(event.message);
   }
 
   FutureOr<void> _onAttachmentsUrlsReceived(
       _AttachmentsUrlsReceived event, Emitter<ImagesAttachmentState> emit) {
-    emit(state.copyWith(urls: Map.from(event.urls)));
+    Map<String, String> urls = Map.from(state.urls)..addAll(event.urls);
+    emit(state.copyWith(urls: urls));
   }
 
-  void _requestAttachmentsUrls() {
+  void _requestAttachmentsUrls(ChatMessage message) {
     if (message.attachments?.isNotEmpty ?? false) {
       Set<String> ids =
           message.attachments!.map((attachment) => attachment.fileId!).toSet();
