@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../api/api.dart';
 
 class User extends Equatable {
   final String? id; //_id
@@ -12,6 +13,7 @@ class User extends Equatable {
   final String? lastName; //last_name
   final String? phone;
   final String? email;
+  final Avatar? avatar;
 
   const User({
     this.id,
@@ -25,6 +27,7 @@ class User extends Equatable {
     this.lastName,
     this.phone,
     this.email,
+    this.avatar,
   });
 
   User.fromJson(Map<String, dynamic> json)
@@ -39,7 +42,8 @@ class User extends Equatable {
         firstName = json['first_name'],
         lastName = json['last_name'],
         phone = json['phone'],
-        email = json['email'];
+        email = json['email'],
+        avatar = Avatar.fromJson(json['avatar_object'], json['avatar_url']);
 
   Map<String, dynamic> toJson() => {
         '_id': id,
@@ -53,6 +57,7 @@ class User extends Equatable {
         'last_name': lastName,
         'phone': phone,
         'email': email,
+        'avatar': avatar,
       };
 
   @override
@@ -64,6 +69,7 @@ class User extends Equatable {
         lastName,
         phone,
         email,
+        avatar,
       ];
 
   User copyWith({
@@ -78,6 +84,7 @@ class User extends Equatable {
     String? lastName,
     String? phone,
     String? email,
+    Avatar? avatar,
   }) {
     return User(
       id: id ?? this.id,
@@ -91,6 +98,7 @@ class User extends Equatable {
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,
       email: email ?? this.email,
+      avatar: avatar ?? this.avatar,
     );
   }
 

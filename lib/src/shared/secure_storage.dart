@@ -10,6 +10,7 @@ const String storageUserFirstName = "storage_user_first_name";
 const String storageUserLastName = "storage_user_last_name";
 const String storageUserPhone = "storage_user_phone";
 const String storageUserEmail = "storage_user_email";
+const String storageUserAvatar = "storage_user_avatar";
 
 class SecureStorage {
   static final SecureStorage _instance = SecureStorage._internal();
@@ -51,6 +52,9 @@ class SecureStorage {
     if (user.email != null) {
       _storage.write(key: storageUserEmail, value: user.email);
     }
+    if (user.avatar?.imageUrl != null) {
+      _storage.write(key: storageUserAvatar, value: user.avatar?.imageUrl);
+    }
   }
 
   Future<User?> getLocalUser() async {
@@ -62,10 +66,12 @@ class SecureStorage {
     String? lastName = await _storage.read(key: storageUserLastName);
     String? phone = await _storage.read(key: storageUserPhone);
     String? email = await _storage.read(key: storageUserEmail);
+    String? avatarUrl = await _storage.read(key: storageUserAvatar);
     if (login != null && password != null) {
       return User(
           id: id,
           login: login,
+          avatar: Avatar(imageUrl: avatarUrl),
           password: password,
           deviceId: deviceId,
           firstName: firstName,

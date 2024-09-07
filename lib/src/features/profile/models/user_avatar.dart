@@ -1,19 +1,15 @@
-import 'dart:io';
-
 import 'package:formz/formz.dart';
 
 enum UserAvatarValidationError { empty }
 
-const int loginMinLength = 1;
-
-class UserAvatar extends FormzInput<File?, UserAvatarValidationError> {
-  const UserAvatar.pure() : super.pure(null);
+class UserAvatar extends FormzInput<String?, UserAvatarValidationError> {
+  const UserAvatar.pure([super.value = '']) : super.pure();
 
   const UserAvatar.dirty([super.value]) : super.dirty();
 
   @override
-  UserAvatarValidationError? validator(File? value) {
-    if (value == null || !value.existsSync()) {
+  UserAvatarValidationError? validator(String? value) {
+    if (value == null) {
       return UserAvatarValidationError.empty;
     }
     return null;

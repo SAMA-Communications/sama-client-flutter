@@ -136,14 +136,14 @@ class _UserAvatar extends StatelessWidget {
                   height: 75.0,
                   width: 75.0,
                   child: Center(child: () {
-                    if (state.userAvatar.value == null) {
+                    if (state.userAvatar.value!.isEmpty) {
                       return const Icon(
                         Icons.image_outlined,
                         color: dullGray,
                         size: 50.0,
                       );
                     } else {
-                      return Image.file(
+                      return Image.network(
                         state.userAvatar.value!,
                         height: 75.0,
                         width: 75.0,

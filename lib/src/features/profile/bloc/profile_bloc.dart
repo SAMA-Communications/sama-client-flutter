@@ -44,6 +44,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       state.copyWith(
           status: FormzSubmissionStatus.initial,
           userLogin: event.user?.login,
+          userAvatar: UserAvatar.pure(event.user?.avatar?.imageUrl ?? ''),
           userFirstname: UserFirstname.pure(event.user?.firstName ?? ''),
           userLastname: UserLastname.pure(event.user?.lastName ?? ''),
           userPhone: UserPhone.pure(event.user?.phone ?? ''),
@@ -57,18 +58,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     await FilePicker.platform
         .pickFiles(type: FileType.image, compressionQuality: 0)
-        .then((result) {
+        .then((result) async {
       if (result != null) {
         File file = File(result.files.single.path!);
-        final userAvatar = UserAvatar.dirty(file);
-
-        emit(
-          state.copyWith(
-            status: FormzSubmissionStatus.initial,
-            userAvatar: userAvatar,
-            isValid: Formz.validate([userAvatar]),
-          ),
-        );
+        try {
+          final user = await _userRepository.updateAvatar(file);
+          emit(state.copyWith(
+              status: FormzSubmissionStatus.success,
+              isValid: false,
+              userAvatar: UserAvatar.pure(user.avatar?.imageUrl ?? ''),
+              informationMessage: 'User was successfully updated'));
+        } catch (e) {
+          emit(state.copyWith(
+              status: FormzSubmissionStatus.failure,
+              isValid: false,
+              userAvatar: const UserAvatar.pure(),
+              errorMessage: 'User wasn\'t updated: $e'));
+        }
       } else {
         emit(
           state.copyWith(

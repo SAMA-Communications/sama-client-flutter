@@ -1,3 +1,4 @@
+import '../../features/conversations_list/conversations_list.dart';
 import '../connection/connection.dart';
 import '../connection/connection_manager.dart';
 import 'models/models.dart';
@@ -88,6 +89,7 @@ Future<User> userEdit({
   String? lastName,
   String? email,
   String? phone,
+  Avatar? avatar,
 }) {
   var requestData = {
     if (login?.isNotEmpty ?? false) 'login': login,
@@ -95,6 +97,7 @@ Future<User> userEdit({
     if (phone?.isNotEmpty ?? false) 'phone': phone,
     if (firstName?.isNotEmpty ?? false) 'first_name': firstName,
     if (lastName?.isNotEmpty ?? false) 'last_name': lastName,
+    if (avatar != null) 'avatar_object': avatar.toImageObjectJson(),
   };
 
   if ((newPassword?.isNotEmpty ?? false) &&

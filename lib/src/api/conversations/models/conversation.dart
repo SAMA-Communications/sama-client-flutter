@@ -42,7 +42,7 @@ class Conversation extends Equatable {
         name = json['name'],
         description = json['description'],
         unreadMessagesCount = json['unread_messages_count'],
-        avatar = Avatar.fromJson(json);
+        avatar = Avatar.fromJson(json['image_object'], json['image_url']);
 
   Map<String, dynamic> toJson() => {
         '_id': id,
