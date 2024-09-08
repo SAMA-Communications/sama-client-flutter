@@ -1,7 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../api/api.dart';
-import '../../api/conversations/models/message.dart';
 
 //FixME RP later
 class ConversationFields {
@@ -16,6 +15,7 @@ class ConversationFields {
   static const int unreadMessagesCount = 0;
   static const Message lastMessage = Message.empty; //last_message
   static const List<String> participantsIds = []; //last_message
+  static const Avatar avatar = Avatar.empty; //last_message
 }
 
 class ConversationModel {
@@ -29,6 +29,7 @@ class ConversationModel {
   final Message? lastMessage;
   final User? opponent;
   final User? owner;
+  final Avatar? avatar;
 
   ConversationModel({
     required this.id,
@@ -41,6 +42,7 @@ class ConversationModel {
     required this.opponent,
     required this.owner,
     this.description,
+    this.avatar,
   });
 
   ConversationModel copyWith({
@@ -54,6 +56,7 @@ class ConversationModel {
     Message? lastMessage,
     User? opponent,
     User? owner,
+    Avatar? avatar,
   }) {
     return ConversationModel(
       id: id ?? this.id,
@@ -66,6 +69,7 @@ class ConversationModel {
       lastMessage: lastMessage ?? this.lastMessage,
       opponent: opponent ?? this.opponent,
       owner: owner ?? this.owner,
+      avatar: avatar ?? this.avatar,
     );
   }
 
