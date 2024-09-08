@@ -57,7 +57,7 @@ Future<bool> readMessages(ReadMessagesStatus readMessageStatus) {
 
 Future<bool> deleteMessages(DeleteMessagesStatus deleteMessagesStatus) {
   return SamaConnectionService.instance
-      .sendRequest(messagesReadRequestName, deleteMessagesStatus.toJson())
+      .sendRequest(messagesDeleteRequestName, deleteMessagesStatus.toJson())
       .then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });

@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../api/api.dart';
@@ -18,7 +19,7 @@ class ConversationFields {
   static const Avatar avatar = Avatar.empty; //last_message
 }
 
-class ConversationModel {
+class ConversationModel extends Equatable {
   final String id;
   final DateTime createdAt; //created_at
   final DateTime updatedAt; //updated_at
@@ -31,7 +32,7 @@ class ConversationModel {
   final User? owner;
   final Avatar? avatar;
 
-  ConversationModel({
+  const ConversationModel({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -79,8 +80,19 @@ class ConversationModel {
     return copyWith(
       updatedAt: updatedAt != item.updatedAt ? item.updatedAt : updatedAt,
       name: name != item.name ? item.name : name,
+      unreadMessagesCount: unreadMessagesCount != item.unreadMessagesCount
+          ? item.unreadMessagesCount
+          : unreadMessagesCount,
       description:
           description != item.description ? item.description : description,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        unreadMessagesCount,
+        description,
+      ];
 }

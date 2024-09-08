@@ -25,11 +25,12 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
 }
 
 class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
-  final ConversationModel currentConversation;
+  ConversationModel currentConversation;
   final ConversationRepository conversationRepository;
   final MessagesRepository messagesRepository;
   final UserRepository userRepository;
 
+  StreamSubscription<ConversationModel>? updateConversationStreamSubscription;
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
 
   ConversationBloc({
@@ -37,7 +38,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.conversationRepository,
     required this.messagesRepository,
     required this.userRepository,
-  }) : super(const ConversationState()) {
+  }) : super(ConversationState(conversation: currentConversation)) {
     on<MessagesRequested>(
       _onMessagesRequested,
       transformer: throttleDroppable(throttleDuration),
@@ -48,6 +49,19 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<_MessageReceived>(
       _onMessageReceived,
     );
+    on<_ConversationUpdated>(
+      _onConversationUpdated,
+    );
+
+    updateConversationStreamSubscription =
+        conversationRepository.updateConversationStream.listen((chat) async {
+      if (chat.id != currentConversation.id) return;
+
+      if (currentConversation != chat) {
+        currentConversation = currentConversation.copyWithItem(item: chat);
+        add(_ConversationUpdated(currentConversation));
+      }
+    });
 
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
@@ -116,6 +130,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(participants: event.participants));
   }
 
+  Future<void> _onConversationUpdated(
+      _ConversationUpdated event, Emitter<ConversationState> emit) async {
+    emit(state.copyWith(conversation: event.conversation));
+  }
+
   FutureOr<void> _onMessageReceived(
       _MessageReceived event, Emitter<ConversationState> emit) {
     var messages = [...state.messages];
@@ -145,6 +164,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   @override
   Future<void> close() {
+    updateConversationStreamSubscription?.cancel();
     incomingMessagesSubscription?.cancel();
     return super.close();
   }
