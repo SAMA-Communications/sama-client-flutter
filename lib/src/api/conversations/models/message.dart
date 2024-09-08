@@ -51,7 +51,7 @@ class Message extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
+        id, status, attachments, body
       ];
 
   static const empty = Message();
