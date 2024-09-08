@@ -98,7 +98,7 @@ class FooterCard extends StatelessWidget {
                 children: [
                   UsernameForm(),
                   SizedBox(height: columnItemMargin),
-                  MobileForm(),
+                  PhoneForm(),
                   SizedBox(height: columnItemMargin),
                   EmailForm(),
                   SizedBox(height: columnItemMargin),
@@ -247,8 +247,8 @@ class UsernameForm extends StatelessWidget {
   }
 }
 
-class MobileForm extends StatelessWidget {
-  const MobileForm({super.key});
+class PhoneForm extends StatelessWidget {
+  const PhoneForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -510,11 +510,13 @@ class NameDialogInput extends StatelessWidget {
                         'First name',
                         style: TextStyle(color: dullGray, fontSize: 16),
                       ),
-                      errorText: !state.userFirstname.isPure &&
-                              state.userFirstname.displayError ==
-                                  UserFirstnameValidationError.empty
+                      errorText: state.userFirstname.displayError ==
+                              UserFirstnameValidationError.empty
                           ? 'user first name is empty'
-                          : null,
+                          : state.userFirstname.displayError ==
+                                  UserFirstnameValidationError.outOfRange
+                              ? 'user can\'t to add more than 20 symbols'
+                              : null,
                     ),
                   ),
                 ),
@@ -541,11 +543,13 @@ class NameDialogInput extends StatelessWidget {
                         'Last name',
                         style: TextStyle(color: dullGray, fontSize: 16),
                       ),
-                      errorText: !state.userLastname.isPure &&
-                              state.userLastname.displayError ==
-                                  UserLastnameValidationError.empty
+                      errorText: state.userLastname.displayError ==
+                              UserLastnameValidationError.empty
                           ? 'user last name is empty'
-                          : null,
+                          : state.userLastname.displayError ==
+                                  UserLastnameValidationError.outOfRange
+                              ? 'user can\'t to add more than 20 symbols'
+                              : null,
                     ),
                   ),
                 ),
