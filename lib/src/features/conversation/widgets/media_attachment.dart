@@ -258,7 +258,7 @@ Widget buildVideoItem(ChatAttachment attachment) {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  // TODO VT temporary hide duration before implementing required field on the back-end
+                  // TODO VT temporary hide duration widget before implementing required fields on the back-end
                   // FutureBuilder<double?>(
                   //     future: getVideoDurationByUrl(attachment.url ?? ''),
                   //     builder: (context, snapshot) {
@@ -277,7 +277,7 @@ Widget buildVideoItem(ChatAttachment attachment) {
                   Icon(
                     Icons.videocam_rounded,
                     color: white,
-                    size: 20,
+                    size: 16,
                   )
                 ],
               ),
