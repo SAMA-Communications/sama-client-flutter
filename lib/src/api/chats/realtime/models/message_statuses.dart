@@ -1,17 +1,17 @@
 abstract class MessageStatus {
   String cid;
-  List<String> msgIds;
+  List<String>? msgIds;
   String? from;
 
   MessageStatus.fromJson(Map<String, dynamic> json)
       : cid = json['cid'],
-        msgIds = List<String>.from(json['ids']),
+        msgIds = json['ids']?.cast<String>(),
         from = json['from'];
 
   Map<String, dynamic> toJson() {
     return {
       'cid': cid,
-      'ids': msgIds,
+      if (msgIds != null) 'ids': msgIds,
       if (from != null) 'from': from,
     };
   }

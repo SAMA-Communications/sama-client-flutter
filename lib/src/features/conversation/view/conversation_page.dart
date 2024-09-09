@@ -33,6 +33,8 @@ class ConversationPage extends StatelessWidget {
       BlocProvider(
         create: (context) => SendMessageBloc(
           currentConversation: currentConversation,
+          conversationRepository:
+              RepositoryProvider.of<ConversationRepository>(context),
           messagesRepository:
               RepositoryProvider.of<MessagesRepository>(context),
         ),
@@ -42,9 +44,6 @@ class ConversationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var currentConversation =
-        context.select((ConversationBloc bloc) => bloc.currentConversation);
-
     return BlocBuilder<ConversationBloc, ConversationState>(
         builder: (BuildContext context, state) {
       return Scaffold(
@@ -56,13 +55,13 @@ class ConversationPage extends StatelessWidget {
             child: ListTile(
               title: Text(
                 overflow: TextOverflow.ellipsis,
-                currentConversation.name,
+                state.conversation.name,
                 style: const TextStyle(
                     fontSize: 28.0, fontWeight: FontWeight.bold),
                 maxLines: 1,
               ),
               subtitle: Text(
-                _getSubtitle(currentConversation, state.participants),
+                _getSubtitle(state.conversation, state.participants),
                 style: const TextStyle(fontSize: 14.0),
               ),
             ),

@@ -58,7 +58,7 @@ class UserRepository {
     return await updateLocalUser(avatar: avatar);
   }
 
-  //ToDo RP finish later
+  // TODO RP finish later
   Future<Map<String, User?>> getUsersByIds(List<String> ids) async {
     Map<String, User?> participants = localDataSource.getUsersByIds(ids);
     Set<String> idsNone =

@@ -27,13 +27,13 @@ class ConversationRepository {
 
   StreamSubscription<api.SystemMessage>? incomingSystemMessagesSubscription;
 
-  final StreamController<ConversationModel> _incomingMessageController =
+  final StreamController<ConversationModel> _conversationsController =
       StreamController.broadcast();
 
   StreamSubscription<api.Message>? incomingMessagesSubscription;
 
   Stream<ConversationModel> get updateConversationStream =>
-      _incomingMessageController.stream;
+      _conversationsController.stream;
 
   void initChatListeners() {
     if (incomingSystemMessagesSubscription != null) return;
@@ -78,7 +78,7 @@ class ConversationRepository {
       } else if (message.type == SystemChatMessageType.conversationKicked) {
         localDataSource.removeConversation(message.cid);
       }
-      _incomingMessageController.add(conversation);
+      _conversationsController.add(conversation);
     });
 
     incomingMessagesSubscription =
@@ -93,7 +93,7 @@ class ConversationRepository {
         final updatedConversation = conversation.copyWith(
             lastMessage: message, unreadMessagesCount: unreadMsgCountUpdated);
         localDataSource.updateConversation(updatedConversation);
-        _incomingMessageController.add(updatedConversation);
+        _conversationsController.add(updatedConversation);
       }
     });
   }
@@ -104,6 +104,12 @@ class ConversationRepository {
     incomingMessagesSubscription?.cancel();
     incomingMessagesSubscription = null;
     api.MessagesManager.instance.destroy();
+  }
+
+  void resetUnreadMessagesCount(ConversationModel conversation) {
+    final updatedConversation = conversation.copyWith(unreadMessagesCount: 0);
+    localDataSource.updateConversation(updatedConversation);
+    _conversationsController.add(updatedConversation);
   }
 
   Future<List<ConversationModel>> getStoredConversations() async {
