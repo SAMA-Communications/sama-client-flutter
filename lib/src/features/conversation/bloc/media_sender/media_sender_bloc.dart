@@ -141,6 +141,8 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
             await getMediaBlurHash(compressedFile);
       }
 
+      if (state.status == MediaSelectorStatus.canceled) return;
+
       await uploadFiles(filesToUpload, (fileName, progress) {
         state.progressController.add(MapEntry(fileName, progress));
       }).then((uploadedAttachments) {
@@ -151,6 +153,8 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
               fileBlurHash: filesBlurHash[uploadedAttachment.fileName]));
         }
       });
+
+      if (state.status == MediaSelectorStatus.canceled) return;
 
       await messagesRepository.sendMediaMessage(currentConversation.id,
           body: body, attachments: attachments);

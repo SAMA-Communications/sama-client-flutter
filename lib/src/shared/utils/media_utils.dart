@@ -45,7 +45,7 @@ Future<String> getImageHashAsync(File imageFile) async {
   );
 
   var image = img.decodeImage(imageData!);
-  return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+  return compute(_getImageHashAsync, image!);
 }
 
 Future<String> getVideoHashAsync(File videoFile) async {
@@ -53,7 +53,7 @@ Future<String> getVideoHashAsync(File videoFile) async {
       quality: 10, position: -1);
 
   var image = img.decodeImage(imageData!);
-  return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+  return compute(_getImageHashAsync, image!);
 }
 
 Future<double?> getVideoDuration(File videoFile) async {
