@@ -24,10 +24,8 @@ class ConversationListItem extends StatelessWidget {
     return Material(
       child: ListTile(
         leading: conversation.type == 'u'
-            ? AvatarLetterIcon(//ToDO RP replace with getUserName
-                name: conversation.opponent?.firstName ??
-                    conversation.opponent?.login ??
-                    "Deleted account",
+            ? AvatarLetterIcon(
+                name: getUserName(conversation.opponent),
                 lastName: conversation.opponent?.lastName,
               )
             : const AvatarGroupIcon(),
@@ -83,9 +81,9 @@ class BodyWidget extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 2.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(2.0),
-                  child: BlurHash(
-                    hash: blurHash,
-                    imageFit: BoxFit.cover,
+                  child: Image(
+                    image: BlurHashImage(blurHash),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

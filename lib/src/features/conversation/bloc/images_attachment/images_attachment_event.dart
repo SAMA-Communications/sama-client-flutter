@@ -7,6 +7,12 @@ class ImagesAttachmentEvent extends Equatable {
   List<Object> get props => [];
 }
 
+final class AttachmentsUrlsRequested extends ImagesAttachmentEvent {
+  final ChatMessage message;
+
+  const AttachmentsUrlsRequested(this.message);
+}
+
 final class _AttachmentsUrlsReceived extends ImagesAttachmentEvent {
   final Map<String, String> urls;
 
