@@ -7,6 +7,7 @@ import '../../../db/models/conversation.dart';
 import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/string_utils.dart';
 import 'avatar_letter_icon.dart';
 import 'package:intl/intl.dart';
 
