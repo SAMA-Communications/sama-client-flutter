@@ -13,11 +13,10 @@ class Avatar extends Equatable {
     this.imageUrl,
   });
 
-  Avatar.fromJson(Map<String, dynamic> json)
-      : fileId = json['image_object']?['file_id'],
-        fileName = json['image_object']?['file_name'],
-        fileBlurHash = json['image_object']?['file_blur_hash'],
-        imageUrl = json['image_url'];
+  Avatar.fromJson(Map<String, dynamic>? json, this.imageUrl)
+      : fileId = json?['file_id'],
+        fileName = json?['file_name'],
+        fileBlurHash = json?['file_blur_hash'];
 
   Map<String, dynamic> toImageObjectJson() => {
         'file_id': fileId,
@@ -27,6 +26,20 @@ class Avatar extends Equatable {
 
   @override
   List<Object?> get props => [fileId, fileName, fileBlurHash, imageUrl];
+
+  Avatar copyWith({
+    String? fileId,
+    String? fileName,
+    String? fileBlurHash,
+    String? imageUrl,
+  }) {
+    return Avatar(
+      fileId: fileId ?? this.fileId,
+      fileName: fileName ?? this.fileName,
+      fileBlurHash: fileBlurHash ?? this.fileBlurHash,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
+  }
 
   static const empty = Avatar();
 }

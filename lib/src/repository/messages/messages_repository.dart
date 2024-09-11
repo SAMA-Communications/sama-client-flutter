@@ -31,7 +31,7 @@ class MessagesRepository {
       if (parameters != null && parameters.isNotEmpty) ...parameters
     });
 
-    var currentUser = await userRepository.getUser();
+    var currentUser = await userRepository.getLocalUser();
 
     await api.fetchParticipants([cid]).then((participants) {
       this.participants.addEntries(participants
@@ -78,7 +78,7 @@ class MessagesRepository {
         createdAt: DateTime.now());
 
     return api.sendMessage(message: message).then((_) async {
-      var currentUser = await userRepository.getUser();
+      var currentUser = await userRepository.getLocalUser();
 
       _incomingMessagesController.add(ChatMessage(
           sender: currentUser!,
@@ -108,7 +108,7 @@ class MessagesRepository {
     incomingMessagesSubscription = api
         .MessagesManager.instance.incomingMessagesStream
         .listen((message) async {
-      var currentUser = await userRepository.getUser();
+      var currentUser = await userRepository.getLocalUser();
       var sender = participants[message.from];
 
       if (sender == null) {
@@ -159,7 +159,7 @@ class MessagesRepository {
 
     return api.sendMessage(message: message).then(
       (_) async {
-        var currentUser = await userRepository.getUser();
+        var currentUser = await userRepository.getLocalUser();
 
         _incomingMessagesController.add(ChatMessage(
             sender: currentUser!,

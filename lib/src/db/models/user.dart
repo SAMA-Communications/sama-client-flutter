@@ -51,7 +51,7 @@ class UserModel {
         UserFields.lastName: lastName,
       };
 
-  UserModel copy({
+  UserModel copyWith({
     int? id,
     String? userId,
     String? login,
@@ -81,7 +81,7 @@ Future<void> createUsersTable(Database db, int version) {
 
 Future<UserModel> addUser(Database db, UserModel note) async {
   return db.insert(UserFields.tableName, note.toJson()).then((id) {
-    return note.copy(id: id);
+    return note.copyWith(id: id);
   });
 }
 
@@ -107,7 +107,7 @@ Future<UserModel> updateUser(Database db, UserModel user) async {
     where: '${UserFields.userId} = ?',
     whereArgs: [user.userId],
   ).then((id) {
-    return user.copy(id: id);
+    return user.copyWith(id: id);
   });
 }
 

@@ -61,8 +61,7 @@ class ConversationPage extends StatelessWidget {
             child: ListTile(
               title: Text(
                 overflow: TextOverflow.ellipsis,
-                state.conversation.name ??
-                    getUserName(state.conversation.opponent),
+                state.conversation.name,
                 style: const TextStyle(
                     fontSize: 28.0, fontWeight: FontWeight.bold),
                 maxLines: 1,

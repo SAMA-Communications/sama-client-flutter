@@ -8,6 +8,7 @@ import '../features/conversation_group_create/view/group_page.dart';
 import '../features/conversations_list/view/conversations_page.dart';
 import '../features/conversation/view/conversation_page.dart';
 import '../features/login/view/login_page.dart';
+import '../features/profile/view/profile_page.dart';
 import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
 import '../repository/authentication/authentication_repository.dart';
@@ -65,6 +66,12 @@ GoRouter router(BuildContext context) => GoRouter(
           path: groupCreateScreenPath,
           builder: (context, state) {
             return GroupPage.route();
+          },
+        ),
+        GoRoute(
+          path: profilePath,
+          builder: (context, state) {
+            return const ProfilePage();
           },
         ),
       ],

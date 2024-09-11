@@ -1,3 +1,4 @@
+import '../../features/conversations_list/conversations_list.dart';
 import '../connection/connection.dart';
 import '../connection/connection_manager.dart';
 import 'models/models.dart';
@@ -59,14 +60,15 @@ Future<User> loginWithToken(String token, String deviceId) {
 Future<bool> logout() {
   return SamaConnectionService.instance
       .sendRequest(userLogoutRequestName, {}).then((response) {
-    var isSuccess =
-        bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
-    if (isSuccess) {
-      ConnectionManager.instance.currentUser = null;
-      ConnectionManager.instance.token = null;
-    }
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+    ;
+  });
+}
 
-    return isSuccess;
+Future<bool> signOut() {
+  return SamaConnectionService.instance
+      .sendRequest(userDeleteRequestName, {}).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
 
@@ -79,21 +81,23 @@ Future<List<User>> getUsersByIds(Set<String> ids) {
   });
 }
 
-Future<User> edit(
-  String login, {
+Future<User> userEdit({
+  String? login,
   String? currentPassword,
   String? newPassword,
   String? firstName,
   String? lastName,
   String? email,
   String? phone,
+  Avatar? avatar,
 }) {
   var requestData = {
-    'login': login,
+    if (login?.isNotEmpty ?? false) 'login': login,
     if (email?.isNotEmpty ?? false) 'email': email,
     if (phone?.isNotEmpty ?? false) 'phone': phone,
     if (firstName?.isNotEmpty ?? false) 'first_name': firstName,
     if (lastName?.isNotEmpty ?? false) 'last_name': lastName,
+    if (avatar != null) 'avatar_object': avatar.toImageObjectJson(),
   };
 
   if ((newPassword?.isNotEmpty ?? false) &&
@@ -106,13 +110,6 @@ Future<User> edit(
       .sendRequest(userEditRequestName, requestData)
       .then((response) {
     return User.fromJson(response['user']);
-  });
-}
-
-Future<bool> delete() {
-  return SamaConnectionService.instance
-      .sendRequest(userDeleteRequestName, {}).then((response) {
-    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
 
