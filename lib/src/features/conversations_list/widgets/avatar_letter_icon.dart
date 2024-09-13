@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../api/api.dart';
 import '../../../shared/ui/colors.dart';
 
 class AvatarLetterIcon extends StatelessWidget {
@@ -12,6 +13,7 @@ class AvatarLetterIcon extends StatelessWidget {
     this.padding = const EdgeInsets.all(4.0),
     this.backgroundColor = black,
     this.textColor = dullGray,
+    this.avatar,
   });
 
   /// The text that will be used for the icon. It is truncated to 2 characters.
@@ -22,6 +24,7 @@ class AvatarLetterIcon extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Color backgroundColor;
   final Color textColor;
+  final Avatar? avatar;
 
   String getText() {
     if (name.isNotEmpty && ((lastName ?? '') != '')) {
@@ -42,12 +45,22 @@ class AvatarLetterIcon extends StatelessWidget {
       height: size.height,
       width: size.width,
       child: Center(
-        child: Text(
-          getText(),
-          style: TextStyle(
-              fontWeight: FontWeight.w400,
-              color: textColor,
-              fontSize: size.height / 2.7),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: avatar?.imageUrl != null
+              ? Image.network(
+                  avatar!.imageUrl!,
+                  height: size.height,
+                  width: size.width,
+                  fit: BoxFit.cover,
+                )
+              : Text(
+                  getText(),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: textColor,
+                      fontSize: size.height / 2.7),
+                ),
         ),
       ),
     );

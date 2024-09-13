@@ -57,7 +57,7 @@ class ConversationRepository {
           updatedAt: message.conversation!.updatedAt!,
           type: message.conversation!.type!,
           name: getConversationName(
-              message.conversation!, opponent, owner, localUser?.id),
+              message.conversation!, opponent, owner, localUser),
           opponent: opponent,
           owner: owner,
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
@@ -146,17 +146,19 @@ class ConversationRepository {
     final List<ConversationModel> result = conversations.map((element) {
       final opponent = participantsMap[element.opponentId];
       final owner = participantsMap[element.ownerId];
+
       return ConversationModel(
         id: element.id!,
         createdAt: element.createdAt!,
         updatedAt: element.updatedAt!,
         type: element.type!,
-        name: getConversationName(element, opponent, owner, localUser?.id),
+        name: getConversationName(element, opponent, owner, localUser),
         opponent: opponent,
         owner: owner,
         unreadMessagesCount: element.unreadMessagesCount,
         lastMessage: element.lastMessage,
         description: element.description,
+        avatar: getConversationAvatar(element, opponent, owner, localUser),
       );
     }).toList();
 
@@ -192,12 +194,13 @@ class ConversationRepository {
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: getConversationName(conversation, opponent, owner, localUser?.id),
+        name: getConversationName(conversation, opponent, owner, localUser),
         opponent: opponent,
         owner: owner,
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage,
-        avatar: conversation.avatar);
+        avatar:
+            getConversationAvatar(conversation, opponent, owner, localUser));
 
     localDataSource.addConversation(result);
     return result;

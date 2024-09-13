@@ -24,8 +24,9 @@ class ConversationListItem extends StatelessWidget {
             ? AvatarLetterIcon(
                 name: getUserName(conversation.opponent),
                 lastName: conversation.opponent?.lastName,
+                avatar: conversation.avatar,
               )
-            : const AvatarGroupIcon(),
+            : AvatarGroupIcon(conversation.avatar),
         title: Text(
           conversation.name,
           style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
