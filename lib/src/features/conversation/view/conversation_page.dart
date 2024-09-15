@@ -9,9 +9,8 @@ import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
-import '../bloc/images_attachment/images_attachment_bloc.dart';
+import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import 'message_input.dart';
 import 'messages_list.dart';
@@ -42,7 +41,7 @@ class ConversationPage extends StatelessWidget {
         ),
       ),
       BlocProvider(
-          create: (context) => ImagesAttachmentBloc(
+          create: (context) => MediaAttachmentBloc(
               attachmentsRepository:
                   RepositoryProvider.of<AttachmentsRepository>(context))),
     ], child: const ConversationPage());

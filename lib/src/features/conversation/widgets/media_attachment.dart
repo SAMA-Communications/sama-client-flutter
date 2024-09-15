@@ -7,7 +7,6 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../repository/attachments/attachments_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
@@ -22,15 +21,9 @@ class MediaAttachment extends StatelessWidget {
   const MediaAttachment({super.key, required this.message});
 
   static Widget create({Key? key, required ChatMessage message}) {
-    return BlocProvider<MediaAttachmentBloc>(
-      create: (context) => MediaAttachmentBloc(
-          message: message,
-          attachmentsRepository:
-              RepositoryProvider.of<AttachmentsRepository>(context)),
-      child: MediaAttachment(
-        key: key,
-        message: message,
-      ),
+    return MediaAttachment(
+      key: key,
+      message: message,
     );
   }
 
@@ -43,6 +36,12 @@ class MediaAttachment extends StatelessWidget {
       isOwn: message.isOwn,
       child: BlocBuilder<MediaAttachmentBloc, MediaAttachmentState>(
         builder: (context, state) {
+          if (!state.urls.containsKey(message.attachments?.first.fileId)) {
+            context
+                .read<MediaAttachmentBloc>()
+                .add(AttachmentsUrlsRequested(message));
+          }
+
           return Stack(alignment: Alignment.bottomRight, children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
