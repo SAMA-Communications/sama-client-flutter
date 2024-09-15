@@ -4,12 +4,14 @@ import 'package:intl/intl.dart';
 
 import '../../../api/api.dart';
 import '../../../db/models/conversation.dart';
+import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/images_attachment/images_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import 'message_input.dart';
 import 'messages_list.dart';
@@ -39,6 +41,10 @@ class ConversationPage extends StatelessWidget {
               RepositoryProvider.of<MessagesRepository>(context),
         ),
       ),
+      BlocProvider(
+          create: (context) => ImagesAttachmentBloc(
+              attachmentsRepository:
+                  RepositoryProvider.of<AttachmentsRepository>(context))),
     ], child: const ConversationPage());
   }
 
@@ -55,8 +61,7 @@ class ConversationPage extends StatelessWidget {
             child: ListTile(
               title: Text(
                 overflow: TextOverflow.ellipsis,
-                state.conversation.name ??
-                    getUserName(state.conversation.opponent),
+                state.conversation.name,
                 style: const TextStyle(
                     fontSize: 28.0, fontWeight: FontWeight.bold),
                 maxLines: 1,
