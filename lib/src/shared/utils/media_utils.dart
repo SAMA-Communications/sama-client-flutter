@@ -146,7 +146,7 @@ Future<String?> getVideoThumbnailByUrl(String url, String fileId) async {
     imageFormat: ImageFormat.JPEG,
     maxHeight: 640,
     quality: 80,
-  ).then((path){
+  ).then((path) {
     return File(path!).rename(target).then((file) {
       return file.path;
     });

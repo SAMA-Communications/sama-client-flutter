@@ -1,11 +1,15 @@
 import 'dart:async';
-
 import 'package:app_set_id/app_set_id.dart';
 
 import '../../api/api.dart' as api;
 import '../../shared/secure_storage.dart';
 
-enum AuthenticationStatus { unknown, canBeAuthenticated, authenticated, unauthenticated }
+enum AuthenticationStatus {
+  unknown,
+  canBeAuthenticated,
+  authenticated,
+  unauthenticated
+}
 
 class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
@@ -27,10 +31,11 @@ class AuthenticationRepository {
     var deviceId = await AppSetId().getIdentifier();
 
     try {
-      api.User user = api.User(login: username, password: password, deviceId: deviceId);
-      await api.login(user);
+      api.User user =
+          api.User(login: username, password: password, deviceId: deviceId);
+      api.User result = (await api.login(user)).copyWith(password: password);
+      SecureStorage.instance.saveLocalUserIfNeed(result);
       api.ReconnectionManager.instance.init();
-      SecureStorage.instance.saveLocalUserIfNotExist(user);
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {
@@ -51,8 +56,10 @@ class AuthenticationRepository {
           login: username, password: password, deviceId: deviceId ?? '');
 
       if (signInWithCreatedUser) {
-        await api.login(
-            api.User(login: username, password: password, deviceId: deviceId));
+        final result = (await api.login(api.User(
+                login: username, password: password, deviceId: deviceId)))
+            .copyWith(password: password);
+        SecureStorage.instance.saveLocalUserIfNeed(result);
         api.ReconnectionManager.instance.init();
         _controller.add(AuthenticationStatus.authenticated);
       }
@@ -68,10 +75,22 @@ class AuthenticationRepository {
 
   Future<void> logOut() async {
     await api.logout().then((success) {
-      SecureStorage.instance.deleteLocalUser();
-      api.ReconnectionManager.instance.destroy();
-      _controller.add(AuthenticationStatus.unauthenticated);
+      _disposeLocalUser();
     });
+  }
+
+  Future<void> signOut() async {
+    await api.signOut().then((success) {
+      _disposeLocalUser();
+    });
+  }
+
+  _disposeLocalUser() {
+    SecureStorage.instance.deleteLocalUser();
+    api.ReconnectionManager.instance.destroy();
+    api.ConnectionManager.instance.currentUser = null;
+    api.ConnectionManager.instance.token = null;
+    _controller.add(AuthenticationStatus.unauthenticated);
   }
 
   void dispose() => _controller.close();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,7 +6,6 @@ import '../../../api/api.dart';
 import '../../../db/models/conversation.dart';
 import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../navigation/constants.dart';
-import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import 'avatar_letter_icon.dart';
@@ -20,19 +18,16 @@ class ConversationListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var localUser = context.read<AuthenticationBloc>().state.user;
     return Material(
       child: ListTile(
         leading: conversation.type == 'u'
-            ? AvatarLetterIcon(//ToDO RP replace with getUserName
-                name: conversation.opponent?.firstName ??
-                    conversation.opponent?.login ??
-                    "Deleted account",
+            ? AvatarLetterIcon(
+                name: getUserName(conversation.opponent),
                 lastName: conversation.opponent?.lastName,
               )
             : const AvatarGroupIcon(),
         title: Text(
-          _getConversationName(conversation, localUser),
+          conversation.name,
           style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -48,17 +43,6 @@ class ConversationListItem extends StatelessWidget {
         },
       ),
     );
-  }
-
-  String _getConversationName(ConversationModel conversation, User localUser) {
-    if (conversation.name != null) {
-      return conversation.name!;
-    }
-    var user = conversation.opponent == localUser
-        ? conversation.owner
-        : conversation.opponent;
-
-    return getUserName(user);
   }
 }
 
@@ -83,9 +67,9 @@ class BodyWidget extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 2.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(2.0),
-                  child: BlurHash(
-                    hash: blurHash,
-                    imageFit: BoxFit.cover,
+                  child: Image(
+                    image: BlurHashImage(blurHash),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

@@ -1,19 +1,61 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
+
+import 'package:path/path.dart';
 
 import '../../api/api.dart';
 import '../../api/api.dart' as api;
 import '../../repository/user/user_data_source.dart';
+import '../../shared/secure_storage.dart';
+import '../../shared/utils/media_utils.dart';
 
 class UserRepository {
-  User? _user;
   final UserLocalDataSource localDataSource;
 
   UserRepository({required this.localDataSource});
 
-  Future<User?> getUser() async {
-    if (_user != null) return _user;
-
+  Future<User?> getLocalUser() async {
     return ConnectionManager.instance.currentUser;
+  }
+
+  Future<User> updateLocalUser(
+      {String? currentPsw,
+      String? newPassword,
+      String? firstName,
+      String? lastName,
+      String? email,
+      String? phone,
+      Avatar? avatar}) async {
+    User result = await api.userEdit(
+        currentPassword: currentPsw,
+        newPassword: newPassword,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        avatar: avatar);
+
+    if (avatar != null) {
+      final filesUrls = await api.getFilesUrls({avatar.fileId!});
+      avatar = avatar.copyWith(imageUrl: filesUrls[avatar.fileId!]);
+      result = result.copyWith(avatar: avatar);
+    }
+
+    SecureStorage.instance.saveLocalUserIfNeed(result);
+    ConnectionManager.instance.currentUser = result;
+    return result;
+  }
+
+  Future<User> updateAvatar(File avatarUrl) async {
+    var compressedFile =
+        await compressImageFile(avatarUrl, const Size(640, 480));
+    final blur = await getImageHashInIsolate(compressedFile);
+    final id = await api.uploadAvatarFile(compressedFile);
+    final name = basename(compressedFile.path);
+    Avatar avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
+
+    return await updateLocalUser(avatar: avatar);
   }
 
   // TODO RP finish later
