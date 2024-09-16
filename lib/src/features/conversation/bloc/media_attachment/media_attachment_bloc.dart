@@ -6,17 +6,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../repository/attachments/attachments_repository.dart';
 import '../../models/models.dart';
 
-part 'images_attachment_event.dart';
+part 'media_attachment_event.dart';
 
-part 'images_attachment_state.dart';
+part 'media_attachment_state.dart';
 
-class ImagesAttachmentBloc
-    extends Bloc<ImagesAttachmentEvent, ImagesAttachmentState> {
+class MediaAttachmentBloc
+    extends Bloc<MediaAttachmentEvent, MediaAttachmentState> {
   final AttachmentsRepository attachmentsRepository;
 
-  ImagesAttachmentBloc({
+  MediaAttachmentBloc({
     required this.attachmentsRepository,
-  }) : super(const ImagesAttachmentState()) {
+  }) : super(const MediaAttachmentState()) {
     on<AttachmentsUrlsRequested>(
       _onAttachmentsUrlsRequested,
     );
@@ -26,12 +26,12 @@ class ImagesAttachmentBloc
   }
 
   FutureOr<void> _onAttachmentsUrlsRequested(
-      AttachmentsUrlsRequested event, Emitter<ImagesAttachmentState> emit) {
+      AttachmentsUrlsRequested event, Emitter<MediaAttachmentState> emit) {
     _requestAttachmentsUrls(event.message);
   }
 
   FutureOr<void> _onAttachmentsUrlsReceived(
-      _AttachmentsUrlsReceived event, Emitter<ImagesAttachmentState> emit) {
+      _AttachmentsUrlsReceived event, Emitter<MediaAttachmentState> emit) {
     Map<String, String> urls = Map.from(state.urls)..addAll(event.urls);
     emit(state.copyWith(urls: urls));
   }

@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -9,11 +10,31 @@ import 'package:image/image.dart' as img;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_compress/video_compress.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+
+import 'file_utils.dart';
 
 bool isImage(String path) {
   final mimeType = lookupMimeType(path);
-
   return mimeType?.startsWith('image/') ?? false;
+}
+
+bool isVideo(String path) {
+  final mimeType = lookupMimeType(path);
+
+  return mimeType?.startsWith('video/') ?? false;
+}
+
+Future<String?> getMediaBlurHash(File file) async {
+  if (isImage(file.path)) {
+    return getImageHashAsync(file);
+  } else if (isVideo(file.path)) {
+    return getVideoHashAsync(file);
+  } else {
+    // TODO VT add blurhash generation for other types of file
+    return null;
+  }
 }
 
 Future<String> getImageHashAsync(File imageFile) async {
@@ -25,6 +46,24 @@ Future<String> getImageHashAsync(File imageFile) async {
 
   var image = img.decodeImage(imageData!);
   return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+}
+
+Future<String> getVideoHashAsync(File videoFile) async {
+  var imageData = await VideoCompress.getByteThumbnail(videoFile.path,
+      quality: 10, position: -1);
+
+  var image = img.decodeImage(imageData!);
+  return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+}
+
+Future<double?> getVideoDuration(File videoFile) async {
+  return VideoCompress.getMediaInfo(videoFile.path).then((mediaInfo) {
+    return mediaInfo.duration;
+  });
+}
+
+Future<double?> getVideoDurationByUrl(String url) async {
+  return 0;
 }
 
 Future<File> compressImageFile(File imageFile,
@@ -63,6 +102,66 @@ Future<img.Image> _compressWithFile(File imageFile) async {
   var imageData = await FlutterImageCompress.compressWithFile(imageFile.path,
       minHeight: 24, minWidth: 32);
   return img.decodeImage(imageData!)!;
+}
+
+Future<File> compressVideoFile(File videoFile) async {
+  try {
+    MediaInfo? mediaInfo = await VideoCompress.compressVideo(
+      videoFile.path,
+      quality: VideoQuality.MediumQuality,
+      includeAudio: true,
+    );
+
+    var result = mediaInfo?.file ?? videoFile;
+    if (basename(result.path) != basename(videoFile.path)) {
+      result = changeFileNameOnly(result, basename(videoFile.path));
+    }
+
+    return result;
+  } catch (e) {
+    return videoFile;
+  }
+}
+
+Future<File> getVideoThumbnail(File videoFile) async {
+  return VideoCompress.getFileThumbnail(
+    videoFile.path,
+    quality: 50,
+  );
+}
+
+Future<String?> getVideoThumbnailByUrl(String url, String fileId) async {
+  final Directory cacheDir = await getTemporaryDirectory();
+
+  final String target = File('${cacheDir.path}/video/thumbnails/$fileId').path;
+  if (File(target).existsSync()) {
+    return target;
+  } else {
+    File(target).createSync(recursive: true);
+  }
+
+  return VideoThumbnail.thumbnailFile(
+    video: url,
+    thumbnailPath: cacheDir.path,
+    imageFormat: ImageFormat.JPEG,
+    maxHeight: 640,
+    quality: 80,
+  ).then((path){
+    return File(path!).rename(target).then((file) {
+      return file.path;
+    });
+  });
+}
+
+Future<File> compressFile(File file) async {
+  if (isImage(file.path)) {
+    return compressImageFile(file);
+  } else if (isVideo(file.path)) {
+    return compressVideoFile(file);
+  } else {
+    // TODO VT return original file if compressing is not required
+    return file;
+  }
 }
 
 List<QuiltedGridTile> getGridPatternForCount(int count) {
@@ -122,3 +221,18 @@ List<QuiltedGridTile> getGridPatternForCount(int count) {
   // TODO VT develop an algorithm for building a grid for more than 10 items
   return getGridPatternForCount(count ~/ 10);
 }
+
+const supportedImageAttachmentExtentions = [
+  'heic',
+  'jpeg',
+  'jpg',
+  'png',
+  'gif',
+  'bmp',
+];
+
+const supportedVideoAttachmentExtentions = [
+  'mp4',
+  'webm',
+  'quicktime',
+];

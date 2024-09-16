@@ -18,7 +18,7 @@ Future<void> sendMessage({
       'message': {
         'id': message.id,
         'cid': message.cid,
-        'body': message.body,
+        if (message.body?.isNotEmpty ?? false) 'body': message.body,
         if (message.extension != null) 'x': message.extension,
         if (message.attachments != null) 'attachments': message.attachments,
       },

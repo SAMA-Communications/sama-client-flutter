@@ -10,6 +10,12 @@ class ChatAttachment extends Attachment {
     super.fileName,
     super.fileBlurHash,
   });
+
+
+  @override
+  List<Object?> get props => [
+    ...super.props, url
+  ];
 }
 
 extension ChatAttachmentExtension on Attachment {
