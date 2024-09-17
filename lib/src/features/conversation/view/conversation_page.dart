@@ -55,6 +55,7 @@ class ConversationPage extends StatelessWidget {
         appBar: AppBar(
           toolbarHeight: 64,
           centerTitle: false,
+          titleSpacing: 0.0,
           title: Padding(
             padding: const EdgeInsets.only(top: 0.0),
             child: ListTile(
@@ -67,6 +68,7 @@ class ConversationPage extends StatelessWidget {
               ),
               subtitle: Text(
                 _getSubtitle(state.conversation, state.participants),
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 14.0),
               ),
             ),
