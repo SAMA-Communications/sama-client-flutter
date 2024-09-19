@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../shared/ui/colors.dart';
-
-const String urlPattern = 'https?://\\S+';
-const String emailPattern = r'\S+@\S+';
-const String phonePattern = r'[\d-]{9,}';
+import '../../../shared/utils/regexp_utils.dart';
 
 class TextMessage extends StatelessWidget {
   final String body;
