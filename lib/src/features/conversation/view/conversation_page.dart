@@ -8,6 +8,7 @@ import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
+import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
@@ -85,7 +86,26 @@ class ConversationPage extends StatelessWidget {
         body: Column(
           children: [
             const Flexible(child: MessagesList()),
-            MessageInput(),
+            context.read<SharingIntentBloc>().state.status ==
+                    SharingIntentStatus.processing
+                ? BlocListener<SendMessageBloc, SendMessageState>(
+                    listener: (context, sendState) {
+                      if (sendState.status == SendMessageStatus.success ||
+                          sendState.status == SendMessageStatus.failure) {
+                        context
+                            .read<SharingIntentBloc>()
+                            .add(SharingIntentCompleted());
+                      }
+                    },
+                    child: MessageInput(
+                        sharedText: context
+                            .read<SharingIntentBloc>()
+                            .state
+                            .sharedFiles
+                            .firstOrNull
+                            ?.path),
+                  )
+                : MessageInput()
           ],
         ),
       );

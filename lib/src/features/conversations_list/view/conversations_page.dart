@@ -4,9 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
-import '../../../shared/auth/bloc/auth_bloc.dart';
+import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
-import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../conversations_list.dart';
 
 class HomePage extends StatelessWidget {
@@ -18,49 +17,100 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: black,
-          automaticallyImplyLeading: false,
-          leading: IconButton(
-            icon: Image.asset(
-              'assets/images/vector_logo.png',
-              width: 32,
-              fit: BoxFit.cover,
-            ),
-            tooltip: 'Profile',
-          onPressed: () {
-            context.push(profilePath);
-            },
-          ),
-          title: const Text(
-            'Chat',
-            style: TextStyle(color: white),
-          ),
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => _openSearch(context),
-              icon: const Icon(
-                Icons.search,
-                color: white,
-                size: 32,
-              ),
-            ),
-          ],
+    return BlocBuilder<SharingIntentBloc, SharingIntentState>(
+        builder: (BuildContext context, state) {
+      return Scaffold(
+        appBar: state.status == SharingIntentStatus.processing
+            ? const SelectChatAppBar() as PreferredSizeWidget
+            : const ChatAppBar(),
+        body: BlocProvider(
+          create: (context) {
+            return ConversationsBloc(
+                conversationRepository:
+                    RepositoryProvider.of<ConversationRepository>(context))
+              ..add(ConversationsFetched());
+          },
+          child: const ConversationsList(),
         ),
-      body: BlocProvider(
-        create: (context) {
-          return ConversationsBloc(
-              conversationRepository:
-              RepositoryProvider.of<ConversationRepository>(context))
-            ..add(ConversationsFetched());
+        floatingActionButton: state.status == SharingIntentStatus.processing
+            ? null
+            : FloatingActionButton(
+                child: const Icon(Icons.add_comment_outlined, size: 32.0),
+                onPressed: () {
+                  context.push(groupCreateScreenPath);
+                },
+              ),
+      );
+    });
+  }
+}
+
+class SelectChatAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const SelectChatAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: black,
+      automaticallyImplyLeading: false,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: lightWhite, size: 30.0),
+        tooltip: 'Cancel',
+        onPressed: () {
+          context.read<SharingIntentBloc>().add(SharingIntentCompleted());
         },
-        child: const ConversationsList(),
       ),
+      title: const Text(
+        "Select Chat",
+        style: TextStyle(color: white),
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const ChatAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: black,
+      automaticallyImplyLeading: false,
+      leading: IconButton(
+        icon: Image.asset(
+          'assets/images/vector_logo.png',
+          width: 32,
+          fit: BoxFit.cover,
+        ),
+        tooltip: 'Profile',
+        onPressed: () {
+          context.push(profilePath);
+        },
+      ),
+      title: const Text(
+        "Chat",
+        style: TextStyle(color: white),
+      ),
+      actions: <Widget>[
+        IconButton(
+          onPressed: () => _openSearch(context),
+          icon: const Icon(
+            Icons.search,
+            color: white,
+            size: 32,
+          ),
+        ),
+      ],
     );
   }
 
   _openSearch(BuildContext context) {
     context.push(globalSearchPath);
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

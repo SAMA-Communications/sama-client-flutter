@@ -6,12 +6,18 @@ import '../bloc/send_message/send_message_bloc.dart';
 import 'media_sender.dart';
 
 class MessageInput extends StatelessWidget {
-  final TextEditingController textEditingController = TextEditingController();
+  final String? sharedText;
+  late final TextEditingController textEditingController =
+      TextEditingController(text: sharedText);
 
-  MessageInput({super.key});
+  MessageInput({this.sharedText, super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (sharedText != null) {
+      BlocProvider.of<SendMessageBloc>(context)
+          .add(TextMessageChanged(sharedText!));
+    }
     return BlocListener<SendMessageBloc, SendMessageState>(
       listener: (context, state) {
         if (state.status == SendMessageStatus.success) {
