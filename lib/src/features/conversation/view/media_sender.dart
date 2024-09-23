@@ -322,10 +322,10 @@ Widget _buildPreviewItem(
                   ),
                   child: IconButton(
                     padding: EdgeInsets.zero,
-                    onPressed: () {
-                      BlocProvider.of<MediaSenderBloc>(context)
-                          .add(RemoveFile(file));
-                    },
+                    onPressed: status == MediaSelectorStatus.processing
+                        ? null
+                        : () => BlocProvider.of<MediaSenderBloc>(context)
+                            .add(RemoveFile(file)),
                     icon: const Icon(
                       Icons.close,
                       color: white,
