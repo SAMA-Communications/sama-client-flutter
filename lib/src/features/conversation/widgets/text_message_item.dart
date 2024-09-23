@@ -24,6 +24,8 @@ class TextMessageItem extends StatelessWidget {
       child: TextMessage(
         body: message.body ?? '',
         style: TextStyle(color: message.isOwn ? white : black, fontSize: 16.0),
+        linkStyle: TextStyle(
+            color: message.isOwn ? lightMallow : slateBlue, fontSize: 16.0),
         time: Text(
           dateToTime(DateTime.fromMillisecondsSinceEpoch(message.t! * 1000)),
           style: TextStyle(
