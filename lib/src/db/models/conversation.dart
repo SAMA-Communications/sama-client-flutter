@@ -85,6 +85,9 @@ class ConversationModel extends Equatable {
           : unreadMessagesCount,
       description:
           description != item.description ? item.description : description,
+      lastMessage:
+          lastMessage != item.lastMessage ? item.lastMessage : lastMessage,
+      avatar: avatar != item.avatar ? item.avatar : avatar,
     );
   }
 

@@ -62,7 +62,9 @@ class ConversationRepository {
           owner: owner,
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
           lastMessage: message.conversation!.lastMessage,
-          description: message.conversation!.description);
+          description: message.conversation!.description,
+          avatar: getConversationAvatar(
+              message.conversation!, opponent, owner, localUser));
       if (message.type == SystemChatMessageType.conversationCreated) {
         localDataSource.addConversation(conversation);
       } else if (message.type == SystemChatMessageType.conversationUpdated) {
