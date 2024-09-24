@@ -54,7 +54,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       final success = await messagesRepository
           .sendStatusReadMessages(currentConversation.id);
       if (success) {
-        conversationRepository.resetUnreadMessagesCount(currentConversation);
+        conversationRepository.resetUnreadMessagesCount(currentConversation.id);
       }
     } catch (_) {}
   }
