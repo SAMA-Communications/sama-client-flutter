@@ -13,6 +13,7 @@ import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
 import '../repository/authentication/authentication_repository.dart';
 import '../shared/auth/bloc/auth_bloc.dart';
+import '../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../shared/utils/observer_utils.dart';
 import 'constants.dart';
 
@@ -75,14 +76,22 @@ GoRouter router(BuildContext context) => GoRouter(
           },
         ),
       ],
-      refreshListenable:
-          GoRouterRefreshBloc<AuthenticationBloc, AuthenticationState>(
+      refreshListenable: GoRouterRefreshBloc(
         BlocProvider.of<AuthenticationBloc>(context),
+        BlocProvider.of<SharingIntentBloc>(context),
       ),
       redirect: (context, state) {
         final status = context.read<AuthenticationBloc>().state.status;
         print(
             'refreshListenable status = $status [router][redirect] ${state.fullPath}');
+
+        if (context.read<SharingIntentBloc>().state.status ==
+                SharingIntentStatus.sharing &&
+            status == AuthenticationStatus.authenticated) {
+          print('refreshListenable status sharing');
+          context.read<SharingIntentBloc>().add(SharingIntentProcessing());
+          return rootScreenPath;
+        }
 
         if (status == AuthenticationStatus.authenticated) {
           return state.fullPath == loginScreenPath ||
@@ -99,33 +108,39 @@ GoRouter router(BuildContext context) => GoRouter(
       },
     );
 
-// The router Bloc that required to manage the user authorisation state at any app point.
+// The router Bloc that required to manage the user authorisation state and sharing feature at any app point.
 // When authorisation state was changer the router will catch this event and redirect to the right screen
-class GoRouterRefreshBloc<BLOC extends BlocBase<STATE>, STATE>
-    extends ChangeNotifier {
-  GoRouterRefreshBloc(BLOC bloc) {
-    _blocStream = bloc.stream.listen(
-      (STATE state) {
-        print('[GoRouterRefreshBloc][listen] state: $state');
-        if (state is AuthenticationState) {
-          var authenticationState = state as AuthenticationState;
-          if (authenticationState.status ==
-                  AuthenticationStatus.authenticated ||
-              authenticationState.status ==
-                  AuthenticationStatus.unauthenticated) {
-            print('[GoRouterRefreshBloc][listen] notifyListeners');
-            notifyListeners();
-          }
+class GoRouterRefreshBloc extends ChangeNotifier {
+  GoRouterRefreshBloc(
+      AuthenticationBloc authBloc, SharingIntentBloc sharedBloc) {
+    _blocStream = authBloc.stream.listen(
+      (AuthenticationState authenticationState) {
+        print('[GoRouterRefreshBloc][listen] state: $authenticationState');
+        if (authenticationState.status == AuthenticationStatus.authenticated ||
+            authenticationState.status ==
+                AuthenticationStatus.unauthenticated) {
+          print('[GoRouterRefreshBloc][listen] notifyListeners');
+          notifyListeners();
+        }
+      },
+    );
+    _sharedBloc = sharedBloc.stream.listen(
+      (SharingIntentState state) {
+        if (state.status == SharingIntentStatus.sharing) {
+          print('[GoRouterRefreshBloc][listen] sharing state: $state');
+          notifyListeners();
         }
       },
     );
   }
 
-  late final StreamSubscription<STATE> _blocStream;
+  late final StreamSubscription<AuthenticationState> _blocStream;
+  late final StreamSubscription<SharingIntentState> _sharedBloc;
 
   @override
   void dispose() {
     _blocStream.cancel();
+    _sharedBloc.cancel();
     super.dispose();
   }
 }

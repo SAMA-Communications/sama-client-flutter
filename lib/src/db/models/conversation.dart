@@ -94,5 +94,6 @@ class ConversationModel extends Equatable {
         name,
         unreadMessagesCount,
         description,
+        lastMessage,
       ];
 }

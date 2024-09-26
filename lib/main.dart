@@ -11,6 +11,7 @@ import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_data_source.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
+import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
 import 'src/shared/ui/colors.dart';
 
 void main() {
@@ -82,12 +83,15 @@ class _AppState extends State<App> {
           create: (context) => _attachmentsRepository,
         ),
       ],
-      child: BlocProvider(
-          create: (_) => AuthenticationBloc(
-                authenticationRepository: _authenticationRepository,
-                userRepository: _userRepository,
-              ),
-          child: const AppView()),
+      child: MultiBlocProvider(providers: [
+        BlocProvider(
+          create: (context) => AuthenticationBloc(
+            authenticationRepository: _authenticationRepository,
+            userRepository: _userRepository,
+          ),
+        ),
+        BlocProvider(create: (context) => SharingIntentBloc()),
+      ], child: const AppView()),
     );
   }
 }

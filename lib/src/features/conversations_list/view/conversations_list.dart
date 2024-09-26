@@ -67,27 +67,20 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
                 ),
               );
             }
-            return Scaffold(
-                floatingActionButton: FloatingActionButton(
-                  child: const Icon(Icons.add_comment_outlined, size: 32.0),
-                  onPressed: () {
-                    context.push(groupCreateScreenPath);
-                  },
-                ),
-                body: ListView.separated(
-                    itemBuilder: (BuildContext context, int index) {
-                      return index >= state.conversations.length
-                          ? const BottomLoader()
-                          : ConversationListItem(
-                              conversation: state.conversations[index]);
-                    },
-                    itemCount: state.hasReachedMax
-                        ? state.conversations.length
-                        : state.conversations.length + 1,
-                    controller: _scrollController,
-                    separatorBuilder: (context, index) => const SizedBox(
-                          height: 5,
-                        )));
+            return ListView.separated(
+                itemBuilder: (BuildContext context, int index) {
+                  return index >= state.conversations.length
+                      ? const BottomLoader()
+                      : ConversationListItem(
+                          conversation: state.conversations[index]);
+                },
+                itemCount: state.hasReachedMax
+                    ? state.conversations.length
+                    : state.conversations.length + 1,
+                controller: _scrollController,
+                separatorBuilder: (context, index) => const SizedBox(
+                      height: 5,
+                    ));
           case ConversationsStatus.initial:
             return const Center(child: CircularProgressIndicator());
         }
