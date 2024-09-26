@@ -106,7 +106,8 @@ class ConversationRepository {
     api.MessagesManager.instance.destroy();
   }
 
-  void resetUnreadMessagesCount(ConversationModel conversation) {
+  void resetUnreadMessagesCount(String conversationId) {
+    final conversation = localDataSource.getConversationById(conversationId)!;
     final updatedConversation = conversation.copyWith(unreadMessagesCount: 0);
     localDataSource.updateConversation(updatedConversation);
     _conversationsController.add(updatedConversation);
