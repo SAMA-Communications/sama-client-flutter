@@ -36,8 +36,8 @@ class MessageBubble extends StatelessWidget {
               name: getUserName(sender),
               lastName: sender.lastName,
               size: const Size(40.0, 40.0),
-              borderRadius: 16.0,
               backgroundColor: isOwn ? slateBlue : gainsborough,
+              avatar: sender.avatar,
             ),
           if (!isLast && !isOwn)
             const SizedBox(

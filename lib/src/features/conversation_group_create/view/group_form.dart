@@ -126,6 +126,8 @@ class _GroupAvatar extends StatelessWidget {
                     {
                       return Image.file(
                         state.avatar.value!,
+                        height: 60.0,
+                        width: 60.0,
                         fit: BoxFit.cover,
                       );
                     }
@@ -316,7 +318,8 @@ class _SearchResults extends StatelessWidget {
             itemBuilder: (BuildContext context, int index) {
               final user = users[index];
               return ListTile(
-                leading: AvatarLetterIcon(name: user.login!),
+                leading:
+                    AvatarLetterIcon(name: user.login!, avatar: user.avatar),
                 title: Text(
                   user.login!,
                   style: const TextStyle(

@@ -124,7 +124,8 @@ class _SearchResults extends StatelessWidget {
             itemBuilder: (BuildContext context, int index) {
               final user = users[index];
               return ListTile(
-                leading: AvatarLetterIcon(name: user.login!),
+                leading:
+                    AvatarLetterIcon(name: user.login!, avatar: user.avatar),
                 title: Text(
                   user.login!,
                   style: const TextStyle(
