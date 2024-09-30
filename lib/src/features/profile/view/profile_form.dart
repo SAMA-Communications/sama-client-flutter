@@ -9,9 +9,8 @@ import '../../../features/profile/bloc/profile_bloc.dart';
 import '../../../api/utils/screen_factor.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/ui/view/user_forms.dart';
 import '../models/models.dart';
-
-const columnItemMargin = 10.0;
 
 class ProfileForm extends StatelessWidget {
   const ProfileForm({super.key});
@@ -81,8 +80,6 @@ class HeaderCard extends StatelessWidget {
 class FooterCard extends StatelessWidget {
   const FooterCard({super.key});
 
-  final arrowBackSize = 30.0;
-
   @override
   Widget build(BuildContext context) {
     return const Expanded(
@@ -96,17 +93,17 @@ class FooterCard extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  UsernameForm(),
+                  _UsernameForm(),
                   SizedBox(height: columnItemMargin),
-                  PhoneForm(),
+                  _PhoneForm(),
                   SizedBox(height: columnItemMargin),
-                  EmailForm(),
+                  _EmailForm(),
                   SizedBox(height: columnItemMargin),
-                  AccountForm(),
+                  _AccountForm(),
                   Expanded(
                       child: Align(
                           alignment: Alignment.bottomRight,
-                          child: LogoutForm()))
+                          child: _LogoutForm()))
                 ],
               ),
             ),
@@ -127,30 +124,9 @@ class _UserAvatar extends StatelessWidget {
           return GestureDetector(
               onTap: () =>
                   context.read<ProfileBloc>().add(ProfileAvatarPicked()),
-              child: Container(
-                  decoration: BoxDecoration(
-                    color: black,
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                  padding: const EdgeInsets.all(4.0),
-                  height: 75.0,
-                  width: 75.0,
-                  child: Center(child: () {
-                    if (state.userAvatar.value!.isEmpty) {
-                      return const Icon(
-                        Icons.image_outlined,
-                        color: dullGray,
-                        size: 50.0,
-                      );
-                    } else {
-                      return Image.network(
-                        state.userAvatar.value!,
-                        height: 75.0,
-                        width: 75.0,
-                        fit: BoxFit.cover,
-                      );
-                    }
-                  }())));
+              child: UserAvatarForm(
+                userAvatar: state.userAvatar.value!,
+              ));
         });
   }
 }
@@ -212,8 +188,8 @@ class _UserFullName extends StatelessWidget {
   }
 }
 
-class UsernameForm extends StatelessWidget {
-  const UsernameForm({super.key});
+class _UsernameForm extends StatelessWidget {
+  const _UsernameForm();
 
   @override
   Widget build(BuildContext context) {
@@ -221,34 +197,13 @@ class UsernameForm extends StatelessWidget {
         buildWhen: (previous, current) =>
             previous.userLogin != current.userLogin,
         builder: (context, state) {
-          return Container(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Icon(Icons.person_2_outlined, color: dullGray, size: 25),
-                      Text(
-                        ' Username',
-                        style: TextStyle(fontWeight: FontWeight.w300),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    context.read<ProfileBloc>().state.userLogin,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.normal),
-                  ),
-                ],
-              ));
+          return UsernameForm(userLogin: state.userLogin);
         });
   }
 }
 
-class PhoneForm extends StatelessWidget {
-  const PhoneForm({super.key});
+class _PhoneForm extends StatelessWidget {
+  const _PhoneForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -269,47 +224,15 @@ class PhoneForm extends StatelessWidget {
                       );
                     });
               },
-              child: Ink(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: lightWhite,
-                    border: Border.all(
-                      color: lightWhite,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Icon(Icons.local_phone_outlined,
-                              color: dullGray, size: 25),
-                          Text(
-                            ' Mobile phone',
-                            style: TextStyle(fontWeight: FontWeight.w300),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        state.userPhone.value.isEmpty
-                            ? 'Enter your phone number'
-                            : state.userPhone.value,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: state.userPhone.value.isEmpty
-                                ? FontWeight.w200
-                                : FontWeight.normal),
-                      ),
-                    ],
-                  )));
+              child: UserPhoneForm(
+                  userPhone: state.userPhone.value,
+                  userPhoneStub: 'Enter your phone number'));
         });
   }
 }
 
-class EmailForm extends StatelessWidget {
-  const EmailForm({super.key});
+class _EmailForm extends StatelessWidget {
+  const _EmailForm();
 
   @override
   Widget build(BuildContext context) {
@@ -330,46 +253,15 @@ class EmailForm extends StatelessWidget {
                       );
                     });
               }, // Handle your callback
-              child: Ink(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: lightWhite,
-                    border: Border.all(
-                      color: lightWhite,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Icon(Icons.email_outlined, color: dullGray, size: 25),
-                          Text(
-                            ' Email address',
-                            style: TextStyle(fontWeight: FontWeight.w300),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        state.userEmail.value.isEmpty
-                            ? 'Enter your email address'
-                            : state.userEmail.value,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: state.userEmail.value.isEmpty
-                                ? FontWeight.w200
-                                : FontWeight.normal),
-                      ),
-                    ],
-                  )));
+              child: UserEmailForm(
+                  userEmail: state.userEmail.value,
+                  userEmailStub: 'Enter your email address'));
         });
   }
 }
 
-class AccountForm extends StatelessWidget {
-  const AccountForm({super.key});
+class _AccountForm extends StatelessWidget {
+  const _AccountForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -446,8 +338,8 @@ class AccountForm extends StatelessWidget {
   }
 }
 
-class LogoutForm extends StatelessWidget {
-  const LogoutForm({super.key});
+class _LogoutForm extends StatelessWidget {
+  const _LogoutForm();
 
   @override
   Widget build(BuildContext context) {

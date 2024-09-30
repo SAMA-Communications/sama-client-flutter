@@ -52,6 +52,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<_ConversationUpdated>(
       _onConversationUpdated,
     );
+    on<ConversationDeleted>(
+      _onConversationDeleted,
+    );
 
     updateConversationStreamSubscription =
         conversationRepository.updateConversationStream.listen((chat) async {
@@ -133,6 +136,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   Future<void> _onConversationUpdated(
       _ConversationUpdated event, Emitter<ConversationState> emit) async {
     emit(state.copyWith(conversation: event.conversation));
+  }
+
+  Future<void> _onConversationDeleted(
+      ConversationDeleted event, Emitter<ConversationState> emit) async {
+    await conversationRepository.deleteConversation(state.conversation.id)
+        ? emit(state.copyWith(status: ConversationStatus.delete))
+        : emit(state.copyWith(status: ConversationStatus.failure));
   }
 
   FutureOr<void> _onMessageReceived(

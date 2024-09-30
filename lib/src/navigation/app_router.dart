@@ -11,6 +11,7 @@ import '../features/login/view/login_page.dart';
 import '../features/profile/view/profile_page.dart';
 import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
+import '../features/user_info/view/user_info_page.dart';
 import '../repository/authentication/authentication_repository.dart';
 import '../shared/auth/bloc/auth_bloc.dart';
 import '../shared/sharing/bloc/sharing_intent_bloc.dart';
@@ -73,6 +74,12 @@ GoRouter router(BuildContext context) => GoRouter(
           path: profilePath,
           builder: (context, state) {
             return const ProfilePage();
+          },
+        ),
+        GoRoute(
+          path: userInfoPath,
+          builder: (context, state) {
+            return UserInfoPage.route(state.extra);
           },
         ),
       ],

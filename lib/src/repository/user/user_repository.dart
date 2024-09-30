@@ -73,7 +73,7 @@ class UserRepository {
     return participants;
   }
 
-  Map<String, User?> getStoredUsersByIds(List<String> ids) {
+  Future<Map<String, User?>> getStoredUsersByIds(List<String> ids) async {
     return localDataSource.getUsersByIds(ids);
   }
 }

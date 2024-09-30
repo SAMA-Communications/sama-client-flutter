@@ -14,10 +14,6 @@ final class MessagesRequested extends ConversationEvent {
   const MessagesRequested({this.startDate, this.endDate});
 }
 
-final class ParticipantsRequested extends ConversationEvent {
-  const ParticipantsRequested();
-}
-
 final class _MessageReceived extends ConversationEvent {
   final ChatMessage message;
 
@@ -34,4 +30,9 @@ final class _ConversationUpdated extends ConversationEvent {
   final ConversationModel conversation;
 
   const _ConversationUpdated(this.conversation);
+}
+
+// TODO RP maybe move to separate ConversationDeleteBloc
+final class ConversationDeleted extends ConversationEvent {
+  const ConversationDeleted();
 }

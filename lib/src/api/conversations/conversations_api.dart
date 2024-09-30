@@ -11,6 +11,7 @@ const String conversationsRequest = 'conversation_list';
 const String getParticipantsByCids = 'get_participants_by_cids';
 const String conversationSearch = 'conversation_search';
 const String conversationCreate = 'conversation_create';
+const String conversationDelete = 'conversation_delete';
 
 Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
   return SamaConnectionService.instance
@@ -60,6 +61,13 @@ Future<Conversation> createConversation(List<String> participants, String type,
     if (avatar != null) 'image_object': avatar.toImageObjectJson(),
   }).then((response) {
     return Conversation.fromJson(response['conversation']);
+  });
+}
+
+Future<bool> deleteConversation(String id) async {
+  return SamaConnectionService.instance
+      .sendRequest(conversationDelete, {"id": id}).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
 

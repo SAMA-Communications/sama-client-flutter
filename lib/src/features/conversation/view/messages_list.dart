@@ -77,6 +77,11 @@ class _MessagesListState extends State<MessagesList> {
             );
           case ConversationStatus.initial:
             return const Center(child: CircularProgressIndicator());
+          case ConversationStatus.delete:
+            Navigator.of(context).pop();
+            return const Center(
+              child: Text('Chat deleted'),
+            );
         }
       },
     );
