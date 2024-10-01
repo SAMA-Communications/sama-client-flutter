@@ -5,7 +5,7 @@ enum GroupnameValidationError { empty, short }
 const int groupNameMinLength = 1;
 
 class Groupname extends FormzInput<String, GroupnameValidationError> {
-  const Groupname.pure() : super.pure('');
+  const Groupname.pure([super.value = '']) : super.pure();
 
   const Groupname.dirty([super.value = '']) : super.dirty();
 

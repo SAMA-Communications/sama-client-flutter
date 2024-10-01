@@ -171,6 +171,10 @@ class ConversationRepository {
     return result;
   }
 
+  Future<ConversationModel?> getConversationById(String conversationId) async {
+    return localDataSource.getConversationById(conversationId);
+  }
+
   Future<ConversationModel> createConversation(
       List<api.User> participants, String type,
       [String? name, File? avatarUrl]) async {
@@ -206,6 +210,40 @@ class ConversationRepository {
             getConversationAvatar(conversation, opponent, owner, localUser));
 
     localDataSource.addConversation(result);
+    return result;
+  }
+
+  Future<ConversationModel?> updateConversation(
+      {required String id,
+      String? name,
+      String? description,
+      Set<api.User>? addParticipants,
+      Set<api.User>? removeParticipants,
+      File? avatarUrl}) async {
+    Avatar? avatar;
+    if (avatarUrl != null) {
+      var compressedFile =
+          await compressImageFile(avatarUrl, const Size(640, 480));
+      final blur = await getImageHashInIsolate(compressedFile);
+      final id = await api.uploadAvatarFile(compressedFile);
+      final name = basename(compressedFile.path);
+      avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
+    }
+
+    var conversation = await api.updateConversation(
+        id,
+        name,
+        description,
+        addParticipants?.map((user) => user.id!).toList(),
+        removeParticipants?.map((user) => user.id!).toList(),
+        avatar);
+
+    var result = localDataSource.getConversationById(id)!.copyWith(
+        name: conversation.name!,
+        description: conversation.description,
+        avatar: conversation.avatar);
+    localDataSource.updateConversation(result);
+    _conversationsController.add(result);
     return result;
   }
 

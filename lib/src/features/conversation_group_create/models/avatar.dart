@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:formz/formz.dart';
 
-enum GroupAvatarValidationError { empty, }
-
-const int loginMinLength = 1;
+enum GroupAvatarValidationError { empty }
 
 class GroupAvatar extends FormzInput<File?, GroupAvatarValidationError> {
   const GroupAvatar.pure() : super.pure(null);
@@ -13,7 +11,9 @@ class GroupAvatar extends FormzInput<File?, GroupAvatarValidationError> {
 
   @override
   GroupAvatarValidationError? validator(File? value) {
-    if (value == null || !value.existsSync()) return GroupAvatarValidationError.empty;
+    if (value == null || !value.existsSync()) {
+      return GroupAvatarValidationError.empty;
+    }
     return null;
   }
 }

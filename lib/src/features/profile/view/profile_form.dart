@@ -124,8 +124,8 @@ class _UserAvatar extends StatelessWidget {
           return GestureDetector(
               onTap: () =>
                   context.read<ProfileBloc>().add(ProfileAvatarPicked()),
-              child: UserAvatarForm(
-                userAvatar: state.userAvatar.value!,
+              child: AvatarForm(
+                avatar: state.userAvatar.value!,
               ));
         });
   }

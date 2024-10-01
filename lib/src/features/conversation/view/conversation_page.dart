@@ -148,7 +148,7 @@ class ConversationPage extends StatelessWidget {
   }
 }
 
-enum _Menu { info, edit, addParticipants, deleteAndLeave }
+enum _Menu { info, deleteAndLeave }
 
 class _PopupMenuButton extends StatelessWidget {
   @override
@@ -164,12 +164,8 @@ class _PopupMenuButton extends StatelessWidget {
                     .firstWhere((user) => user.id != localUserId);
                 context.push(userInfoPath, extra: user);
               } else {
-                // context.push(groupInfoPath, extra: state.participants);
+                context.push(groupInfoPath, extra: state.conversation);
               }
-              break;
-            case _Menu.edit:
-              break;
-            case _Menu.addParticipants:
               break;
             case _Menu.deleteAndLeave:
               showDialog(
@@ -216,25 +212,6 @@ class _PopupMenuButton extends StatelessWidget {
                 title: Text('Info'),
               ),
             ),
-            if (state.conversation.type != 'u' &&
-                state.conversation.owner?.id == localUserId) ...[
-              const PopupMenuItem<_Menu>(
-                padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                value: _Menu.info,
-                child: ListTile(
-                  leading: Icon(Icons.edit),
-                  title: Text('Edit'),
-                ),
-              ),
-              const PopupMenuItem<_Menu>(
-                padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                value: _Menu.info,
-                child: ListTile(
-                  leading: Icon(Icons.person_add_alt_1_outlined),
-                  title: Text('Add participants'),
-                ),
-              ),
-            ],
             const PopupMenuItem<_Menu>(
               padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
               value: _Menu.deleteAndLeave,

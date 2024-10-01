@@ -32,7 +32,6 @@ final class _ConversationUpdated extends ConversationEvent {
   const _ConversationUpdated(this.conversation);
 }
 
-// TODO RP maybe move to separate ConversationDeleteBloc
 final class ConversationDeleted extends ConversationEvent {
   const ConversationDeleted();
 }

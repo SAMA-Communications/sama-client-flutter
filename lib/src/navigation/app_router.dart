@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/conversation_group_create/view/group_page.dart';
+import '../features/group_info/view/group_info_page.dart';
+import '../features/conversation_group_create/view/group_create_page.dart';
 import '../features/conversations_list/view/conversations_page.dart';
 import '../features/conversation/view/conversation_page.dart';
 import '../features/login/view/login_page.dart';
@@ -80,6 +81,12 @@ GoRouter router(BuildContext context) => GoRouter(
           path: userInfoPath,
           builder: (context, state) {
             return UserInfoPage.route(state.extra);
+          },
+        ),
+        GoRoute(
+          path: groupInfoPath,
+          builder: (context, state) {
+            return GroupInfoPage.route(state.extra);
           },
         ),
       ],
