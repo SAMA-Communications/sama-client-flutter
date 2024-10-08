@@ -1,6 +1,6 @@
 part of 'conversation_bloc.dart';
 
-enum ConversationStatus { initial, success, failure }
+enum ConversationStatus { initial, success, failure, delete }
 
 final class ConversationState extends Equatable {
   const ConversationState({

@@ -209,6 +209,12 @@ class ConversationRepository {
     return result;
   }
 
+  Future<bool> deleteConversation(String id) async {
+    var result = await api.deleteConversation(id);
+    if (result) localDataSource.removeConversation(id);
+    return result;
+  }
+
   void _sortConversations(List<ConversationModel> items) {
     items.sort((a, b) => (b.lastMessage?.createdAt ?? b.updatedAt)
         .compareTo(a.lastMessage?.createdAt ?? a.updatedAt));

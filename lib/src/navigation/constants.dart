@@ -6,3 +6,4 @@ const String conversationScreenSubPath = 'conversation';
 const String globalSearchPath = '/global_search';
 const String groupCreateScreenPath = '/group_create';
 const String profilePath = '/profile';
+const String userInfoPath = '/user_info';
