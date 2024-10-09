@@ -17,8 +17,8 @@ class AvatarForm extends StatelessWidget {
           borderRadius: BorderRadius.circular(5.0),
         ),
         padding: const EdgeInsets.all(4.0),
-        height: 75.0,
-        width: 75.0,
+        height: 85.0,
+        width: 85.0,
         child: Center(child: () {
           if (avatar == null) {
             return const Icon(

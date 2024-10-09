@@ -210,6 +210,8 @@ class ConversationRepository {
             getConversationAvatar(conversation, opponent, owner, localUser));
 
     localDataSource.addConversation(result);
+    // TODO RP check (added cause group is not shown if empty)
+    _conversationsController.add(result);
     return result;
   }
 

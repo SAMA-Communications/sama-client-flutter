@@ -141,6 +141,7 @@ class _ChatNameDescription extends StatelessWidget {
                         ? "Description"
                         : state.description.value,
                     style: TextStyle(
+                        fontSize: 18,
                         color: signalBlack,
                         fontWeight: state.description.value.isEmpty
                             ? FontWeight.w200

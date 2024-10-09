@@ -65,6 +65,7 @@ class ConversationPage extends StatelessWidget {
           title: Padding(
             padding: const EdgeInsets.only(top: 0.0),
             child: ListTile(
+              onTap: () => _infoAction(context),
               title: Text(
                 overflow: TextOverflow.ellipsis,
                 state.conversation.name,
@@ -153,19 +154,13 @@ enum _Menu { info, deleteAndLeave }
 class _PopupMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var localUserId = context.read<AuthenticationBloc>().state.user.id;
     var state = context.read<ConversationBloc>().state;
     return PopupMenuButton<_Menu>(
+        position: PopupMenuPosition.under,
         onSelected: (_Menu item) {
           switch (item) {
             case _Menu.info:
-              if (state.conversation.type == 'u') {
-                User user = state.participants
-                    .firstWhere((user) => user.id != localUserId);
-                context.push(userInfoPath, extra: user);
-              } else {
-                context.push(groupInfoPath, extra: state.conversation);
-              }
+              _infoAction(context);
               break;
             case _Menu.deleteAndLeave:
               showDialog(
@@ -212,15 +207,28 @@ class _PopupMenuButton extends StatelessWidget {
                 title: Text('Info'),
               ),
             ),
-            const PopupMenuItem<_Menu>(
-              padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-              value: _Menu.deleteAndLeave,
-              child: ListTile(
-                leading: Icon(Icons.exit_to_app_outlined),
-                title: Text('Delete and leave'),
-              ),
-            )
+            if (state.conversation.lastMessage != null) ...[
+              const PopupMenuItem<_Menu>(
+                  padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                  value: _Menu.deleteAndLeave,
+                  child: ListTile(
+                    leading: Icon(Icons.exit_to_app_outlined),
+                    title: Text('Delete and leave'),
+                  ))
+            ],
           ];
         });
+  }
+}
+
+void _infoAction(BuildContext context) {
+  var localUserId = context.read<AuthenticationBloc>().state.user.id;
+  var state = context.read<ConversationBloc>().state;
+
+  if (state.conversation.type == 'u') {
+    User user = state.participants.firstWhere((user) => user.id != localUserId);
+    context.push(userInfoPath, extra: user);
+  } else {
+    context.push(groupInfoPath, extra: state.conversation);
   }
 }

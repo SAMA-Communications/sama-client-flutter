@@ -176,6 +176,7 @@ class _UserFullName extends StatelessWidget {
                         ? "Last name"
                         : state.userLastname.value,
                     style: TextStyle(
+                        fontSize: 18,
                         color: signalBlack,
                         fontWeight: state.userLastname.value.isEmpty
                             ? FontWeight.w200
