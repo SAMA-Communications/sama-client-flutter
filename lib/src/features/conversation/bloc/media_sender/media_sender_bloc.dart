@@ -177,11 +177,12 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
   void _pickMedia() {
     FilePicker.platform
         .pickFiles(
-            type: FileType.custom,
-            allowedExtensions: [
-              ...supportedImageAttachmentExtentions,
-              ...supportedVideoAttachmentExtentions
-            ],
+            type: FileType.media,
+            //TODO RP remove this if it's all ok on both android and iOS sides
+            // allowedExtensions: [
+            //   ...supportedImageAttachmentExtentions,
+            //   ...supportedVideoAttachmentExtentions
+            // ],
             allowMultiple: true,
             compressionQuality: 0)
         .then((result) {
