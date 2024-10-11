@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../../api/utils/screen_factor.dart';
 import '../ui/colors.dart';
+import '../utils/screen_factor.dart';
 
 class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
   const LogoAppBar({super.key});
@@ -21,7 +21,7 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: 24,
+              height: 36,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(24),

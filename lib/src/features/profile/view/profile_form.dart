@@ -6,10 +6,10 @@ import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../features/profile/bloc/profile_bloc.dart';
-import '../../../api/utils/screen_factor.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/user_forms.dart';
+import '../../../shared/utils/screen_factor.dart';
 import '../models/models.dart';
 
 class ProfileForm extends StatelessWidget {

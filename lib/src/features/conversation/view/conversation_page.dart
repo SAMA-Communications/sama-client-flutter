@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -84,26 +85,29 @@ class ConversationPage extends StatelessWidget {
         body: Column(
           children: [
             const Flexible(child: MessagesList()),
-            context.read<SharingIntentBloc>().state.status ==
-                    SharingIntentStatus.processing
-                ? BlocListener<SendMessageBloc, SendMessageState>(
-                    listener: (context, sendState) {
-                      if (sendState.status == SendMessageStatus.success ||
-                          sendState.status == SendMessageStatus.failure) {
-                        context
-                            .read<SharingIntentBloc>()
-                            .add(SharingIntentCompleted());
-                      }
-                    },
-                    child: MessageInput(
-                        sharedText: context
-                            .read<SharingIntentBloc>()
-                            .state
-                            .sharedFiles
-                            .firstOrNull
-                            ?.path),
-                  )
-                : MessageInput()
+            Padding(
+                //need extra space for safe area on ios
+                padding: EdgeInsets.only(bottom: Platform.isIOS ? 16.0 : 0.0),
+                child: context.read<SharingIntentBloc>().state.status ==
+                        SharingIntentStatus.processing
+                    ? BlocListener<SendMessageBloc, SendMessageState>(
+                        listener: (context, sendState) {
+                          if (sendState.status == SendMessageStatus.success ||
+                              sendState.status == SendMessageStatus.failure) {
+                            context
+                                .read<SharingIntentBloc>()
+                                .add(SharingIntentCompleted());
+                          }
+                        },
+                        child: MessageInput(
+                            sharedText: context
+                                .read<SharingIntentBloc>()
+                                .state
+                                .sharedFiles
+                                .firstOrNull
+                                ?.path),
+                      )
+                    : MessageInput())
           ],
         ),
       );
