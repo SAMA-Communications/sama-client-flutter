@@ -20,7 +20,7 @@ class UserAvatarForm extends StatelessWidget {
         height: 75.0,
         width: 75.0,
         child: Center(child: () {
-          if (userAvatar == null) {
+          if (userAvatar == null || userAvatar!.isEmpty) {
             return const Icon(
               Icons.image_outlined,
               color: dullGray,
