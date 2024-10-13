@@ -172,17 +172,21 @@ Widget buildImageItem(ChatAttachment attachment) {
                 valueColor: AlwaysStoppedAnimation<Color>(slateBlue),
               ),
             )
-          : BlurHash(
-              hash: attachment.fileBlurHash!,
-              imageFit: BoxFit.cover,
+          : SizedBox.expand(
+              child: Image(
+                image: BlurHashImage(attachment.fileBlurHash!),
+                fit: BoxFit.cover,
+              ),
             ),
     ),
     errorWidget: (context, url, error) => Center(
       child: !validateBlurhash(attachment.fileBlurHash ?? '')
           ? const SizedBox.shrink()
-          : BlurHash(
-              hash: attachment.fileBlurHash!,
-              imageFit: BoxFit.cover,
+          : SizedBox.expand(
+              child: Image(
+                image: BlurHashImage(attachment.fileBlurHash!),
+                fit: BoxFit.cover,
+              ),
             ),
     ),
     imageUrl: attachment.url ?? '',
