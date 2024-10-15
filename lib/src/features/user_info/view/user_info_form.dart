@@ -135,6 +135,7 @@ class _StartConversationForm extends StatelessWidget {
           } else if (state is ConversationCreatedState) {
             // loadingOverlay.hide();// for now disable
             final conversation = state.conversation;
+            Navigator.popUntil(context, (route) => route.isFirst);
             context.go('$conversationListScreenPath/$conversationScreenSubPath',
                 extra: conversation);
           } else if (state is ConversationCreatedStateError) {

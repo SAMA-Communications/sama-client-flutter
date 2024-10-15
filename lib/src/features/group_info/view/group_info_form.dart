@@ -66,7 +66,7 @@ class HeaderCard extends StatelessWidget {
           icon: Icon(Icons.arrow_back_outlined,
               color: signalBlack, size: arrowBackSize),
           onPressed: () {
-            context.pop();
+            context.pop(context.read<GroupInfoBloc>().state.status.isSuccess);
           },
         ),
         title: Center(
@@ -254,6 +254,7 @@ class FooterCard extends StatelessWidget {
         buildWhen: (previous, current) =>
             previous.participants != current.participants,
         builder: (context, state) {
+          var ownerId = state.conversation.owner?.id ?? '';
           var localUserId = context.read<AuthenticationBloc>().state.user.id!;
           var isOwner = state.conversation.owner?.id == localUserId;
           return Expanded(
@@ -266,8 +267,11 @@ class FooterCard extends StatelessWidget {
                           padding: const EdgeInsets.all(15),
                           child: Column(children: [
                             _ParticipantsHeaderForm(isOwner: isOwner),
-                            _ParticipantsListForm(
-                                isOwner: isOwner, localUserId: localUserId),
+                            Expanded(
+                                child: _ParticipantsListForm(
+                                    isOwner: isOwner,
+                                    ownerId: ownerId,
+                                    localUserId: localUserId)),
                           ]),
                         ),
                       ))));
@@ -308,10 +312,13 @@ class _ParticipantsHeaderForm extends StatelessWidget {
 
 class _ParticipantsListForm extends StatelessWidget {
   final bool isOwner;
+  final String ownerId;
   final String localUserId;
 
   const _ParticipantsListForm(
-      {required this.isOwner, required this.localUserId});
+      {required this.isOwner,
+      required this.ownerId,
+      required this.localUserId});
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +339,7 @@ class _ParticipantsListForm extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            if (user.id == localUserId)
+            if (user.id == ownerId)
               const Text(
                 'admin',
                 style: TextStyle(fontWeight: FontWeight.w300, fontSize: 18),

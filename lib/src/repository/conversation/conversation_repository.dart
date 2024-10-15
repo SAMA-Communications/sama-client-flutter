@@ -148,6 +148,7 @@ class ConversationRepository {
 
     final List<ConversationModel> result = conversations.map((element) {
       final opponent = participantsMap[element.opponentId];
+      //can be null if user deleted
       final owner = participantsMap[element.ownerId];
 
       return ConversationModel(
@@ -194,8 +195,7 @@ class ConversationRepository {
 
     var localUser = await userRepository.getLocalUser();
     final opponent = participantsMap[conversation.opponentId];
-    final owner = participantsMap[conversation.ownerId];
-
+    final owner = localUser;
     var result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
@@ -249,9 +249,10 @@ class ConversationRepository {
     return result;
   }
 
-  Future<bool> deleteConversation(String id) async {
-    var result = await api.deleteConversation(id);
-    if (result) localDataSource.removeConversation(id);
+  Future<bool> deleteConversation(ConversationModel conversation) async {
+    var result = await api.deleteConversation(conversation.id);
+    if (result) localDataSource.removeConversation(conversation.id);
+    _conversationsController.add(conversation);
     return result;
   }
 

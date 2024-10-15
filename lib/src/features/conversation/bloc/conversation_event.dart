@@ -20,10 +20,8 @@ final class _MessageReceived extends ConversationEvent {
   const _MessageReceived(this.message);
 }
 
-final class _ParticipantsReceived extends ConversationEvent {
-  final Set<User> participants;
-
-  const _ParticipantsReceived(this.participants);
+final class ParticipantsReceived extends ConversationEvent {
+  const ParticipantsReceived();
 }
 
 final class _ConversationUpdated extends ConversationEvent {

@@ -221,7 +221,7 @@ class _PopupMenuButton extends StatelessWidget {
   }
 }
 
-void _infoAction(BuildContext context) {
+Future<void> _infoAction(BuildContext context) async {
   var localUserId = context.read<AuthenticationBloc>().state.user.id;
   var state = context.read<ConversationBloc>().state;
 
@@ -229,6 +229,10 @@ void _infoAction(BuildContext context) {
     User user = state.participants.firstWhere((user) => user.id != localUserId);
     context.push(userInfoPath, extra: user);
   } else {
-    context.push(groupInfoPath, extra: state.conversation);
+    bool conversationUpdated =
+        await context.push(groupInfoPath, extra: state.conversation) as bool;
+    if (conversationUpdated && context.mounted) {
+      context.read<ConversationBloc>().add(const ParticipantsReceived());
+    }
   }
 }
