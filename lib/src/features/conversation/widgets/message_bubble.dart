@@ -38,6 +38,7 @@ class MessageBubble extends StatelessWidget {
               size: const Size(40.0, 40.0),
               backgroundColor: isOwn ? slateBlue : gainsborough,
               avatar: sender.avatar,
+              isDeleted: isDeletedUser(sender),
             ),
           if (!isLast && !isOwn)
             const SizedBox(
