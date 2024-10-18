@@ -121,7 +121,8 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
   ) {
     var users = Set.of(state.addParticipants.value);
     users.add(event.participant);
-    final participants = GroupParticipants.dirty(users);
+    final participants =
+        GroupParticipants.dirty(users, state.participants.value.length);
     emit(
       state.copyWith(
         status: FormzSubmissionStatus.initial,
@@ -138,7 +139,8 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
     final user = event.participant;
     final users = Set.of(state.addParticipants.value);
     users.remove(user);
-    final participants = GroupParticipants.dirty(users);
+    final participants =
+        GroupParticipants.dirty(users, state.participants.value.length);
     emit(
       state.copyWith(
         status: FormzSubmissionStatus.initial,
@@ -231,8 +233,8 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
             name: Groupname.pure(chat.name),
             description: GroupDescription.pure(chat.description ?? ''),
             participants: GroupParticipants.pure(participants.toSet()),
-            addParticipants: GroupParticipants.pure(participants.toSet()),
-            removeParticipants: GroupParticipants.pure(participants.toSet()),
+            addParticipants: const GroupParticipants.pure(),
+            removeParticipants: const GroupParticipants.pure(),
             errorMessage: 'Chat wasn\'t updated: $e'));
       }
     }

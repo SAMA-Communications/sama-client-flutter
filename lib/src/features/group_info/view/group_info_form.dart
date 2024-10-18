@@ -55,6 +55,9 @@ class HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
+        context.read<AuthenticationBloc>().state.user.id!;
+
     return Card(
       child: ListTile(
         titleAlignment: ListTileTitleAlignment.top,
@@ -72,11 +75,11 @@ class HeaderCard extends StatelessWidget {
         title: Center(
           child: Padding(
               padding: EdgeInsets.only(right: arrowBackSize, top: 8),
-              child: _ChatAvatar()),
+              child: _ChatAvatar(isOwner: isOwner)),
         ),
         subtitle: Padding(
           padding: EdgeInsets.only(right: arrowBackSize, bottom: 4),
-          child: _ChatNameDescription(),
+          child: _ChatNameDescription(isOwner: isOwner),
         ),
       ),
     );
@@ -84,14 +87,19 @@ class HeaderCard extends StatelessWidget {
 }
 
 class _ChatAvatar extends StatelessWidget {
+  final bool isOwner;
+
+  const _ChatAvatar({required this.isOwner});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GroupInfoBloc, GroupInfoState>(
         buildWhen: (previous, current) => previous.avatar != current.avatar,
         builder: (context, state) {
           return GestureDetector(
-              onTap: () =>
-                  context.read<GroupInfoBloc>().add(GroupAvatarPicked()),
+              onTap: () => isOwner
+                  ? context.read<GroupInfoBloc>().add(GroupAvatarPicked())
+                  : null,
               child: AvatarForm(
                 avatar: state.avatar.value,
               ));
@@ -100,6 +108,10 @@ class _ChatAvatar extends StatelessWidget {
 }
 
 class _ChatNameDescription extends StatelessWidget {
+  final bool isOwner;
+
+  const _ChatNameDescription({required this.isOwner});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GroupInfoBloc, GroupInfoState>(
@@ -111,16 +123,18 @@ class _ChatNameDescription extends StatelessWidget {
           return Align(
               alignment: Alignment.center,
               child: TextButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (_) {
-                        return BlocProvider.value(
-                          value: BlocProvider.of<GroupInfoBloc>(context),
-                          child: const NameDialogInput(),
-                        );
-                      });
-                },
+                onPressed: isOwner
+                    ? () {
+                        showDialog(
+                            context: context,
+                            builder: (_) {
+                              return BlocProvider.value(
+                                value: BlocProvider.of<GroupInfoBloc>(context),
+                                child: const NameDialogInput(),
+                              );
+                            });
+                      }
+                    : null,
                 style: TextButton.styleFrom(
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -256,7 +270,7 @@ class FooterCard extends StatelessWidget {
         builder: (context, state) {
           var ownerId = state.conversation.owner?.id ?? '';
           var localUserId = context.read<AuthenticationBloc>().state.user.id!;
-          var isOwner = state.conversation.owner?.id == localUserId;
+          var isOwner = ownerId == localUserId;
           return Expanded(
               child: Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -386,14 +400,24 @@ void _showSearchScreenDialog(BuildContext context) {
                       const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
                   child: BlocProvider.value(
                     value: BlocProvider.of<GroupInfoBloc>(context),
-                    child: BlocBuilder<GroupInfoBloc, GroupInfoState>(
-                        buildWhen: (previous, current) {
+                    child: BlocConsumer<GroupInfoBloc, GroupInfoState>(
+                        listener: (context, state) {
+                      if (state.addParticipants.displayError ==
+                          GroupParticipantsValidationError.long) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'you\'ve reached maximum participant limit')),
+                          );
+                      }
+                    }, buildWhen: (previous, current) {
                       return previous.addParticipants !=
                           current.addParticipants;
                     }, builder: (context, state) {
-                      var users = state.addParticipants.value;
                       return ParticipantsForm(
-                        users: List.of(users),
+                        users: List.of(state.addParticipants.value),
                         onAddParticipants: (user) {
                           if (!state.participants.value.contains(user)) {
                             context

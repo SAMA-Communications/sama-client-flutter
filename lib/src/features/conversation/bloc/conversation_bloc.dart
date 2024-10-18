@@ -73,6 +73,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       if (message.cid != currentConversation.id) return;
 
       add(_MessageReceived(message));
+
+      switch (message.extension?['type']) {
+        case 'added_participant':
+        case 'removed_participant':
+        case 'left_participants':
+          add(const ParticipantsReceived());
+      }
     });
   }
 
