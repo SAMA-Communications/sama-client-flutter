@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../api/utils/screen_factor.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/global_search/global_search_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/participants_forms.dart';
 import '../../../shared/ui/view/user_forms.dart';
+import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../../search/bloc/global_search_bloc.dart';
