@@ -314,7 +314,7 @@ class _ParticipantsHeaderForm extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap),
               icon: const Icon(Icons.person_add_alt_outlined,
-                  color: semiBlack, size: 30),
+                  color: signalBlack, size: 30),
               onPressed: () {
                 _showSearchScreenDialog(context);
               },

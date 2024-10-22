@@ -11,7 +11,8 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      flexibleSpace: Stack(
+        flexibleSpace: FlexibleSpaceBar(
+      background: Stack(
         children: [
           Image.asset(
             'assets/images/sama_background.png',
@@ -21,7 +22,7 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: 44,
+              height: 36,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(24),
@@ -33,7 +34,7 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
           )
         ],
       ),
-    );
+    ));
   }
 
   @override
