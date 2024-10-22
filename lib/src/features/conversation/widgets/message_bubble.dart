@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../api/api.dart';
+import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
@@ -32,14 +34,16 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (isLast && !isOwn)
-            AvatarLetterIcon(
+            GestureDetector(
+                onTap: () => context.push(userInfoPath, extra: sender),
+                child:AvatarLetterIcon(
               name: getUserName(sender),
               lastName: sender.lastName,
               size: const Size(40.0, 40.0),
               backgroundColor: isOwn ? slateBlue : gainsborough,
               avatar: sender.avatar,
               isDeleted: isDeletedUser(sender),
-            ),
+            )),
           if (!isLast && !isOwn)
             const SizedBox(
               width: 40,
@@ -63,6 +67,8 @@ class MessageBubble extends StatelessWidget {
                   if (isFirst && !isOwn)
                     Text(
                       getUserName(sender),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: isOwn ? gainsborough : slateBlue,

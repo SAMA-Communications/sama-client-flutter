@@ -124,8 +124,8 @@ class _UserAvatar extends StatelessWidget {
           return GestureDetector(
               onTap: () =>
                   context.read<ProfileBloc>().add(ProfileAvatarPicked()),
-              child: UserAvatarForm(
-                userAvatar: state.userAvatar.value!,
+              child: AvatarForm(
+                avatar: state.userAvatar.value!,
               ));
         });
   }
@@ -176,6 +176,7 @@ class _UserFullName extends StatelessWidget {
                         ? "Last name"
                         : state.userLastname.value,
                     style: TextStyle(
+                        fontSize: 18,
                         color: signalBlack,
                         fontWeight: state.userLastname.value.isEmpty
                             ? FontWeight.w200

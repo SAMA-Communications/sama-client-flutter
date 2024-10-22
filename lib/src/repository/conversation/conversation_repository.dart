@@ -148,6 +148,7 @@ class ConversationRepository {
 
     final List<ConversationModel> result = conversations.map((element) {
       final opponent = participantsMap[element.opponentId];
+      //can be null if user deleted
       final owner = participantsMap[element.ownerId];
 
       return ConversationModel(
@@ -171,6 +172,10 @@ class ConversationRepository {
     return result;
   }
 
+  Future<ConversationModel?> getConversationById(String conversationId) async {
+    return localDataSource.getConversationById(conversationId);
+  }
+
   Future<ConversationModel> createConversation(
       List<api.User> participants, String type,
       [String? name, File? avatarUrl]) async {
@@ -190,8 +195,7 @@ class ConversationRepository {
 
     var localUser = await userRepository.getLocalUser();
     final opponent = participantsMap[conversation.opponentId];
-    final owner = participantsMap[conversation.ownerId];
-
+    final owner = localUser;
     var result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
@@ -206,12 +210,49 @@ class ConversationRepository {
             getConversationAvatar(conversation, owner, opponent, localUser));
 
     localDataSource.addConversation(result);
+    // TODO RP check (added cause group is not shown if empty)
+    _conversationsController.add(result);
     return result;
   }
 
-  Future<bool> deleteConversation(String id) async {
-    var result = await api.deleteConversation(id);
-    if (result) localDataSource.removeConversation(id);
+  Future<ConversationModel?> updateConversation(
+      {required String id,
+      String? name,
+      String? description,
+      Set<api.User>? addParticipants,
+      Set<api.User>? removeParticipants,
+      File? avatarUrl}) async {
+    Avatar? avatar;
+    if (avatarUrl != null) {
+      var compressedFile =
+          await compressImageFile(avatarUrl, const Size(640, 480));
+      final blur = await getImageHashInIsolate(compressedFile);
+      final id = await api.uploadAvatarFile(compressedFile);
+      final name = basename(compressedFile.path);
+      avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
+    }
+
+    var conversation = await api.updateConversation(
+        id,
+        name,
+        description,
+        addParticipants?.map((user) => user.id!).toList(),
+        removeParticipants?.map((user) => user.id!).toList(),
+        avatar);
+
+    var result = localDataSource.getConversationById(id)!.copyWith(
+        name: conversation.name!,
+        description: conversation.description,
+        avatar: conversation.avatar);
+    localDataSource.updateConversation(result);
+    _conversationsController.add(result);
+    return result;
+  }
+
+  Future<bool> deleteConversation(ConversationModel conversation) async {
+    var result = await api.deleteConversation(conversation.id);
+    if (result) localDataSource.removeConversation(conversation.id);
+    _conversationsController.add(conversation);
     return result;
   }
 

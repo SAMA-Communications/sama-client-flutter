@@ -4,10 +4,10 @@ import '../colors.dart';
 
 const columnItemMargin = 10.0;
 
-class UserAvatarForm extends StatelessWidget {
-  final String? userAvatar;
+class AvatarForm extends StatelessWidget {
+  final String? avatar;
 
-  const UserAvatarForm({super.key, required this.userAvatar});
+  const AvatarForm({super.key, required this.avatar});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +17,10 @@ class UserAvatarForm extends StatelessWidget {
           borderRadius: BorderRadius.circular(5.0),
         ),
         padding: const EdgeInsets.all(4.0),
-        height: 75.0,
-        width: 75.0,
+        height: 85.0,
+        width: 85.0,
         child: Center(child: () {
-          if (userAvatar == null || userAvatar!.isEmpty) {
+          if (avatar == null || avatar!.isEmpty) {
             return const Icon(
               Icons.image_outlined,
               color: dullGray,
@@ -28,7 +28,7 @@ class UserAvatarForm extends StatelessWidget {
             );
           } else {
             return Image.network(
-              userAvatar!,
+              avatar!,
               height: 75.0,
               width: 75.0,
               fit: BoxFit.cover,

@@ -30,18 +30,11 @@ class UserInfoPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: black,
           automaticallyImplyLeading: false,
-          leading: IconButton(
-            icon: Image.asset(
-              'assets/images/vector_logo.png',
-              width: 32,
-              fit: BoxFit.cover,
-            ),
-            onPressed: () {},
-          ),
           title: const Text(
             'User information',
             style: TextStyle(color: white),
           ),
+          centerTitle: true,
         ),
         body: UserInfoForm(user: user));
   }

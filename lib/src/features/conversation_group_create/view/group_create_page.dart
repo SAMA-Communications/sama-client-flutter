@@ -13,7 +13,7 @@ import '../../conversation_create/bloc/conversation_create_state.dart';
 import '../../search/bloc/global_search_bloc.dart';
 import '../../search/view/search_bar.dart';
 import '../bloc/group_bloc.dart';
-import 'group_form.dart';
+import 'group_create_form.dart';
 
 class GroupPage extends StatelessWidget {
   const GroupPage({super.key});

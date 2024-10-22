@@ -51,7 +51,7 @@ class HeaderCard extends StatelessWidget {
         title: Center(
           child: Padding(
             padding: EdgeInsets.only(right: arrowBackSize, top: 8),
-            child: UserAvatarForm(userAvatar: user.avatar?.imageUrl),
+            child: AvatarForm(avatar: user.avatar?.imageUrl),
           ),
         ),
         subtitle: Padding(
@@ -135,6 +135,7 @@ class _StartConversationForm extends StatelessWidget {
           } else if (state is ConversationCreatedState) {
             // loadingOverlay.hide();// for now disable
             final conversation = state.conversation;
+            Navigator.popUntil(context, (route) => route.isFirst);
             context.go('$conversationListScreenPath/$conversationScreenSubPath',
                 extra: conversation);
           } else if (state is ConversationCreatedStateError) {
@@ -154,26 +155,5 @@ class _StartConversationForm extends StatelessWidget {
                 onPressed: () => context.read<ConversationCreateBloc>().add(
                       ConversationCreated(user: user, type: 'u'),
                     ))));
-  }
-}
-
-//TODO RP consider to move this to list with participants on group chat
-class _RemoveParticipantForm extends StatelessWidget {
-  const _RemoveParticipantForm();
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton.icon(
-      onPressed: () {},
-      icon: const Icon(Icons.remove_circle_outline, color: red, size: 25),
-      style: TextButton.styleFrom(
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          alignment: Alignment.centerLeft),
-      label: const Text(
-        'Remove participant',
-        style: TextStyle(fontWeight: FontWeight.w300),
-      ),
-    );
   }
 }
