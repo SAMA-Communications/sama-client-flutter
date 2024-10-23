@@ -22,7 +22,7 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: 36,
+              height: 46,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(24),
