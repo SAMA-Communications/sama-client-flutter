@@ -111,7 +111,7 @@ class LoginFormState extends State<LoginForm> {
                             loginWithNewUser = checked ?? true;
                           });
                         }),
-                    const Text('* Sign in automatically as a new user')
+                    const Text('* Sign in automatically')
                   ],
                 )),
             const Padding(padding: EdgeInsets.all(4)),

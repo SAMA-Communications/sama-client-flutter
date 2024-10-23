@@ -57,14 +57,14 @@ class ConversationRepository {
           updatedAt: message.conversation!.updatedAt!,
           type: message.conversation!.type!,
           name: getConversationName(
-              message.conversation!, opponent, owner, localUser),
-          opponent: opponent,
+              message.conversation!, owner, opponent, localUser),
+          opponent: getConversationOpponent(owner, opponent, localUser),
           owner: owner,
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
           lastMessage: message.conversation!.lastMessage,
           description: message.conversation!.description,
           avatar: getConversationAvatar(
-              message.conversation!, opponent, owner, localUser));
+              message.conversation!, owner, opponent, localUser));
       if (message.type == SystemChatMessageType.conversationCreated) {
         localDataSource.addConversation(conversation);
       } else if (message.type == SystemChatMessageType.conversationUpdated) {
@@ -156,13 +156,13 @@ class ConversationRepository {
         createdAt: element.createdAt!,
         updatedAt: element.updatedAt!,
         type: element.type!,
-        name: getConversationName(element, opponent, owner, localUser),
-        opponent: opponent,
+        name: getConversationName(element, owner, opponent, localUser),
+        opponent: getConversationOpponent(owner, opponent, localUser),
         owner: owner,
         unreadMessagesCount: element.unreadMessagesCount,
         lastMessage: element.lastMessage,
         description: element.description,
-        avatar: getConversationAvatar(element, opponent, owner, localUser),
+        avatar: getConversationAvatar(element, owner, opponent, localUser),
       );
     }).toList();
 
@@ -201,13 +201,13 @@ class ConversationRepository {
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: getConversationName(conversation, opponent, owner, localUser),
-        opponent: opponent,
+        name: getConversationName(conversation, owner, opponent, localUser),
+        opponent: getConversationOpponent(owner, opponent, localUser),
         owner: owner,
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage,
         avatar:
-            getConversationAvatar(conversation, opponent, owner, localUser));
+            getConversationAvatar(conversation, owner, opponent, localUser));
 
     localDataSource.addConversation(result);
     // TODO RP check (added cause group is not shown if empty)

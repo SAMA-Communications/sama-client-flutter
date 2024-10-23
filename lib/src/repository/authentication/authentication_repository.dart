@@ -85,8 +85,8 @@ class AuthenticationRepository {
     });
   }
 
-  _disposeLocalUser() {
-    SecureStorage.instance.deleteLocalUser();
+  _disposeLocalUser() async {
+    await SecureStorage.instance.deleteLocalUser();
     api.ReconnectionManager.instance.destroy();
     api.ConnectionManager.instance.currentUser = null;
     api.ConnectionManager.instance.token = null;
