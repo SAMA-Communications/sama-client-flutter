@@ -79,17 +79,16 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: black,
       automaticallyImplyLeading: false,
-      leading: IconButton(
-        icon: Image.asset(
-          'assets/images/vector_logo.png',
-          width: 32,
-          fit: BoxFit.cover,
-        ),
-        tooltip: 'Profile',
-        onPressed: () {
-          context.push(profilePath);
-        },
-      ),
+      leading: Align(
+          alignment: Alignment.centerRight,
+          child: IconButton(
+            icon:
+                const Icon(Icons.person_outline, color: lightWhite, size: 32.0),
+            tooltip: 'Profile',
+            onPressed: () {
+              context.push(profilePath);
+            },
+          )),
       title: const Text(
         "Chat",
         style: TextStyle(color: white),

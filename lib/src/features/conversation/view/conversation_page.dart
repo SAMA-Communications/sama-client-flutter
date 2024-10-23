@@ -1,13 +1,19 @@
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../api/api.dart';
 import '../../../db/models/conversation.dart';
+import '../../../navigation/constants.dart';
 import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
+import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/conversation_bloc.dart';
@@ -60,6 +66,7 @@ class ConversationPage extends StatelessWidget {
           title: Padding(
             padding: const EdgeInsets.only(top: 0.0),
             child: ListTile(
+              onTap: () => _infoAction(context),
               title: Text(
                 overflow: TextOverflow.ellipsis,
                 state.conversation.name,
@@ -74,38 +81,34 @@ class ConversationPage extends StatelessWidget {
               ),
             ),
           ),
-          actions: [
-            IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.more_vert_outlined,
-                  color: dullGray,
-                ))
-          ],
+          actions: [_PopupMenuButton()],
         ),
         body: Column(
           children: [
             const Flexible(child: MessagesList()),
-            context.read<SharingIntentBloc>().state.status ==
-                    SharingIntentStatus.processing
-                ? BlocListener<SendMessageBloc, SendMessageState>(
-                    listener: (context, sendState) {
-                      if (sendState.status == SendMessageStatus.success ||
-                          sendState.status == SendMessageStatus.failure) {
-                        context
-                            .read<SharingIntentBloc>()
-                            .add(SharingIntentCompleted());
-                      }
-                    },
-                    child: MessageInput(
-                        sharedText: context
-                            .read<SharingIntentBloc>()
-                            .state
-                            .sharedFiles
-                            .firstOrNull
-                            ?.path),
-                  )
-                : MessageInput()
+            Padding(
+                //need extra space for safe area on ios
+                padding: EdgeInsets.only(bottom: Platform.isIOS ? 16.0 : 0.0),
+                child: context.read<SharingIntentBloc>().state.status ==
+                        SharingIntentStatus.processing
+                    ? BlocListener<SendMessageBloc, SendMessageState>(
+                        listener: (context, sendState) {
+                          if (sendState.status == SendMessageStatus.success ||
+                              sendState.status == SendMessageStatus.failure) {
+                            context
+                                .read<SharingIntentBloc>()
+                                .add(SharingIntentCompleted());
+                          }
+                        },
+                        child: MessageInput(
+                            sharedText: context
+                                .read<SharingIntentBloc>()
+                                .state
+                                .sharedFiles
+                                .firstOrNull
+                                ?.path),
+                      )
+                    : MessageInput())
           ],
         ),
       );
@@ -146,6 +149,94 @@ class ConversationPage extends StatelessWidget {
       }
     } else {
       return '${participants.length} members';
+    }
+  }
+}
+
+enum _Menu { info, deleteAndLeave }
+
+class _PopupMenuButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var state = context.read<ConversationBloc>().state;
+    return PopupMenuButton<_Menu>(
+        position: PopupMenuPosition.under,
+        onSelected: (_Menu item) {
+          switch (item) {
+            case _Menu.info:
+              _infoAction(context);
+              break;
+            case _Menu.deleteAndLeave:
+              showDialog(
+                  context: context,
+                  builder: (_) {
+                    return BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                        child: AlertDialog(
+                          title: const Text('Delete chat',
+                              style: TextStyle(fontSize: 20)),
+                          content: const Text(
+                              'Do you want to delete this chat?',
+                              style: TextStyle(fontSize: 16)),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text("Cancel"),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                            TextButton(
+                              child: const Text("Ok"),
+                              onPressed: () {
+                                context
+                                    .read<ConversationBloc>()
+                                    .add(const ConversationDeleted());
+                              },
+                            ),
+                          ],
+                        ));
+                  });
+              break;
+          }
+        },
+        icon: const Icon(
+          Icons.more_vert_outlined,
+          color: dullGray,
+        ),
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuEntry<_Menu>>[
+            const PopupMenuItem<_Menu>(
+              padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+              value: _Menu.info,
+              child: ListTile(
+                leading: Icon(Icons.visibility_outlined),
+                title: Text('Info'),
+              ),
+            ),
+            if (state.conversation.lastMessage != null) ...[
+              const PopupMenuItem<_Menu>(
+                  padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                  value: _Menu.deleteAndLeave,
+                  child: ListTile(
+                    leading: Icon(Icons.exit_to_app_outlined),
+                    title: Text('Delete and leave'),
+                  ))
+            ],
+          ];
+        });
+  }
+}
+
+Future<void> _infoAction(BuildContext context) async {
+  var localUserId = context.read<AuthenticationBloc>().state.user.id;
+  var state = context.read<ConversationBloc>().state;
+
+  if (state.conversation.type == 'u') {
+    User user = state.participants.firstWhere((user) => user.id != localUserId);
+    context.push(userInfoPath, extra: user);
+  } else {
+    bool conversationUpdated =
+        await context.push(groupInfoPath, extra: state.conversation) as bool;
+    if (conversationUpdated && context.mounted) {
+      context.read<ConversationBloc>().add(const ParticipantsReceived());
     }
   }
 }

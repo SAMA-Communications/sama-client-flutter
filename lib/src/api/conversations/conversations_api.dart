@@ -11,6 +11,8 @@ const String conversationsRequest = 'conversation_list';
 const String getParticipantsByCids = 'get_participants_by_cids';
 const String conversationSearch = 'conversation_search';
 const String conversationCreate = 'conversation_create';
+const String conversationUpdate = 'conversation_update';
+const String conversationDelete = 'conversation_delete';
 
 Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
   return SamaConnectionService.instance
@@ -60,6 +62,34 @@ Future<Conversation> createConversation(List<String> participants, String type,
     if (avatar != null) 'image_object': avatar.toImageObjectJson(),
   }).then((response) {
     return Conversation.fromJson(response['conversation']);
+  });
+}
+
+Future<Conversation> updateConversation(
+    String id,
+    String? name,
+    String? description,
+    List<String>? addParticipants,
+    List<String>? removeParticipants,
+    Avatar? avatar) async {
+  return SamaConnectionService.instance.sendRequest(conversationUpdate, {
+    'id': id,
+    if (name != null) 'name': name,
+    if (description != null) 'description': description,
+    'participants': {
+      if (addParticipants != null) 'add': addParticipants,
+      if (removeParticipants != null) 'remove': removeParticipants,
+    },
+    if (avatar != null) 'image_object': avatar.toImageObjectJson(),
+  }).then((response) {
+    return Conversation.fromJson(response['conversation']);
+  });
+}
+
+Future<bool> deleteConversation(String id) async {
+  return SamaConnectionService.instance
+      .sendRequest(conversationDelete, {"id": id}).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
 

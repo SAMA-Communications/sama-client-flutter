@@ -14,6 +14,7 @@ class AvatarLetterIcon extends StatelessWidget {
     this.backgroundColor = black,
     this.textColor = dullGray,
     this.avatar,
+    this.isDeleted,
   });
 
   /// The text that will be used for the icon. It is truncated to 2 characters.
@@ -25,6 +26,7 @@ class AvatarLetterIcon extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final Avatar? avatar;
+  final bool? isDeleted;
 
   String getText() {
     if (name.isNotEmpty && ((lastName ?? '') != '')) {
@@ -54,13 +56,18 @@ class AvatarLetterIcon extends StatelessWidget {
                   width: size.width,
                   fit: BoxFit.cover,
                 )
-              : Text(
-                  getText(),
-                  style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: textColor,
-                      fontSize: size.height / 2.7),
-                ),
+              : isDeleted ?? false
+                  ? const Icon(
+                      Icons.person_off_outlined,
+                      size: 30.0,
+                    )
+                  : Text(
+                      getText(),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: textColor,
+                          fontSize: size.height / 2.7),
+                    ),
         ),
       ),
     );

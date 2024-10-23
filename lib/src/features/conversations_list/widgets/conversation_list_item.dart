@@ -25,6 +25,7 @@ class ConversationListItem extends StatelessWidget {
                 name: getUserName(conversation.opponent),
                 lastName: conversation.opponent?.lastName,
                 avatar: conversation.avatar,
+                isDeleted: isDeletedUser(conversation.opponent),
               )
             : AvatarGroupIcon(conversation.avatar),
         title: Text(

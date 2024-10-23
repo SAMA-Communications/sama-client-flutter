@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0
+
+### Released Forth Phase
+
+- Updated app name
+- Implemented 1-1 info screen
+- Implemented group info screen
+
+### Fixes
+-  iOS UI issues
+-  iOS ShareTo
+-  Attachments blinking download
+
 ## 0.1.0
 
 ### Released all core features

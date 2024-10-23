@@ -57,14 +57,14 @@ class ConversationRepository {
           updatedAt: message.conversation!.updatedAt!,
           type: message.conversation!.type!,
           name: getConversationName(
-              message.conversation!, opponent, owner, localUser),
-          opponent: opponent,
+              message.conversation!, owner, opponent, localUser),
+          opponent: getConversationOpponent(owner, opponent, localUser),
           owner: owner,
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
           lastMessage: message.conversation!.lastMessage,
           description: message.conversation!.description,
           avatar: getConversationAvatar(
-              message.conversation!, opponent, owner, localUser));
+              message.conversation!, owner, opponent, localUser));
       if (message.type == SystemChatMessageType.conversationCreated) {
         localDataSource.addConversation(conversation);
       } else if (message.type == SystemChatMessageType.conversationUpdated) {
@@ -148,6 +148,7 @@ class ConversationRepository {
 
     final List<ConversationModel> result = conversations.map((element) {
       final opponent = participantsMap[element.opponentId];
+      //can be null if user deleted
       final owner = participantsMap[element.ownerId];
 
       return ConversationModel(
@@ -155,13 +156,13 @@ class ConversationRepository {
         createdAt: element.createdAt!,
         updatedAt: element.updatedAt!,
         type: element.type!,
-        name: getConversationName(element, opponent, owner, localUser),
-        opponent: opponent,
+        name: getConversationName(element, owner, opponent, localUser),
+        opponent: getConversationOpponent(owner, opponent, localUser),
         owner: owner,
         unreadMessagesCount: element.unreadMessagesCount,
         lastMessage: element.lastMessage,
         description: element.description,
-        avatar: getConversationAvatar(element, opponent, owner, localUser),
+        avatar: getConversationAvatar(element, owner, opponent, localUser),
       );
     }).toList();
 
@@ -169,6 +170,10 @@ class ConversationRepository {
     _sortConversations(result);
     _removeEmptyPrivateConversations(result);
     return result;
+  }
+
+  Future<ConversationModel?> getConversationById(String conversationId) async {
+    return localDataSource.getConversationById(conversationId);
   }
 
   Future<ConversationModel> createConversation(
@@ -190,22 +195,64 @@ class ConversationRepository {
 
     var localUser = await userRepository.getLocalUser();
     final opponent = participantsMap[conversation.opponentId];
-    final owner = participantsMap[conversation.ownerId];
-
+    final owner = localUser;
     var result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: getConversationName(conversation, opponent, owner, localUser),
-        opponent: opponent,
+        name: getConversationName(conversation, owner, opponent, localUser),
+        opponent: getConversationOpponent(owner, opponent, localUser),
         owner: owner,
         unreadMessagesCount: conversation.unreadMessagesCount,
         lastMessage: conversation.lastMessage,
         avatar:
-            getConversationAvatar(conversation, opponent, owner, localUser));
+            getConversationAvatar(conversation, owner, opponent, localUser));
 
     localDataSource.addConversation(result);
+    // TODO RP check (added cause group is not shown if empty)
+    _conversationsController.add(result);
+    return result;
+  }
+
+  Future<ConversationModel?> updateConversation(
+      {required String id,
+      String? name,
+      String? description,
+      Set<api.User>? addParticipants,
+      Set<api.User>? removeParticipants,
+      File? avatarUrl}) async {
+    Avatar? avatar;
+    if (avatarUrl != null) {
+      var compressedFile =
+          await compressImageFile(avatarUrl, const Size(640, 480));
+      final blur = await getImageHashInIsolate(compressedFile);
+      final id = await api.uploadAvatarFile(compressedFile);
+      final name = basename(compressedFile.path);
+      avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
+    }
+
+    var conversation = await api.updateConversation(
+        id,
+        name,
+        description,
+        addParticipants?.map((user) => user.id!).toList(),
+        removeParticipants?.map((user) => user.id!).toList(),
+        avatar);
+
+    var result = localDataSource.getConversationById(id)!.copyWith(
+        name: conversation.name!,
+        description: conversation.description,
+        avatar: conversation.avatar);
+    localDataSource.updateConversation(result);
+    _conversationsController.add(result);
+    return result;
+  }
+
+  Future<bool> deleteConversation(ConversationModel conversation) async {
+    var result = await api.deleteConversation(conversation.id);
+    if (result) localDataSource.removeConversation(conversation.id);
+    _conversationsController.add(conversation);
     return result;
   }
 

@@ -91,9 +91,15 @@ class SecureStorage {
   }
 
   Future<void> deleteLocalUser() async {
-    // _storage.delete(key: storageUserLogin);
-    // _storage.delete(key: storageUserPsw);
-    // _storage.delete(key: storageUserDeviceId);
-    _storage.deleteAll();
+    _storage.delete(key: storageUserId);
+    _storage.delete(key: storageUserLogin);
+    _storage.delete(key: storageUserPsw);
+    _storage.delete(key: storageUserDeviceId);
+    _storage.delete(key: storageUserFirstName);
+    _storage.delete(key: storageUserLastName);
+    _storage.delete(key: storageUserPhone);
+    _storage.delete(key: storageUserEmail);
+    _storage.delete(key: storageUserAvatar);
+    // _storage.deleteAll();
   }
 }

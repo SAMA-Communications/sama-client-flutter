@@ -37,14 +37,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     return AppBar(
       backgroundColor: black,
       // titleSpacing: 0,
-      leading: IconButton(
-        icon: Image.asset(
-          'assets/images/vector_logo.png',
-          width: 32,
-          fit: BoxFit.cover,
-        ),
-        onPressed: () {},
-      ),
+      leading: const BackButton(color: Colors.white),
       title: SizedBox(
         height: kToolbarHeight - 18,
         child: TextField(

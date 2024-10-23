@@ -43,7 +43,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _onMessagesRequested,
       transformer: throttleDroppable(throttleDuration),
     );
-    on<_ParticipantsReceived>(
+    on<ParticipantsReceived>(
       _onParticipantsReceived,
     );
     on<_MessageReceived>(
@@ -52,6 +52,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<_ConversationUpdated>(
       _onConversationUpdated,
     );
+    on<ConversationDeleted>(
+      _onConversationDeleted,
+    );
+
+    add(const ParticipantsReceived());
 
     updateConversationStreamSubscription =
         conversationRepository.updateConversationStream.listen((chat) async {
@@ -68,11 +73,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       if (message.cid != currentConversation.id) return;
 
       add(_MessageReceived(message));
-    });
 
-    conversationRepository
-        .getParticipants([currentConversation.id]).then((participants) {
-      add(_ParticipantsReceived(participants.toSet()));
+      switch (message.extension?['type']) {
+        case 'added_participant':
+        case 'removed_participant':
+        case 'left_participants':
+          add(const ParticipantsReceived());
+      }
     });
   }
 
@@ -126,13 +133,22 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   Future<void> _onParticipantsReceived(
-      _ParticipantsReceived event, Emitter<ConversationState> emit) async {
-    emit(state.copyWith(participants: event.participants));
+      ParticipantsReceived event, Emitter<ConversationState> emit) async {
+    var participants =
+        await conversationRepository.getParticipants([currentConversation.id]);
+    emit(state.copyWith(participants: Set.of(participants)));
   }
 
   Future<void> _onConversationUpdated(
       _ConversationUpdated event, Emitter<ConversationState> emit) async {
     emit(state.copyWith(conversation: event.conversation));
+  }
+
+  Future<void> _onConversationDeleted(
+      ConversationDeleted event, Emitter<ConversationState> emit) async {
+    await conversationRepository.deleteConversation(state.conversation)
+        ? emit(state.copyWith(status: ConversationStatus.delete))
+        : emit(state.copyWith(status: ConversationStatus.failure));
   }
 
   FutureOr<void> _onMessageReceived(
