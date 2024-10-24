@@ -1,6 +1,11 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:sama_client_flutter/src/shared/push_notifications/bloc/push_notifications_bloc.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'src/api/api.dart';
 import 'src/navigation/app_router.dart';
 import 'src/repository/attachments/attachments_repository.dart';
 import 'src/repository/authentication/authentication_repository.dart';
@@ -14,7 +19,16 @@ import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
 import 'src/shared/ui/colors.dart';
 
-void main() {
+//delete if no need
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
+
   runApp(const App());
 }
 
@@ -91,6 +105,9 @@ class _AppState extends State<App> {
           ),
         ),
         BlocProvider(create: (context) => SharingIntentBloc()),
+        BlocProvider(
+            create: (context) => PushNotificationsBloc(
+                conversationRepository: _conversationRepository)),
       ], child: const AppView()),
     );
   }
@@ -107,7 +124,7 @@ class _AppViewState extends State<AppView> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: router(context),
+      routerConfig: router(context, navigatorKey),
       title: 'SAMA client Flutter',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: slateBlue),

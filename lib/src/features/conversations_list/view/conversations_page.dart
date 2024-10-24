@@ -35,6 +35,8 @@ class HomePage extends StatelessWidget {
         floatingActionButton: state.status == SharingIntentStatus.processing
             ? null
             : FloatingActionButton(
+                // fix error https://github.com/flutter/flutter/issues/115358
+                heroTag: null,
                 child: const Icon(Icons.add_comment_outlined, size: 32.0),
                 onPressed: () {
                   context.push(groupCreateScreenPath);

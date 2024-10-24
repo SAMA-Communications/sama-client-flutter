@@ -7,6 +7,7 @@ export 'connection/connection_manager.dart';
 export 'connection/exceptions.dart';
 export 'conversations/models/models.dart';
 export 'conversations/conversations_api.dart';
+export 'push_notifications/push_notifications_manager.dart';
 export 'users/models/models.dart';
 export 'users/users_api.dart';
 export 'utils/connectivity_manager.dart';

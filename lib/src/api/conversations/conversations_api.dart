@@ -53,6 +53,22 @@ Future<List<String>> searchConversationsIdsByName(String name) async {
   });
 }
 
+Future<List<Conversation>> fetchConversationsByIds(List<String> cids) async {
+  return SamaConnectionService.instance.sendRequest(conversationsRequest, {
+    'ids': cids,
+  }).then((response) {
+    List<Conversation> conversations;
+    List<dynamic> items = List.of(response['conversations']);
+    if (items.isEmpty) {
+      conversations = [];
+    } else {
+      conversations =
+          items.map((element) => Conversation.fromJson(element)).toList();
+    }
+    return conversations;
+  });
+}
+
 Future<Conversation> createConversation(List<String> participants, String type,
     String? name, Avatar? avatar) async {
   return SamaConnectionService.instance.sendRequest(conversationCreate, {
