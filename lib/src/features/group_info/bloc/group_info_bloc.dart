@@ -222,7 +222,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
             addParticipants: const GroupParticipants.pure(),
             removeParticipants: const GroupParticipants.pure(),
             informationMessage: 'Chat was successfully updated'));
-      } catch (e) {
+      } on ResponseException catch (e) {
         var chat = await _conversationRepository
             .getConversationById(state.conversation.id);
         var participants =
@@ -235,7 +235,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
             participants: GroupParticipants.pure(participants.toSet()),
             addParticipants: const GroupParticipants.pure(),
             removeParticipants: const GroupParticipants.pure(),
-            errorMessage: 'Chat wasn\'t updated: $e'));
+            errorMessage: 'Chat wasn\'t updated: ${e.message}'));
       }
     }
   }
