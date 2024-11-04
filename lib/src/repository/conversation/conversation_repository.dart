@@ -6,6 +6,7 @@ import 'package:path/path.dart';
 
 import '../../api/api.dart' as api;
 import '../../api/api.dart';
+import '../../api/push_notifications/models/models.dart';
 import '../../db/models/conversation.dart';
 import '../../repository/messages/messages_repository.dart';
 import '../../shared/utils/media_utils.dart';
@@ -96,6 +97,13 @@ class ConversationRepository {
             lastMessage: message, unreadMessagesCount: unreadMsgCountUpdated);
         localDataSource.updateConversation(updatedConversation);
         _conversationsController.add(updatedConversation);
+
+        api.showNotificationIfAppPaused(PushMessageData(
+            cid: updatedConversation.id,
+            title: updatedConversation.name,
+            body: updatedConversation.lastMessage?.body,
+            firstAttachmentFileId:
+                updatedConversation.lastMessage?.attachments?.first.fileId));
       }
     });
   }
@@ -164,9 +172,10 @@ class ConversationRepository {
 
     if (conversation == null) {
       final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
+      if (conversation == null) return null;
       final localUser = await userRepository.getLocalUser();
       final participants = await getParticipantsAsMap([cid]);
-      return _buildConversationModel(conversation!, participants, localUser);
+      return _buildConversationModel(conversation, participants, localUser);
     }
     return conversation;
   }

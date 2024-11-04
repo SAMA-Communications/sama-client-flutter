@@ -1,11 +1,12 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
@@ -104,6 +105,19 @@ Future<img.Image> _compressWithFile(File imageFile) async {
   return img.decodeImage(imageData!)!;
 }
 
+Future<bool> checkIfImageBytes(List<int> bytes) async {
+  try {
+    await instantiateImageCodec(Uint8List.fromList(bytes));
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+Future<List<int>> loadImageBytesByUrl(String url) async {
+  return (await http.get(Uri.parse(url))).bodyBytes;
+}
+
 Future<File> compressVideoFile(File videoFile) async {
   try {
     MediaInfo? mediaInfo = await VideoCompress.compressVideo(
@@ -151,6 +165,15 @@ Future<String?> getVideoThumbnailByUrl(String url, String fileId) async {
       return file.path;
     });
   });
+}
+
+Future<Uint8List?> getVideoThumbnailBytesByUrl(String url) async {
+  return VideoThumbnail.thumbnailData(
+    video: url,
+    imageFormat: ImageFormat.JPEG,
+    maxWidth: 128,
+    quality: 80,
+  );
 }
 
 Future<File> compressFile(File file) async {

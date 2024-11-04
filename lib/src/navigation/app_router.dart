@@ -129,7 +129,10 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
           context
               .read<PushNotificationsBloc>()
               .add(PushNotificationsCompleted());
-          return ('$conversationListScreenPath/$conversationScreenSubPath');
+          if (context.read<PushNotificationsBloc>().state.conversation !=
+              null) {
+            return ('$conversationListScreenPath/$conversationScreenSubPath');
+          }
         }
 
         if (status == AuthenticationStatus.authenticated) {

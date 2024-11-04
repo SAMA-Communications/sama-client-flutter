@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:sama_client_flutter/src/shared/push_notifications/bloc/push_notifications_bloc.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +15,7 @@ import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_data_source.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
+import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
 import 'src/shared/ui/colors.dart';
 

@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../../shared/utils/media_utils.dart';
 import '../../shared/secure_storage.dart';
 import '../../shared/ui/colors.dart';
 import '../api.dart';
 import '/src/api/push_notifications/push_notifications_api.dart';
+import 'models/models.dart';
+import 'models/push_message_data.dart';
 
 const String channelId = 'sama_messages_channel_id';
 const String channelName = 'Sama messages';
@@ -72,7 +77,7 @@ class PushNotificationsManager {
     //Foreground messages
     FirebaseMessaging.onMessage.listen((remoteMessage) {
       print('[onMessage] message: ${remoteMessage.data}');
-      showNotification(remoteMessage);
+      showNotification(PushMessageData.fromJson(remoteMessage.data));
     });
 
     // app is in pause state
@@ -160,29 +165,62 @@ class PushNotificationsManager {
   }
 }
 
-showNotification(RemoteMessage message) {
-  print('[showNotification] message: ${message.data}');
-  Map<String, dynamic> data = message.data;
+showNotificationIfAppPaused(PushMessageData data) {
+  if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
+    showNotification(data);
+  }
+}
 
-  NotificationDetails buildNotificationDetails(
+showNotification(PushMessageData data) async {
+  print('[showNotification] message: $data');
+  if (data.cid == null) return;
+
+  Future<NotificationDetails> buildNotificationDetails(
     int? badge,
     String threadIdentifier,
-  ) {
+  ) async {
     final DarwinNotificationDetails darwinNotificationDetails =
         DarwinNotificationDetails(
       badgeNumber: badge,
       threadIdentifier: threadIdentifier,
     );
 
+    ByteArrayAndroidBitmap? bitmap;
+    StyleInformation? styleInformation;
+    if (data.firstAttachmentUrl != null) {
+      var imageData = await loadImageBytesByUrl(data.firstAttachmentUrl!);
+      //TODO RP temp solution while no attachment_type
+      var isImage = await checkIfImageBytes(imageData);
+
+      if (isImage) {
+        bitmap =
+            ByteArrayAndroidBitmap.fromBase64String(base64Encode(imageData));
+      } else {
+        var bytes = await getVideoThumbnailBytesByUrl(data.firstAttachmentUrl!);
+        bitmap = ByteArrayAndroidBitmap.fromBase64String(base64Encode(bytes!));
+      }
+
+      styleInformation = BigPictureStyleInformation(
+        bitmap,
+        hideExpandedLargeIcon: true,
+        contentTitle: data.title,
+        htmlFormatContentTitle: true,
+        summaryText: '${isImage ? 'Image' : 'Video'} attachment',
+        htmlFormatSummaryText: true,
+      );
+    }
+
     AndroidNotificationDetails androidPlatformChannelSpecifics =
-        const AndroidNotificationDetails(
+        AndroidNotificationDetails(
       channelId,
       channelName,
       channelDescription: channelDescription,
       importance: Importance.max,
       priority: Priority.high,
+      largeIcon: bitmap,
       showWhen: true,
       color: slateBlue,
+      styleInformation: styleInformation,
     );
 
     return NotificationDetails(
@@ -190,14 +228,18 @@ showNotification(RemoteMessage message) {
         iOS: darwinNotificationDetails);
   }
 
-  var badge = int.tryParse(data['badge'].toString());
-  var threadId = data['ios_thread_id'] ?? data['cid'] ?? 'ios_thread_id';
+  // var badge = int.tryParse(data['badge'].toString());
+  // var threadId = data['ios_thread_id'] ?? data['cid'] ?? 'ios_thread_id';
 
   FlutterLocalNotificationsPlugin().show(
-    data['cid'].hashCode,
-    data['title'] ?? "Sama",
-    data['body'] ?? 'new message',
-    buildNotificationDetails(badge, threadId),
+    data.cid.hashCode,
+    data.title ?? "Sama",
+    data.body?.isNotEmpty == true
+        ? data.body
+        : data.firstAttachmentFileId != null || data.firstAttachmentUrl != null
+            ? 'Media attachment'
+            : 'message',
+    await buildNotificationDetails(0, 'threadId'),
     payload: jsonEncode(data),
   );
 }
@@ -206,7 +248,7 @@ showNotification(RemoteMessage message) {
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   print('[onBackgroundMessage] message: ${message.data}}');
 
-  showNotification(message);
+  showNotification(PushMessageData.fromJson(message.data));
   // if (!Platform.isIOS) {
   //   updateBadgeCount(int.tryParse(message.data['badge'].toString()));
   // }
