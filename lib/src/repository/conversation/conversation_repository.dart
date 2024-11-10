@@ -49,7 +49,8 @@ class ConversationRepository {
       ]);
 
       var localUser = await userRepository.getLocalUser();
-      final opponent = participants[message.conversation!.opponentId];
+      final opponent = participants[message.conversation!.opponentId] ??
+          participants[message.from!];
       final owner = participants[message.conversation!.ownerId];
 
       final conversation = ConversationModel(
@@ -82,6 +83,11 @@ class ConversationRepository {
         localDataSource.removeConversation(message.cid);
       }
       _conversationsController.add(conversation);
+
+      api.showNotificationIfAppPaused(PushMessageData(
+          cid: conversation.id,
+          title: conversation.name,
+          body: getSystemMessagePushBody(conversation, message, opponent)));
     });
 
     incomingMessagesSubscription =

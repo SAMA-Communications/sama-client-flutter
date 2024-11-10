@@ -1,4 +1,5 @@
 import '../../api/api.dart';
+import '../../db/models/conversation.dart';
 
 String getUserName(User? user) {
   if (user == null) return 'Deleted user';
@@ -13,6 +14,18 @@ String getConversationName(
   if (conversation.type! == 'g') return conversation.name!;
   var user = conversation.opponentId == localUser?.id ? owner : opponent;
   return getUserName(user);
+}
+
+String getSystemMessagePushBody(
+    ConversationModel conversation, SystemChatMessage message, User? opponent) {
+  var opponentName = getUserName(opponent);
+  return message.type == SystemChatMessageType.conversationKicked
+      ? '$opponentName removed you from conversation'
+      : message.type == SystemChatMessageType.conversationUpdated
+          ? '$opponentName added you to conversation'
+          : message.type == SystemChatMessageType.conversationCreated
+              ? '$opponentName created a new conversation'
+              : 'message';
 }
 
 Avatar? getConversationAvatar(
