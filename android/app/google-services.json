@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "172400770458",
+    "project_id": "sama-2602d",
+    "storage_bucket": "sama-2602d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:172400770458:android:cc7027b2fe9a119fdb8e23",
+        "android_client_info": {
+          "package_name": "com.sama.sama_client_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKgSEXilTV3NuAwRP4oMWPsfreP7p2Ugs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

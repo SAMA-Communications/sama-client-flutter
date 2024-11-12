@@ -61,7 +61,6 @@ Future<bool> logout() {
   return SamaConnectionService.instance
       .sendRequest(userLogoutRequestName, {}).then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
-    ;
   });
 }
 

@@ -15,11 +15,13 @@ import '../features/splash_page.dart';
 import '../features/user_info/view/user_info_page.dart';
 import '../repository/authentication/authentication_repository.dart';
 import '../shared/auth/bloc/auth_bloc.dart';
+import '../shared/push_notifications/bloc/push_notifications_bloc.dart';
 import '../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../shared/utils/observer_utils.dart';
 import 'constants.dart';
 
-GoRouter router(BuildContext context) => GoRouter(
+GoRouter router(BuildContext context, navigatorKey) => GoRouter(
+      navigatorKey: navigatorKey,
       observers: [routeObserver],
       routes: <RouteBase>[
         GoRoute(
@@ -48,7 +50,9 @@ GoRouter router(BuildContext context) => GoRouter(
             GoRoute(
               path: conversationScreenSubPath,
               builder: (context, state) {
-                return ConversationPage.route(state.extra);
+                var extra = state.extra ??
+                    context.read<PushNotificationsBloc>().state.conversation;
+                return ConversationPage.route(extra);
               },
             )
           ],
@@ -93,6 +97,7 @@ GoRouter router(BuildContext context) => GoRouter(
       refreshListenable: GoRouterRefreshBloc(
         BlocProvider.of<AuthenticationBloc>(context),
         BlocProvider.of<SharingIntentBloc>(context),
+        BlocProvider.of<PushNotificationsBloc>(context),
       ),
       redirect: (context, state) {
         final status = context.read<AuthenticationBloc>().state.status;
@@ -105,6 +110,29 @@ GoRouter router(BuildContext context) => GoRouter(
           print('refreshListenable status sharing');
           context.read<SharingIntentBloc>().add(SharingIntentProcessing());
           return rootScreenPath;
+        }
+
+        if (context.read<PushNotificationsBloc>().state.status ==
+                PushNotificationsStatus.clicked &&
+            status == AuthenticationStatus.authenticated) {
+          print('refreshListenable status notification clicked');
+          context
+              .read<PushNotificationsBloc>()
+              .add(PushNotificationsProcessing());
+          return splashScreenPath;
+        }
+
+        if (context.read<PushNotificationsBloc>().state.status ==
+                PushNotificationsStatus.processing &&
+            status == AuthenticationStatus.authenticated) {
+          print('refreshListenable status notification processing');
+          context
+              .read<PushNotificationsBloc>()
+              .add(PushNotificationsCompleted());
+          if (context.read<PushNotificationsBloc>().state.conversation !=
+              null) {
+            return ('$conversationListScreenPath/$conversationScreenSubPath');
+          }
         }
 
         if (status == AuthenticationStatus.authenticated) {
@@ -125,8 +153,8 @@ GoRouter router(BuildContext context) => GoRouter(
 // The router Bloc that required to manage the user authorisation state and sharing feature at any app point.
 // When authorisation state was changer the router will catch this event and redirect to the right screen
 class GoRouterRefreshBloc extends ChangeNotifier {
-  GoRouterRefreshBloc(
-      AuthenticationBloc authBloc, SharingIntentBloc sharedBloc) {
+  GoRouterRefreshBloc(AuthenticationBloc authBloc, SharingIntentBloc sharedBloc,
+      PushNotificationsBloc notificationsBloc) {
     _blocStream = authBloc.stream.listen(
       (AuthenticationState authenticationState) {
         print('[GoRouterRefreshBloc][listen] state: $authenticationState');
@@ -146,15 +174,27 @@ class GoRouterRefreshBloc extends ChangeNotifier {
         }
       },
     );
+    _notificationsBloc = notificationsBloc.stream.listen(
+      (PushNotificationsState state) {
+        if (state.status == PushNotificationsStatus.clicked ||
+            state.status == PushNotificationsStatus.processing) {
+          print(
+              '[GoRouterRefreshBloc][listen] notification clicked/processing state: $state');
+          notifyListeners();
+        }
+      },
+    );
   }
 
   late final StreamSubscription<AuthenticationState> _blocStream;
   late final StreamSubscription<SharingIntentState> _sharedBloc;
+  late final StreamSubscription<PushNotificationsState> _notificationsBloc;
 
   @override
   void dispose() {
     _blocStream.cancel();
     _sharedBloc.cancel();
+    _notificationsBloc.cancel();
     super.dispose();
   }
 }

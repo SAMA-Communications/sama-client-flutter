@@ -27,15 +27,18 @@ class AuthenticationRepository {
   Future<void> logIn({
     required String username,
     required String password,
+    String? deviceId,
   }) async {
-    var deviceId = await AppSetId().getIdentifier();
-
     try {
-      api.User user =
-          api.User(login: username, password: password, deviceId: deviceId);
-      api.User result = (await api.login(user)).copyWith(password: password);
+      api.User user = api.User(
+          login: username,
+          password: password,
+          deviceId: deviceId ?? await AppSetId().getIdentifier());
+      api.User result = (await api.login(user))
+          .copyWith(password: password, deviceId: user.deviceId);
       SecureStorage.instance.saveLocalUserIfNeed(result);
       api.ReconnectionManager.instance.init();
+      api.PushNotificationsManager.instance.subscribe();
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {
@@ -56,12 +59,7 @@ class AuthenticationRepository {
           login: username, password: password, deviceId: deviceId ?? '');
 
       if (signInWithCreatedUser) {
-        final result = (await api.login(api.User(
-                login: username, password: password, deviceId: deviceId)))
-            .copyWith(password: password);
-        SecureStorage.instance.saveLocalUserIfNeed(result);
-        api.ReconnectionManager.instance.init();
-        _controller.add(AuthenticationStatus.authenticated);
+        logIn(username: username, password: password, deviceId: deviceId);
       }
 
       return Future.value(null);
@@ -74,12 +72,14 @@ class AuthenticationRepository {
   }
 
   Future<void> logOut() async {
+    await api.PushNotificationsManager.instance.unsubscribe();
     await api.logout().then((success) {
       _disposeLocalUser();
     });
   }
 
   Future<void> signOut() async {
+    await api.PushNotificationsManager.instance.unsubscribe();
     await api.signOut().then((success) {
       _disposeLocalUser();
     });

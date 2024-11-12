@@ -71,7 +71,7 @@ class AuthenticationBloc
   }
 
   Future<void> _onAuthenticationSignOutRequested(
-      AuthenticationSignOutRequested event,
+    AuthenticationSignOutRequested event,
     Emitter<AuthenticationState> emit,
   ) async {
     try {
@@ -92,7 +92,9 @@ class AuthenticationBloc
     try {
       final user = await SecureStorage.instance.getLocalUser();
       await _authenticationRepository.logIn(
-          username: user!.login!, password: user.password!);
+          username: user!.login!,
+          password: user.password!,
+          deviceId: user.deviceId);
     } catch (_) {}
   }
 
