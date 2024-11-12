@@ -18,14 +18,8 @@ class ProfilePage extends StatelessWidget {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           backgroundColor: black,
-          automaticallyImplyLeading: false,
-          leading: IconButton(
-            icon: Image.asset(
-              'assets/images/vector_logo.png',
-              width: 32,
-              fit: BoxFit.cover,
-            ),
-            onPressed: () {},
+          iconTheme: const IconThemeData(
+            color: white, //change your color here
           ),
           title: const Text(
             'Personal information',

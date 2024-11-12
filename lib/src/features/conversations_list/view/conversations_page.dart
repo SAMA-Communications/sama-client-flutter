@@ -66,6 +66,7 @@ class SelectChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         "Select Chat",
         style: TextStyle(color: white),
       ),
+      centerTitle: true,
     );
   }
 
@@ -95,6 +96,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         "Chat",
         style: TextStyle(color: white),
       ),
+      centerTitle: true,
       actions: <Widget>[
         IconButton(
           onPressed: () => _openSearch(context),

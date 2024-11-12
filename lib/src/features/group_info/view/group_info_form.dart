@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -51,8 +52,6 @@ class GroupInfoForm extends StatelessWidget {
 class HeaderCard extends StatelessWidget {
   const HeaderCard({super.key});
 
-  final arrowBackSize = 30.0;
-
   @override
   Widget build(BuildContext context) {
     var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
@@ -61,24 +60,13 @@ class HeaderCard extends StatelessWidget {
     return Card(
       child: ListTile(
         titleAlignment: ListTileTitleAlignment.top,
-        leading: IconButton(
-          style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: EdgeInsets.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-          icon: Icon(Icons.arrow_back_outlined,
-              color: signalBlack, size: arrowBackSize),
-          onPressed: () {
-            context.pop(context.read<GroupInfoBloc>().state.status.isSuccess);
-          },
-        ),
         title: Center(
           child: Padding(
-              padding: EdgeInsets.only(right: arrowBackSize, top: 8),
+              padding: const EdgeInsets.only(top: 8),
               child: _ChatAvatar(isOwner: isOwner)),
         ),
         subtitle: Padding(
-          padding: EdgeInsets.only(right: arrowBackSize, bottom: 4),
+          padding: const EdgeInsets.only(bottom: 4),
           child: _ChatNameDescription(isOwner: isOwner),
         ),
       ),
@@ -116,9 +104,8 @@ class _ChatNameDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GroupInfoBloc, GroupInfoState>(
         buildWhen: (previous, current) =>
-            previous.name != current.name && current.name.isPure ||
             previous.description != current.description &&
-                current.description.isPure,
+            current.description.isPure,
         builder: (context, state) {
           return Align(
               alignment: Alignment.center,
@@ -139,30 +126,19 @@ class _ChatNameDescription extends StatelessWidget {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     alignment: Alignment.center),
-                child: Column(children: [
-                  Text(
-                    state.name.value.isEmpty ? "Group name" : state.name.value,
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: state.name.value.isEmpty
-                            ? FontWeight.w200
-                            : FontWeight.bold,
-                        color: signalBlack),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    state.description.value.isEmpty
-                        ? "Description"
-                        : state.description.value,
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: signalBlack,
-                        fontWeight: state.description.value.isEmpty
-                            ? FontWeight.w200
-                            : FontWeight.normal),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ]),
+                child: Text(
+                  state.description.value.isEmpty
+                      ? "Description"
+                      : state.description.value,
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: signalBlack,
+                      fontWeight: state.description.value.isEmpty
+                          ? FontWeight.w200
+                          : FontWeight.normal),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ));
         });
   }
@@ -273,7 +249,7 @@ class FooterCard extends StatelessWidget {
           var isOwner = ownerId == localUserId;
           return Expanded(
               child: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
                   child: SizedBox(
                       width: double.infinity,
                       child: Card(
