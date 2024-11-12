@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:formz/formz.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../db/models/conversation.dart';
 import '../../../repository/conversation/conversation_repository.dart';
@@ -25,18 +27,25 @@ class GroupInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: black,
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
+    return BlocBuilder<GroupInfoBloc, GroupInfoState>(
+        builder: (context, state) {
+      return Scaffold(
           backgroundColor: black,
-          automaticallyImplyLeading: false,
-          title: const Text(
-            'Chat information',
-            style: TextStyle(color: white),
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            backgroundColor: black,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_outlined, color: white),
+              onPressed: () => context.pop(state.status.isSuccess),
+            ),
+            title: Text(
+              state.name.value,
+              style: const TextStyle(color: white),
+              overflow: TextOverflow.ellipsis,
+            ),
+            centerTitle: true,
           ),
-          centerTitle: true,
-        ),
-        body: const GroupInfoForm());
+          body: const GroupInfoForm());
+    });
   }
 }

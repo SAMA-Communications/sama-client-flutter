@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -34,78 +35,58 @@ class ProfileForm extends StatelessWidget {
               );
           }
         },
-        child: const Column(mainAxisSize: MainAxisSize.min, children: [
-          HeaderCard(),
-          FooterCard(),
-        ]));
+        child: const ProfileCard());
   }
 }
 
-class HeaderCard extends StatelessWidget {
-  const HeaderCard({super.key});
-
-  final arrowBackSize = 30.0;
+class AvatarNameTile extends StatelessWidget {
+  const AvatarNameTile({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        titleAlignment: ListTileTitleAlignment.top,
-        leading: IconButton(
-          style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: EdgeInsets.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-          icon: Icon(Icons.arrow_back_outlined,
-              color: signalBlack, size: arrowBackSize),
-          onPressed: () {
-            context.pop();
-          },
+    return ListTile(
+      titleAlignment: ListTileTitleAlignment.top,
+      title: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: _UserAvatar(),
         ),
-        title: Center(
-          child: Padding(
-            padding: EdgeInsets.only(right: arrowBackSize, top: 8),
-            child: _UserAvatar(),
-          ),
-        ),
-        subtitle: Padding(
-          padding: EdgeInsets.only(right: arrowBackSize, bottom: 4),
-          child: _UserFullName(),
-        ),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: _UserFullName(),
       ),
     );
   }
 }
 
-class FooterCard extends StatelessWidget {
-  const FooterCard({super.key});
+class ProfileCard extends StatelessWidget {
+  const ProfileCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Expanded(
-      child: Padding(
-        padding: EdgeInsets.only(bottom: 4),
-        child: SizedBox(
-          width: double.infinity,
-          child: Card(
-            child: Padding(
-              padding: EdgeInsets.all(15),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _UsernameForm(),
-                  SizedBox(height: columnItemMargin),
-                  _PhoneForm(),
-                  SizedBox(height: columnItemMargin),
-                  _EmailForm(),
-                  SizedBox(height: columnItemMargin),
-                  _AccountForm(),
-                  Expanded(
-                      child: Align(
-                          alignment: Alignment.bottomRight,
-                          child: _LogoutForm()))
-                ],
-              ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
+      child: const SizedBox(
+        width: double.infinity,
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AvatarNameTile(),
+                _UsernameForm(),
+                SizedBox(height: columnItemMargin),
+                _PhoneForm(),
+                SizedBox(height: columnItemMargin),
+                _EmailForm(),
+                SizedBox(height: columnItemMargin),
+                _AccountForm(),
+                Expanded(
+                    child: Align(
+                        alignment: Alignment.bottomRight, child: _LogoutForm()))
+              ],
             ),
           ),
         ),

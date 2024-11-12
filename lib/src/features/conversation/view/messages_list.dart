@@ -65,6 +65,7 @@ class _MessagesListState extends State<MessagesList> {
             }
             markAsReadIfNeed();
             return ListView.separated(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               reverse: true,
               itemBuilder: (BuildContext context, int index) {
                 return buildMessageListItem(state.messages[index]);
@@ -78,10 +79,10 @@ class _MessagesListState extends State<MessagesList> {
           case ConversationStatus.initial:
             return const Center(child: CircularProgressIndicator());
           case ConversationStatus.delete:
-            Navigator.of(context).pop();
-            return const Center(
-              child: Text('Chat deleted'),
-            );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            });
+            return const SizedBox.shrink();
         }
       },
     );

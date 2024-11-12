@@ -5,6 +5,7 @@ import '../../../api/api.dart';
 import '../../../features/user_info/view/user_info_form.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/string_utils.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 
 class UserInfoPage extends StatelessWidget {
@@ -29,10 +30,13 @@ class UserInfoPage extends StatelessWidget {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           backgroundColor: black,
-          automaticallyImplyLeading: false,
-          title: const Text(
-            'User information',
-            style: TextStyle(color: white),
+          iconTheme: const IconThemeData(
+            color: white, //change your color here
+          ),
+          title: Text(
+            getUserName(user),
+            style: const TextStyle(color: white),
+            overflow: TextOverflow.ellipsis,
           ),
           centerTitle: true,
         ),

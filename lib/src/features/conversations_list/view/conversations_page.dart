@@ -35,6 +35,8 @@ class HomePage extends StatelessWidget {
         floatingActionButton: state.status == SharingIntentStatus.processing
             ? null
             : FloatingActionButton(
+                // fix error https://github.com/flutter/flutter/issues/115358
+                heroTag: null,
                 child: const Icon(Icons.add_comment_outlined, size: 32.0),
                 onPressed: () {
                   context.push(groupCreateScreenPath);
@@ -64,6 +66,7 @@ class SelectChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         "Select Chat",
         style: TextStyle(color: white),
       ),
+      centerTitle: true,
     );
   }
 
@@ -93,6 +96,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         "Chat",
         style: TextStyle(color: white),
       ),
+      centerTitle: true,
       actions: <Widget>[
         IconButton(
           onPressed: () => _openSearch(context),

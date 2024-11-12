@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +8,6 @@ import '../../../api/api.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/user_forms.dart';
-import '../../../shared/utils/string_utils.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_event.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
@@ -18,104 +19,62 @@ class UserInfoForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      HeaderCard(user: user),
-      FooterCard(user: user),
-    ]);
+    return UserInfoCard(user: user);
   }
 }
 
-class HeaderCard extends StatelessWidget {
+class AvatarTileFrom extends StatelessWidget {
   final User user;
 
-  const HeaderCard({required this.user, super.key});
-
-  final arrowBackSize = 30.0;
+  const AvatarTileFrom({required this.user, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        titleAlignment: ListTileTitleAlignment.top,
-        leading: IconButton(
-          style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: EdgeInsets.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-          icon: Icon(Icons.arrow_back_outlined,
-              color: signalBlack, size: arrowBackSize),
-          onPressed: () {
-            context.pop();
-          },
-        ),
-        title: Center(
-          child: Padding(
-            padding: EdgeInsets.only(right: arrowBackSize, top: 8),
-            child: AvatarForm(avatar: user.avatar?.imageUrl),
-          ),
-        ),
-        subtitle: Padding(
-          padding: EdgeInsets.only(right: arrowBackSize, bottom: 4),
-          child: _UserFullName(user: user),
+    return ListTile(
+      titleAlignment: ListTileTitleAlignment.top,
+      title: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 32),
+          child: AvatarForm(avatar: user.avatar?.imageUrl),
         ),
       ),
     );
   }
 }
 
-class FooterCard extends StatelessWidget {
+class UserInfoCard extends StatelessWidget {
   final User user;
 
-  const FooterCard({required this.user, super.key});
+  const UserInfoCard({required this.user, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: SizedBox(
-          width: double.infinity,
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  UsernameForm(userLogin: user.login),
-                  const SizedBox(height: columnItemMargin),
-                  UserPhoneForm(userPhone: user.phone),
-                  const SizedBox(height: columnItemMargin),
-                  UserEmailForm(userEmail: user.email),
-                  const SizedBox(height: columnItemMargin),
-                  _StartConversationForm(user: user),
-                  // const Expanded(
-                  //     child: Align(
-                  //         alignment: Alignment.bottomLeft,
-                  //         child: _RemoveParticipantForm()))
-                ],
-              ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
+      child: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AvatarTileFrom(user: user),
+                UsernameForm(userLogin: user.login),
+                const SizedBox(height: columnItemMargin),
+                UserPhoneForm(userPhone: user.phone),
+                const SizedBox(height: columnItemMargin),
+                UserEmailForm(userEmail: user.email),
+                const SizedBox(height: columnItemMargin),
+                Expanded(
+                    child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: _StartConversationForm(user: user)))
+              ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _UserFullName extends StatelessWidget {
-  final User user;
-
-  const _UserFullName({required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: Text(
-        getUserName(user),
-        style: const TextStyle(
-            fontSize: 22, fontWeight: FontWeight.bold, color: signalBlack),
-        overflow: TextOverflow.ellipsis,
       ),
     );
   }
@@ -147,13 +106,11 @@ class _StartConversationForm extends StatelessWidget {
               );
           }
         },
-        child: Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-                child: const Text("Start a conversation",
-                    style: TextStyle(fontSize: 20, color: slateBlue)),
-                onPressed: () => context.read<ConversationCreateBloc>().add(
-                      ConversationCreated(user: user, type: 'u'),
-                    ))));
+        child: TextButton(
+            child: const Text("Start a conversation",
+                style: TextStyle(fontSize: 20, color: slateBlue)),
+            onPressed: () => context.read<ConversationCreateBloc>().add(
+                  ConversationCreated(user: user, type: 'u'),
+                )));
   }
 }

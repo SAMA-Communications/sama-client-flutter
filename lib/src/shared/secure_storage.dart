@@ -11,6 +11,7 @@ const String storageUserLastName = "storage_user_last_name";
 const String storageUserPhone = "storage_user_phone";
 const String storageUserEmail = "storage_user_email";
 const String storageUserAvatar = "storage_user_avatar";
+const String storageSubscriptionToken = "storage_subscription_token";
 
 class SecureStorage {
   static final SecureStorage _instance = SecureStorage._internal();
@@ -100,6 +101,15 @@ class SecureStorage {
     _storage.delete(key: storageUserPhone);
     _storage.delete(key: storageUserEmail);
     _storage.delete(key: storageUserAvatar);
+    _storage.delete(key: storageSubscriptionToken);
     // _storage.deleteAll();
+  }
+
+  saveSubscriptionToken(String token) {
+    _storage.write(key: storageSubscriptionToken, value: token);
+  }
+
+  Future<String?> getSubscriptionToken() {
+    return _storage.read(key: storageSubscriptionToken);
   }
 }
