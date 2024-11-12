@@ -42,33 +42,28 @@ class GroupInfoForm extends StatelessWidget {
               );
           }
         },
-        child: const Column(mainAxisSize: MainAxisSize.min, children: [
-          HeaderCard(),
-          FooterCard(),
-        ]));
+        child: const GroupInfoCard());
   }
 }
 
-class HeaderCard extends StatelessWidget {
-  const HeaderCard({super.key});
+class AvatarDescriptionTile extends StatelessWidget {
+  const AvatarDescriptionTile({super.key});
 
   @override
   Widget build(BuildContext context) {
     var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
         context.read<AuthenticationBloc>().state.user.id!;
 
-    return Card(
-      child: ListTile(
-        titleAlignment: ListTileTitleAlignment.top,
-        title: Center(
-          child: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: _ChatAvatar(isOwner: isOwner)),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: _ChatNameDescription(isOwner: isOwner),
-        ),
+    return ListTile(
+      titleAlignment: ListTileTitleAlignment.top,
+      title: Center(
+        child: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: _ChatAvatar(isOwner: isOwner)),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: _ChatNameDescription(isOwner: isOwner),
       ),
     );
   }
@@ -235,8 +230,8 @@ class NameDialogInput extends StatelessWidget {
   }
 }
 
-class FooterCard extends StatelessWidget {
-  const FooterCard({super.key});
+class GroupInfoCard extends StatelessWidget {
+  const GroupInfoCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -247,24 +242,24 @@ class FooterCard extends StatelessWidget {
           var ownerId = state.conversation.owner?.id ?? '';
           var localUserId = context.read<AuthenticationBloc>().state.user.id!;
           var isOwner = ownerId == localUserId;
-          return Expanded(
-              child: Padding(
-                  padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
-                  child: SizedBox(
-                      width: double.infinity,
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Column(children: [
-                            _ParticipantsHeaderForm(isOwner: isOwner),
-                            Expanded(
-                                child: _ParticipantsListForm(
-                                    isOwner: isOwner,
-                                    ownerId: ownerId,
-                                    localUserId: localUserId)),
-                          ]),
-                        ),
-                      ))));
+          return Padding(
+              padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
+              child: SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Column(children: [
+                        const AvatarDescriptionTile(),
+                        _ParticipantsHeaderForm(isOwner: isOwner),
+                        Expanded(
+                            child: _ParticipantsListForm(
+                                isOwner: isOwner,
+                                ownerId: ownerId,
+                                localUserId: localUserId)),
+                      ]),
+                    ),
+                  )));
         });
   }
 }

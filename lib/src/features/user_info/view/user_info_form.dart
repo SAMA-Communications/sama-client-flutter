@@ -19,61 +19,59 @@ class UserInfoForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      HeaderCard(user: user),
-      FooterCard(user: user),
-    ]);
+    return UserInfoCard(user: user);
   }
 }
 
-class HeaderCard extends StatelessWidget {
+class AvatarTileFrom extends StatelessWidget {
   final User user;
 
-  const HeaderCard({required this.user, super.key});
+  const AvatarTileFrom({required this.user, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        titleAlignment: ListTileTitleAlignment.top,
-        title: Center(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 8),
-            child: AvatarForm(avatar: user.avatar?.imageUrl),
-          ),
+    return ListTile(
+      titleAlignment: ListTileTitleAlignment.top,
+      title: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 32),
+          child: AvatarForm(avatar: user.avatar?.imageUrl),
         ),
       ),
     );
   }
 }
 
-class FooterCard extends StatelessWidget {
+class UserInfoCard extends StatelessWidget {
   final User user;
 
-  const FooterCard({required this.user, super.key});
+  const UserInfoCard({required this.user, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  UsernameForm(userLogin: user.login),
-                  const SizedBox(height: columnItemMargin),
-                  UserPhoneForm(userPhone: user.phone),
-                  const SizedBox(height: columnItemMargin),
-                  UserEmailForm(userEmail: user.email),
-                  const SizedBox(height: columnItemMargin),
-                  _StartConversationForm(user: user),
-                ],
-              ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
+      child: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AvatarTileFrom(user: user),
+                UsernameForm(userLogin: user.login),
+                const SizedBox(height: columnItemMargin),
+                UserPhoneForm(userPhone: user.phone),
+                const SizedBox(height: columnItemMargin),
+                UserEmailForm(userEmail: user.email),
+                const SizedBox(height: columnItemMargin),
+                Expanded(
+                    child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: _StartConversationForm(user: user)))
+              ],
             ),
           ),
         ),
@@ -108,13 +106,11 @@ class _StartConversationForm extends StatelessWidget {
               );
           }
         },
-        child: Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-                child: const Text("Start a conversation",
-                    style: TextStyle(fontSize: 20, color: slateBlue)),
-                onPressed: () => context.read<ConversationCreateBloc>().add(
-                      ConversationCreated(user: user, type: 'u'),
-                    ))));
+        child: TextButton(
+            child: const Text("Start a conversation",
+                style: TextStyle(fontSize: 20, color: slateBlue)),
+            onPressed: () => context.read<ConversationCreateBloc>().add(
+                  ConversationCreated(user: user, type: 'u'),
+                )));
   }
 }
