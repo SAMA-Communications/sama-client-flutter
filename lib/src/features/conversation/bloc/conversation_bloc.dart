@@ -32,6 +32,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   StreamSubscription<ConversationModel>? updateConversationStreamSubscription;
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
+  StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
 
   ConversationBloc({
     required this.currentConversation,
@@ -48,6 +49,15 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<_MessageReceived>(
       _onMessageReceived,
+    );
+    on<_PendingStatusReceived>(
+      _onPendingStatusReceived,
+    );
+    on<_SentStatusReceived>(
+      _onSentStatusReceived,
+    );
+    on<_ReadStatusReceived>(
+      _onReadStatusReceived,
     );
     on<_ConversationUpdated>(
       _onConversationUpdated,
@@ -79,6 +89,21 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         case 'removed_participant':
         case 'left_participants':
           add(const ParticipantsReceived());
+      }
+    });
+
+    statusMessagesSubscription =
+        messagesRepository.statusMessagesStream.listen((status) async {
+      switch (status) {
+        case PendingMessageStatus():
+          add(_PendingStatusReceived(status));
+          break;
+        case SentMessageStatus():
+          add(_SentStatusReceived(status));
+          break;
+        case ReadMessagesStatus():
+          add(_ReadStatusReceived(status));
+          break;
       }
     });
   }
@@ -178,10 +203,45 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(messages: messages));
   }
 
+  FutureOr<void> _onPendingStatusReceived(
+      _PendingStatusReceived event, Emitter<ConversationState> emit) {
+    var messages = [...state.messages];
+
+    var msg = messages.firstWhere((o) => o.id == event.status.messageId);
+    messages[messages.indexOf(msg)] =
+        msg.copyWith(status: ChatMessageStatus.pending);
+
+    emit(state.copyWith(messages: messages));
+  }
+
+  FutureOr<void> _onSentStatusReceived(
+      _SentStatusReceived event, Emitter<ConversationState> emit) {
+    var messages = [...state.messages];
+
+    var msg = messages.firstWhere((o) => o.id == event.status.messageId);
+    messages[messages.indexOf(msg)] = msg.copyWith(
+        id: event.status.serverMessageId, status: ChatMessageStatus.sent);
+
+    emit(state.copyWith(messages: messages));
+  }
+
+  FutureOr<void> _onReadStatusReceived(
+      _ReadStatusReceived event, Emitter<ConversationState> emit) {
+    var messages = {for (var v in state.messages) v.id!: v};
+    event.status.msgIds?.forEach((id) {
+      if (messages[id]?.status != ChatMessageStatus.read) {
+        messages[id] = messages[id]!.copyWith(status: ChatMessageStatus.read);
+      }
+    });
+
+    emit(state.copyWith(messages: messages.values.toList()));
+  }
+
   @override
   Future<void> close() {
     updateConversationStreamSubscription?.cancel();
     incomingMessagesSubscription?.cancel();
+    statusMessagesSubscription?.cancel();
     return super.close();
   }
 }

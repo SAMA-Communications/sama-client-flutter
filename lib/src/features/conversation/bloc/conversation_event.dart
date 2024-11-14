@@ -20,6 +20,24 @@ final class _MessageReceived extends ConversationEvent {
   const _MessageReceived(this.message);
 }
 
+final class _PendingStatusReceived extends ConversationEvent {
+  final PendingMessageStatus status;
+
+  const _PendingStatusReceived(this.status);
+}
+
+final class _SentStatusReceived extends ConversationEvent {
+  final SentMessageStatus status;
+
+  const _SentStatusReceived(this.status);
+}
+
+final class _ReadStatusReceived extends ConversationEvent {
+  final ReadMessagesStatus status;
+
+  const _ReadStatusReceived(this.status);
+}
+
 final class ParticipantsReceived extends ConversationEvent {
   const ParticipantsReceived();
 }

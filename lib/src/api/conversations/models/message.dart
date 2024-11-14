@@ -6,7 +6,7 @@ class Message extends Equatable {
   final String? id; //_id
   final String? from; //from
   final String? cid; //cid
-  final String? status; //status
+  final String? rawStatus; //status
   final String? body; //body
   final List<Attachment>? attachments; //attachments
   final int? t; //t
@@ -17,7 +17,7 @@ class Message extends Equatable {
     this.id,
     this.from,
     this.cid,
-    this.status,
+    this.rawStatus,
     this.body,
     this.attachments,
     this.createdAt,
@@ -29,7 +29,7 @@ class Message extends Equatable {
       : id = json['_id'],
         from = json['from'],
         cid = json['cid'],
-        status = json['status'],
+        rawStatus = json['status'],
         body = json['body'],
         attachments = json['attachments'] == null
             ? null
@@ -44,14 +44,14 @@ class Message extends Equatable {
         '_id': id,
         'from': from,
         'cid': cid,
-        'status': status,
+        'status': rawStatus,
         'body': body,
         't': createdAt,
       };
 
   @override
   List<Object?> get props => [
-        id, status, attachments, body
+        id, rawStatus, attachments, body
       ];
 
   static const empty = Message();
