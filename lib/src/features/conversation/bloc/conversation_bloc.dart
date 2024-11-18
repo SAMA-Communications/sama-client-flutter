@@ -24,6 +24,12 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
   };
 }
 
+EventTransformer<Event> debounce<Event>({
+  Duration duration = const Duration(milliseconds: 500),
+}) {
+  return (events, mapper) => events.debounce(duration).switchMap(mapper);
+}
+
 class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   ConversationModel currentConversation;
   final ConversationRepository conversationRepository;
@@ -58,6 +64,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<_ReadStatusReceived>(
       _onReadStatusReceived,
+      transformer: debounce(),
     );
     on<_ConversationUpdated>(
       _onConversationUpdated,
