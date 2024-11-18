@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../api/api.dart';
+import '../api/utils/config.dart';
 
 const String storageUserId = "storage_user_id";
 const String storageUserLogin = "storage_user_login";
@@ -12,6 +13,7 @@ const String storageUserPhone = "storage_user_phone";
 const String storageUserEmail = "storage_user_email";
 const String storageUserAvatar = "storage_user_avatar";
 const String storageSubscriptionToken = "storage_subscription_token";
+const String storageEnvironmentUrl = "storage_environment_url";
 
 class SecureStorage {
   static final SecureStorage _instance = SecureStorage._internal();
@@ -111,5 +113,17 @@ class SecureStorage {
 
   Future<String?> getSubscriptionToken() {
     return _storage.read(key: storageSubscriptionToken);
+  }
+
+  saveEnvironmentType(EnvType type) {
+    _storage.write(key: storageEnvironmentUrl, value: type.url);
+  }
+
+  Future<EnvType> getDevEnvironmentType() async {
+    return EnvType.fromUrl(await getEnvironmentUrl());
+  }
+
+  Future<String> getEnvironmentUrl() async {
+    return (await _storage.read(key: storageEnvironmentUrl)) ?? EnvType.dev.url;
   }
 }
