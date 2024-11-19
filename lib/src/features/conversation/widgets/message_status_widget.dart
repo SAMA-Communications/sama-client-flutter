@@ -28,19 +28,35 @@ class MessageStatusWidget extends StatelessWidget {
           )
         ]);
       case ChatMessageStatus.sent:
-        return const Icon(
-          Icons.check_rounded,
-          size: 15.0,
-          color: lightMallow,
-        );
+        return const Stack(children: <Widget>[
+          Icon(Icons.check_rounded, size: 15.0, color: lightMallow),
+          Padding(
+            padding: EdgeInsets.only(
+              left: 4,
+            ),
+            child: SizedBox.square(dimension: 15.0),
+          )
+        ]);
       case ChatMessageStatus.pending:
-        return const Icon(
-          Icons.watch_later_outlined,
-          size: 15.0,
-          color: lightMallow,
-        );
+        return const Stack(children: <Widget>[
+          Icon(Icons.watch_later_outlined, size: 15.0, color: lightMallow),
+          Padding(
+            padding: EdgeInsets.only(
+              left: 4,
+            ),
+            child: SizedBox.square(dimension: 15.0),
+          )
+        ]);
       default:
-        return const SizedBox.shrink();
+        return const Stack(children: <Widget>[
+          SizedBox.square(dimension: 15.0),
+          Padding(
+            padding: EdgeInsets.only(
+              left: 4,
+            ),
+            child: SizedBox.square(dimension: 15.0),
+          )
+        ]);
     }
   }
 }
