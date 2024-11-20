@@ -388,7 +388,8 @@ void _showSearchScreenDialog(BuildContext context) {
                           current.addParticipants;
                     }, builder: (context, state) {
                       return ParticipantsForm(
-                        users: List.of(state.addParticipants.value),
+                        users: List.of(state.addParticipants.value)
+                          ..addAll(state.participants.value),
                         onAddParticipants: (user) {
                           if (!state.participants.value.contains(user)) {
                             context

@@ -5,6 +5,7 @@ import '../../../api/api.dart';
 import '../../../features/conversations_list/widgets/avatar_letter_icon.dart';
 import '../../../features/search/bloc/global_search_bloc.dart';
 import '../../../features/search/bloc/global_search_state.dart';
+import '../../utils/api_utils.dart';
 import '../../utils/string_utils.dart';
 import '../colors.dart';
 
@@ -27,7 +28,7 @@ class ParticipantsForm extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
           child: Text('Add participants',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
         ),
       ),
       LimitedBox(
@@ -38,20 +39,32 @@ class ParticipantsForm extends StatelessWidget {
               users: users, onRemoveParticipants: onRemoveParticipants),
         ),
       ),
-      const Align(
-        alignment: Alignment.centerLeft,
-        child: Text('List of users',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text('List of users ${users.length}/$maxParticipantsCount',
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
       ),
-      _SearchBody(onAddParticipants: onAddParticipants)
+      _SearchBody(
+          selectedUsers: users,
+          onAddParticipants: onAddParticipants,
+          onRemoveParticipants: onRemoveParticipants)
     ]);
   }
 }
 
 class _SearchBody extends StatelessWidget {
-  const _SearchBody({required this.onAddParticipants});
+  const _SearchBody(
+      {required this.selectedUsers,
+      required this.onAddParticipants,
+      required this.onRemoveParticipants});
 
+  final List<User> selectedUsers;
   final ValueSetter<User> onAddParticipants;
+  final ValueSetter<User> onRemoveParticipants;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +85,10 @@ class _SearchBody extends StatelessWidget {
             ),
           SearchStateSuccess() => Expanded(
               child: _SearchResults(
-                  users: state.users, onAddParticipants: onAddParticipants),
+                  users: state.users,
+                  selectedUsers: selectedUsers,
+                  onAddParticipants: onAddParticipants,
+                  onRemoveParticipants: onRemoveParticipants),
             ),
         };
       },
@@ -81,10 +97,16 @@ class _SearchBody extends StatelessWidget {
 }
 
 class _SearchResults extends StatelessWidget {
-  const _SearchResults({required this.users, required this.onAddParticipants});
+  const _SearchResults(
+      {required this.users,
+      required this.selectedUsers,
+      required this.onAddParticipants,
+      required this.onRemoveParticipants});
 
   final List<User> users;
+  final List<User> selectedUsers;
   final ValueSetter<User> onAddParticipants;
+  final ValueSetter<User> onRemoveParticipants;
 
   Widget _emptyListText(String title) {
     return Padding(
@@ -104,7 +126,7 @@ class _SearchResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final userList = users.isEmpty
         ? _emptyListText('We couldn\'t find the specified users')
-        : ListView.builder(
+        : ListView.separated(
             shrinkWrap: true,
             itemCount: users.length,
             itemBuilder: (BuildContext context, int index) {
@@ -119,11 +141,19 @@ class _SearchResults extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                contentPadding: const EdgeInsets.fromLTRB(0.0, 8.0, 18.0, 8.0),
+                trailing: selectedUsers.contains(user)
+                    ? const Icon(Icons.circle_rounded, color: slateBlue)
+                    : const Icon(Icons.circle_outlined),
+                contentPadding: const EdgeInsets.fromLTRB(0.0, 4.0, 18.0, 4.0),
                 onTap: () {
-                  onAddParticipants(user);
+                  selectedUsers.contains(user)
+                      ? onRemoveParticipants(user)
+                      : onAddParticipants(user);
                 },
               );
+            },
+            separatorBuilder: (context, index) {
+              return const Divider(color: slateBlue);
             },
           );
 

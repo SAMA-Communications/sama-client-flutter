@@ -6,12 +6,10 @@ import '../../../db/models/conversation.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/global_search/global_search_repository.dart';
-import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/loading_overlay.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
 import '../../search/bloc/global_search_bloc.dart';
-import '../../search/view/search_bar.dart';
 import '../bloc/group_bloc.dart';
 import 'group_create_form.dart';
 
@@ -44,7 +42,6 @@ class GroupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LoadingOverlay loadingOverlay = LoadingOverlay();
-    bool keyboardIsOpen = MediaQuery.of(context).viewInsets.bottom != 0;
     return BlocListener<ConversationCreateBloc, ConversationCreateState>(
         listener: (context, state) {
           if (state is ConversationCreatedLoading) {
@@ -63,22 +60,6 @@ class GroupPage extends StatelessWidget {
               );
           }
         },
-        child: Scaffold(
-          appBar: const GlobalSearchBar(),
-          body: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
-              child: const GroupForm()),
-          floatingActionButton: Visibility(
-            visible: !keyboardIsOpen,
-            child: FloatingActionButton(
-              backgroundColor: dullGray,
-              tooltip: 'Create chat',
-              onPressed: () {
-                context.read<GroupBloc>().add(GroupSubmitted());
-              },
-              child: const Icon(Icons.check, color: Colors.white, size: 28),
-            ),
-          ),
-        ));
+        child: const GroupForm());
   }
 }

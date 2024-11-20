@@ -37,7 +37,10 @@ class HomePage extends StatelessWidget {
             : FloatingActionButton(
                 // fix error https://github.com/flutter/flutter/issues/115358
                 heroTag: null,
-                child: const Icon(Icons.add_comment_outlined, size: 32.0),
+                child: const Padding(
+                  padding: EdgeInsets.only(top: 4.0),
+                  child: Icon(Icons.add_comment_outlined, size: 32.0),
+                ),
                 onPressed: () {
                   context.push(groupCreateScreenPath);
                 },
