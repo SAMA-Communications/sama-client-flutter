@@ -88,6 +88,7 @@ class AuthenticationRepository {
   _disposeLocalUser() async {
     await SecureStorage.instance.deleteLocalUser();
     api.ReconnectionManager.instance.destroy();
+    api.SamaConnectionService.instance.closeConnection();
     api.ConnectionManager.instance.currentUser = null;
     api.ConnectionManager.instance.token = null;
     _controller.add(AuthenticationStatus.unauthenticated);

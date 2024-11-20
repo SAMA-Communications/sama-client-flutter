@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../../shared/secure_storage.dart';
 import '../utils/config.dart';
 import '../utils/logger.dart';
 import 'exceptions.dart';
@@ -39,14 +40,14 @@ class SamaConnectionService {
 
   ConnectionState get connectionState => _connectionState;
 
-  Future<WebSocketChannel> connect() {
+  Future<WebSocketChannel> connect() async {
     log(
       '[SamaConnectionService][connect]',
     );
 
     _updateConnectionState(ConnectionState.connecting);
 
-    final wssUrl = Uri.parse(apiUrl);
+    final wssUrl = Uri.parse(await SecureStorage.instance.getEnvironmentUrl());
     final channel = WebSocketChannel.connect(wssUrl);
 
     return channel.ready.then((_) {
@@ -159,7 +160,7 @@ class SamaConnectionService {
   }
 
   closeConnection() {
-    connection?.sink.close(status.goingAway).then((_) {
+    connection?.sink.close(status.normalClosure).then((_) {
       _updateConnectionState(ConnectionState.disconnected);
 
       connection = null;
