@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
+import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
+import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../conversations_list.dart';
@@ -25,12 +27,26 @@ class HomePage extends StatelessWidget {
             : const ChatAppBar(),
         body: BlocProvider(
           create: (context) {
-            return ConversationsBloc(
+            final bloc = ConversationsBloc(
                 conversationRepository:
-                    RepositoryProvider.of<ConversationRepository>(context))
-              ..add(ConversationsFetched());
+                    RepositoryProvider.of<ConversationRepository>(context));
+            if (context.read<AuthenticationBloc>().state.status ==
+                AuthenticationStatus.authenticated) {
+              bloc.add(ConversationsFetched());
+            }
+            return bloc;
           },
-          child: const ConversationsList(),
+          child: BlocListener<AuthenticationBloc, AuthenticationState>(
+            listener: (context, state) {
+              if (state.status == AuthenticationStatus.authenticated &&
+                  context.read<ConversationsBloc>().state.status ==
+                      ConversationsStatus.initial) {
+                BlocProvider.of<ConversationsBloc>(context)
+                    .add(ConversationsFetched());
+              }
+            },
+            child: const ConversationsList(),
+          ),
         ),
         floatingActionButton: state.status == SharingIntentStatus.processing
             ? null

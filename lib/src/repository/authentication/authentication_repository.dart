@@ -15,7 +15,8 @@ class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
 
   Stream<AuthenticationStatus> get status async* {
-    await Future<void>.delayed(const Duration(seconds: 1));
+    //TODO RP not clear why this delay is needed, commented for now
+    // await Future<void>.delayed(const Duration(seconds: 1));
     if (await SecureStorage.instance.hasLocalUser()) {
       yield AuthenticationStatus.canBeAuthenticated;
     } else {
