@@ -6,13 +6,12 @@ import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../api.dart';
 import '../utils/config.dart';
 import '../utils/logger.dart';
 import 'exceptions.dart';
 
 class SamaConnectionService {
-  SamaConnectionService._();
-
   static final _instance = SamaConnectionService._();
 
   static SamaConnectionService get instance {
@@ -38,6 +37,16 @@ class SamaConnectionService {
   ConnectionState _connectionState = ConnectionState.idle;
 
   ConnectionState get connectionState => _connectionState;
+
+  SamaConnectionService._() {
+    //fix for iOS https://github.com/flutter/flutter/issues/35272
+    ConnectivityManager.instance.connectivityChangedStream.listen((_) {
+      print('network connection changed');
+      if (connectionState != ConnectionState.failed) {
+        _updateConnectionState(ConnectionState.failed);
+      }
+    });
+  }
 
   Future<WebSocketChannel> connect() {
     log(

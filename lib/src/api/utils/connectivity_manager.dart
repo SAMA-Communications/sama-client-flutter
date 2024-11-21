@@ -12,6 +12,11 @@ class ConnectivityManager {
   final StreamController<ConnectivityState> _connectivityController =
       StreamController.broadcast();
 
+  ConnectivityNetwork? _currentConnectivityNetwork;
+
+  final StreamController<bool> _connectivityChangedController =
+      StreamController.broadcast();
+
   ConnectivityManager._() {
     _connectivity.onConnectivityChanged
         .listen((List<ConnectivityResult> connectivityResult) {
@@ -21,6 +26,20 @@ class ConnectivityManager {
       } else {
         if (connectivityResult.contains(ConnectivityResult.bluetooth)) {
           _connectivityController.add(ConnectivityState.hasBluetooth);
+        }
+
+        if (connectivityResult.contains(ConnectivityResult.mobile)) {
+          if (_currentConnectivityNetwork != null &&
+              _currentConnectivityNetwork != ConnectivityNetwork.mobile) {
+            _connectivityChangedController.add(true);
+          }
+          _currentConnectivityNetwork = ConnectivityNetwork.mobile;
+        } else if (connectivityResult.contains(ConnectivityResult.wifi)) {
+          if (_currentConnectivityNetwork != null &&
+              _currentConnectivityNetwork != ConnectivityNetwork.wifi) {
+            _connectivityChangedController.add(true);
+          }
+          _currentConnectivityNetwork = ConnectivityNetwork.wifi;
         }
 
         if (connectivityResult.contains(ConnectivityResult.mobile) ||
@@ -34,6 +53,9 @@ class ConnectivityManager {
 
   Stream<ConnectivityState> get connectivityStream =>
       _connectivityController.stream;
+
+  Stream<bool> get connectivityChangedStream =>
+      _connectivityChangedController.stream;
 
   Future<bool> checkIfMobileNetworkConnectionAvailable() async {
     var connectivity = await _connectivity.checkConnectivity();
@@ -59,3 +81,5 @@ class ConnectivityManager {
 }
 
 enum ConnectivityState { hasBluetooth, hasNetwork, none }
+
+enum ConnectivityNetwork { mobile, wifi, none }
