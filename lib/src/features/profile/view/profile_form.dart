@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../features/profile/bloc/profile_bloc.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
