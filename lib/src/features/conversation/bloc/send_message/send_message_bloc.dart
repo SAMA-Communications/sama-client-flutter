@@ -40,14 +40,15 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       emit(
           state.copyWith(isTextEmpty: true, status: SendMessageStatus.success));
     } catch (_) {
-      emit(
-          state.copyWith(status: SendMessageStatus.failure));
+      emit(state.copyWith(status: SendMessageStatus.failure));
     }
   }
 
   FutureOr<void> _onTextChanged(
       TextMessageChanged event, Emitter<SendMessageState> emit) {
-    emit(state.copyWith(isTextEmpty: event.text.trim().isEmpty));
+    emit(state.copyWith(
+        isTextEmpty: event.text.trim().isEmpty,
+        status: SendMessageStatus.initial));
   }
 
   Future<FutureOr<void>> _onSendStatusReadMessages(
