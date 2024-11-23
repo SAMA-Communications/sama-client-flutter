@@ -8,9 +8,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../shared/secure_storage.dart';
 import '../api.dart';
-import '../utils/config.dart';
-import '../utils/logger.dart';
-import 'exceptions.dart';
 
 class SamaConnectionService {
   static final _instance = SamaConnectionService._();
@@ -42,7 +39,7 @@ class SamaConnectionService {
   SamaConnectionService._() {
     //fix for iOS https://github.com/flutter/flutter/issues/35272
     ConnectivityManager.instance.connectivityChangedStream.listen((_) {
-      print('network connection changed');
+      log('[SamaConnectionService][network connection changed]');
       if (connectionState != ConnectionState.failed) {
         _updateConnectionState(ConnectionState.failed);
       }
@@ -221,7 +218,13 @@ class SamaConnectionService {
     if (requestInfo != null) {
       var completer = requestInfo.completer;
       if (error != null) {
-        completer.completeError(ResponseException.fromJson(error));
+        var responseException = ResponseException.fromJson(error);
+        if (responseException.status == 404) {
+          //Unauthorized wait to reconnect
+          awaitingRequests[responseId] = requestInfo;
+        } else {
+          completer.completeError(responseException);
+        }
       } else {
         completer.complete(response);
       }
