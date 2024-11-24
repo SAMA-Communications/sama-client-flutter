@@ -1,9 +1,10 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../models/models.dart';
 import 'message_bubble.dart';
+import 'message_status_widget.dart';
 import 'text_message.dart';
 
 class TextMessageItem extends StatelessWidget {
@@ -24,13 +25,14 @@ class TextMessageItem extends StatelessWidget {
       child: TextMessage(
         body: message.body ?? '',
         style: TextStyle(color: message.isOwn ? white : black, fontSize: 16.0),
-        linkStyle: TextStyle(
-            color: message.isOwn ? gold : slateBlue, fontSize: 16.0),
+        linkStyle:
+            TextStyle(color: message.isOwn ? gold : slateBlue, fontSize: 16.0),
         time: Text(
           dateToTime(DateTime.fromMillisecondsSinceEpoch(message.t! * 1000)),
           style: TextStyle(
               color: message.isOwn ? white : dullGray, fontSize: 12.0),
         ),
+        status: MessageStatusWidget(status: message.status),
       ),
     );
   }

@@ -17,7 +17,20 @@ abstract class MessageStatus {
   }
 }
 
-class SentMessageStatus {
+sealed class MessageSendStatus {}
+
+class PendingMessageStatus implements MessageSendStatus {
+  final String messageId;
+
+  PendingMessageStatus.fromJson(Map<String, dynamic> json)
+      : messageId = json['mid'];
+
+  Map<String, dynamic> toJson() {
+    return {'mid': messageId};
+  }
+}
+
+class SentMessageStatus implements MessageSendStatus {
   final String messageId; // mid
   final String serverMessageId; // server_mid
   final DateTime time; // t
@@ -28,7 +41,7 @@ class SentMessageStatus {
         time = DateTime.parse(json['t'].toString());
 }
 
-class ReadMessagesStatus extends MessageStatus {
+class ReadMessagesStatus extends MessageStatus implements MessageSendStatus {
   ReadMessagesStatus.fromJson(super.json) : super.fromJson();
 }
 

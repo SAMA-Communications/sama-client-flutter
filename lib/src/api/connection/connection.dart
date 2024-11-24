@@ -190,6 +190,13 @@ class SamaConnectionService {
         return;
       }
 
+      if (jsonData['ask'] != null) {
+        var response = jsonData['ask'];
+        var responseId = response['mid'];
+        var request = awaitingRequests.remove(responseId);
+        if (request != null) request.completer.complete(response);
+      }
+
       _dataController.add(jsonData);
     } catch (e) {
       log(

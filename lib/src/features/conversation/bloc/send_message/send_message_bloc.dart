@@ -37,7 +37,8 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     try {
       await messagesRepository.sendTextMessage(
           event.message, currentConversation.id);
-      emit(state.copyWith(status: SendMessageStatus.success));
+      emit(
+          state.copyWith(isTextEmpty: true, status: SendMessageStatus.success));
     } catch (_) {
       emit(state.copyWith(status: SendMessageStatus.failure));
     }
@@ -45,7 +46,9 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
 
   FutureOr<void> _onTextChanged(
       TextMessageChanged event, Emitter<SendMessageState> emit) {
-    emit(state.copyWith(isTextEmpty: event.text.trim().isEmpty));
+    emit(state.copyWith(
+        isTextEmpty: event.text.trim().isEmpty,
+        status: SendMessageStatus.initial));
   }
 
   Future<FutureOr<void>> _onSendStatusReadMessages(

@@ -15,12 +15,20 @@ class MessagesRepository {
   }
 
   StreamSubscription<api.Message>? incomingMessagesSubscription;
+  StreamSubscription<api.MessageSendStatus>? sentMessageSubscription;
+  StreamSubscription<api.MessageSendStatus>? readMessagesSubscription;
 
   final StreamController<ChatMessage> _incomingMessagesController =
       StreamController.broadcast();
 
   Stream<ChatMessage> get incomingMessagesStream =>
       _incomingMessagesController.stream;
+
+  final StreamController<api.MessageSendStatus> _statusMessagesController =
+      StreamController.broadcast();
+
+  Stream<api.MessageSendStatus> get statusMessagesStream =>
+      _statusMessagesController.stream;
 
   Future<List<ChatMessage>> getMessages(
     String cid, {
@@ -43,25 +51,18 @@ class MessagesRepository {
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
       var sender = participants[message.from] ?? api.User.empty;
+      var isOwn = currentUser?.id == message.from;
 
-      var chatMessage = ChatMessage(
-          sender: sender ?? api.User.empty,
-          isOwn: currentUser?.id == message.from,
-          isLastUserMessage: i == 0 ||
+      var chatMessage = message.toChatMessage(
+          sender,
+          isOwn,
+          i == 0 ||
               isServiceMessage(messages[i - 1]) ||
               messages[i - 1].from != messages[i].from,
-          isFirstUserMessage: i == messages.length - 1 ||
+          i == messages.length - 1 ||
               isServiceMessage(messages[i + 1]) ||
               messages[i + 1].from != messages[i].from,
-          id: message.id,
-          from: message.from,
-          cid: message.cid,
-          status: message.status,
-          body: message.body,
-          attachments: message.attachments,
-          createdAt: message.createdAt,
-          t: message.t,
-          extension: message.extension);
+          isOwn ? ChatMessageStatus.sent : ChatMessageStatus.none);
 
       result.add(chatMessage);
     }
@@ -69,7 +70,7 @@ class MessagesRepository {
     return result;
   }
 
-  Future<void> sendTextMessage(String body, String cid) {
+  Future<void> sendTextMessage(String body, String cid) async {
     var message = api.Message(
         body: body.trim(),
         cid: cid,
@@ -77,24 +78,16 @@ class MessagesRepository {
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
-    return api.sendMessage(message: message).then((_) async {
-      var currentUser = await userRepository.getLocalUser();
+    var currentUser = await userRepository.getLocalUser();
 
-      _incomingMessagesController.add(ChatMessage(
-          sender: currentUser!,
-          isOwn: true,
-          //will be calculated before add to list
-          isFirstUserMessage: true,
-          isLastUserMessage: true,
-          id: message.id,
-          from: currentUser.id,
-          cid: message.cid,
-          status: message.status,
-          body: message.body,
-          attachments: message.attachments,
-          createdAt: message.createdAt,
-          t: message.t,
-          extension: message.extension));
+    _incomingMessagesController
+        .add(message.toChatMessage(currentUser!, true, true, true));
+
+    return api.sendMessage(message: message).then((result) {
+      if (!result) {
+        _statusMessagesController
+            .add(api.PendingMessageStatus.fromJson({'mid': message.id}));
+      }
     });
   }
 
@@ -120,31 +113,29 @@ class MessagesRepository {
 
       sender ??= participants[message.from] ?? api.User.empty;
 
-      var chatMessage = ChatMessage(
-        sender: sender,
-        isOwn: currentUser?.id == message.from,
-        //will be calculated before add to list
-        isFirstUserMessage: true,
-        // will be calculated before add to list
-        isLastUserMessage: true,
-        id: message.id,
-        from: message.from ?? currentUser?.id,
-        cid: message.cid,
-        status: message.status,
-        body: message.body,
-        attachments: message.attachments,
-        createdAt: message.createdAt,
-        t: message.t,
-        extension: message.extension,
-      );
+      var chatMessage = message.toChatMessage(
+          sender, currentUser?.id == message.from, true, true);
 
       _incomingMessagesController.add(chatMessage);
+    });
+
+    sentMessageSubscription = api
+        .MessagesManager.instance.sentMessageStatusStream
+        .listen((sentStatus) async {
+      _statusMessagesController.add(sentStatus);
+    });
+
+    readMessagesSubscription = api
+        .MessagesManager.instance.readMessagesStatusStream
+        .listen((readStatus) async {
+      _statusMessagesController.add(readStatus);
     });
   }
 
   void dispose() {
     incomingMessagesSubscription?.cancel();
-    incomingMessagesSubscription = null;
+    sentMessageSubscription?.cancel();
+    readMessagesSubscription?.cancel();
     api.MessagesManager.instance.destroy();
   }
 
@@ -162,22 +153,8 @@ class MessagesRepository {
       (_) async {
         var currentUser = await userRepository.getLocalUser();
 
-        _incomingMessagesController.add(ChatMessage(
-            sender: currentUser!,
-            isOwn: true,
-            //will be calculated before add to list
-            isFirstUserMessage: true,
-            //will be calculated before add to list
-            isLastUserMessage: true,
-            id: message.id,
-            from: currentUser.id,
-            cid: message.cid,
-            status: message.status,
-            body: message.body,
-            attachments: message.attachments,
-            createdAt: message.createdAt,
-            t: message.t,
-            extension: message.extension));
+        _incomingMessagesController
+            .add(message.toChatMessage(currentUser!, true, true, true));
       },
     );
   }

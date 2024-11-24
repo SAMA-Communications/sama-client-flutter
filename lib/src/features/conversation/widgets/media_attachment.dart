@@ -14,6 +14,7 @@ import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../models/chat_attachment.dart';
 import '../models/models.dart';
 import 'message_bubble.dart';
+import 'message_status_widget.dart';
 
 class MediaAttachment extends StatelessWidget {
   final ChatMessage message;
@@ -60,13 +61,20 @@ class MediaAttachment extends StatelessWidget {
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Text(
-                      dateToTime(DateTime.fromMillisecondsSinceEpoch(
-                          message.t! * 1000)),
-                      style: TextStyle(
-                          color: message.isOwn ? white : dullGray,
-                          fontSize: 12.0),
-                    ),
+                    child: Wrap(
+                        spacing: 4.0,
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: [
+                          Text(
+                            dateToTime(DateTime.fromMillisecondsSinceEpoch(
+                                message.t! * 1000)),
+                            style: TextStyle(
+                                color: message.isOwn ? white : dullGray,
+                                fontSize: 12.0),
+                          ),
+                          MessageStatusWidget(status: message.status),
+                        ]),
                   ),
                 ]
               ],
@@ -79,11 +87,18 @@ class MediaAttachment extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     color: black.withAlpha(150),
-                    child: Text(
-                      dateToTime(DateTime.fromMillisecondsSinceEpoch(
-                          message.t! * 1000)),
-                      style: const TextStyle(color: white),
-                    ),
+                    child: Wrap(
+                        spacing: 4.0,
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: [
+                          Text(
+                            dateToTime(DateTime.fromMillisecondsSinceEpoch(
+                                message.t! * 1000)),
+                            style: const TextStyle(color: white),
+                          ),
+                          MessageStatusWidget(status: message.status),
+                        ]),
                   ),
                 ),
               ),

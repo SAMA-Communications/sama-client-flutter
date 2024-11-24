@@ -1,31 +1,36 @@
-import 'dart:convert';
-
 import '../connection/connection.dart';
 import '../conversations/models/models.dart';
-import '../utils/logger.dart';
 import 'realtime/models/models.dart';
 
+const String messageRequestName = 'message';
 const String messageEditRequestName = 'message_edit';
 const String messagesListRequestName = 'message_list';
 const String messagesReadRequestName = 'message_read';
 const String messagesDeleteRequestName = 'message_delete';
 
-Future<void> sendMessage({
+const messageRequestTimeout = Duration(seconds: 5);
+
+Future<bool> sendMessage({
   required Message message,
 }) {
-  return SamaConnectionService.instance.getConnection().then((connection) {
-    var dataToSend = {
-      'message': {
-        'id': message.id,
-        'cid': message.cid,
-        if (message.body?.isNotEmpty ?? false) 'body': message.body,
-        if (message.extension != null) 'x': message.extension,
-        if (message.attachments != null) 'attachments': message.attachments,
-      },
-    };
+  var dataToSend = {
+    'id': message.id,
+    'cid': message.cid,
+    if (message.body?.isNotEmpty ?? false) 'body': message.body,
+    if (message.extension != null) 'x': message.extension,
+    if (message.attachments != null) 'attachments': message.attachments,
+  };
 
-    log('[MessagesManager][sendMessage]', jsonData: dataToSend);
-    connection.sink.add(jsonEncode(dataToSend));
+  return SamaConnectionService.instance
+      .sendRequest(messageRequestName, dataToSend, retryRequestId: message.id)
+      .timeout(messageRequestTimeout)
+      .then((response) {
+    if (message.id == response['mid']) {
+      return true;
+    }
+    return false;
+  }).catchError((onError) {
+    return false;
   });
 }
 
