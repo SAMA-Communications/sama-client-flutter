@@ -1,1 +1,1 @@
-const int maxParticipantsCount = 49;
+const int maxParticipantsCount = 50;

@@ -13,16 +13,16 @@ import '../../search/view/search_bar.dart';
 import '../bloc/group_bloc.dart';
 import '../models/groupname.dart';
 
-class GroupForm extends StatefulWidget {
-  const GroupForm({super.key});
+class GroupCreateForm extends StatefulWidget {
+  const GroupCreateForm({super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return GroupFormState();
+    return GroupCreateFormState();
   }
 }
 
-class GroupFormState extends State<GroupForm> {
+class GroupCreateFormState extends State<GroupCreateForm> {
   @override
   void initState() {
     super.initState();
@@ -137,7 +137,7 @@ class _GroupInfoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-        padding: EdgeInsets.only(bottom: 8.0),
+        padding: EdgeInsets.only(bottom: 8.0, top: 8.0),
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text('Group info',
@@ -176,7 +176,7 @@ class _GroupDetailsForm extends StatelessWidget {
                       fontWeight: FontWeight.bold, fontSize: 18)),
             ),
           ),
-          _Participants(users: List.of(users)),
+          Expanded(child: _Participants(users: List.of(users)))
         ]));
   }
 }
@@ -232,7 +232,7 @@ class _GroupNameInput extends StatelessWidget {
             color: gainsborough,
           ),
           child: TextField(
-            key: const Key('groupForm_groupnameInput_textField'),
+            key: const Key('groupCreateForm_groupnameInput_textField'),
             keyboardType: TextInputType.text,
             onChanged: (groupname) =>
                 context.read<GroupBloc>().add(GroupnameChanged(groupname)),

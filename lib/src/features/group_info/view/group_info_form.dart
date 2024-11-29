@@ -388,8 +388,9 @@ void _showSearchScreenDialog(BuildContext context) {
                           current.addParticipants;
                     }, builder: (context, state) {
                       return ParticipantsForm(
-                        users: List.of(state.addParticipants.value)
-                          ..addAll(state.participants.value),
+                        users: List.of(state.participants.value)
+                          ..addAll(state.addParticipants.value),
+                        nonRemovableUsers: List.of(state.participants.value),
                         onAddParticipants: (user) {
                           if (!state.participants.value.contains(user)) {
                             context

@@ -14,9 +14,11 @@ class ParticipantsForm extends StatelessWidget {
       {required this.users,
       required this.onAddParticipants,
       required this.onRemoveParticipants,
+      this.nonRemovableUsers,
       super.key});
 
   final List<User> users;
+  final List<User>? nonRemovableUsers;
   final ValueSetter<User> onAddParticipants;
   final ValueSetter<User> onRemoveParticipants;
 
@@ -36,11 +38,13 @@ class ParticipantsForm extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: ParticipantsList(
-              users: users, onRemoveParticipants: onRemoveParticipants),
+              users: users,
+              nonRemovableUsers: nonRemovableUsers,
+              onRemoveParticipants: onRemoveParticipants),
         ),
       ),
       Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
+        padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text('List of users ${users.length}/$maxParticipantsCount',
@@ -127,6 +131,7 @@ class _SearchResults extends StatelessWidget {
     final userList = users.isEmpty
         ? _emptyListText('We couldn\'t find the specified users')
         : ListView.separated(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             shrinkWrap: true,
             itemCount: users.length,
             itemBuilder: (BuildContext context, int index) {
@@ -153,7 +158,7 @@ class _SearchResults extends StatelessWidget {
               );
             },
             separatorBuilder: (context, index) {
-              return const Divider(color: slateBlue);
+              return const Divider(color: lightMallow);
             },
           );
 
@@ -163,9 +168,13 @@ class _SearchResults extends StatelessWidget {
 
 class ParticipantsList extends StatelessWidget {
   const ParticipantsList(
-      {required this.users, required this.onRemoveParticipants, super.key});
+      {required this.users,
+      required this.nonRemovableUsers,
+      required this.onRemoveParticipants,
+      super.key});
 
   final List<User> users;
+  final List<User>? nonRemovableUsers;
   final ValueSetter<User> onRemoveParticipants;
 
   @override
@@ -178,8 +187,10 @@ class ParticipantsList extends StatelessWidget {
       crossAxisSpacing: 8.0,
       mainAxisSpacing: 8.0,
       children: List.generate(users.length, (index) {
+        var user = users.elementAt(index);
         return _ParticipantsListItem(
-            user: users.elementAt(index),
+            user: user,
+            removable: nonRemovableUsers?.contains(user) != true,
             onRemoveParticipants: onRemoveParticipants);
       }),
     );
@@ -188,9 +199,12 @@ class ParticipantsList extends StatelessWidget {
 
 class _ParticipantsListItem extends StatelessWidget {
   const _ParticipantsListItem(
-      {required this.user, required this.onRemoveParticipants});
+      {required this.user,
+      required this.removable,
+      required this.onRemoveParticipants});
 
   final User user;
+  final bool removable;
   final ValueSetter<User> onRemoveParticipants;
 
   @override
@@ -203,21 +217,24 @@ class _ParticipantsListItem extends StatelessWidget {
             child: Stack(fit: StackFit.expand, children: [
               AvatarLetterIcon(
                 name: getUserName(user),
-                padding: const EdgeInsets.fromLTRB(4.0, 8.0, 4.0, 4.0),
+                padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 4.0),
+                size: const Size(50.0, 50.0),
               ),
-              Positioned(
-                  top: -2,
-                  right: -2,
-                  child: InkWell(
-                      borderRadius: BorderRadius.circular(6.0),
-                      onTap: () {
-                        onRemoveParticipants(user);
-                      },
-                      child: const Icon(
-                        Icons.close,
-                        size: 20,
-                        color: gainsborough,
-                      )))
+              removable
+                  ? Positioned(
+                      top: -2,
+                      right: -2,
+                      child: InkWell(
+                          borderRadius: BorderRadius.circular(6.0),
+                          onTap: () {
+                            onRemoveParticipants(user);
+                          },
+                          child: const Icon(
+                            Icons.close,
+                            size: 20,
+                            color: gainsborough,
+                          )))
+                  : const SizedBox.shrink(),
             ])),
         Text(
           getUserName(user),

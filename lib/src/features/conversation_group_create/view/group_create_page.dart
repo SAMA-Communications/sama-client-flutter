@@ -13,8 +13,8 @@ import '../../search/bloc/global_search_bloc.dart';
 import '../bloc/group_bloc.dart';
 import 'group_create_form.dart';
 
-class GroupPage extends StatelessWidget {
-  const GroupPage({super.key});
+class GroupCreatePage extends StatelessWidget {
+  const GroupCreatePage({super.key});
 
   static MultiBlocProvider route() {
     return MultiBlocProvider(
@@ -35,7 +35,7 @@ class GroupPage extends StatelessWidget {
           create: (context) => GroupBloc(),
         ),
       ],
-      child: const GroupPage(),
+      child: const GroupCreatePage(),
     );
   }
 
@@ -60,6 +60,6 @@ class GroupPage extends StatelessWidget {
               );
           }
         },
-        child: const GroupForm());
+        child: const GroupCreateForm());
   }
 }

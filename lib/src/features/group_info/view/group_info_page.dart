@@ -29,23 +29,25 @@ class GroupInfoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GroupInfoBloc, GroupInfoState>(
         builder: (context, state) {
-      return Scaffold(
-          backgroundColor: black,
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            backgroundColor: black,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_outlined, color: white),
-              onPressed: () => context.pop(state.status.isSuccess),
-            ),
-            title: Text(
-              state.name.value,
-              style: const TextStyle(color: white),
-              overflow: TextOverflow.ellipsis,
-            ),
-            centerTitle: true,
-          ),
-          body: const GroupInfoForm());
+      return PopScope(
+          canPop: false,
+          child: Scaffold(
+              backgroundColor: black,
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                backgroundColor: black,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_outlined, color: white),
+                  onPressed: () => context.pop(state.status.isSuccess),
+                ),
+                title: Text(
+                  state.name.value,
+                  style: const TextStyle(color: white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                centerTitle: true,
+              ),
+              body: const GroupInfoForm()));
     });
   }
 }
