@@ -387,10 +387,12 @@ void _showSearchScreenDialog(BuildContext context) {
                       return previous.addParticipants !=
                           current.addParticipants;
                     }, builder: (context, state) {
+                      var currentParticipants = List.of(
+                          state.participants.value..remove(state.localUser));
                       return ParticipantsForm(
-                        users: List.of(state.participants.value)
+                        users: currentParticipants
                           ..addAll(state.addParticipants.value),
-                        nonRemovableUsers: List.of(state.participants.value),
+                        nonRemovableUsers: currentParticipants,
                         onAddParticipants: (user) {
                           if (!state.participants.value.contains(user)) {
                             context

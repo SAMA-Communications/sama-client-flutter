@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../db/models/conversation.dart';
 import '../../../repository/conversation/conversation_repository.dart';
+import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/group_info_bloc.dart';
 import 'group_info_form.dart';
@@ -20,6 +21,7 @@ class GroupInfoPage extends StatelessWidget {
     return BlocProvider<GroupInfoBloc>(
       create: (context) => GroupInfoBloc(
           RepositoryProvider.of<ConversationRepository>(context),
+          RepositoryProvider.of<UserRepository>(context),
           conversation: conversation),
       child: GroupInfoPage(conversation: conversation),
     );
