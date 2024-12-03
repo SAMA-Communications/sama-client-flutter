@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../api/api.dart';
+import '../../../api/utils/screen_factor.dart';
 import '../../../features/conversations_list/widgets/avatar_letter_icon.dart';
 import '../../../features/search/bloc/global_search_bloc.dart';
 import '../../../features/search/bloc/global_search_state.dart';
@@ -34,9 +35,9 @@ class ParticipantsForm extends StatelessWidget {
         ),
       ),
       LimitedBox(
-        maxHeight: 135,
+        maxHeight: heightScreen / 5.5,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
+          padding: const EdgeInsets.only(bottom: 8.0),
           child: ParticipantsList(
               users: users,
               nonRemovableUsers: nonRemovableUsers,
