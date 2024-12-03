@@ -34,9 +34,9 @@ class ParticipantsForm extends StatelessWidget {
         ),
       ),
       LimitedBox(
-        maxHeight: 132,
+        maxHeight: 135,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
+          padding: const EdgeInsets.only(bottom: 12.0),
           child: ParticipantsList(
               users: users,
               nonRemovableUsers: nonRemovableUsers,
