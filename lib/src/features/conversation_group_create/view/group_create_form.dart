@@ -92,8 +92,8 @@ class GroupCreateFormState extends State<GroupCreateForm> {
                 onPressed: () {
                   _showGroupDetails(context);
                 },
-                child: const Icon(Icons.arrow_forward,
-                    color: Colors.white, size: 28),
+                child:
+                    const Icon(Icons.arrow_forward, color: slateBlue, size: 28),
               ),
             ),
           );
@@ -127,7 +127,7 @@ void _showGroupDetails(BuildContext context) {
                 onPressed: () {
                   context.read<GroupBloc>().add(GroupSubmitted());
                 },
-                child: const Icon(Icons.check, color: Colors.white, size: 28),
+                child: const Icon(Icons.check, color: slateBlue, size: 28),
               ),
             ),
           )));
