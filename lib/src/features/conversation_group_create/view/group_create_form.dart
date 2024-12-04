@@ -87,13 +87,12 @@ class GroupCreateFormState extends State<GroupCreateForm> {
             child: Visibility(
               visible: state.participants.isValid,
               child: FloatingActionButton(
-                backgroundColor: dullGray,
+                backgroundColor: slateBlue,
                 tooltip: 'Next',
                 onPressed: () {
                   _showGroupDetails(context);
                 },
-                child:
-                    const Icon(Icons.arrow_forward, color: slateBlue, size: 28),
+                child: const Icon(Icons.arrow_forward, color: white, size: 28),
               ),
             ),
           );
@@ -122,12 +121,12 @@ void _showGroupDetails(BuildContext context) {
             floatingActionButton: Visibility(
               visible: !keyboardIsOpen,
               child: FloatingActionButton(
-                backgroundColor: dullGray,
+                backgroundColor: slateBlue,
                 tooltip: 'Create chat',
                 onPressed: () {
                   context.read<GroupBloc>().add(GroupSubmitted());
                 },
-                child: const Icon(Icons.check, color: slateBlue, size: 28),
+                child: const Icon(Icons.check, color: white, size: 28),
               ),
             ),
           )));
