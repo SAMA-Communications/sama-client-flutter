@@ -57,6 +57,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
             )
           ],
         ),
+        //TODO RP can be deleted if not used
         GoRoute(
           path: splashScreenPath,
           builder: (context, state) {
@@ -72,7 +73,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         GoRoute(
           path: groupCreateScreenPath,
           builder: (context, state) {
-            return GroupPage.route();
+            return GroupCreatePage.route();
           },
         ),
         GoRoute(
@@ -119,7 +120,6 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
           context
               .read<PushNotificationsBloc>()
               .add(PushNotificationsProcessing());
-          return splashScreenPath;
         }
 
         if (context.read<PushNotificationsBloc>().state.status ==
@@ -136,15 +136,14 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         }
 
         if (status == AuthenticationStatus.authenticated) {
-          return state.fullPath == loginScreenPath ||
-                  state.fullPath == splashScreenPath
+          return state.fullPath == loginScreenPath
               ? rootScreenPath
               : state.fullPath;
         } else {
           return BlocProvider.of<AuthenticationBloc>(context)
               .tryGetHasLocalUser()
               .then((hasUser) {
-            return hasUser ? splashScreenPath : loginScreenPath;
+            return hasUser ? conversationListScreenPath : loginScreenPath;
           });
         }
       },

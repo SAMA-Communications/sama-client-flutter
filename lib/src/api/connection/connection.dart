@@ -6,13 +6,10 @@ import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../utils/config.dart';
-import '../utils/logger.dart';
-import 'exceptions.dart';
+import '../../shared/secure_storage.dart';
+import '../api.dart';
 
 class SamaConnectionService {
-  SamaConnectionService._();
-
   static final _instance = SamaConnectionService._();
 
   static SamaConnectionService get instance {
@@ -39,14 +36,24 @@ class SamaConnectionService {
 
   ConnectionState get connectionState => _connectionState;
 
-  Future<WebSocketChannel> connect() {
+  SamaConnectionService._() {
+    //fix for iOS https://github.com/flutter/flutter/issues/35272
+    ConnectivityManager.instance.connectivityChangedStream.listen((_) {
+      log('[SamaConnectionService][network connection changed]');
+      if (connectionState != ConnectionState.failed) {
+        _updateConnectionState(ConnectionState.failed);
+      }
+    });
+  }
+
+  Future<WebSocketChannel> connect() async {
     log(
       '[SamaConnectionService][connect]',
     );
 
     _updateConnectionState(ConnectionState.connecting);
 
-    final wssUrl = Uri.parse(apiUrl);
+    final wssUrl = Uri.parse(await SecureStorage.instance.getEnvironmentUrl());
     final channel = WebSocketChannel.connect(wssUrl);
 
     return channel.ready.then((_) {
@@ -78,7 +85,7 @@ class SamaConnectionService {
   }
 
   Future<WebSocketChannel> getConnection(
-      {bool forciblyRecreateConnection = false}) async {
+      {bool forciblyRecreateConnection = false}) {
     if (!forciblyRecreateConnection && openConnectionFeature != null) {
       return openConnectionFeature!;
     } else if (!forciblyRecreateConnection && connection != null) {
@@ -159,7 +166,7 @@ class SamaConnectionService {
   }
 
   closeConnection() {
-    connection?.sink.close(status.goingAway).then((_) {
+    connection?.sink.close(status.normalClosure).then((_) {
       _updateConnectionState(ConnectionState.disconnected);
 
       connection = null;
@@ -189,6 +196,13 @@ class SamaConnectionService {
         return;
       }
 
+      if (jsonData['ask'] != null) {
+        var response = jsonData['ask'];
+        var responseId = response['mid'];
+        var request = awaitingRequests.remove(responseId);
+        if (request != null) request.completer.complete(response);
+      }
+
       _dataController.add(jsonData);
     } catch (e) {
       log(
@@ -211,7 +225,13 @@ class SamaConnectionService {
     if (requestInfo != null) {
       var completer = requestInfo.completer;
       if (error != null) {
-        completer.completeError(ResponseException.fromJson(error));
+        var responseException = ResponseException.fromJson(error);
+        if (responseException.status == 404) {
+          //Unauthorized wait to reconnect
+          awaitingRequests[responseId] = requestInfo;
+        } else {
+          completer.completeError(responseException);
+        }
       } else {
         completer.complete(response);
       }

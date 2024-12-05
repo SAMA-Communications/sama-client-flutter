@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0
+
+### Enhancements:
+
+- Implement Pending/Sent/Read receipts
+- Quick display the chats instead of login screen after app was run
+- Re-design Create Group chat screen
+
+### Fixes:
+- Resolve issue when chats aren’t displayed while the user tries to share some text
+- Fix send empty text message
+
 ## 0.5.0
 
 ### Released Fifth Phase

@@ -1,20 +1,24 @@
 import '../../../api/api.dart';
 
+enum ChatMessageStatus { none, pending, sent, read }
+
 class ChatMessage extends Message {
   final User sender;
   final bool isOwn;
   final bool isFirstUserMessage;
   final bool isLastUserMessage;
+  final ChatMessageStatus status;
 
   const ChatMessage({
     required this.sender,
     required this.isOwn,
     required this.isFirstUserMessage,
     required this.isLastUserMessage,
+    this.status = ChatMessageStatus.none,
     super.id,
     super.from,
     super.cid,
-    super.status,
+    super.rawStatus,
     super.body,
     super.attachments,
     super.createdAt,
@@ -27,10 +31,11 @@ class ChatMessage extends Message {
     bool? isOwn,
     bool? isFirstUserMessage,
     bool? isLastUserMessage,
+    ChatMessageStatus? status,
     String? id,
     String? from,
     String? cid,
-    String? status,
+    String? rawStatus,
     String? body,
     List<Attachment>? attachments,
     int? t,
@@ -42,11 +47,12 @@ class ChatMessage extends Message {
       isOwn: isOwn ?? this.isOwn,
       isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
       isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
+      status: status ?? this.status,
       id: id ?? this.id,
       from: from ?? this.from,
       cid: cid ?? this.cid,
-      status: status ?? this.status,
       body: body ?? this.body,
+      rawStatus: rawStatus ?? this.rawStatus,
       attachments: attachments ?? this.attachments,
       createdAt: createdAt ?? this.createdAt,
       t: t ?? this.t,
@@ -56,5 +62,27 @@ class ChatMessage extends Message {
 
   @override
   List<Object?> get props =>
-      [...super.props, isLastUserMessage, isFirstUserMessage];
+      [...super.props, isLastUserMessage, isFirstUserMessage, status];
+}
+
+extension ChatMessageExtension on Message {
+  ChatMessage toChatMessage(
+      User sender, bool isOwn, bool isLastUserMessage, bool isFirstUserMessage,
+      [ChatMessageStatus status = ChatMessageStatus.none]) {
+    return ChatMessage(
+        sender: sender,
+        isOwn: isOwn,
+        isLastUserMessage: isLastUserMessage,
+        isFirstUserMessage: isFirstUserMessage,
+        status: rawStatus == 'read' ? ChatMessageStatus.read : status,
+        id: id,
+        from: from,
+        cid: cid,
+        rawStatus: rawStatus,
+        body: body,
+        attachments: attachments,
+        createdAt: createdAt,
+        t: t,
+        extension: extension);
+  }
 }

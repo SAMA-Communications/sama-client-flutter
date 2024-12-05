@@ -15,7 +15,8 @@ class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
 
   Stream<AuthenticationStatus> get status async* {
-    await Future<void>.delayed(const Duration(seconds: 1));
+    //TODO RP not clear why this delay is needed, commented for now
+    // await Future<void>.delayed(const Duration(seconds: 1));
     if (await SecureStorage.instance.hasLocalUser()) {
       yield AuthenticationStatus.canBeAuthenticated;
     } else {
@@ -88,6 +89,7 @@ class AuthenticationRepository {
   _disposeLocalUser() async {
     await SecureStorage.instance.deleteLocalUser();
     api.ReconnectionManager.instance.destroy();
+    api.SamaConnectionService.instance.closeConnection();
     api.ConnectionManager.instance.currentUser = null;
     api.ConnectionManager.instance.token = null;
     _controller.add(AuthenticationStatus.unauthenticated);

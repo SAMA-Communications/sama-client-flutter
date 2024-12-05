@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../db/models/conversation.dart';
 import '../../../repository/conversation/conversation_repository.dart';
+import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/group_info_bloc.dart';
 import 'group_info_form.dart';
@@ -20,6 +21,7 @@ class GroupInfoPage extends StatelessWidget {
     return BlocProvider<GroupInfoBloc>(
       create: (context) => GroupInfoBloc(
           RepositoryProvider.of<ConversationRepository>(context),
+          RepositoryProvider.of<UserRepository>(context),
           conversation: conversation),
       child: GroupInfoPage(conversation: conversation),
     );
@@ -29,23 +31,25 @@ class GroupInfoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<GroupInfoBloc, GroupInfoState>(
         builder: (context, state) {
-      return Scaffold(
-          backgroundColor: black,
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            backgroundColor: black,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_outlined, color: white),
-              onPressed: () => context.pop(state.status.isSuccess),
-            ),
-            title: Text(
-              state.name.value,
-              style: const TextStyle(color: white),
-              overflow: TextOverflow.ellipsis,
-            ),
-            centerTitle: true,
-          ),
-          body: const GroupInfoForm());
+      return PopScope(
+          canPop: false,
+          child: Scaffold(
+              backgroundColor: black,
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                backgroundColor: black,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_outlined, color: white),
+                  onPressed: () => context.pop(state.status.isSuccess),
+                ),
+                title: Text(
+                  state.name.value,
+                  style: const TextStyle(color: white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                centerTitle: true,
+              ),
+              body: const GroupInfoForm()));
     });
   }
 }
