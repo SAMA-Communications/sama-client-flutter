@@ -1,10 +1,9 @@
 import 'package:formz/formz.dart';
 
 import '../../../api/api.dart';
+import '../../../shared/utils/api_utils.dart';
 
 enum GroupParticipantsValidationError { empty, long }
-
-const int maxParticipantsCount = 50;
 
 class GroupParticipants
     extends FormzInput<Set<User>, GroupParticipantsValidationError> {

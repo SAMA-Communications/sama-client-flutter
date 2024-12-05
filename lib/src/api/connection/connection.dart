@@ -85,7 +85,7 @@ class SamaConnectionService {
   }
 
   Future<WebSocketChannel> getConnection(
-      {bool forciblyRecreateConnection = false}) async {
+      {bool forciblyRecreateConnection = false}) {
     if (!forciblyRecreateConnection && openConnectionFeature != null) {
       return openConnectionFeature!;
     } else if (!forciblyRecreateConnection && connection != null) {

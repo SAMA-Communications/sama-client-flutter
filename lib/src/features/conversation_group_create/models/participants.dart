@@ -1,13 +1,12 @@
 import 'package:formz/formz.dart';
 
 import '../../../api/api.dart';
+import '../../../shared/utils/api_utils.dart';
 
 enum ParticipantsValidationError {
   empty,
   long,
 }
-
-const int maxParticipantsCount = 50;
 
 class Participants extends FormzInput<Set<User>, ParticipantsValidationError> {
   const Participants.pure() : super.pure(const {});

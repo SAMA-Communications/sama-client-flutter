@@ -73,7 +73,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         GoRoute(
           path: groupCreateScreenPath,
           builder: (context, state) {
-            return GroupPage.route();
+            return GroupCreatePage.route();
           },
         ),
         GoRoute(

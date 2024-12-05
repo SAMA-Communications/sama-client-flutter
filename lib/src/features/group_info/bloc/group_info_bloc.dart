@@ -8,6 +8,7 @@ import 'package:formz/formz.dart';
 import '../../../api/api.dart';
 import '../../../db/models/conversation.dart';
 import '../../../repository/conversation/conversation_repository.dart';
+import '../../../repository/user/user_repository.dart';
 import '../models/models.dart';
 
 part 'group_info_event.dart';
@@ -15,7 +16,7 @@ part 'group_info_event.dart';
 part 'group_info_state.dart';
 
 class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
-  GroupInfoBloc(this._conversationRepository,
+  GroupInfoBloc(this._conversationRepository, this._userRepository,
       {required ConversationModel conversation})
       : super(GroupInfoState(conversation: conversation)) {
     on<GroupParticipantsReceived>(_onGroupInfoParticipantsReceived);
@@ -35,11 +36,12 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
   }
 
   final ConversationRepository _conversationRepository;
+  final UserRepository _userRepository;
 
-  void _onGroupInfoParticipantsReceived(
+  Future<void> _onGroupInfoParticipantsReceived(
     GroupParticipantsReceived event,
     Emitter<GroupInfoState> emit,
-  ) {
+  ) async {
     emit(
       state.copyWith(
           status: FormzSubmissionStatus.initial,
@@ -47,6 +49,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
           description:
               GroupDescription.pure(state.conversation.description ?? ''),
           avatar: GroupAvatar.pure(state.conversation.avatar?.imageUrl),
+          localUser: await _userRepository.getLocalUser(),
           participants: GroupParticipants.pure(event.participants.toSet())),
     );
   }
