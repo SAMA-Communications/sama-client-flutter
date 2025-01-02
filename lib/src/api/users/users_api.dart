@@ -36,7 +36,7 @@ Future<User> login(User user) {
   return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
     'login': user.login,
     'password': user.password,
-    'deviceId': user.deviceId,
+    'device_id': user.deviceId,
   }).then((response) {
     var loggedUser = User.fromJson(response['user']);
     ConnectionManager.instance.currentUser = loggedUser;
@@ -48,7 +48,7 @@ Future<User> login(User user) {
 Future<User> loginWithToken(String token, String deviceId) {
   return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
     'token': token,
-    'deviceId': deviceId,
+    'device_id': deviceId,
   }).then((response) {
     var loggedUser = User.fromJson(response['user']);
     ConnectionManager.instance.currentUser = loggedUser;

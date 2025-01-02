@@ -37,7 +37,7 @@ class AuthenticationRepository {
           deviceId: deviceId ?? await AppSetId().getIdentifier());
       api.User result = (await api.login(user))
           .copyWith(password: password, deviceId: user.deviceId);
-      SecureStorage.instance.saveLocalUserIfNeed(result);
+      await SecureStorage.instance.saveLocalUserIfNeed(result);
       api.ReconnectionManager.instance.init();
       api.PushNotificationsManager.instance.subscribe();
       _controller.add(AuthenticationStatus.authenticated);

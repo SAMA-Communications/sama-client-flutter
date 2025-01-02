@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:app_set_id/app_set_id.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -106,15 +107,15 @@ class PushNotificationsManager {
     });
   }
 
-  subscribe() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      FirebaseMessaging.instance.getToken().then((token) {
-        print('[getToken] token: $token');
-        _subscribePlatform(token);
-      }).catchError((onError) {
-        print('[getToken] onError: $onError');
-      });
+  subscribe() async {
+    String? token;
+    if (Platform.isAndroid) {
+      token = await FirebaseMessaging.instance.getToken();
+    } else if (Platform.isIOS) {
+      token = await FirebaseMessaging.instance.getAPNSToken();
     }
+    print('[getToken] token: $token');
+    _subscribePlatform(token);
   }
 
   _subscribePlatform(String? token) async {
@@ -131,11 +132,10 @@ class PushNotificationsManager {
             ? 'ios'
             : '';
 
-    String deviceId =
-        (await SecureStorage.instance.getLocalUser())?.deviceId ?? '';
+    String? deviceId = await AppSetId().getIdentifier();
     print('[subscribe] subscription');
 
-    createSubscription(platform, deviceId, token!).then((subscription) {
+    createSubscription(platform, deviceId!, token!).then((subscription) {
       print('[subscribe] subscription SUCCESS');
       SecureStorage.instance.saveSubscriptionToken(token);
     }).catchError((error) {
