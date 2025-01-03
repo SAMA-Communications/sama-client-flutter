@@ -32,7 +32,7 @@ class User extends Equatable {
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['_id'],
-        deviceId = json['deviceId'],
+        deviceId = json['device_id'],
         createdAt = DateTime.tryParse(json['created_at']?.toString() ?? ''),
         updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? ''),
         recentActivity =

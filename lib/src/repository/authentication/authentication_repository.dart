@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app_set_id/app_set_id.dart';
 
 import '../../api/api.dart' as api;
+import '../../api/api.dart';
 import '../../shared/secure_storage.dart';
 
 enum AuthenticationStatus {
@@ -25,19 +26,39 @@ class AuthenticationRepository {
     yield* _controller.stream;
   }
 
-  Future<void> logIn({
+  Future<void> login({
     required String username,
-    required String password,
+    String? password,
     String? deviceId,
   }) async {
     try {
-      api.User user = api.User(
+      User user = api.User(
           login: username,
           password: password,
           deviceId: deviceId ?? await AppSetId().getIdentifier());
-      api.User result = (await api.login(user))
-          .copyWith(password: password, deviceId: user.deviceId);
-      SecureStorage.instance.saveLocalUserIfNeed(result);
+      var loggedUser = await api.loginHttp(user);
+      SecureStorage.instance.saveLocalUserIfNeed(loggedUser);
+      await loginWithAccessToken();
+      return Future.value(null);
+    } catch (e) {
+      _controller.add(AuthenticationStatus.unauthenticated);
+      return Future.error((e as api.ResponseException).message ?? '');
+    }
+  }
+
+  Future<void> loginWithAccessToken() async {
+    try {
+      var deviceId = (await SecureStorage.instance.getLocalUser())!.deviceId!;
+      var accessToken = await SecureStorage.instance.getAccessToken();
+
+      if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
+        print('loginWithAccessToken accessToken is expired, so refresh Token');
+        final refreshToken = await SecureStorage.instance.getRefreshToken();
+        await api.refreshToken(accessToken.token!, refreshToken!, deviceId);
+        accessToken = await SecureStorage.instance.getAccessToken();
+      }
+      await api.loginWithAccessToken(accessToken!.token!, deviceId);
+
       api.ReconnectionManager.instance.init();
       api.PushNotificationsManager.instance.subscribe();
       _controller.add(AuthenticationStatus.authenticated);
@@ -60,7 +81,7 @@ class AuthenticationRepository {
           login: username, password: password, deviceId: deviceId ?? '');
 
       if (signInWithCreatedUser) {
-        logIn(username: username, password: password, deviceId: deviceId);
+        login(username: username, password: password, deviceId: deviceId);
       }
 
       return Future.value(null);
@@ -90,8 +111,6 @@ class AuthenticationRepository {
     await SecureStorage.instance.deleteLocalUser();
     api.ReconnectionManager.instance.destroy();
     api.SamaConnectionService.instance.closeConnection();
-    api.ConnectionManager.instance.currentUser = null;
-    api.ConnectionManager.instance.token = null;
     _controller.add(AuthenticationStatus.unauthenticated);
   }
 

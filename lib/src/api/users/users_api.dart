@@ -1,6 +1,8 @@
+import 'dart:io';
+
 import '../../features/conversations_list/conversations_list.dart';
+import '../../shared/secure_storage.dart';
 import '../connection/connection.dart';
-import '../connection/connection_manager.dart';
 import 'models/models.dart';
 
 const String userCreateRequestName = 'user_create';
@@ -8,7 +10,10 @@ const String userLoginRequestName = 'user_login';
 const String userLogoutRequestName = 'user_logout';
 const String userEditRequestName = 'user_edit';
 const String userDeleteRequestName = 'user_delete';
+const String userConnectRequestName = 'connect';
 const String usersGetByIdsRequestName = 'get_users_by_ids';
+
+const String httpLoginRequestName = 'login';
 
 Future<User> createUser({
   required String login,
@@ -32,6 +37,46 @@ Future<User> createUser({
   });
 }
 
+Future<User> loginHttp(User user) {
+  return SamaConnectionService.instance.sendHTTPRequest(httpLoginRequestName, {
+    'login': user.login,
+    'password': user.password,
+    'device_id': user.deviceId,
+  }).then((response) {
+    var loggedUser =
+        User.fromJson(response['user']).copyWith(deviceId: user.deviceId);
+    var accessToken = AccessToken.fromJson(response);
+    var refreshToken = response['refreshToken'];
+    SecureStorage.instance.saveAccessToken(accessToken);
+    SecureStorage.instance.saveRefreshToken(refreshToken);
+    return loggedUser;
+  });
+}
+
+Future<bool> loginWithAccessToken(String token, String deviceId) {
+  return SamaConnectionService.instance.sendRequest(userConnectRequestName, {
+    'token': token,
+    'device_id': deviceId,
+  }).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+  });
+}
+
+Future<void> refreshToken(
+    String accessToken, String refreshToken, String deviceId) async {
+  return SamaConnectionService.instance.sendHTTPRequest(httpLoginRequestName, {
+    'device_id': deviceId,
+  }, {
+    HttpHeaders.authorizationHeader: 'Bearer $accessToken',
+    HttpHeaders.cookieHeader: 'refresh_token=$refreshToken'
+  }).then((response) {
+    var accessToken = AccessToken.fromJson(response);
+    var refreshToken = response['refresh_token']?.toString() ?? '';
+    SecureStorage.instance.saveAccessToken(accessToken);
+    // SecureStorage.instance.saveRefreshToken(refreshToken);
+  });
+}
+
 Future<User> login(User user) {
   return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
     'login': user.login,
@@ -39,20 +84,6 @@ Future<User> login(User user) {
     'deviceId': user.deviceId,
   }).then((response) {
     var loggedUser = User.fromJson(response['user']);
-    ConnectionManager.instance.currentUser = loggedUser;
-    ConnectionManager.instance.token = response['token']?.toString();
-    return loggedUser;
-  });
-}
-
-Future<User> loginWithToken(String token, String deviceId) {
-  return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
-    'token': token,
-    'deviceId': deviceId,
-  }).then((response) {
-    var loggedUser = User.fromJson(response['user']);
-    ConnectionManager.instance.currentUser = loggedUser;
-    ConnectionManager.instance.token = response['token']?.toString();
     return loggedUser;
   });
 }

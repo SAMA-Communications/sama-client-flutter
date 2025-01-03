@@ -69,15 +69,15 @@ class ReconnectionManager {
           if (reconnected) {
             log('[ReconnectionManager]', stringData: 'reconnected');
             _reconnectionTime = 0;
-            if (ConnectionManager.instance.token != null) {
-              var deviceId = await AppSetId().getIdentifier();
-              loginWithToken(ConnectionManager.instance.token!, deviceId ?? '')
-                  .then((_) {
+            final accessToken = await SecureStorage.instance.getAccessToken();
+            if (accessToken?.token != null) {
+              var deviceId =
+                  (await SecureStorage.instance.getLocalUser())?.deviceId;
+              loginWithAccessToken(accessToken!.token!, deviceId!).then((_) {
                 SamaConnectionService.instance.resendAwaitingRequests();
               }).catchError((onError) async {
                 if (onError is ResponseException) {
-                  final user = await SecureStorage.instance.getLocalUser();
-                  login(user!).then((_) {
+                  loginWithAccessToken(accessToken.token!, deviceId).then((_) {
                     SamaConnectionService.instance.resendAwaitingRequests();
                   });
                 }

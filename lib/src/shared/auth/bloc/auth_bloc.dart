@@ -90,11 +90,7 @@ class AuthenticationBloc
 
   Future<void> tryAuthUser() async {
     try {
-      final user = await SecureStorage.instance.getLocalUser();
-      await _authenticationRepository.logIn(
-          username: user!.login!,
-          password: user.password!,
-          deviceId: user.deviceId);
+      await _authenticationRepository.loginWithAccessToken();
     } catch (_) {}
   }
 

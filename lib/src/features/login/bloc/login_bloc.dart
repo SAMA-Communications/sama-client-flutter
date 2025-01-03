@@ -64,7 +64,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               password: state.password.value.trim(),
               signInWithCreatedUser: event.isSighupWithLogin);
         } else {
-          requiredMethod = _authenticationRepository.logIn(
+          requiredMethod = _authenticationRepository.login(
             username: state.username.value.trim(),
             password: state.password.value.trim(),
           );
