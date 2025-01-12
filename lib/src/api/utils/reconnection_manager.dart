@@ -1,8 +1,5 @@
 import 'dart:async';
 
-import 'package:app_set_id/app_set_id.dart';
-
-import '../../shared/secure_storage.dart';
 import '../api.dart';
 
 const int reconnectionTimeout = 5;
@@ -69,20 +66,15 @@ class ReconnectionManager {
           if (reconnected) {
             log('[ReconnectionManager]', stringData: 'reconnected');
             _reconnectionTime = 0;
-            final accessToken = await SecureStorage.instance.getAccessToken();
-            if (accessToken?.token != null) {
-              var deviceId =
-                  (await SecureStorage.instance.getLocalUser())?.deviceId;
-              loginWithAccessToken(accessToken!.token!, deviceId!).then((_) {
-                SamaConnectionService.instance.resendAwaitingRequests();
-              }).catchError((onError) async {
-                if (onError is ResponseException) {
-                  loginWithAccessToken(accessToken.token!, deviceId).then((_) {
-                    SamaConnectionService.instance.resendAwaitingRequests();
-                  });
-                }
-              });
-            }
+            loginWithToken().then((_) {
+              SamaConnectionService.instance.resendAwaitingRequests();
+            }).catchError((onError) async {
+              if (onError is ResponseException) {
+                loginWithToken().then((_) {
+                  SamaConnectionService.instance.resendAwaitingRequests();
+                });
+              }
+            });
           } else {
             _reconnect();
           }

@@ -48,16 +48,7 @@ class AuthenticationRepository {
 
   Future<void> loginWithAccessToken() async {
     try {
-      var deviceId = (await SecureStorage.instance.getLocalUser())!.deviceId!;
-      var accessToken = await SecureStorage.instance.getAccessToken();
-
-      if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
-        print('loginWithAccessToken accessToken is expired, so refresh Token');
-        final refreshToken = await SecureStorage.instance.getRefreshToken();
-        await api.refreshToken(accessToken.token!, refreshToken!, deviceId);
-        accessToken = await SecureStorage.instance.getAccessToken();
-      }
-      await api.loginWithAccessToken(accessToken!.token!, deviceId);
+      await api.loginWithToken();
 
       api.ReconnectionManager.instance.init();
       api.PushNotificationsManager.instance.subscribe();

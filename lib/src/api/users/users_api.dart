@@ -54,7 +54,20 @@ Future<User> loginHttp(User user) {
   });
 }
 
-Future<bool> loginWithAccessToken(String token, String deviceId) {
+Future<bool> loginWithToken() async {
+  var deviceId = (await SecureStorage.instance.getLocalUser())!.deviceId!;
+  var accessToken = await SecureStorage.instance.getAccessToken();
+
+  if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
+    print('loginWithAccessToken accessToken is expired, so refresh Token');
+    final refreshToken = await SecureStorage.instance.getRefreshToken();
+    await _refreshToken(accessToken.token!, refreshToken!, deviceId);
+    accessToken = await SecureStorage.instance.getAccessToken();
+  }
+  return _loginWithAccessToken(accessToken!.token!, deviceId);
+}
+
+Future<bool> _loginWithAccessToken(String token, String deviceId) {
   return SamaConnectionService.instance.sendRequest(userConnectRequestName, {
     'token': token,
     'device_id': deviceId,
@@ -63,7 +76,7 @@ Future<bool> loginWithAccessToken(String token, String deviceId) {
   });
 }
 
-Future<void> refreshToken(
+Future<void> _refreshToken(
     String accessToken, String refreshToken, String deviceId) async {
   return sendHTTPRequest(httpLoginRequestName, {
     'device_id': deviceId,
@@ -74,7 +87,7 @@ Future<void> refreshToken(
     var accessToken = AccessToken.fromJson(response);
     var refreshToken = response['refresh_token']?.toString() ?? '';
     SecureStorage.instance.saveAccessToken(accessToken);
-    // SecureStorage.instance.saveRefreshToken(refreshToken);
+    SecureStorage.instance.saveRefreshToken(refreshToken);
   });
 }
 

@@ -24,8 +24,8 @@ Future<Map<String, dynamic>> sendHTTPRequest(
   Response response =
       await post(urlQuery, headers: headers, body: jsonEncode(requestData));
 
-  print('HTTP response.request?.headers ${response.request?.headers}');
-  print('HTTP response headers${response.headers}');
+  print('HTTP response request headers ${response.request?.headers}');
+  print('HTTP response statusCode ${response.statusCode}, headers $headers ${response.headers}');
 
   var completer = Completer<Map<String, dynamic>>();
   switch (response.statusCode) {
