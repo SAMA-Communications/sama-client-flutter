@@ -3,6 +3,7 @@ import 'dart:io';
 import '../../features/conversations_list/conversations_list.dart';
 import '../../shared/secure_storage.dart';
 import '../connection/connection.dart';
+import '../connection/http_request.dart';
 import 'models/models.dart';
 
 const String userCreateRequestName = 'user_create';
@@ -38,7 +39,7 @@ Future<User> createUser({
 }
 
 Future<User> loginHttp(User user) {
-  return SamaConnectionService.instance.sendHTTPRequest(httpLoginRequestName, {
+  return sendHTTPRequest(httpLoginRequestName, {
     'login': user.login,
     'password': user.password,
     'device_id': user.deviceId,
@@ -64,7 +65,7 @@ Future<bool> loginWithAccessToken(String token, String deviceId) {
 
 Future<void> refreshToken(
     String accessToken, String refreshToken, String deviceId) async {
-  return SamaConnectionService.instance.sendHTTPRequest(httpLoginRequestName, {
+  return sendHTTPRequest(httpLoginRequestName, {
     'device_id': deviceId,
   }, {
     HttpHeaders.authorizationHeader: 'Bearer $accessToken',
