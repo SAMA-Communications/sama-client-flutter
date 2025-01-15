@@ -9,6 +9,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../shared/secure_storage.dart';
 import '../api.dart';
 
+const unauthorizedTimeout = 5;
+
 class SamaConnectionService {
   static final _instance = SamaConnectionService._();
 
@@ -228,8 +230,16 @@ class SamaConnectionService {
       if (error != null) {
         var responseException = ResponseException.fromJson(error);
         if (responseException.status == 404) {
+          print('Unauthorized wait to reconnect $unauthorizedTimeout seconds');
           //Unauthorized wait to reconnect
           awaitingRequests[responseId] = requestInfo;
+          Future.delayed(const Duration(seconds: unauthorizedTimeout), () {
+            if (awaitingRequests[responseId] != null) {
+              print('Unauthorized completeError');
+              awaitingRequests.remove(responseId);
+              completer.completeError(responseException);
+            }
+          });
         } else {
           completer.completeError(responseException);
         }

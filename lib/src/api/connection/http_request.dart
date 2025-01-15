@@ -24,8 +24,7 @@ Future<Map<String, dynamic>> sendHTTPRequest(
   Response response =
       await post(urlQuery, headers: headers, body: jsonEncode(requestData));
 
-  print('HTTP response request headers ${response.request?.headers}');
-  print('HTTP response statusCode ${response.statusCode}, headers $headers ${response.headers}');
+  log('HTTP response statusCode ${response.statusCode}, headers $headers ${response.headers}');
 
   var completer = Completer<Map<String, dynamic>>();
   switch (response.statusCode) {
@@ -36,7 +35,7 @@ Future<Map<String, dynamic>> sendHTTPRequest(
 
       var cookie = response.headers['set-cookie'];
       if (cookie != null) {
-        data['refreshToken'] = Cookie.fromSetCookieValue(cookie).value;
+        data['refresh_token'] = Cookie.fromSetCookieValue(cookie).value;
       }
 
       completer.complete(data);
@@ -50,13 +49,14 @@ Future<Map<String, dynamic>> sendHTTPRequest(
     case 429:
     case 500:
     case 503:
-      Map<String, dynamic> data = jsonDecode(response.body);
-      completer.completeError(ResponseException.fromJson(data)); //TODO CHECK
+      final data = jsonDecode(response.body);
+      completer.completeError(ResponseException.fromJson(
+          {'status': response.statusCode, 'message': data}));
       break;
 
     default:
       completer.completeError(ResponseException.fromJson(
-          {'status': response.statusCode, 'message': response.reasonPhrase}));
+          {'status': response.statusCode, 'message': 'unexpected error'}));
   }
   log('HTTP response', jsonData: await completer.future);
   return completer.future;

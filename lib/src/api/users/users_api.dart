@@ -47,7 +47,7 @@ Future<User> loginHttp(User user) {
     var loggedUser =
         User.fromJson(response['user']).copyWith(deviceId: user.deviceId);
     var accessToken = AccessToken.fromJson(response);
-    var refreshToken = response['refreshToken'];
+    var refreshToken = response['refresh_token'];
     SecureStorage.instance.saveAccessToken(accessToken);
     SecureStorage.instance.saveRefreshToken(refreshToken);
     return loggedUser;
@@ -81,11 +81,11 @@ Future<void> _refreshToken(
   return sendHTTPRequest(httpLoginRequestName, {
     'device_id': deviceId,
   }, {
-    HttpHeaders.authorizationHeader: 'Bearer $accessToken',
     HttpHeaders.cookieHeader: 'refresh_token=$refreshToken'
   }).then((response) {
     var accessToken = AccessToken.fromJson(response);
-    var refreshToken = response['refresh_token']?.toString() ?? '';
+    var refreshToken = response['refresh_token'];
+
     SecureStorage.instance.saveAccessToken(accessToken);
     SecureStorage.instance.saveRefreshToken(refreshToken);
   });

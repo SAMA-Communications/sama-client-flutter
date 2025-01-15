@@ -1,8 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../main.dart';
+import '../../shared/auth/bloc/auth_bloc.dart';
 import '../api.dart';
 
 const int reconnectionTimeout = 5;
+const int statusTokenExpired = 422;
 
 class ReconnectionManager {
   ReconnectionManager._();
@@ -72,6 +77,18 @@ class ReconnectionManager {
               if (onError is ResponseException) {
                 loginWithToken().then((_) {
                   SamaConnectionService.instance.resendAwaitingRequests();
+                }).catchError((onError) {
+                  var ex = onError as ResponseException;
+                  log('[ReconnectionManager]',
+                      stringData: 'reconnected error ${ex.message}');
+                  if (ex.status == statusTokenExpired) {
+                    final context = navigatorKey.currentState?.context;
+                    if (context!.mounted) {
+                      context
+                          .read<AuthenticationBloc>()
+                          .add(AuthenticationLogoutRequested());
+                    }
+                  }
                 });
               }
             });

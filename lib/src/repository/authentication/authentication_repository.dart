@@ -86,19 +86,19 @@ class AuthenticationRepository {
 
   Future<void> logOut() async {
     await api.PushNotificationsManager.instance.unsubscribe();
-    await api.logout().then((success) {
-      _disposeLocalUser();
+    await api.logout().whenComplete(() {
+      disposeLocalUser();
     });
   }
 
   Future<void> signOut() async {
     await api.PushNotificationsManager.instance.unsubscribe();
     await api.signOut().then((success) {
-      _disposeLocalUser();
+      disposeLocalUser();
     });
   }
 
-  _disposeLocalUser() async {
+  disposeLocalUser() async {
     await SecureStorage.instance.deleteLocalUser();
     api.ReconnectionManager.instance.destroy();
     api.SamaConnectionService.instance.closeConnection();

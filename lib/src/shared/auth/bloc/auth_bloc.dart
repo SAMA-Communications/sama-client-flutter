@@ -91,7 +91,10 @@ class AuthenticationBloc
   Future<void> tryAuthUser() async {
     try {
       await _authenticationRepository.loginWithAccessToken();
-    } catch (_) {}
+    } catch (e) {
+      print('tryAuthUser e= $e');
+      _authenticationRepository.disposeLocalUser();
+    }
   }
 
   Future<bool> tryGetHasLocalUser() async {
