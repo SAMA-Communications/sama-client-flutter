@@ -131,8 +131,11 @@ class PushNotificationsManager {
             ? 'ios'
             : '';
 
-    String deviceId =
-        (await SecureStorage.instance.getLocalUser())?.deviceId ?? '';
+    String? deviceId = (await SecureStorage.instance.getLocalUser())?.deviceId;
+    if (deviceId == null) {
+      print('[subscribe] skip subscription for unregistered user');
+      return;
+    }
     print('[subscribe] subscription');
 
     createSubscription(platform, deviceId, token!).then((subscription) {
@@ -147,7 +150,7 @@ class PushNotificationsManager {
     return SecureStorage.instance.getLocalUser().then((user) {
       String? deviceId = user?.deviceId;
       if (deviceId != null) {
-        return deleteSubscription(deviceId).then((_) {
+        return deleteSubscription(deviceId).whenComplete(() {
           FirebaseMessaging.instance.deleteToken();
         });
       }
