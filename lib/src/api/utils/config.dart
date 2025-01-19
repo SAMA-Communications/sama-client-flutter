@@ -1,5 +1,5 @@
-const String apiProdUrl = 'wss://api.samacloud.io';
-const String apiDevUrl = 'wss://api-dev.samacloud.io';
+const String apiProdUrl = 'api.samacloud.io';
+const String apiDevUrl = 'api-dev.samacloud.io';
 
 enum EnvType {
   dev(apiDevUrl),

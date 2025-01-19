@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import '../../features/conversations_list/conversations_list.dart';
+import '../../shared/secure_storage.dart';
 import '../connection/connection.dart';
-import '../connection/connection_manager.dart';
+import '../connection/http_request.dart';
 import 'models/models.dart';
 
 const String userCreateRequestName = 'user_create';
@@ -8,7 +11,10 @@ const String userLoginRequestName = 'user_login';
 const String userLogoutRequestName = 'user_logout';
 const String userEditRequestName = 'user_edit';
 const String userDeleteRequestName = 'user_delete';
+const String userConnectRequestName = 'connect';
 const String usersGetByIdsRequestName = 'get_users_by_ids';
+
+const String httpLoginRequestName = 'login';
 
 Future<User> createUser({
   required String login,
@@ -32,6 +38,60 @@ Future<User> createUser({
   });
 }
 
+Future<User> loginHttp(User user) {
+  return sendHTTPRequest(httpLoginRequestName, {
+    'login': user.login,
+    'password': user.password,
+    'device_id': user.deviceId,
+  }).then((response) {
+    var loggedUser =
+        User.fromJson(response['user']).copyWith(deviceId: user.deviceId);
+    var accessToken = AccessToken.fromJson(response);
+    var refreshToken = response['refresh_token'];
+    SecureStorage.instance.saveAccessToken(accessToken);
+    SecureStorage.instance.saveRefreshToken(refreshToken);
+    return loggedUser;
+  });
+}
+
+Future<bool> loginWithToken() async {
+  var deviceId = (await SecureStorage.instance.getLocalUser())!.deviceId!;
+  var accessToken = await SecureStorage.instance.getAccessToken();
+
+  if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
+    print('loginWithAccessToken accessToken is expired, so refresh Token');
+    final refreshToken = await SecureStorage.instance.getRefreshToken();
+    await _refreshToken(accessToken.token!, refreshToken!, deviceId);
+    accessToken = await SecureStorage.instance.getAccessToken();
+  }
+  return _loginWithAccessToken(accessToken!.token!, deviceId);
+}
+
+Future<bool> _loginWithAccessToken(String token, String deviceId) {
+  return SamaConnectionService.instance.sendRequest(userConnectRequestName, {
+    'token': token,
+    'device_id': deviceId,
+  }).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+  });
+}
+
+Future<void> _refreshToken(
+    String accessToken, String refreshToken, String deviceId) async {
+  return sendHTTPRequest(httpLoginRequestName, {
+    'device_id': deviceId,
+  }, {
+    HttpHeaders.cookieHeader: 'refresh_token=$refreshToken'
+  }).then((response) {
+    var accessToken = AccessToken.fromJson(response);
+    var refreshToken = response['refresh_token'];
+
+    SecureStorage.instance.saveAccessToken(accessToken);
+    SecureStorage.instance.saveRefreshToken(refreshToken);
+  });
+}
+
+@Deprecated('old login way')
 Future<User> login(User user) {
   return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
     'login': user.login,
@@ -39,20 +99,6 @@ Future<User> login(User user) {
     'device_id': user.deviceId,
   }).then((response) {
     var loggedUser = User.fromJson(response['user']);
-    ConnectionManager.instance.currentUser = loggedUser;
-    ConnectionManager.instance.token = response['token']?.toString();
-    return loggedUser;
-  });
-}
-
-Future<User> loginWithToken(String token, String deviceId) {
-  return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
-    'token': token,
-    'device_id': deviceId,
-  }).then((response) {
-    var loggedUser = User.fromJson(response['user']);
-    ConnectionManager.instance.currentUser = loggedUser;
-    ConnectionManager.instance.token = response['token']?.toString();
     return loggedUser;
   });
 }

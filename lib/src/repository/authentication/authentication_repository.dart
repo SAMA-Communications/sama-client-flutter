@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app_set_id/app_set_id.dart';
 
 import '../../api/api.dart' as api;
+import '../../api/api.dart';
 import '../../shared/secure_storage.dart';
 
 enum AuthenticationStatus {
@@ -25,19 +26,30 @@ class AuthenticationRepository {
     yield* _controller.stream;
   }
 
-  Future<void> logIn({
+  Future<void> login({
     required String username,
-    required String password,
+    String? password,
     String? deviceId,
   }) async {
     try {
-      api.User user = api.User(
+      User user = api.User(
           login: username,
           password: password,
           deviceId: deviceId ?? await AppSetId().getIdentifier());
-      api.User result = (await api.login(user))
-          .copyWith(password: password, deviceId: user.deviceId);
-      await SecureStorage.instance.saveLocalUserIfNeed(result);
+      var loggedUser = await api.loginHttp(user);
+      SecureStorage.instance.saveLocalUserIfNeed(loggedUser);
+      await loginWithAccessToken();
+      return Future.value(null);
+    } catch (e) {
+      _controller.add(AuthenticationStatus.unauthenticated);
+      return Future.error((e as api.ResponseException).message ?? '');
+    }
+  }
+
+  Future<void> loginWithAccessToken() async {
+    try {
+      await api.loginWithToken();
+
       api.ReconnectionManager.instance.init();
       api.PushNotificationsManager.instance.subscribe();
       _controller.add(AuthenticationStatus.authenticated);
@@ -60,7 +72,7 @@ class AuthenticationRepository {
           login: username, password: password, deviceId: deviceId ?? '');
 
       if (signInWithCreatedUser) {
-        logIn(username: username, password: password, deviceId: deviceId);
+        login(username: username, password: password, deviceId: deviceId);
       }
 
       return Future.value(null);
@@ -74,24 +86,22 @@ class AuthenticationRepository {
 
   Future<void> logOut() async {
     await api.PushNotificationsManager.instance.unsubscribe();
-    await api.logout().then((success) {
-      _disposeLocalUser();
+    await api.logout().whenComplete(() {
+      disposeLocalUser();
     });
   }
 
   Future<void> signOut() async {
     await api.PushNotificationsManager.instance.unsubscribe();
     await api.signOut().then((success) {
-      _disposeLocalUser();
+      disposeLocalUser();
     });
   }
 
-  _disposeLocalUser() async {
+  disposeLocalUser() async {
     await SecureStorage.instance.deleteLocalUser();
     api.ReconnectionManager.instance.destroy();
     api.SamaConnectionService.instance.closeConnection();
-    api.ConnectionManager.instance.currentUser = null;
-    api.ConnectionManager.instance.token = null;
     _controller.add(AuthenticationStatus.unauthenticated);
   }
 

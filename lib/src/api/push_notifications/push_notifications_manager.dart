@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
-import 'package:app_set_id/app_set_id.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -131,10 +129,14 @@ class PushNotificationsManager {
             ? 'ios'
             : '';
 
-    String? deviceId = await AppSetId().getIdentifier();
+    String? deviceId = (await SecureStorage.instance.getLocalUser())?.deviceId;
+    if (deviceId == null) {
+      print('[subscribe] skip subscription for unregistered user');
+      return;
+    }
     print('[subscribe] subscription');
 
-    createSubscription(platform, deviceId!, token!).then((subscription) {
+    createSubscription(platform, deviceId, token!).then((subscription) {
       print('[subscribe] subscription SUCCESS');
       SecureStorage.instance.saveSubscriptionToken(token);
     }).catchError((error) {
@@ -146,7 +148,7 @@ class PushNotificationsManager {
     return SecureStorage.instance.getLocalUser().then((user) {
       String? deviceId = user?.deviceId;
       if (deviceId != null) {
-        return deleteSubscription(deviceId).then((_) {
+        return deleteSubscription(deviceId).whenComplete(() {
           FirebaseMessaging.instance.deleteToken();
         });
       }
