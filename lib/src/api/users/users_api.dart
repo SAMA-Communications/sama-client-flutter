@@ -59,7 +59,7 @@ Future<AccessToken> loginHttp(User user) {
 
 Future<bool> loginWithToken([AccessToken? accessToken]) async {
   var deviceId = await AppSetId().getIdentifier();
-  accessToken ?? await SecureStorage.instance.getAccessToken();
+  accessToken ??= await SecureStorage.instance.getAccessToken();
 
   if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
     print('loginWithAccessToken accessToken is expired, so refresh Token');
