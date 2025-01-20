@@ -30,7 +30,7 @@ Future<User> createUser({
   return SamaConnectionService.instance.sendRequest(userCreateRequestName, {
     'login': login,
     'password': password,
-    'deviceId': deviceId,
+    'device_id': deviceId,
     if (email != null) 'email': email,
     if (phone != null) 'phone': phone,
     if (firstName != null) 'first_name': firstName,
