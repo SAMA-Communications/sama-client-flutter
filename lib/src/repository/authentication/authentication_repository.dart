@@ -36,9 +36,8 @@ class AuthenticationRepository {
           login: username,
           password: password,
           deviceId: deviceId ?? await AppSetId().getIdentifier());
-      var loggedUser = await api.loginHttp(user);
-      SecureStorage.instance.saveLocalUserIfNeed(loggedUser);
-      await loginWithAccessToken();
+      var accessToken = await api.loginHttp(user);
+      await loginWithAccessToken(accessToken);
       return Future.value(null);
     } catch (e) {
       _controller.add(AuthenticationStatus.unauthenticated);
@@ -46,9 +45,9 @@ class AuthenticationRepository {
     }
   }
 
-  Future<void> loginWithAccessToken() async {
+  Future<void> loginWithAccessToken([AccessToken? accessToken]) async {
     try {
-      await api.loginWithToken();
+      await api.loginWithToken(accessToken);
 
       api.ReconnectionManager.instance.init();
       api.PushNotificationsManager.instance.subscribe();
