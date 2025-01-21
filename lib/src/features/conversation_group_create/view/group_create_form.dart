@@ -104,6 +104,7 @@ void _showGroupDetails(BuildContext context) {
   bool keyboardIsOpen = MediaQuery.of(context).viewInsets.bottom != 0;
   showDialog(
       context: context,
+      useSafeArea: false,
       builder: (_) => Dialog.fullscreen(
               child: Scaffold(
             appBar: AppBar(

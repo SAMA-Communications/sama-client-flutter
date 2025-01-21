@@ -36,16 +36,7 @@ class ProfilePage extends StatelessWidget {
               style: TextStyle(color: white),
             ),
           ),
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => context.push(globalSearchPath),
-              icon: const Icon(
-                Icons.search,
-                color: white,
-                size: 32,
-              ),
-            ),
-          ],
+          centerTitle: true,
         ),
         body: BlocProvider(
           create: (context) {

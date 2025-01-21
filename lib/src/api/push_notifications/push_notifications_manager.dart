@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -42,15 +41,14 @@ class PushNotificationsManager {
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_notification');
-    final DarwinInitializationSettings initializationSettingsIOS =
+    const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
       requestSoundPermission: true,
       requestBadgePermission: true,
       requestAlertPermission: true,
-      onDidReceiveLocalNotification: onDidReceiveLocalNotification,
     );
 
-    final InitializationSettings initializationSettings =
+    const InitializationSettings initializationSettings =
         InitializationSettings(
             android: initializationSettingsAndroid,
             iOS: initializationSettingsIOS);
@@ -106,15 +104,15 @@ class PushNotificationsManager {
     });
   }
 
-  subscribe() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      FirebaseMessaging.instance.getToken().then((token) {
-        print('[getToken] token: $token');
-        _subscribePlatform(token);
-      }).catchError((onError) {
-        print('[getToken] onError: $onError');
-      });
+  subscribe() async {
+    String? token;
+    if (Platform.isAndroid) {
+      token = await FirebaseMessaging.instance.getToken();
+    } else if (Platform.isIOS) {
+      token = await FirebaseMessaging.instance.getAPNSToken();
     }
+    print('[getToken] token: $token');
+    _subscribePlatform(token);
   }
 
   _subscribePlatform(String? token) async {

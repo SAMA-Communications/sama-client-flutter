@@ -106,6 +106,11 @@ class SecureStorage {
     // _storage.deleteAll();
   }
 
+  Future<void> deleteAllData() async {
+    deleteLocalUser();
+    _storage.delete(key: storageEnvironmentUrl);
+  }
+
   saveAccessToken(AccessToken token) {
     _storage.write(key: storageAccessToken, value: token.token);
     _storage.write(

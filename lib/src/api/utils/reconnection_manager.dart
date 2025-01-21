@@ -90,6 +90,9 @@ class ReconnectionManager {
                     }
                   }
                 });
+              } else {
+                log('[ReconnectionManager]',
+                    stringData: 'unexpected error $onError');
               }
             });
           } else {

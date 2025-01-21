@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../../api/api.dart';
 import '../../../db/models/conversation.dart';
@@ -15,7 +14,6 @@ part 'push_notifications_state.dart';
 class PushNotificationsBloc
     extends Bloc<PushNotificationsEvent, PushNotificationsState> {
   final ConversationRepository _conversationRepository;
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   PushNotificationsBloc({
     required ConversationRepository conversationRepository,
