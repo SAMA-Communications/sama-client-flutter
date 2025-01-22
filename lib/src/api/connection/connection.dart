@@ -229,7 +229,7 @@ class SamaConnectionService {
       var completer = requestInfo.completer;
       if (error != null) {
         var responseException = ResponseException.fromJson(error);
-        if (responseException.status == 404) {
+        if (responseException.status == HttpStatus.unauthorized) {
           print('Unauthorized wait to reconnect $unauthorizedTimeout seconds');
           //Unauthorized wait to reconnect
           awaitingRequests[responseId] = requestInfo;
