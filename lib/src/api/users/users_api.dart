@@ -11,6 +11,7 @@ import 'models/models.dart';
 const String userCreateRequestName = 'user_create';
 const String userLoginRequestName = 'user_login';
 const String userLogoutRequestName = 'user_logout';
+const String userSearchRequestName = 'user_search';
 const String userEditRequestName = 'user_edit';
 const String userDeleteRequestName = 'user_delete';
 const String userConnectRequestName = 'connect';
@@ -162,10 +163,10 @@ Future<User> userEdit({
   });
 }
 
-Future<List<User>> searchUsersByLogin(String login,
+Future<List<User>> searchUsersByKeyword(String keyword,
     [List<String>? ignoreIds]) async {
-  return SamaConnectionService.instance.sendRequest("user_search", {
-    'login': login,
+  return SamaConnectionService.instance.sendRequest(userSearchRequestName, {
+    'keyword': keyword,
     'ignore_ids': ignoreIds ?? [],
     'limit': 5,
   }).then((response) {

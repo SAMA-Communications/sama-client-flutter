@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.0
+
+### Features:
+
+- Implemented a progressive authentication flow to enhance security
+- Implemented push notifications for the iOS platform
+
+### Fixes:
+- Fixed minor UI bugs for the iOS app
+
 ## 0.6.0
 
 ### Enhancements:
