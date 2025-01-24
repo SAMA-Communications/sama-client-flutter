@@ -2,9 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../secure_storage.dart';
 import '../ui/colors.dart';
 import '../utils/screen_factor.dart';
+import 'env_dialog_widget.dart';
 import 'multi_gesture_detector.dart';
 
 class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -17,27 +17,11 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
       background: MultiGestureDetector(
         taps: 5,
         onTap: () => showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Erase all data'),
-            content: const Text('Are you sure you want to erase all data?'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  SecureStorage.instance.deleteAllData();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              )
-            ],
-          ),
-        ),
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return const EnvDialogInput();
+            }),
         child: Stack(
           children: [
             Image.asset(
