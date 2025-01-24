@@ -1,14 +1,23 @@
+import 'dart:io';
+
+import 'package:app_set_id/app_set_id.dart';
+
 import '../../features/conversations_list/conversations_list.dart';
+import '../../shared/secure_storage.dart';
 import '../connection/connection.dart';
-import '../connection/connection_manager.dart';
+import '../connection/http_request.dart';
 import 'models/models.dart';
 
 const String userCreateRequestName = 'user_create';
 const String userLoginRequestName = 'user_login';
 const String userLogoutRequestName = 'user_logout';
+const String userSearchRequestName = 'user_search';
 const String userEditRequestName = 'user_edit';
 const String userDeleteRequestName = 'user_delete';
+const String userConnectRequestName = 'connect';
 const String usersGetByIdsRequestName = 'get_users_by_ids';
+
+const String httpLoginRequestName = 'login';
 
 Future<User> createUser({
   required String login,
@@ -22,7 +31,7 @@ Future<User> createUser({
   return SamaConnectionService.instance.sendRequest(userCreateRequestName, {
     'login': login,
     'password': password,
-    'deviceId': deviceId,
+    'device_id': deviceId,
     if (email != null) 'email': email,
     if (phone != null) 'phone': phone,
     if (firstName != null) 'first_name': firstName,
@@ -32,27 +41,69 @@ Future<User> createUser({
   });
 }
 
+Future<AccessToken> loginHttp(User user) {
+  return sendHTTPRequest(httpLoginRequestName, {
+    'login': user.login,
+    'password': user.password,
+    'device_id': user.deviceId,
+  }).then((response) {
+    var loggedUser =
+        User.fromJson(response['user']).copyWith(deviceId: user.deviceId);
+    var accessToken = AccessToken.fromJson(response);
+    var refreshToken = response['refresh_token'];
+    SecureStorage.instance.saveLocalUserIfNeed(loggedUser);
+    SecureStorage.instance.saveAccessToken(accessToken);
+    SecureStorage.instance.saveRefreshToken(refreshToken);
+    return accessToken;
+  });
+}
+
+Future<bool> loginWithToken([AccessToken? accessToken]) async {
+  var deviceId = await AppSetId().getIdentifier();
+  accessToken ??= await SecureStorage.instance.getAccessToken();
+
+  if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
+    print('loginWithAccessToken accessToken is expired, so refresh Token');
+    final refreshToken = await SecureStorage.instance.getRefreshToken();
+    accessToken =
+        await _refreshToken(accessToken.token!, refreshToken!, deviceId!);
+  }
+  return _loginWithAccessToken(accessToken.token!, deviceId!);
+}
+
+Future<bool> _loginWithAccessToken(String token, String deviceId) {
+  return SamaConnectionService.instance.sendRequest(userConnectRequestName, {
+    'token': token,
+    'device_id': deviceId,
+  }).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+  });
+}
+
+Future<AccessToken> _refreshToken(
+    String accessToken, String refreshToken, String deviceId) async {
+  return sendHTTPRequest(httpLoginRequestName, {
+    'device_id': deviceId,
+  }, {
+    HttpHeaders.cookieHeader: 'refresh_token=$refreshToken'
+  }).then((response) {
+    var accessToken = AccessToken.fromJson(response);
+    var refreshToken = response['refresh_token'];
+
+    SecureStorage.instance.saveAccessToken(accessToken);
+    SecureStorage.instance.saveRefreshToken(refreshToken);
+    return accessToken;
+  });
+}
+
+@Deprecated('old login way')
 Future<User> login(User user) {
   return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
     'login': user.login,
     'password': user.password,
-    'deviceId': user.deviceId,
+    'device_id': user.deviceId,
   }).then((response) {
     var loggedUser = User.fromJson(response['user']);
-    ConnectionManager.instance.currentUser = loggedUser;
-    ConnectionManager.instance.token = response['token']?.toString();
-    return loggedUser;
-  });
-}
-
-Future<User> loginWithToken(String token, String deviceId) {
-  return SamaConnectionService.instance.sendRequest(userLoginRequestName, {
-    'token': token,
-    'deviceId': deviceId,
-  }).then((response) {
-    var loggedUser = User.fromJson(response['user']);
-    ConnectionManager.instance.currentUser = loggedUser;
-    ConnectionManager.instance.token = response['token']?.toString();
     return loggedUser;
   });
 }
@@ -112,10 +163,10 @@ Future<User> userEdit({
   });
 }
 
-Future<List<User>> searchUsersByLogin(String login,
+Future<List<User>> searchUsersByKeyword(String keyword,
     [List<String>? ignoreIds]) async {
-  return SamaConnectionService.instance.sendRequest("user_search", {
-    'login': login,
+  return SamaConnectionService.instance.sendRequest(userSearchRequestName, {
+    'keyword': keyword,
     'ignore_ids': ignoreIds ?? [],
     'limit': 5,
   }).then((response) {

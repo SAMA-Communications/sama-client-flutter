@@ -23,29 +23,11 @@ class ProfilePage extends StatelessWidget {
           iconTheme: const IconThemeData(
             color: white, //change your color here
           ),
-          title: MultiGestureDetector(
-            taps: 5,
-            onTap: () => showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return const EnvDialogInput();
-                }),
-            child: const Text(
-              'Personal information',
-              style: TextStyle(color: white),
-            ),
+          title: const Text(
+            'Personal information',
+            style: TextStyle(color: white),
           ),
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => context.push(globalSearchPath),
-              icon: const Icon(
-                Icons.search,
-                color: white,
-                size: 32,
-              ),
-            ),
-          ],
+          centerTitle: true,
         ),
         body: BlocProvider(
           create: (context) {

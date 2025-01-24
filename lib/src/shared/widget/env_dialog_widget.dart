@@ -30,9 +30,12 @@ class EnvDialogInput extends StatelessWidget {
             onPressed: () {
               if (envType != null) {
                 SecureStorage.instance.saveEnvironmentType(envType!);
-                context
-                    .read<AuthenticationBloc>()
-                    .add(AuthenticationLogoutRequested());
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(content: Text('Updated')),
+                  );
+                Navigator.pop(context, true);
               } else {
                 ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()

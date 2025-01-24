@@ -16,7 +16,7 @@ class GlobalSearchRepository {
   });
 
   Future<SearchResult> search(String term) async {
-    final List<User> users = await api.searchUsersByLogin(term);
+    final List<User> users = await api.searchUsersByKeyword(term);
     final List<String> ids = await api.searchConversationsIdsByName(term);
     final List<ConversationModel> conversations =
         localDataSource.getConversationsByIds(ids);

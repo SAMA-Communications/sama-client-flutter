@@ -16,7 +16,7 @@ class UserRepository {
   UserRepository({required this.localDataSource});
 
   Future<User?> getLocalUser() async {
-    return ConnectionManager.instance.currentUser;
+    return SecureStorage.instance.getLocalUser();
   }
 
   Future<User> updateLocalUser(
@@ -43,7 +43,6 @@ class UserRepository {
     }
 
     SecureStorage.instance.saveLocalUserIfNeed(result);
-    ConnectionManager.instance.currentUser = result;
     return result;
   }
 
