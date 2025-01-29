@@ -34,7 +34,7 @@ class SamaDB {
 
   Future<List<void>> _createDatabase(Database db, int version) async {
     return await Future.wait([
-      createUsersTable(db, version),
+      // createUsersTable(db, version),
     ]);
   }
 

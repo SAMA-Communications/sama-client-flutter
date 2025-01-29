@@ -171,8 +171,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(participants: Set.of(participants)));
   }
 
-  Future<void> _onConversationUpdated(
-      _ConversationUpdated event, Emitter<ConversationState> emit) async {
+  Future<void> _onConversationUpdated(event, emit) async {
     emit(state.copyWith(conversation: event.conversation));
   }
 

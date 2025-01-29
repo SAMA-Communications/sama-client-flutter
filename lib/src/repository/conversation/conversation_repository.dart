@@ -7,15 +7,25 @@ import 'package:path/path.dart';
 import '../../api/api.dart' as api;
 import '../../api/api.dart';
 import '../../api/push_notifications/models/models.dart';
+import '../../db/entities/conversation_entity.dart';
+import '../../db/entity_builder.dart';
 import '../../db/models/conversation.dart';
+import '../../db/network_bound_resource.dart';
+import '../../db/resource.dart';
 import '../../repository/messages/messages_repository.dart';
 import '../../shared/utils/media_utils.dart';
 import '../../shared/utils/string_utils.dart';
 import '../user/user_repository.dart';
 import 'conversation_data_source.dart';
+import '../../db/local/conversation_local_datasource.dart' as store;
 
 class ConversationRepository {
   final ConversationLocalDataSource localDataSource;
+  final store.ConversationLocalDataSource localStore =
+      store.ConversationLocalDataSource();
+
+  // final ConversationRemoteDataSource remoteDataSource;
+
   final UserRepository userRepository;
   final MessagesRepository messagesRepository;
 
@@ -155,6 +165,41 @@ class ConversationRepository {
     return {for (var v in await api.fetchParticipants(cids)) v.id!: v};
   }
 
+  Future<Resource<List<ConversationEntity>?>> getAllConversations() async {
+    return NetworkBoundResources<List<ConversationEntity>, List<ConversationEntity>>().asFuture(
+      loadFromDb: localStore.getAllConversationsLocal,
+      shouldFetch: (data) => data == null || data.isEmpty,
+      createCall: getAllConversationsWithParticipants,
+      saveCallResult: localStore.saveConversationsLocal,
+    );
+  }
+
+  Future<Resource<ConversationEntity?>> getConversation(String id) async {
+    return NetworkBoundResources<ConversationEntity?, ConversationEntity?>().asFuture(
+      loadFromDb: () => localStore.getConversationLocal(id),
+      shouldFetch: (data) => data == null,
+      createCall: () => getOneConversationById(id),
+      saveCallResult: (data) =>
+          data != null ? localStore.saveConversationLocal(data) : Future.value(false),
+    );
+  }
+
+  Future<List<ConversationEntity>> getAllConversationsWithParticipants() async {
+    print('AMBRA getAllConversationsWithParticipants');
+    final List<api.Conversation> conversations = await getConversations();
+
+    final List<String> cids =
+    conversations.map((element) => element.id!).toList();
+    final localUser = await userRepository.getLocalUser();
+    final participants = await getParticipantsAsMap(cids);
+
+    final List<ConversationEntity> result = conversations.map((conversation) {
+      return _buildConversationEntity(conversation, participants, localUser);
+    }).toList();
+
+    return result;
+  }
+
   Future<List<ConversationModel>> getConversationsWithParticipants() async {
     final List<api.Conversation> conversations = await getConversations();
 
@@ -171,6 +216,19 @@ class ConversationRepository {
     _sortConversations(result);
     _removeEmptyPrivateConversations(result);
     return result;
+  }
+
+  Future<ConversationEntity?> getOneConversationById(String cid) async {
+    var conversation = localDataSource.getConversationById(cid);
+
+    if (conversation == null) {
+      final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
+      if (conversation == null) return null;
+      final localUser = await userRepository.getLocalUser();
+      final participants = await getParticipantsAsMap([cid]);
+      return _buildConversationEntity(conversation, participants, localUser);
+    }
+    return null;
   }
 
   Future<ConversationModel?> getConversationById(String cid) async {
@@ -294,5 +352,38 @@ class ConversationRepository {
       description: conversation.description,
       avatar: getConversationAvatar(conversation, owner, opponent, localUser),
     );
+  }
+
+  ConversationEntity _buildConversationEntity(Conversation conversation,
+      Map<String, api.User> participants, api.User? localUser) {
+    final opponent = participants[conversation.opponentId];
+    final owner = participants[conversation.ownerId];
+    //can be null if user deleted
+    var ownerEnt;
+    var opponentEnt;
+    var avatarEnt;
+    var messageEnt;
+
+    avatarEnt = buildWithAvatar(
+        getConversationAvatar(conversation, owner, opponent, localUser));
+    messageEnt = buildWithMessage(conversation.lastMessage);
+
+    opponentEnt =
+        buildWithUser(getConversationOpponent(owner, opponent, localUser));
+    ownerEnt = buildWithUser(owner);
+
+    return ConversationEntity(
+      uid: conversation.id!,
+      createdAt: conversation.createdAt!,
+      updatedAt: conversation.updatedAt!,
+      type: conversation.type!,
+      name: getConversationName(conversation, owner, opponent, localUser),
+      unreadMessagesCount: conversation.unreadMessagesCount,
+      description: conversation.description,
+    )
+      ..opponent.target = opponentEnt
+      ..owner.target = ownerEnt
+      ..lastMessage.target = messageEnt
+      ..avatar.target = avatarEnt;
   }
 }

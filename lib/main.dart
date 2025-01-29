@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'src/api/api.dart';
+import 'src/db/db_service.dart';
 import 'src/navigation/app_router.dart';
 import 'src/repository/attachments/attachments_repository.dart';
 import 'src/repository/authentication/authentication_repository.dart';
@@ -28,7 +29,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-
+  DatabaseService.instance.drop();
   runApp(const App());
 }
 
@@ -71,6 +72,7 @@ class _AppState extends State<App> {
     _authenticationRepository.dispose();
     _messagesRepository.dispose();
     _conversationRepository.dispose();
+    DatabaseService.instance.close();
     super.dispose();
   }
 
