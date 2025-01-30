@@ -1,0 +1,5 @@
+app_identifier("io.samacloud.messenger") # The bundle identifier of your app
+apple_id("sergeyku9nov@gmail.com") # Your Apple Developer Portal username
+
+itc_team_id("127481005") # App Store Connect Team ID
+team_id("LQZ558R8Q8") # Developer Portal Team ID

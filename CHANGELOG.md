@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1
+
+### Features:
+
+- Implemented CI
+
 ## 0.7.0
 
 ### Features:
