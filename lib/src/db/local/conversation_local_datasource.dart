@@ -1,13 +1,13 @@
 import '../../shared/errors/exceptions.dart';
 import '../db_service.dart';
-import '../entities/conversation_entity.dart';
+import '../models/conversation_model.dart';
 
 class ConversationLocalDataSource {
   final DatabaseService databaseService = DatabaseService.instance;
 
   // ConversationLocalDataSource(this.databaseService);
 
-  Future<List<ConversationEntity>> getAllConversationsLocal() async {
+  Future<List<ConversationModel>> getAllConversationsLocal() async {
     try {
       return await databaseService.getAllConversationsLocal();
     } catch (e) {
@@ -15,7 +15,7 @@ class ConversationLocalDataSource {
     }
   }
 
-  Future<ConversationEntity> getConversationLocal(String cid) async {
+  Future<ConversationModel?> getConversationLocal(String cid) async {
     try {
       return await databaseService.getConversationLocal(cid);
     } catch (e) {
@@ -23,7 +23,16 @@ class ConversationLocalDataSource {
     }
   }
 
-  Future<bool> saveConversationsLocal(List<ConversationEntity> items) async {
+  Future<List<ConversationModel>> getConversationsLocal(
+      List<String> ids) async {
+    try {
+      return await databaseService.getConversationsLocal(ids);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<bool> saveConversationsLocal(List<ConversationModel> items) async {
     try {
       return await databaseService.saveConversationsLocal(items);
     } catch (e) {
@@ -31,9 +40,25 @@ class ConversationLocalDataSource {
     }
   }
 
-  Future<bool> saveConversationLocal(ConversationEntity item) async {
+  Future<bool> saveConversationLocal(ConversationModel item) async {
     try {
       return await databaseService.saveConversationLocal(item);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<bool> updateConversationLocal(ConversationModel item) async {
+    try {
+      return await databaseService.updateConversationLocal(item);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<bool> removeConversationLocal(String id) async {
+    try {
+      return await databaseService.removeConversationLocal(id);
     } catch (e) {
       throw DatabaseException(e.toString());
     }

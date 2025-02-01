@@ -7,7 +7,7 @@ final class GroupInfoState extends Equatable {
     this.name = const Groupname.pure(),
     this.description = const GroupDescription.pure(),
     this.avatar = const GroupAvatar.pure(),
-    this.localUser = User.empty,
+    this.localUser,
     this.participants = const GroupParticipants.pure(),
     this.addParticipants = const GroupParticipants.pure(),
     this.removeParticipants = const GroupParticipants.pure(),
@@ -21,7 +21,7 @@ final class GroupInfoState extends Equatable {
   final Groupname name;
   final GroupDescription description;
   final GroupAvatar avatar;
-  final User localUser;
+  final UserModel? localUser;
   final GroupParticipants participants;
   final GroupParticipants addParticipants;
   final GroupParticipants removeParticipants;
@@ -34,7 +34,7 @@ final class GroupInfoState extends Equatable {
     Groupname? name,
     GroupDescription? description,
     GroupAvatar? avatar,
-    User? localUser,
+    UserModel? localUser,
     GroupParticipants? participants,
     GroupParticipants? addParticipants,
     GroupParticipants? removeParticipants,

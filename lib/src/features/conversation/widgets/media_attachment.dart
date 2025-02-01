@@ -7,6 +7,7 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../db/entity_builder.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
@@ -31,7 +32,7 @@ class MediaAttachment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MessageBubble(
-      sender: message.sender,
+      sender: buildWithUser(message.sender)!,
       isFirst: message.isFirstUserMessage,
       isLast: message.isLastUserMessage,
       isOwn: message.isOwn,

@@ -6,8 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../api/api.dart';
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../db/models/user_model.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
@@ -117,7 +117,7 @@ class ConversationPage extends StatelessWidget {
 
   String _getSubtitle(
     ConversationModel conversation,
-    Set<User> participants,
+    Set<UserModel> participants,
   ) {
     if (conversation.type == 'u') {
       if (conversation.opponent?.recentActivity != null) {
@@ -230,7 +230,7 @@ Future<void> _infoAction(BuildContext context) async {
   var state = context.read<ConversationBloc>().state;
 
   if (state.conversation.type == 'u') {
-    User user = state.participants.firstWhere((user) => user.id != localUserId);
+    var user = state.participants.firstWhere((user) => user.id != localUserId);
     context.push(userInfoPath, extra: user);
   } else {
     bool conversationUpdated =

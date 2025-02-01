@@ -4,9 +4,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import '../../objectbox.g.dart';
-import 'entities/conversation_entity.dart';
-import 'entities/user_entity.dart';
-import 'models/user.dart' as users;
+import 'models/conversation_model.dart';
+import 'models/user_model.dart';
 
 const dbName = 'SamaObjectBox';
 
@@ -53,38 +52,71 @@ class DatabaseService {
   /// Conversation Store Functions ///
   /// ////////////////////////////////
 
-  Future<List<ConversationEntity>> getAllConversationsLocal() async {
+  Future<List<ConversationModel>> getAllConversationsLocal() async {
     final db = await store;
     final query = db!
-        .box<ConversationEntity>()
+        .box<ConversationModel>()
         .query()
-        .order(ConversationEntity_.updatedAt)
+        .order(ConversationModel_.updatedAt, flags: Order.descending)
         .build();
     final results = await query.findAsync();
     query.close();
     return results;
   }
 
-  Future<ConversationEntity> getConversationLocal(String cid) async {
+  Future<ConversationModel?> getConversationLocal(String cid) async {
     final db = await store;
     final query = db!
-        .box<ConversationEntity>()
-        .query(ConversationEntity_.uid.equals(cid))
+        .box<ConversationModel>()
+        .query(ConversationModel_.id.equals(cid))
         .build();
     final results = await query.findAsync();
     query.close();
     return results[0];
   }
 
-  Future<bool> saveConversationsLocal(List<ConversationEntity> items) async {
+  Future<List<ConversationModel>> getConversationsLocal(
+      List<String> ids) async {
     final db = await store;
-    await db!.box<ConversationEntity>().putManyAsync(items, mode: PutMode.put);
+
+    final query = db!
+        .box<ConversationModel>()
+        .query(ConversationModel_.id.oneOf(ids))
+        .build();
+    final results = await query.findAsync();
+    query.close();
+    return results;
+  }
+
+  Future<bool> saveConversationsLocal(List<ConversationModel> items) async {
+    final db = await store;
+    await db!.box<ConversationModel>().putManyAsync(items, mode: PutMode.put);
     return true;
   }
 
-  Future<bool> saveConversationLocal(ConversationEntity item) async {
+  Future<bool> saveConversationLocal(ConversationModel item) async {
     final db = await store;
-    await db!.box<ConversationEntity>().putAsync(item, mode: PutMode.put);
+    await db!.box<ConversationModel>().putAsync(item, mode: PutMode.put);
+    return true;
+  }
+
+  Future<bool> updateConversationLocal(ConversationModel item) async {
+    final db = await store;
+    await db!.box<ConversationModel>().putAsync(item, mode: PutMode.update);
+    return true;
+  }
+
+  Future<bool> removeConversationLocal(String id) async {
+    final db = await store;
+    final query = db!
+        .box<ConversationModel>()
+        .query(ConversationModel_.id.equals(id))
+        .build();
+    await query.removeAsync();
+    query.close();
+    // final results = await query.findAsync();
+    // query.close();
+    // await db.box<ConversationModel>().removeAsync(results[0].bid!);
     return true;
   }
 
@@ -96,10 +128,9 @@ class DatabaseService {
   /// User Store Functions ///
   /// ////////////////////////
 
-  Future<UserEntity> getUserLocal(String uid) async {
+  Future<UserModel?> getUserLocal(String id) async {
     final db = await store;
-    final query =
-        db!.box<UserEntity>().query(UserEntity_.uid.equals(uid)).build();
+    final query = db!.box<UserModel>().query(UserModel_.id.equals(id)).build();
     final results = await query.findAsync();
     query.close();
     return results[0];

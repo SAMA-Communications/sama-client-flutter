@@ -1,15 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
-import 'avatar_entity.dart';
+import 'avatar_model.dart';
+
 
 @Entity()
 // ignore: must_be_immutable
-class UserEntity extends Equatable {
+class UserModel extends Equatable {
   @Id()
-  int? id;
+  int? bid;
   @Unique(onConflict: ConflictStrategy.replace)
-  final String? uid;
+  final String? id;
   final String? deviceId;
   @Property(type: PropertyType.date)
   final DateTime? createdAt;
@@ -22,9 +23,9 @@ class UserEntity extends Equatable {
   final String? phone;
   final String? email;
 
-  UserEntity({
+  UserModel({
+    this.bid,
     this.id,
-    this.uid,
     this.deviceId,
     this.createdAt,
     this.updatedAt,
@@ -36,10 +37,13 @@ class UserEntity extends Equatable {
     this.email,
   });
 
-  final avatar = ToOne<AvatarEntity>();
+  final avatarBind = ToOne<AvatarModel>();
 
-  UserEntity copyWith({
-    String? uid,
+  AvatarModel? get avatar => avatarBind.target;
+  set avatar(AvatarModel? item) => avatarBind.target = item;
+
+  UserModel copyWith({
+    String? id,
     String? deviceId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -49,10 +53,10 @@ class UserEntity extends Equatable {
     String? lastName,
     String? phone,
     String? email,
-    AvatarEntity? avatar,
+    AvatarModel? avatar,
   }) {
-    return UserEntity(
-        uid: uid ?? this.uid,
+    return UserModel(
+        id: id ?? this.id,
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -62,7 +66,7 @@ class UserEntity extends Equatable {
         lastName: lastName ?? this.lastName,
         phone: phone ?? this.phone,
         email: email ?? this.email)
-      ..avatar.target = avatar ?? this.avatar.target;
+      ..avatar = avatar ?? this.avatar;
   }
 
   @override

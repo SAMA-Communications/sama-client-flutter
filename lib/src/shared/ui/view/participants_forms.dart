@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../api/api.dart';
 import '../../../api/utils/screen_factor.dart';
+import '../../../db/models/user_model.dart';
 import '../../../features/conversations_list/widgets/avatar_letter_icon.dart';
 import '../../../features/search/bloc/global_search_bloc.dart';
 import '../../../features/search/bloc/global_search_state.dart';
@@ -18,10 +19,10 @@ class ParticipantsForm extends StatelessWidget {
       this.nonRemovableUsers,
       super.key});
 
-  final List<User> users;
-  final List<User>? nonRemovableUsers;
-  final ValueSetter<User> onAddParticipants;
-  final ValueSetter<User> onRemoveParticipants;
+  final List<UserModel> users;
+  final List<UserModel>? nonRemovableUsers;
+  final ValueSetter<UserModel> onAddParticipants;
+  final ValueSetter<UserModel> onRemoveParticipants;
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +68,9 @@ class _SearchBody extends StatelessWidget {
       required this.onAddParticipants,
       required this.onRemoveParticipants});
 
-  final List<User> selectedUsers;
-  final ValueSetter<User> onAddParticipants;
-  final ValueSetter<User> onRemoveParticipants;
+  final List<UserModel> selectedUsers;
+  final ValueSetter<UserModel> onAddParticipants;
+  final ValueSetter<UserModel> onRemoveParticipants;
 
   @override
   Widget build(BuildContext context) {
@@ -108,10 +109,10 @@ class _SearchResults extends StatelessWidget {
       required this.onAddParticipants,
       required this.onRemoveParticipants});
 
-  final List<User> users;
-  final List<User> selectedUsers;
-  final ValueSetter<User> onAddParticipants;
-  final ValueSetter<User> onRemoveParticipants;
+  final List<UserModel> users;
+  final List<UserModel> selectedUsers;
+  final ValueSetter<UserModel> onAddParticipants;
+  final ValueSetter<UserModel> onRemoveParticipants;
 
   Widget _emptyListText(String title) {
     return Padding(
@@ -174,9 +175,9 @@ class ParticipantsList extends StatelessWidget {
       required this.onRemoveParticipants,
       super.key});
 
-  final List<User> users;
-  final List<User>? nonRemovableUsers;
-  final ValueSetter<User> onRemoveParticipants;
+  final List<UserModel> users;
+  final List<UserModel>? nonRemovableUsers;
+  final ValueSetter<UserModel> onRemoveParticipants;
 
   @override
   Widget build(BuildContext context) {
@@ -204,9 +205,9 @@ class _ParticipantsListItem extends StatelessWidget {
       required this.removable,
       required this.onRemoveParticipants});
 
-  final User user;
+  final UserModel user;
   final bool removable;
-  final ValueSetter<User> onRemoveParticipants;
+  final ValueSetter<UserModel> onRemoveParticipants;
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +218,7 @@ class _ParticipantsListItem extends StatelessWidget {
             height: 40,
             child: Stack(fit: StackFit.expand, children: [
               AvatarLetterIcon(
-                name: getUserName(user),
+                name: getUserModelName(user),
                 padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 4.0),
                 size: const Size(50.0, 50.0),
               ),
@@ -238,7 +239,7 @@ class _ParticipantsListItem extends StatelessWidget {
                   : const SizedBox.shrink(),
             ])),
         Text(
-          getUserName(user),
+          getUserModelName(user),
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontSize: 10.0,

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/avatar_model.dart';
 import '../../../shared/ui/colors.dart';
 
 class AvatarGroupIcon extends StatelessWidget {
   const AvatarGroupIcon(this.avatar, {super.key});
 
-  final Avatar? avatar;
+  final AvatarModel? avatar;
   final Size size = const Size(55, 60);
 
   @override

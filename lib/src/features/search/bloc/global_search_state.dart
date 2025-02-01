@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../api/api.dart';
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../db/models/user_model.dart';
 
 sealed class GlobalSearchState extends Equatable {
   const GlobalSearchState();
@@ -17,7 +17,7 @@ final class SearchStateLoading extends GlobalSearchState {}
 final class SearchStateSuccess extends GlobalSearchState {
   const SearchStateSuccess(this.users, this.conversations);
 
-  final List<User> users;
+  final List<UserModel> users;
   final List<ConversationModel> conversations;
 
   @override

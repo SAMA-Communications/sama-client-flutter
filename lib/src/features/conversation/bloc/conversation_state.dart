@@ -7,21 +7,21 @@ final class ConversationState extends Equatable {
     required this.conversation,
     this.status = ConversationStatus.initial,
     this.messages = const <ChatMessage>[],
-    this.participants = const <User>{},
+    this.participants = const <UserModel>{},
     this.hasReachedMax = false,
   });
 
   final ConversationModel conversation;
   final ConversationStatus status;
   final List<ChatMessage> messages;
-  final Set<User> participants;
+  final Set<UserModel> participants;
   final bool hasReachedMax;
 
   ConversationState copyWith({
     ConversationModel? conversation,
     ConversationStatus? status,
     List<ChatMessage>? messages,
-    Set<User>? participants,
+    Set<UserModel>? participants,
     bool? hasReachedMax,
   }) {
     return ConversationState(

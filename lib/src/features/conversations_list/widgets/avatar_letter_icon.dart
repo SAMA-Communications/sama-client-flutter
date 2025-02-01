@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/avatar_model.dart';
 import '../../../shared/ui/colors.dart';
 
 class AvatarLetterIcon extends StatelessWidget {
@@ -25,7 +25,7 @@ class AvatarLetterIcon extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Color backgroundColor;
   final Color textColor;
-  final Avatar? avatar;
+  final AvatarModel? avatar;
   final bool? isDeleted;
 
   String getText() {

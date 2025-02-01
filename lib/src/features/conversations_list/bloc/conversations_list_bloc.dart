@@ -5,7 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 
 part 'conversations_list_event.dart';
@@ -50,7 +50,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     try {
       if (state.status == ConversationsStatus.initial) {
         final conversations =
-            await _conversationRepository.getConversationsWithParticipants();
+            (await _conversationRepository.getAllConversations()).data;
         return emit(
           state.copyWith(
             status: ConversationsStatus.success,
@@ -62,7 +62,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
       }
 
       final List<ConversationModel> conversations =
-          await _conversationRepository.getConversationsWithParticipants();
+          (await _conversationRepository.getAllConversations()).data ?? List.empty();
 
       conversations.isEmpty
           ? emit(state.copyWith(hasReachedMax: true))

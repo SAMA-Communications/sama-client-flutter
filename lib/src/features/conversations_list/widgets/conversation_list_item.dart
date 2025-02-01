@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../api/api.dart';
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../db/models/message_model.dart';
 import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
@@ -22,10 +22,10 @@ class ConversationListItem extends StatelessWidget {
       child: ListTile(
         leading: conversation.type == 'u'
             ? AvatarLetterIcon(
-                name: getUserName(conversation.opponent),
+                name: getUserModelName(conversation.opponent),
                 lastName: conversation.opponent?.lastName,
                 avatar: conversation.avatar,
-                isDeleted: isDeletedUser(conversation.opponent),
+                isDeleted: isDeletedUserModel(conversation.opponent),
               )
             : AvatarGroupIcon(conversation.avatar),
         title: Text(
@@ -51,11 +51,11 @@ class ConversationListItem extends StatelessWidget {
 class BodyWidget extends StatelessWidget {
   const BodyWidget({required this.message, super.key});
 
-  final Message? message;
+  final MessageModel? message;
 
   @override
   Widget build(BuildContext context) {
-    String? blurHash = message?.attachments?.first.fileBlurHash;
+    String? blurHash = message?.attachments.firstOrNull?.fileBlurHash;
     String body = message?.body != null ? message!.body! : "";
 
     return Text.rich(

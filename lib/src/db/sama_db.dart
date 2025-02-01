@@ -1,7 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'models/user.dart';
 
 const int dbVersion = 1;
 const String dbName = 'sama_db.db';

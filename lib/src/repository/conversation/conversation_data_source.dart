@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
-import '../../db/models/conversation.dart';
+
+import '../../db/models/conversation_model.dart';
 
 class ConversationLocalDataSource {
   final Map<String, ConversationModel> _conversations = {};

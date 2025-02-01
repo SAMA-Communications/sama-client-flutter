@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/user_model.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/user_forms.dart';
@@ -13,7 +13,7 @@ import '../../conversation_create/bloc/conversation_create_event.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
 
 class UserInfoForm extends StatelessWidget {
-  final User user;
+  final UserModel user;
 
   const UserInfoForm({required this.user, super.key});
 
@@ -24,7 +24,7 @@ class UserInfoForm extends StatelessWidget {
 }
 
 class AvatarTileFrom extends StatelessWidget {
-  final User user;
+  final UserModel user;
 
   const AvatarTileFrom({required this.user, super.key});
 
@@ -43,7 +43,7 @@ class AvatarTileFrom extends StatelessWidget {
 }
 
 class UserInfoCard extends StatelessWidget {
-  final User user;
+  final UserModel user;
 
   const UserInfoCard({required this.user, super.key});
 
@@ -81,7 +81,7 @@ class UserInfoCard extends StatelessWidget {
 }
 
 class _StartConversationForm extends StatelessWidget {
-  final User user;
+  final UserModel user;
 
   const _StartConversationForm({required this.user});
 

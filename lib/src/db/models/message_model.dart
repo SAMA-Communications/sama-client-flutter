@@ -1,15 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
-import 'attachment_entity.dart';
+import 'attachment_model.dart';
 
 @Entity()
 // ignore: must_be_immutable
-class MessageEntity extends Equatable {
+class MessageModel extends Equatable {
   @Id()
-  int? id;
+  int? bid;
   @Unique()
-  final String? uid;
+  final String? id;
   final String? from;
   final String? cid;
   final String? rawStatus;
@@ -20,9 +20,9 @@ class MessageEntity extends Equatable {
 
   // final Map<String, dynamic>? extension; //x
 
-  MessageEntity({
+  MessageModel({
+    this.bid,
     this.id,
-    this.uid,
     this.from,
     this.cid,
     this.rawStatus,
@@ -31,11 +31,14 @@ class MessageEntity extends Equatable {
     this.t,
   });
 
-  final attachments = ToMany<AttachmentEntity>();
+  final attachments = ToMany<AttachmentModel>();
+
+  // List<AttachmentModel>? get attachments => attachmentsBind;
+  // set attachments(List<AttachmentModel>? item) => attachmentsBind = item;
 
   @override
   List<Object?> get props => [
-        id,
+        bid,
         from,
         cid,
         rawStatus,

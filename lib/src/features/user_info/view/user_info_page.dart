@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../api/api.dart';
+import '../../../db/models/user_model.dart';
 import '../../../features/user_info/view/user_info_form.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/ui/colors.dart';
@@ -9,12 +10,12 @@ import '../../../shared/utils/string_utils.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 
 class UserInfoPage extends StatelessWidget {
-  final User user;
+  final UserModel user;
 
   const UserInfoPage({required this.user, super.key});
 
   static BlocProvider route(Object? extra) {
-    User user = extra as User;
+    UserModel user = extra as UserModel;
     return BlocProvider<ConversationCreateBloc>(
         create: (context) => ConversationCreateBloc(
               conversationRepository:
@@ -34,7 +35,7 @@ class UserInfoPage extends StatelessWidget {
             color: white, //change your color here
           ),
           title: Text(
-            getUserName(user),
+            getUserModelName(user),
             style: const TextStyle(color: white),
             overflow: TextOverflow.ellipsis,
           ),

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../db/models/conversation.dart';
+import '../../../../db/models/conversation_model.dart';
 import '../../../../repository/conversation/conversation_repository.dart';
 import '../../../../repository/messages/messages_repository.dart';
 

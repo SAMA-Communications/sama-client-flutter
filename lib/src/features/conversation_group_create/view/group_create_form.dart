@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/user_model.dart';
 import '../../../features/conversation_create/bloc/conversation_create_event.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/participants_forms.dart';
@@ -269,7 +269,7 @@ class _GroupNameInput extends StatelessWidget {
 class _Participants extends StatelessWidget {
   const _Participants({required this.users});
 
-  final List<User> users;
+  final List<UserModel> users;
 
   @override
   Widget build(BuildContext context) {

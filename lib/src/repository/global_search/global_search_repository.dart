@@ -2,9 +2,10 @@ import '../../api/api.dart' as api;
 import 'dart:async';
 
 import '../../api/api.dart';
-import '../../db/models/conversation.dart';
+import '../../db/entity_builder.dart';
+import '../../db/local/conversation_local_datasource.dart';
+import '../../db/models/conversation_model.dart';
 import '../../features/search/models/models.dart';
-import '../conversation/conversation_data_source.dart';
 
 class GlobalSearchRepository {
   // final ConversationRemoteDataSource remoteDataSource;
@@ -19,8 +20,9 @@ class GlobalSearchRepository {
     final List<User> users = await api.searchUsersByKeyword(term);
     final List<String> ids = await api.searchConversationsIdsByName(term);
     final List<ConversationModel> conversations =
-        localDataSource.getConversationsByIds(ids);
-
-    return SearchResult.from(users, conversations);
+        await localDataSource.getConversationsLocal(ids);
+    return SearchResult.from(
+        users.map((element) => buildWithUser(element)!).toList(),
+        conversations);
   }
 }

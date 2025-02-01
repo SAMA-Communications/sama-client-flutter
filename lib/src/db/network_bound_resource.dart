@@ -3,8 +3,8 @@ import 'dart:async';
 import 'resource.dart';
 
 class NetworkBoundResources<ResultType, RequestType> {
-  Future<Resource<ResultType?>> asFuture({
-    required Future<ResultType?> Function() loadFromDb,
+  Future<Resource<ResultType>> asFuture({
+    required Future<ResultType> Function() loadFromDb,
     required bool Function(ResultType? data) shouldFetch,
     required Future<RequestType> Function() createCall,
     ResultType Function(RequestType result)? processResponse,
@@ -16,24 +16,26 @@ class NetworkBoundResources<ResultType, RequestType> {
       "You need to specify the `processResponse` when the types are different",
     );
     processResponse ??= (value) => value as ResultType;
-    return Resource.asFuture<ResultType?>(() async {
-      final value = await loadFromDb();
-      return shouldFetch(value)
-          ? await _fetchFromNetwork(createCall, saveCallResult, value)
-          : value;
+    return Resource.asFuture<ResultType>(() async {
+      var value = await loadFromDb();
+
+      if (shouldFetch(value)) {
+        await _updateFromNetwork(createCall, saveCallResult, value);
+        value = await loadFromDb();
+      }
+
+      return value;
     });
   }
 
-  Future<ResultType> _fetchFromNetwork(
+  Future<void> _updateFromNetwork(
       Future<RequestType> Function() createCall,
       Future Function(RequestType item)? saveCallResult,
       ResultType? unconfirmedResult) async {
-    if (saveCallResult != null) saveCallResult(unconfirmedResult as RequestType);
     return await createCall().then((value) async {
       if (value != unconfirmedResult) {
         if (saveCallResult != null) await saveCallResult(value);
       }
-      return value as ResultType;
     });
   }
 }

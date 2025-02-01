@@ -1,7 +1,16 @@
 import '../../api/api.dart';
-import '../../db/models/conversation.dart';
+import '../../db/models/conversation_model.dart';
+import '../../db/models/user_model.dart';
 
 String getUserName(User? user) {
+  if (user == null) return 'Deleted user';
+
+  return (user.lastName?.isEmpty ?? true && (user.firstName?.isEmpty ?? true))
+      ? user.email ?? user.login ?? 'Deleted user'
+      : '${user.firstName ?? ''} ${user.lastName ?? ''}';
+}
+
+String getUserModelName(UserModel? user) {
   if (user == null) return 'Deleted user';
 
   return (user.lastName?.isEmpty ?? true && (user.firstName?.isEmpty ?? true))
@@ -47,4 +56,7 @@ User? getConversationOpponent(User? owner, User? opponent, User? localUser) {
 }
 
 bool isDeletedUser(User? user) =>
+    user == null || (user.email == null && user.login == null);
+
+bool isDeletedUserModel(UserModel? user) =>
     user == null || (user.email == null && user.login == null);

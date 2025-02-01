@@ -319,7 +319,7 @@ class _ParticipantsListForm extends StatelessWidget {
           title:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
-              getUserName(user),
+              getUserModelName(user),
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
