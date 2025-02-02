@@ -29,7 +29,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-  DatabaseService.instance.drop();
+  // DatabaseService.instance.drop();
   runApp(const App());
 }
 

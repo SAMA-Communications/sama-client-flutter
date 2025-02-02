@@ -6,7 +6,7 @@ import 'package:objectbox/objectbox.dart';
 class AvatarModel extends Equatable {
   @Id()
   int? bid;
-  @Unique()
+  @Unique(onConflict: ConflictStrategy.replace)
   final String? fileId;
   final String? fileName;
   final String? fileBlurHash;

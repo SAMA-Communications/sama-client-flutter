@@ -68,7 +68,7 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 5029774360479968412),
             name: 'fileId',
             type: 9,
-            flags: 2080,
+            flags: 34848,
             indexId: const obx_int.IdUid(16, 7730326273086017154)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 5415602239263669102),
@@ -103,7 +103,7 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 3776672104103537937),
             name: 'id',
             type: 9,
-            flags: 2080,
+            flags: 34848,
             indexId: const obx_int.IdUid(17, 8590772032330868498)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 7972368654429353481),
@@ -181,7 +181,7 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 3431085295353515294),
             name: 'id',
             type: 9,
-            flags: 2080,
+            flags: 34848,
             indexId: const obx_int.IdUid(22, 8137762055088700512)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 298933995628152516),

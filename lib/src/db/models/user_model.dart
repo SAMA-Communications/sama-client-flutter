@@ -3,7 +3,6 @@ import 'package:objectbox/objectbox.dart';
 
 import 'avatar_model.dart';
 
-
 @Entity()
 // ignore: must_be_immutable
 class UserModel extends Equatable {
@@ -40,9 +39,11 @@ class UserModel extends Equatable {
   final avatarBind = ToOne<AvatarModel>();
 
   AvatarModel? get avatar => avatarBind.target;
+
   set avatar(AvatarModel? item) => avatarBind.target = item;
 
   UserModel copyWith({
+    int? bid,
     String? id,
     String? deviceId,
     DateTime? createdAt,
@@ -56,6 +57,7 @@ class UserModel extends Equatable {
     AvatarModel? avatar,
   }) {
     return UserModel(
+        bid: bid ?? this.bid,
         id: id ?? this.id,
         deviceId: deviceId ?? this.deviceId,
         createdAt: createdAt ?? this.createdAt,

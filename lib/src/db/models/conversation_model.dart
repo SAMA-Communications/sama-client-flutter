@@ -10,7 +10,7 @@ import 'message_model.dart';
 class ConversationModel extends Equatable {
   @Id()
   int? bid;
-  @Unique()
+  @Unique(onConflict: ConflictStrategy.replace)
   final String id;
   @Property(type: PropertyType.date)
   final DateTime createdAt;
@@ -49,6 +49,7 @@ class ConversationModel extends Equatable {
 
 
   ConversationModel copyWith({
+    int? bid,
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -62,6 +63,7 @@ class ConversationModel extends Equatable {
     AvatarModel? avatar,
   }) {
     return ConversationModel(
+        bid: bid ?? this.bid,
         id: id ?? this.id,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -93,6 +95,11 @@ class ConversationModel extends Equatable {
           ? item.avatar
           : avatar,
     );
+  }
+
+  @override
+  String toString() {
+    return 'ConversationModel{bid: $bid, id: $id, lastMessage: $lastMessage}';
   }
 
   @override

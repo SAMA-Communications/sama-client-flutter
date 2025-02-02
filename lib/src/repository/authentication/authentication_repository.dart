@@ -41,19 +41,24 @@ class AuthenticationRepository {
       return Future.value(null);
     } catch (e) {
       _controller.add(AuthenticationStatus.unauthenticated);
-      return Future.error((e as api.ResponseException).message ?? '');
+      return Future.error(
+          e is ResponseException ? (e).message ?? e.toString() : e.toString());
     }
   }
 
   Future<void> loginWithAccessToken([AccessToken? accessToken]) async {
+    //TODO RP FIX auto relogin
+    ReconnectionManager.instance.init();
     try {
       await api.loginWithToken(accessToken);
 
-      api.ReconnectionManager.instance.init();
       api.PushNotificationsManager.instance.subscribe();
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {
+      // add loginWithAccessToken to reconnect
+      // ReconnectionManager.instance.addTask(() => loginWithAccessToken(accessToken));
+      // SamaConnectionService.instance.updateConnectionState(ConnectionState.failed);
       _controller.add(AuthenticationStatus.unauthenticated);
       return Future.error((e as api.ResponseException).message ?? '');
     }

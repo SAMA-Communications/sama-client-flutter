@@ -102,7 +102,7 @@ class DatabaseService {
 
   Future<bool> updateConversationLocal(ConversationModel item) async {
     final db = await store;
-    await db!.box<ConversationModel>().putAsync(item, mode: PutMode.update);
+    await db!.box<ConversationModel>().putAsync(item, mode: PutMode.put);
     return true;
   }
 

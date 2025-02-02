@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../api/api.dart' as api;
+import '../../../api/utils/logger.dart';
 import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../../secure_storage.dart';
@@ -92,8 +93,11 @@ class AuthenticationBloc
     try {
       await _authenticationRepository.loginWithAccessToken();
     } catch (e) {
-      print('tryAuthUser e= $e');
-      _authenticationRepository.disposeLocalUser();
+      log('tryAuthUser e= $e');
+      //TODO RP CHECK ME
+      if (e.toString().contains('Expired')) {
+        _authenticationRepository.disposeLocalUser();
+      }
     }
   }
 

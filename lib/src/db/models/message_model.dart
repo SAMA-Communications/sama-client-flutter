@@ -8,7 +8,7 @@ import 'attachment_model.dart';
 class MessageModel extends Equatable {
   @Id()
   int? bid;
-  @Unique()
+  @Unique(onConflict: ConflictStrategy.replace)
   final String? id;
   final String? from;
   final String? cid;
@@ -33,12 +33,15 @@ class MessageModel extends Equatable {
 
   final attachments = ToMany<AttachmentModel>();
 
-  // List<AttachmentModel>? get attachments => attachmentsBind;
+  @override
+  String toString() {
+    return 'MessageModel{bid: $bid, id: $id}';
+  } // List<AttachmentModel>? get attachments => attachmentsBind;
   // set attachments(List<AttachmentModel>? item) => attachmentsBind = item;
 
   @override
   List<Object?> get props => [
-        bid,
+        id,
         from,
         cid,
         rawStatus,

@@ -14,9 +14,11 @@ const String conversationCreate = 'conversation_create';
 const String conversationUpdate = 'conversation_update';
 const String conversationDelete = 'conversation_delete';
 
-Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
+Future<List<Conversation>> fetchConversations(
+    Map<String, dynamic>? params) async {
   return SamaConnectionService.instance
-      .sendRequest(conversationsRequest, {}).then((response) {
+      .sendRequest(conversationsRequest, params)
+      .then((response) {
     List<Conversation> conversations;
     List<dynamic> items = List.of(response['conversations']);
     if (items.isEmpty) {
