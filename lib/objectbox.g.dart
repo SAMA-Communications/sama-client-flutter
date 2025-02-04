@@ -38,7 +38,7 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 747399038920962484),
             name: 'fileId',
             type: 9,
-            flags: 2080,
+            flags: 34848,
             indexId: const obx_int.IdUid(15, 626623788693270148)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 768953523524252804),
@@ -69,7 +69,7 @@ final _entities = <obx_int.ModelEntity>[
             name: 'fileId',
             type: 9,
             flags: 34848,
-            indexId: const obx_int.IdUid(16, 7730326273086017154)),
+            indexId: const obx_int.IdUid(25, 4244316179033347291)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 5415602239263669102),
             name: 'fileName',
@@ -89,84 +89,6 @@ final _entities = <obx_int.ModelEntity>[
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(10, 2679282245502448550),
-      name: 'ConversationModel',
-      lastPropertyId: const obx_int.IdUid(12, 7768713511998184494),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 4376506821871815231),
-            name: 'bid',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 3776672104103537937),
-            name: 'id',
-            type: 9,
-            flags: 34848,
-            indexId: const obx_int.IdUid(17, 8590772032330868498)),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 7972368654429353481),
-            name: 'createdAt',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 8633736652726027619),
-            name: 'updatedAt',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 7353937754765402079),
-            name: 'type',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 7048963428701517603),
-            name: 'name',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 7514358998250204160),
-            name: 'description',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 3264904124875647524),
-            name: 'unreadMessagesCount',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 614204034693092275),
-            name: 'lastMessageBindId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(18, 4815363189271929600),
-            relationTarget: 'MessageModel'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(10, 155656363300645816),
-            name: 'opponentBindId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(19, 991723779733556301),
-            relationTarget: 'UserModel'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(11, 1773146609978416143),
-            name: 'ownerBindId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(20, 3028564476556144103),
-            relationTarget: 'UserModel'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(12, 7768713511998184494),
-            name: 'avatarBindId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(21, 909413394318601726),
-            relationTarget: 'AvatarModel')
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[]),
-  obx_int.ModelEntity(
       id: const obx_int.IdUid(11, 6168919874786736956),
       name: 'MessageModel',
       lastPropertyId: const obx_int.IdUid(8, 1010284661967327878),
@@ -182,7 +104,7 @@ final _entities = <obx_int.ModelEntity>[
             name: 'id',
             type: 9,
             flags: 34848,
-            indexId: const obx_int.IdUid(22, 8137762055088700512)),
+            indexId: const obx_int.IdUid(27, 1312181892016791297)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 298933995628152516),
             name: 'from',
@@ -236,8 +158,8 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 1796029667524301994),
             name: 'id',
             type: 9,
-            flags: 34848,
-            indexId: const obx_int.IdUid(23, 2308776673764111186)),
+            flags: 2080,
+            indexId: const obx_int.IdUid(28, 8383136850945105628)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 3523188585463807346),
             name: 'deviceId',
@@ -292,6 +214,84 @@ final _entities = <obx_int.ModelEntity>[
             relationTarget: 'AvatarModel')
       ],
       relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(13, 9106374520578572502),
+      name: 'ConversationModel',
+      lastPropertyId: const obx_int.IdUid(14, 5058682722642913901),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 6717232681942624528),
+            name: 'bid',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 2579398636291900819),
+            name: 'id',
+            type: 9,
+            flags: 2080,
+            indexId: const obx_int.IdUid(29, 4205296519667695880)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 7873950750532297915),
+            name: 'createdAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 9132499605888996505),
+            name: 'updatedAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 7874076721401934636),
+            name: 'type',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 1911538922432355672),
+            name: 'name',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 3488711112687952056),
+            name: 'description',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 4718072041675418821),
+            name: 'unreadMessagesCount',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 8543586135917731916),
+            name: 'lastMessageBindId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(30, 5882588671767701244),
+            relationTarget: 'MessageModel'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(12, 8542803209060046040),
+            name: 'avatarBindId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(33, 7298741033559918238),
+            relationTarget: 'AvatarModel'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(13, 6726414800751664493),
+            name: 'opponentBindId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(34, 2014479524742516296),
+            relationTarget: 'UserModel'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(14, 5058682722642913901),
+            name: 'ownerBindId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(35, 2642777293408708995),
+            relationTarget: 'UserModel')
+      ],
+      relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -330,9 +330,9 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(12, 6516061588255621718),
-      lastIndexId: const obx_int.IdUid(24, 2478963062982225581),
-      lastRelationId: const obx_int.IdUid(2, 1972630443271039517),
+      lastEntityId: const obx_int.IdUid(13, 9106374520578572502),
+      lastIndexId: const obx_int.IdUid(35, 2642777293408708995),
+      lastRelationId: const obx_int.IdUid(4, 5100230969978387914),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
         8221608220756309685,
@@ -341,9 +341,17 @@ obx_int.ModelDefinition getObjectBoxModel() {
         6918202109537402906,
         5487033076272012390,
         5012849246139480832,
-        6012607412223436967
+        6012607412223436967,
+        2679282245502448550
       ],
-      retiredIndexUids: const [],
+      retiredIndexUids: const [
+        2308776673764111186,
+        7730326273086017154,
+        8590772032330868498,
+        8137762055088700512,
+        7050184320199163165,
+        5813459946923529345
+      ],
       retiredPropertyUids: const [
         5244948909752663107,
         642035060693614009,
@@ -409,9 +417,23 @@ obx_int.ModelDefinition getObjectBoxModel() {
         5710713795623848612,
         4217675935215597774,
         8971578261290097735,
-        34888985269025050
+        34888985269025050,
+        4376506821871815231,
+        3776672104103537937,
+        7972368654429353481,
+        8633736652726027619,
+        7353937754765402079,
+        7048963428701517603,
+        7514358998250204160,
+        3264904124875647524,
+        614204034693092275,
+        155656363300645816,
+        1773146609978416143,
+        7768713511998184494,
+        2456344090811030546,
+        2261589455151034389
       ],
-      retiredRelationUids: const [],
+      retiredRelationUids: const [4063380833838902563, 5100230969978387914],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
       version: 1);
@@ -514,87 +536,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
 
           return object;
         }),
-    ConversationModel: obx_int.EntityDefinition<ConversationModel>(
-        model: _entities[2],
-        toOneRelations: (ConversationModel object) => [
-              object.lastMessageBind,
-              object.opponentBind,
-              object.ownerBind,
-              object.avatarBind
-            ],
-        toManyRelations: (ConversationModel object) => {},
-        getId: (ConversationModel object) => object.bid,
-        setId: (ConversationModel object, int id) {
-          object.bid = id;
-        },
-        objectToFB: (ConversationModel object, fb.Builder fbb) {
-          final idOffset = fbb.writeString(object.id);
-          final typeOffset = fbb.writeString(object.type);
-          final nameOffset = fbb.writeString(object.name);
-          final descriptionOffset = object.description == null
-              ? null
-              : fbb.writeString(object.description!);
-          fbb.startTable(13);
-          fbb.addInt64(0, object.bid ?? 0);
-          fbb.addOffset(1, idOffset);
-          fbb.addInt64(2, object.createdAt.millisecondsSinceEpoch);
-          fbb.addInt64(3, object.updatedAt.millisecondsSinceEpoch);
-          fbb.addOffset(4, typeOffset);
-          fbb.addOffset(5, nameOffset);
-          fbb.addOffset(6, descriptionOffset);
-          fbb.addInt64(7, object.unreadMessagesCount);
-          fbb.addInt64(8, object.lastMessageBind.targetId);
-          fbb.addInt64(9, object.opponentBind.targetId);
-          fbb.addInt64(10, object.ownerBind.targetId);
-          fbb.addInt64(11, object.avatarBind.targetId);
-          fbb.finish(fbb.endTable());
-          return object.bid ?? 0;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final bidParam =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 4);
-          final idParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
-          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0));
-          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
-          final nameParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 14, '');
-          final typeParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 12, '');
-          final unreadMessagesCountParam =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 18);
-          final descriptionParam =
-              const fb.StringReader(asciiOptimization: true)
-                  .vTableGetNullable(buffer, rootOffset, 16);
-          final object = ConversationModel(
-              bid: bidParam,
-              id: idParam,
-              createdAt: createdAtParam,
-              updatedAt: updatedAtParam,
-              name: nameParam,
-              type: typeParam,
-              unreadMessagesCount: unreadMessagesCountParam,
-              description: descriptionParam);
-          object.lastMessageBind.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
-          object.lastMessageBind.attach(store);
-          object.opponentBind.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0);
-          object.opponentBind.attach(store);
-          object.ownerBind.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0);
-          object.ownerBind.attach(store);
-          object.avatarBind.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0);
-          object.avatarBind.attach(store);
-          return object;
-        }),
     MessageModel: obx_int.EntityDefinition<MessageModel>(
-        model: _entities[3],
+        model: _entities[2],
         toOneRelations: (MessageModel object) => [],
         toManyRelations: (MessageModel object) => {
               obx_int.RelInfo<MessageModel>.toMany(2, object.bid!):
@@ -666,7 +609,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     UserModel: obx_int.EntityDefinition<UserModel>(
-        model: _entities[4],
+        model: _entities[3],
         toOneRelations: (UserModel object) => [object.avatarBind],
         toManyRelations: (UserModel object) => {},
         getId: (UserModel object) => object.bid,
@@ -754,6 +697,85 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0);
           object.avatarBind.attach(store);
           return object;
+        }),
+    ConversationModel: obx_int.EntityDefinition<ConversationModel>(
+        model: _entities[4],
+        toOneRelations: (ConversationModel object) => [
+              object.lastMessageBind,
+              object.avatarBind,
+              object.opponentBind,
+              object.ownerBind
+            ],
+        toManyRelations: (ConversationModel object) => {},
+        getId: (ConversationModel object) => object.bid,
+        setId: (ConversationModel object, int id) {
+          object.bid = id;
+        },
+        objectToFB: (ConversationModel object, fb.Builder fbb) {
+          final idOffset = fbb.writeString(object.id);
+          final typeOffset = fbb.writeString(object.type);
+          final nameOffset = fbb.writeString(object.name);
+          final descriptionOffset = object.description == null
+              ? null
+              : fbb.writeString(object.description!);
+          fbb.startTable(15);
+          fbb.addInt64(0, object.bid ?? 0);
+          fbb.addOffset(1, idOffset);
+          fbb.addInt64(2, object.createdAt.millisecondsSinceEpoch);
+          fbb.addInt64(3, object.updatedAt.millisecondsSinceEpoch);
+          fbb.addOffset(4, typeOffset);
+          fbb.addOffset(5, nameOffset);
+          fbb.addOffset(6, descriptionOffset);
+          fbb.addInt64(7, object.unreadMessagesCount);
+          fbb.addInt64(8, object.lastMessageBind.targetId);
+          fbb.addInt64(11, object.avatarBind.targetId);
+          fbb.addInt64(12, object.opponentBind.targetId);
+          fbb.addInt64(13, object.ownerBind.targetId);
+          fbb.finish(fbb.endTable());
+          return object.bid ?? 0;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final bidParam =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 4);
+          final idParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0));
+          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+          final nameParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 14, '');
+          final typeParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 12, '');
+          final unreadMessagesCountParam =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 18);
+          final descriptionParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 16);
+          final object = ConversationModel(
+              bid: bidParam,
+              id: idParam,
+              createdAt: createdAtParam,
+              updatedAt: updatedAtParam,
+              name: nameParam,
+              type: typeParam,
+              unreadMessagesCount: unreadMessagesCountParam,
+              description: descriptionParam);
+          object.lastMessageBind.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
+          object.lastMessageBind.attach(store);
+          object.avatarBind.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0);
+          object.avatarBind.attach(store);
+          object.opponentBind.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 28, 0);
+          object.opponentBind.attach(store);
+          object.ownerBind.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 30, 0);
+          object.ownerBind.attach(store);
+          return object;
         })
   };
 
@@ -802,147 +824,147 @@ class AvatarModel_ {
       obx.QueryStringProperty<AvatarModel>(_entities[1].properties[4]);
 }
 
-/// [ConversationModel] entity fields to define ObjectBox queries.
-class ConversationModel_ {
-  /// See [ConversationModel.bid].
-  static final bid =
-      obx.QueryIntegerProperty<ConversationModel>(_entities[2].properties[0]);
-
-  /// See [ConversationModel.id].
-  static final id =
-      obx.QueryStringProperty<ConversationModel>(_entities[2].properties[1]);
-
-  /// See [ConversationModel.createdAt].
-  static final createdAt =
-      obx.QueryDateProperty<ConversationModel>(_entities[2].properties[2]);
-
-  /// See [ConversationModel.updatedAt].
-  static final updatedAt =
-      obx.QueryDateProperty<ConversationModel>(_entities[2].properties[3]);
-
-  /// See [ConversationModel.type].
-  static final type =
-      obx.QueryStringProperty<ConversationModel>(_entities[2].properties[4]);
-
-  /// See [ConversationModel.name].
-  static final name =
-      obx.QueryStringProperty<ConversationModel>(_entities[2].properties[5]);
-
-  /// See [ConversationModel.description].
-  static final description =
-      obx.QueryStringProperty<ConversationModel>(_entities[2].properties[6]);
-
-  /// See [ConversationModel.unreadMessagesCount].
-  static final unreadMessagesCount =
-      obx.QueryIntegerProperty<ConversationModel>(_entities[2].properties[7]);
-
-  /// See [ConversationModel.lastMessageBind].
-  static final lastMessageBind =
-      obx.QueryRelationToOne<ConversationModel, MessageModel>(
-          _entities[2].properties[8]);
-
-  /// See [ConversationModel.opponentBind].
-  static final opponentBind =
-      obx.QueryRelationToOne<ConversationModel, UserModel>(
-          _entities[2].properties[9]);
-
-  /// See [ConversationModel.ownerBind].
-  static final ownerBind = obx.QueryRelationToOne<ConversationModel, UserModel>(
-      _entities[2].properties[10]);
-
-  /// See [ConversationModel.avatarBind].
-  static final avatarBind =
-      obx.QueryRelationToOne<ConversationModel, AvatarModel>(
-          _entities[2].properties[11]);
-}
-
 /// [MessageModel] entity fields to define ObjectBox queries.
 class MessageModel_ {
   /// See [MessageModel.bid].
   static final bid =
-      obx.QueryIntegerProperty<MessageModel>(_entities[3].properties[0]);
+      obx.QueryIntegerProperty<MessageModel>(_entities[2].properties[0]);
 
   /// See [MessageModel.id].
   static final id =
-      obx.QueryStringProperty<MessageModel>(_entities[3].properties[1]);
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[1]);
 
   /// See [MessageModel.from].
   static final from =
-      obx.QueryStringProperty<MessageModel>(_entities[3].properties[2]);
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[2]);
 
   /// See [MessageModel.cid].
   static final cid =
-      obx.QueryStringProperty<MessageModel>(_entities[3].properties[3]);
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[3]);
 
   /// See [MessageModel.rawStatus].
   static final rawStatus =
-      obx.QueryStringProperty<MessageModel>(_entities[3].properties[4]);
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[4]);
 
   /// See [MessageModel.body].
   static final body =
-      obx.QueryStringProperty<MessageModel>(_entities[3].properties[5]);
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[5]);
 
   /// See [MessageModel.t].
   static final t =
-      obx.QueryIntegerProperty<MessageModel>(_entities[3].properties[6]);
+      obx.QueryIntegerProperty<MessageModel>(_entities[2].properties[6]);
 
   /// See [MessageModel.createdAt].
   static final createdAt =
-      obx.QueryDateProperty<MessageModel>(_entities[3].properties[7]);
+      obx.QueryDateProperty<MessageModel>(_entities[2].properties[7]);
 
   /// see [MessageModel.attachments]
   static final attachments =
       obx.QueryRelationToMany<MessageModel, AttachmentModel>(
-          _entities[3].relations[0]);
+          _entities[2].relations[0]);
 }
 
 /// [UserModel] entity fields to define ObjectBox queries.
 class UserModel_ {
   /// See [UserModel.bid].
   static final bid =
-      obx.QueryIntegerProperty<UserModel>(_entities[4].properties[0]);
+      obx.QueryIntegerProperty<UserModel>(_entities[3].properties[0]);
 
   /// See [UserModel.id].
   static final id =
-      obx.QueryStringProperty<UserModel>(_entities[4].properties[1]);
+      obx.QueryStringProperty<UserModel>(_entities[3].properties[1]);
 
   /// See [UserModel.deviceId].
   static final deviceId =
-      obx.QueryStringProperty<UserModel>(_entities[4].properties[2]);
+      obx.QueryStringProperty<UserModel>(_entities[3].properties[2]);
 
   /// See [UserModel.createdAt].
   static final createdAt =
-      obx.QueryDateProperty<UserModel>(_entities[4].properties[3]);
+      obx.QueryDateProperty<UserModel>(_entities[3].properties[3]);
 
   /// See [UserModel.updatedAt].
   static final updatedAt =
-      obx.QueryDateProperty<UserModel>(_entities[4].properties[4]);
+      obx.QueryDateProperty<UserModel>(_entities[3].properties[4]);
 
   /// See [UserModel.recentActivity].
   static final recentActivity =
-      obx.QueryIntegerProperty<UserModel>(_entities[4].properties[5]);
+      obx.QueryIntegerProperty<UserModel>(_entities[3].properties[5]);
 
   /// See [UserModel.login].
   static final login =
-      obx.QueryStringProperty<UserModel>(_entities[4].properties[6]);
+      obx.QueryStringProperty<UserModel>(_entities[3].properties[6]);
 
   /// See [UserModel.firstName].
   static final firstName =
-      obx.QueryStringProperty<UserModel>(_entities[4].properties[7]);
+      obx.QueryStringProperty<UserModel>(_entities[3].properties[7]);
 
   /// See [UserModel.lastName].
   static final lastName =
-      obx.QueryStringProperty<UserModel>(_entities[4].properties[8]);
+      obx.QueryStringProperty<UserModel>(_entities[3].properties[8]);
 
   /// See [UserModel.phone].
   static final phone =
-      obx.QueryStringProperty<UserModel>(_entities[4].properties[9]);
+      obx.QueryStringProperty<UserModel>(_entities[3].properties[9]);
 
   /// See [UserModel.email].
   static final email =
-      obx.QueryStringProperty<UserModel>(_entities[4].properties[10]);
+      obx.QueryStringProperty<UserModel>(_entities[3].properties[10]);
 
   /// See [UserModel.avatarBind].
   static final avatarBind = obx.QueryRelationToOne<UserModel, AvatarModel>(
+      _entities[3].properties[11]);
+}
+
+/// [ConversationModel] entity fields to define ObjectBox queries.
+class ConversationModel_ {
+  /// See [ConversationModel.bid].
+  static final bid =
+      obx.QueryIntegerProperty<ConversationModel>(_entities[4].properties[0]);
+
+  /// See [ConversationModel.id].
+  static final id =
+      obx.QueryStringProperty<ConversationModel>(_entities[4].properties[1]);
+
+  /// See [ConversationModel.createdAt].
+  static final createdAt =
+      obx.QueryDateProperty<ConversationModel>(_entities[4].properties[2]);
+
+  /// See [ConversationModel.updatedAt].
+  static final updatedAt =
+      obx.QueryDateProperty<ConversationModel>(_entities[4].properties[3]);
+
+  /// See [ConversationModel.type].
+  static final type =
+      obx.QueryStringProperty<ConversationModel>(_entities[4].properties[4]);
+
+  /// See [ConversationModel.name].
+  static final name =
+      obx.QueryStringProperty<ConversationModel>(_entities[4].properties[5]);
+
+  /// See [ConversationModel.description].
+  static final description =
+      obx.QueryStringProperty<ConversationModel>(_entities[4].properties[6]);
+
+  /// See [ConversationModel.unreadMessagesCount].
+  static final unreadMessagesCount =
+      obx.QueryIntegerProperty<ConversationModel>(_entities[4].properties[7]);
+
+  /// See [ConversationModel.lastMessageBind].
+  static final lastMessageBind =
+      obx.QueryRelationToOne<ConversationModel, MessageModel>(
+          _entities[4].properties[8]);
+
+  /// See [ConversationModel.avatarBind].
+  static final avatarBind =
+      obx.QueryRelationToOne<ConversationModel, AvatarModel>(
+          _entities[4].properties[9]);
+
+  /// See [ConversationModel.opponentBind].
+  static final opponentBind =
+      obx.QueryRelationToOne<ConversationModel, UserModel>(
+          _entities[4].properties[10]);
+
+  /// See [ConversationModel.ownerBind].
+  static final ownerBind = obx.QueryRelationToOne<ConversationModel, UserModel>(
       _entities[4].properties[11]);
 }

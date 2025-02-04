@@ -90,6 +90,28 @@ class DatabaseService {
 
   Future<bool> saveConversationsLocal(List<ConversationModel> items) async {
     final db = await store;
+
+// https://docs.objectbox.io/entity-annotations#unique-constraints need to be updated manually
+    for (var chat in items) {
+      final chatInDb = (await db!
+              .box<ConversationModel>()
+              .query(ConversationModel_.id.equals(chat.id))
+              .build()
+              .findAsync())
+          .firstOrNull;
+      if (chatInDb != null) {
+        chat.bid = chatInDb.bid;
+        chat.opponent?.bid = chatInDb.opponent?.bid;
+        chat.owner?.bid = chatInDb.owner?.bid;
+        if (chatInDb.avatar?.fileId == chat.avatar?.fileId) {
+          chat.avatar?.bid = chatInDb.avatar?.bid;
+        }
+        if (chatInDb.lastMessage?.id == chat.lastMessage?.id) {
+          chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
+        }
+      }
+    }
+
     await db!.box<ConversationModel>().putManyAsync(items, mode: PutMode.put);
     return true;
   }
@@ -134,5 +156,30 @@ class DatabaseService {
     final results = await query.findAsync();
     query.close();
     return results[0];
+  }
+
+  Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
+    final db = await store;
+    final results =
+        await db!.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);
+    return results;
+  }
+
+  Future<List<UserModel>> saveUsersUniqueLocal(List<UserModel> items) async {
+    final db = await store;
+
+    for (var user in items) {
+      final userInDb = (await db!
+              .box<UserModel>()
+              .query(UserModel_.id.equals(user.id!))
+              .build()
+              .findAsync())
+          .firstOrNull;
+      user.bid = userInDb?.bid;
+    }
+
+    final results =
+        await db!.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);
+    return results;
   }
 }

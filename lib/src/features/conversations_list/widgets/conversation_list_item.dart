@@ -22,7 +22,7 @@ class ConversationListItem extends StatelessWidget {
       child: ListTile(
         leading: conversation.type == 'u'
             ? AvatarLetterIcon(
-                name: getUserModelName(conversation.opponent),
+                name: conversation.name,
                 lastName: conversation.opponent?.lastName,
                 avatar: conversation.avatar,
                 isDeleted: isDeletedUserModel(conversation.opponent),

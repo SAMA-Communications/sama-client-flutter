@@ -1,12 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
+import '../../api/api.dart';
+
 @Entity()
 // ignore: must_be_immutable
 class AttachmentModel extends Equatable {
   @Id()
   int? bid;
-  @Unique()
+  @Unique(onConflict: ConflictStrategy.replace)
   final String? fileId;
   final String? fileName;
   final String? fileBlurHash;
@@ -20,4 +22,11 @@ class AttachmentModel extends Equatable {
 
   @override
   List<Object?> get props => [fileId, fileName, fileBlurHash];
+}
+
+extension AttachmentModelExtension on Attachment {
+  AttachmentModel toAttachmentModel() {
+    return AttachmentModel(
+        fileId: fileId, fileName: fileName, fileBlurHash: fileBlurHash);
+  }
 }

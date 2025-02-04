@@ -229,7 +229,9 @@ class ConversationRepository {
 
     final cids = conversations.map((element) => element.id!).toList();
     final localUser = await userRepository.getLocalUser();
-    final participants = await getParticipantsAsMap(cids);
+    final participants = await getParticipants(cids);
+
+    var usersDB = await localDataSource.saveUsersLocal(participants);
 
     // List<ConversationModel> result =
     //     conversations.fold<List<ConversationModel>>([], (prev, conversation) {
@@ -241,8 +243,9 @@ class ConversationRepository {
     //   return prev;
     // }).toList();
 
+    var usersMap = {for (var v in usersDB) v.id!: v};
     final List<ConversationModel> result = conversations.map((conversation) {
-      var chat = _buildConversationModel(conversation, participants, localUser);
+      var chat = _buildConversationModel2(conversation, usersMap, localUser);
       return chat;
     }).toList();
     _removeEmptyPrivateConversations(result);
@@ -387,5 +390,25 @@ class ConversationRepository {
       ..lastMessage = buildWithMessage(conversation.lastMessage)
       ..avatar = buildWithAvatar(
           getConversationAvatar(conversation, owner, opponent, localUser));
+  }
+
+  ConversationModel _buildConversationModel2(Conversation conversation,
+      Map<String, UserModel> participants, api.User? localUser) {
+    final opponent = participants[conversation.opponentId];
+    //can be null if user deleted
+    final owner = participants[conversation.ownerId];
+
+    return ConversationModel(
+        id: conversation.id!,
+        createdAt: conversation.createdAt!,
+        updatedAt: conversation.updatedAt!,
+        type: conversation.type!,
+        name: getConversationModelName(conversation, owner, opponent, localUser),
+        description: conversation.description,
+        unreadMessagesCount: conversation.unreadMessagesCount)
+      ..opponent = getConversationModelOpponent(owner, opponent, localUser)
+      ..owner = owner
+      ..lastMessage = buildWithMessage(conversation.lastMessage)
+      ..avatar = getConversationModelAvatar(conversation, owner, opponent, localUser);
   }
 }

@@ -1,4 +1,6 @@
 import '../../api/api.dart';
+import '../../db/entity_builder.dart';
+import '../../db/models/avatar_model.dart';
 import '../../db/models/conversation_model.dart';
 import '../../db/models/user_model.dart';
 
@@ -25,6 +27,13 @@ String getConversationName(
   return getUserName(user);
 }
 
+String getConversationModelName(
+    Conversation conversation, UserModel? owner, UserModel? opponent, User? localUser) {
+  if (conversation.type! == 'g') return conversation.name!;
+  var user = conversation.opponentId == localUser?.id ? owner : opponent;
+  return getUserModelName(user);
+}
+
 String getSystemMessagePushBody(
     ConversationModel conversation, SystemChatMessage message, User? opponent) {
   var opponentName = getUserName(opponent);
@@ -46,11 +55,29 @@ Avatar? getConversationAvatar(
       : conversation.avatar;
 }
 
+AvatarModel? getConversationModelAvatar(
+    Conversation conversation, UserModel? owner, UserModel? opponent, User? localUser) {
+  return conversation.type == 'u'
+      ? conversation.opponentId == localUser?.id
+      ? owner?.avatar
+      : opponent?.avatar
+      : buildWithAvatar(conversation.avatar);
+}
+
 // set opponent always as real opponent for current user
 User? getConversationOpponent(User? owner, User? opponent, User? localUser) {
   return opponent == null
       ? null
-      : opponent == localUser
+      : opponent.id == localUser?.id
+          ? owner
+          : opponent;
+}
+
+// set opponent always as real opponent for current user
+UserModel? getConversationModelOpponent (UserModel? owner, UserModel? opponent, User? localUser) {
+  return opponent == null
+      ? null
+      : opponent.id == localUser?.id
           ? owner
           : opponent;
 }

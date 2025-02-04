@@ -1,6 +1,7 @@
 import '../../shared/errors/exceptions.dart';
 import '../db_service.dart';
 import '../models/conversation_model.dart';
+import '../models/user_model.dart';
 
 class ConversationLocalDataSource {
   final DatabaseService databaseService = DatabaseService.instance;
@@ -60,6 +61,16 @@ class ConversationLocalDataSource {
     try {
       return await databaseService.removeConversationLocal(id);
     } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
+    print('saveUsersLocal');
+    try {
+      return await databaseService.saveUsersUniqueLocal(items);
+    } catch (e) {
+      print('saveConversationLocal e ${e.toString()}');
       throw DatabaseException(e.toString());
     }
   }

@@ -8,7 +8,7 @@ import 'avatar_model.dart';
 class UserModel extends Equatable {
   @Id()
   int? bid;
-  @Unique(onConflict: ConflictStrategy.replace)
+  @Unique()
   final String? id;
   final String? deviceId;
   @Property(type: PropertyType.date)

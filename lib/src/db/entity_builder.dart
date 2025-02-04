@@ -1,3 +1,4 @@
+import 'package:sama_client_flutter/src/db/models/attachment_model.dart';
 import 'package:sama_client_flutter/src/db/models/message_model.dart';
 
 import '../api/api.dart';
@@ -7,7 +8,7 @@ import 'models/user_model.dart';
 // TODO RP make extension
 UserModel? buildWithUser(User? user) {
   if (user == null) return null;
-  return UserModel(
+  var userModel =  UserModel(
     id: user.id,
     deviceId: user.deviceId,
     createdAt: user.createdAt,
@@ -19,6 +20,10 @@ UserModel? buildWithUser(User? user) {
     phone: user.phone,
     email: user.email,
   );
+  if (user.avatar != null) {
+    userModel.avatar = buildWithAvatar(user.avatar);
+  }
+  return userModel;
 }
 
 User? buildWithUserModel(UserModel? user) {
@@ -48,9 +53,10 @@ MessageModel? buildWithMessage(Message? message) {
     createdAt: message.createdAt,
     t: message.t,
   );
-  // if(message.attachments != null) {
-  //   messageModel.attachments.addAll(message.attachments!);
-  // }
+  if (message.attachments != null) {
+    messageModel.attachments.addAll(message.attachments!
+        .map((attachment) => attachment.toAttachmentModel()));
+  }
 
   return messageModel;
 }

@@ -10,7 +10,7 @@ import 'message_model.dart';
 class ConversationModel extends Equatable {
   @Id()
   int? bid;
-  @Unique(onConflict: ConflictStrategy.replace)
+  @Unique()
   final String id;
   @Property(type: PropertyType.date)
   final DateTime createdAt;
