@@ -92,13 +92,15 @@ class DatabaseService {
     final db = await store;
 
 // https://docs.objectbox.io/entity-annotations#unique-constraints need to be updated manually
+    var chatsInDb = await db!
+        .box<ConversationModel>()
+        .query(ConversationModel_.id.oneOf(items.map((element) => element.id).toList()))
+        .build()
+        .findAsync();
+
+    var chatsInDbMap = {for (var v in chatsInDb) v.id: v};
     for (var chat in items) {
-      final chatInDb = (await db!
-              .box<ConversationModel>()
-              .query(ConversationModel_.id.equals(chat.id))
-              .build()
-              .findAsync())
-          .firstOrNull;
+      final chatInDb = chatsInDbMap[chat.id];
       if (chatInDb != null) {
         chat.bid = chatInDb.bid;
         chat.opponent?.bid = chatInDb.opponent?.bid;
@@ -168,14 +170,15 @@ class DatabaseService {
   Future<List<UserModel>> saveUsersUniqueLocal(List<UserModel> items) async {
     final db = await store;
 
+    var usersInDb = await db!
+        .box<UserModel>()
+        .query(UserModel_.id.oneOf(items.map((element) => element.id!).toList()))
+        .build()
+        .findAsync();
+
+    var usersMap = {for (var v in usersInDb) v.id!: v};
     for (var user in items) {
-      final userInDb = (await db!
-              .box<UserModel>()
-              .query(UserModel_.id.equals(user.id!))
-              .build()
-              .findAsync())
-          .firstOrNull;
-      user.bid = userInDb?.bid;
+      user.bid = usersMap[user.id]?.bid;
     }
 
     final results =

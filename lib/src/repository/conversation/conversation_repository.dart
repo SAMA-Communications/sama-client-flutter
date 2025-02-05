@@ -231,7 +231,7 @@ class ConversationRepository {
     final localUser = await userRepository.getLocalUser();
     final participants = await getParticipants(cids);
 
-    var usersDB = await localDataSource.saveUsersLocal(participants);
+    var usersLocal = await localDataSource.saveUsersLocal(participants);
 
     // List<ConversationModel> result =
     //     conversations.fold<List<ConversationModel>>([], (prev, conversation) {
@@ -243,10 +243,9 @@ class ConversationRepository {
     //   return prev;
     // }).toList();
 
-    var usersMap = {for (var v in usersDB) v.id!: v};
+    var usersMap = {for (var v in usersLocal) v.id!: v};
     final List<ConversationModel> result = conversations.map((conversation) {
-      var chat = _buildConversationModel2(conversation, usersMap, localUser);
-      return chat;
+      return _buildConversationModel2(conversation, usersMap, localUser);
     }).toList();
     _removeEmptyPrivateConversations(result);
     return result;
