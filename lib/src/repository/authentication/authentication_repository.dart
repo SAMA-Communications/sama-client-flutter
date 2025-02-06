@@ -3,6 +3,7 @@ import 'package:app_set_id/app_set_id.dart';
 
 import '../../api/api.dart' as api;
 import '../../api/api.dart';
+import '../../db/db_service.dart';
 import '../../shared/secure_storage.dart';
 
 enum AuthenticationStatus {
@@ -106,6 +107,7 @@ class AuthenticationRepository {
     await SecureStorage.instance.deleteLocalUser();
     api.ReconnectionManager.instance.destroy();
     api.SamaConnectionService.instance.closeConnection();
+    DatabaseService.instance.drop();
     _controller.add(AuthenticationStatus.unauthenticated);
   }
 

@@ -9,7 +9,7 @@ import '../../features/search/models/models.dart';
 
 class GlobalSearchRepository {
   // final ConversationRemoteDataSource remoteDataSource;
-  final ConversationLocalDataSource localDataSource;
+  final ConversationLocalDatasource localDataSource;
 
   GlobalSearchRepository({
     // required this.remoteDataSource,

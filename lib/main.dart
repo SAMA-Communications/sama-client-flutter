@@ -29,7 +29,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-  // DatabaseService.instance.drop();
   runApp(const App());
 }
 
@@ -46,25 +45,25 @@ class _AppState extends State<App> {
   late final ConversationRepository _conversationRepository;
   late final MessagesRepository _messagesRepository;
   late final GlobalSearchRepository _globalSearchRepository;
-  late final ConversationLocalDataSource _conversationLocalDataSource;
+  late final ConversationLocalDatasource _conversationLocalDatasource;
   late final AttachmentsRepository _attachmentsRepository;
   late final UserLocalDataSource _userLocalDataSource;
 
   @override
   void initState() {
     super.initState();
-    _conversationLocalDataSource = ConversationLocalDataSource();
+    _conversationLocalDatasource = ConversationLocalDatasource();
     _userLocalDataSource = UserLocalDataSource();
     _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository(localDataSource: _userLocalDataSource);
     _messagesRepository = MessagesRepository(userRepository: _userRepository);
     _attachmentsRepository = AttachmentsRepository();
     _conversationRepository = ConversationRepository(
-        localDataSource: _conversationLocalDataSource,
+        localDatasource: _conversationLocalDatasource,
         userRepository: _userRepository,
         messagesRepository: _messagesRepository);
     _globalSearchRepository =
-        GlobalSearchRepository(localDataSource: _conversationLocalDataSource);
+        GlobalSearchRepository(localDataSource: _conversationLocalDatasource);
   }
 
   @override

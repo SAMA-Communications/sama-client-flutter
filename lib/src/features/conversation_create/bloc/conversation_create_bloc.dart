@@ -24,7 +24,7 @@ class ConversationCreateBloc
     emit(ConversationCreatedLoading());
 
     try {
-      var conversation = (await conversationRepository.localDataSource
+      var conversation = (await conversationRepository.localDatasource
               .getAllConversationsLocal())
           .firstWhereOrNull((item) =>
               item.type == type &&

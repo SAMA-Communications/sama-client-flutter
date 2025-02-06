@@ -92,11 +92,14 @@ class DatabaseService {
     final db = await store;
 
 // https://docs.objectbox.io/entity-annotations#unique-constraints need to be updated manually
-    var chatsInDb = await db!
+    final query = db!
         .box<ConversationModel>()
-        .query(ConversationModel_.id.oneOf(items.map((element) => element.id).toList()))
-        .build()
-        .findAsync();
+        .query(ConversationModel_.id
+            .oneOf(items.map((element) => element.id).toList()))
+        .build();
+
+    final chatsInDb = await query.findAsync();
+    query.close();
 
     var chatsInDbMap = {for (var v in chatsInDb) v.id: v};
     for (var chat in items) {
@@ -114,7 +117,7 @@ class DatabaseService {
       }
     }
 
-    await db!.box<ConversationModel>().putManyAsync(items, mode: PutMode.put);
+    await db.box<ConversationModel>().putManyAsync(items, mode: PutMode.put);
     return true;
   }
 
@@ -144,10 +147,6 @@ class DatabaseService {
     return true;
   }
 
-  /// ///////////////////////////
-  /// Message Store Functions ///
-  /// ///////////////////////////
-
   /// ////////////////////////
   /// User Store Functions ///
   /// ////////////////////////
@@ -162,27 +161,35 @@ class DatabaseService {
 
   Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
     final db = await store;
-    final results =
-        await db!.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);
-    return results;
-  }
 
-  Future<List<UserModel>> saveUsersUniqueLocal(List<UserModel> items) async {
-    final db = await store;
-
-    var usersInDb = await db!
+    final query = db!
         .box<UserModel>()
-        .query(UserModel_.id.oneOf(items.map((element) => element.id!).toList()))
-        .build()
-        .findAsync();
+        .query(
+            UserModel_.id.oneOf(items.map((element) => element.id!).toList()))
+        .build();
+    var usersInDb = await query.findAsync();
+    query.close();
 
     var usersMap = {for (var v in usersInDb) v.id!: v};
     for (var user in items) {
       user.bid = usersMap[user.id]?.bid;
     }
 
-    final results =
-        await db!.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);
+    return await db
+        .box<UserModel>()
+        .putAndGetManyAsync(items, mode: PutMode.put);
+  }
+
+  Future<List<UserModel>> getUsersModelLocal(List<String> ids) async {
+    final db = await store;
+
+    final query = db!.box<UserModel>().query(UserModel_.id.oneOf(ids)).build();
+    final results = await query.findAsync();
+    query.close();
     return results;
   }
+
+  /// ///////////////////////////
+  /// Message Store Functions ///
+  /// ///////////////////////////
 }

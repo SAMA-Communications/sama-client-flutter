@@ -19,15 +19,15 @@ import '../user/user_repository.dart';
 import '../../db/local/conversation_local_datasource.dart';
 
 class ConversationRepository {
-  final ConversationLocalDataSource localDataSource;
+  final ConversationLocalDatasource localDatasource;
 
-  // final ConversationRemoteDataSource remoteDataSource;
+  // final ConversationRemoteDataSource remoteDatasource;
 
   final UserRepository userRepository;
   final MessagesRepository messagesRepository;
 
   ConversationRepository(
-      {required this.localDataSource,
+      {required this.localDatasource,
       required this.userRepository,
       required this.messagesRepository}) {
     initChatListeners();
@@ -49,7 +49,8 @@ class ConversationRepository {
     incomingSystemMessagesSubscription = api
         .MessagesManager.instance.systemChatMessagesStream
         .listen((message) async {
-      Map<String, User?> participants = await userRepository.getUsersByIds([
+      Map<String, UserModel?> participants =
+          await userRepository.getUsersByIds([
         message.from!,
         if (message.conversation?.opponentId != null)
           message.conversation!.opponentId!
@@ -65,30 +66,29 @@ class ConversationRepository {
           createdAt: message.conversation!.createdAt!,
           updatedAt: message.conversation!.updatedAt!,
           type: message.conversation!.type!,
-          name: getConversationName(
+          name: getConversationModelName(
               message.conversation!, owner, opponent, localUser),
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
           description: message.conversation!.description)
-        ..opponent =
-            buildWithUser(getConversationOpponent(owner, opponent, localUser))
-        ..owner = buildWithUser(owner)
+        ..opponent = getConversationModelOpponent(owner, opponent, localUser)
+        ..owner = owner
         ..lastMessage = buildWithMessage(message.conversation!.lastMessage)
-        ..avatar = buildWithAvatar(getConversationAvatar(
-            message.conversation!, owner, opponent, localUser));
+        ..avatar = getConversationModelAvatar(
+            message.conversation!, owner, opponent, localUser);
       if (message.type == SystemChatMessageType.conversationCreated) {
-        localDataSource.saveConversationLocal(conversation);
+        localDatasource.saveConversationLocal(conversation);
       } else if (message.type == SystemChatMessageType.conversationUpdated) {
         final conversationStored =
-            await localDataSource.getConversationLocal(message.cid);
+            await localDatasource.getConversationLocal(message.cid);
         if (conversationStored != null) {
           var updatedConversation =
               conversationStored.copyWithItem(item: conversation);
-          localDataSource.updateConversationLocal(updatedConversation);
+          localDatasource.updateConversationLocal(updatedConversation);
         } else {
-          localDataSource.saveConversationLocal(conversation);
+          localDatasource.saveConversationLocal(conversation);
         }
       } else if (message.type == SystemChatMessageType.conversationKicked) {
-        localDataSource.removeConversationLocal(message.cid);
+        localDatasource.removeConversationLocal(message.cid);
       }
       _conversationsController.add(conversation);
 
@@ -101,7 +101,7 @@ class ConversationRepository {
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
-          await localDataSource.getConversationLocal(message.cid!);
+          await localDatasource.getConversationLocal(message.cid!);
       if (conversation != null) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {
@@ -111,7 +111,7 @@ class ConversationRepository {
         final updatedConversation = conversation.copyWith(
             lastMessage: buildWithMessage(message),
             unreadMessagesCount: unreadMsgCountUpdated);
-        localDataSource.updateConversationLocal(updatedConversation);
+        localDatasource.updateConversationLocal(updatedConversation);
         _conversationsController.add(updatedConversation);
 
         api.showNotificationIfAppPaused(PushMessageData(
@@ -134,14 +134,14 @@ class ConversationRepository {
 
   Future<void> resetUnreadMessagesCount(String conversationId) async {
     final conversation =
-        await localDataSource.getConversationLocal(conversationId);
+        await localDatasource.getConversationLocal(conversationId);
     final updatedConversation = conversation?.copyWith(unreadMessagesCount: 0);
-    localDataSource.updateConversationLocal(updatedConversation!);
+    localDatasource.updateConversationLocal(updatedConversation!);
     _conversationsController.add(updatedConversation);
   }
 
   Future<List<ConversationModel>> getStoredConversations() async {
-    var conversations = await localDataSource.getAllConversationsLocal();
+    var conversations = await localDatasource.getAllConversationsLocal();
     _removeEmptyPrivateConversations(conversations);
     return conversations;
   }
@@ -155,9 +155,10 @@ class ConversationRepository {
         .toList();
   }
 
-  Future<Map<String, api.User>> getParticipantsAsMap(List<String> cids) async {
-    //FixME RP later with storage mechanism
-    return {for (var v in await api.fetchParticipants(cids)) v.id!: v};
+  Future<Map<String, UserModel>> getParticipantsAsMap(List<String> cids) async {
+    final participants = await getParticipants(cids);
+    var usersLocal = await userRepository.saveUsersLocal(participants);
+    return {for (var v in usersLocal) v.id!: v};
   }
 
   //TODO RP remove if no need - get conversations as stream
@@ -169,10 +170,10 @@ class ConversationRepository {
     updateConversationsSubscription = NetworkBoundResources<
             List<ConversationModel>, List<ConversationModel>>()
         .asStream(
-      loadFromDb: localDataSource.getAllConversationsLocal,
+      loadFromDb: localDatasource.getAllConversationsLocal,
       shouldFetch: (data) => data == null || data.isEmpty,
       createCall: _fetchConversationsWithParticipants,
-      saveCallResult: localDataSource.saveConversationsLocal,
+      saveCallResult: localDatasource.saveConversationsLocal,
     )
         .listen((result) async {
       switch (result.status) {
@@ -194,7 +195,7 @@ class ConversationRepository {
     return NetworkBoundResources<List<ConversationModel>,
             List<ConversationModel>>()
         .asFuture(
-      loadFromDb: localDataSource.getAllConversationsLocal,
+      loadFromDb: localDatasource.getAllConversationsLocal,
       shouldFetch: (data, slice) {
         // var oldData = data?.take(10).toList();
         // var result = data != null && !listEquals(oldData, slice);
@@ -202,18 +203,18 @@ class ConversationRepository {
       },
       // createCallSlice: () => _fetchConversationsWithParticipants(10),
       createCall: _fetchConversationsWithParticipants,
-      saveCallResult: localDataSource.saveConversationsLocal,
+      saveCallResult: localDatasource.saveConversationsLocal,
     );
   }
 
   Future<Resource<ConversationModel?>> getConversation(String id) async {
     return NetworkBoundResources<ConversationModel?, ConversationModel?>()
         .asFuture(
-      loadFromDb: () => localDataSource.getConversationLocal(id),
+      loadFromDb: () => localDatasource.getConversationLocal(id),
       shouldFetch: (data, slice) => data == null,
       createCall: () => getOneConversationById(id),
       saveCallResult: (data) => data != null
-          ? localDataSource.saveConversationLocal(data)
+          ? localDatasource.saveConversationLocal(data)
           : Future.value(false),
     );
   }
@@ -227,12 +228,6 @@ class ConversationRepository {
       'limit': limit,
     });
 
-    final cids = conversations.map((element) => element.id!).toList();
-    final localUser = await userRepository.getLocalUser();
-    final participants = await getParticipants(cids);
-
-    var usersLocal = await localDataSource.saveUsersLocal(participants);
-
     // List<ConversationModel> result =
     //     conversations.fold<List<ConversationModel>>([], (prev, conversation) {
     //   if (conversation.type == 'u' && conversation.lastMessage == null) {
@@ -243,16 +238,19 @@ class ConversationRepository {
     //   return prev;
     // }).toList();
 
-    var usersMap = {for (var v in usersLocal) v.id!: v};
+    final localUser = await userRepository.getLocalUser();
+    final cids = conversations.map((element) => element.id!).toList();
+    var usersMap = await getParticipantsAsMap(cids);
+
     final List<ConversationModel> result = conversations.map((conversation) {
-      return _buildConversationModel2(conversation, usersMap, localUser);
+      return _buildConversationModel(conversation, usersMap, localUser);
     }).toList();
     _removeEmptyPrivateConversations(result);
     return result;
   }
 
   Future<ConversationModel?> getOneConversationById(String cid) async {
-    var conversation = await localDataSource.getConversationLocal(cid);
+    var conversation = await localDatasource.getConversationLocal(cid);
 
     if (conversation == null) {
       final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
@@ -265,7 +263,7 @@ class ConversationRepository {
   }
 
   Future<ConversationModel?> getConversationById(String cid) async {
-    var conversation = await localDataSource.getConversationLocal(cid);
+    var conversation = await localDatasource.getConversationLocal(cid);
 
     if (conversation == null) {
       final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
@@ -312,7 +310,7 @@ class ConversationRepository {
       ..avatar = buildWithAvatar(getConversationAvatar(
           conversation, owner, buildWithUserModel(opponent), localUser));
 
-    localDataSource.saveConversationLocal(result);
+    localDatasource.saveConversationLocal(result);
     // TODO RP check (added cause group is not shown if empty)
     _conversationsController.add(result);
     return result;
@@ -343,18 +341,18 @@ class ConversationRepository {
         removeParticipants?.map((user) => user.id!).toList(),
         avatar);
 
-    var result = (await localDataSource.getConversationLocal(id))!.copyWith(
+    var result = (await localDatasource.getConversationLocal(id))!.copyWith(
         name: conversation.name!,
         description: conversation.description,
         avatar: buildWithAvatar(conversation.avatar));
-    localDataSource.updateConversationLocal(result);
+    localDatasource.updateConversationLocal(result);
     _conversationsController.add(result);
     return result;
   }
 
   Future<bool> deleteConversation(ConversationModel conversation) async {
     var result = await api.deleteConversation(conversation.id);
-    if (result) localDataSource.removeConversationLocal(conversation.id);
+    if (result) localDatasource.removeConversationLocal(conversation.id);
     _conversationsController.add(conversation);
     return result;
   }
@@ -370,28 +368,6 @@ class ConversationRepository {
   }
 
   ConversationModel _buildConversationModel(Conversation conversation,
-      Map<String, api.User> participants, api.User? localUser) {
-    final opponent = participants[conversation.opponentId];
-    //can be null if user deleted
-    final owner = participants[conversation.ownerId];
-
-    return ConversationModel(
-        id: conversation.id!,
-        createdAt: conversation.createdAt!,
-        updatedAt: conversation.updatedAt!,
-        type: conversation.type!,
-        name: getConversationName(conversation, owner, opponent, localUser),
-        description: conversation.description,
-        unreadMessagesCount: conversation.unreadMessagesCount)
-      ..opponent =
-          buildWithUser(getConversationOpponent(owner, opponent, localUser))
-      ..owner = buildWithUser(owner)
-      ..lastMessage = buildWithMessage(conversation.lastMessage)
-      ..avatar = buildWithAvatar(
-          getConversationAvatar(conversation, owner, opponent, localUser));
-  }
-
-  ConversationModel _buildConversationModel2(Conversation conversation,
       Map<String, UserModel> participants, api.User? localUser) {
     final opponent = participants[conversation.opponentId];
     //can be null if user deleted
@@ -402,12 +378,14 @@ class ConversationRepository {
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: getConversationModelName(conversation, owner, opponent, localUser),
+        name:
+            getConversationModelName(conversation, owner, opponent, localUser),
         description: conversation.description,
         unreadMessagesCount: conversation.unreadMessagesCount)
       ..opponent = getConversationModelOpponent(owner, opponent, localUser)
       ..owner = owner
       ..lastMessage = buildWithMessage(conversation.lastMessage)
-      ..avatar = getConversationModelAvatar(conversation, owner, opponent, localUser);
+      ..avatar =
+          getConversationModelAvatar(conversation, owner, opponent, localUser);
   }
 }

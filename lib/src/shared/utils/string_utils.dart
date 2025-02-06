@@ -35,8 +35,8 @@ String getConversationModelName(
 }
 
 String getSystemMessagePushBody(
-    ConversationModel conversation, SystemChatMessage message, User? opponent) {
-  var opponentName = getUserName(opponent);
+    ConversationModel conversation, SystemChatMessage message, UserModel? opponent) {
+  var opponentName = getUserModelName(opponent);
   return message.type == SystemChatMessageType.conversationKicked
       ? '$opponentName removed you from conversation'
       : message.type == SystemChatMessageType.conversationUpdated
@@ -81,9 +81,6 @@ UserModel? getConversationModelOpponent (UserModel? owner, UserModel? opponent, 
           ? owner
           : opponent;
 }
-
-bool isDeletedUser(User? user) =>
-    user == null || (user.email == null && user.login == null);
 
 bool isDeletedUserModel(UserModel? user) =>
     user == null || (user.email == null && user.login == null);
