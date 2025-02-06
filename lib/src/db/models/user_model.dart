@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
+import '../../api/users/models/models.dart';
 import 'avatar_model.dart';
 
 @Entity()
@@ -81,4 +82,25 @@ class UserModel extends Equatable {
         email,
         avatar,
       ];
+}
+
+extension UserModelExtension on User {
+  UserModel toUserModel() {
+    var userModel = UserModel(
+      id: id,
+      deviceId: deviceId,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      recentActivity: recentActivity,
+      login: login,
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
+      email: email,
+    );
+    if (avatar != null) {
+      userModel.avatar = avatar!.toAvatarModel();
+    }
+    return userModel;
+  }
 }

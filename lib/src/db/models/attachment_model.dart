@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
-import '../../api/api.dart';
+import '../../api/conversations/models/models.dart';
 
 @Entity()
 // ignore: must_be_immutable

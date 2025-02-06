@@ -1,5 +1,4 @@
 import '../../api/api.dart';
-import '../../db/entity_builder.dart';
 import '../../db/models/avatar_model.dart';
 import '../../db/models/conversation_model.dart';
 import '../../db/models/user_model.dart';
@@ -61,7 +60,7 @@ AvatarModel? getConversationModelAvatar(
       ? conversation.opponentId == localUser?.id
       ? owner?.avatar
       : opponent?.avatar
-      : buildWithAvatar(conversation.avatar);
+      : conversation.avatar?.toAvatarModel();
 }
 
 // set opponent always as real opponent for current user

@@ -6,9 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
 
 import '../../../api/api.dart';
-import '../../../db/entity_builder.dart';
-import '../../../db/models/conversation_model.dart';
-import '../../../db/models/user_model.dart';
+import '../../../db/models/models.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../models/models.dart';
@@ -51,7 +49,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
           description:
               GroupDescription.pure(state.conversation.description ?? ''),
           avatar: GroupAvatar.pure(state.conversation.avatar?.imageUrl),
-          localUser: buildWithUser((await _userRepository.getLocalUser())),
+          localUser: (await _userRepository.getLocalUser())?.toUserModel(),
           participants: GroupParticipants.pure(event.participants.toSet())),
     );
   }

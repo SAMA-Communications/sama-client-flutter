@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
+import '../../api/conversations/models/models.dart';
 import 'attachment_model.dart';
 
 @Entity()
@@ -49,4 +50,23 @@ class MessageModel extends Equatable {
         t,
         createdAt,
       ];
+}
+
+extension MessageModelExtension on Message {
+  MessageModel toMessageModel() {
+    var messageModel = MessageModel(
+      id: id,
+      from: from,
+      cid: cid,
+      rawStatus: rawStatus,
+      body: body,
+      createdAt: createdAt,
+      t: t,
+    );
+    if (attachments != null) {
+      messageModel.attachments.addAll(
+          attachments!.map((attachment) => attachment.toAttachmentModel()));
+    }
+    return messageModel;
+  }
 }

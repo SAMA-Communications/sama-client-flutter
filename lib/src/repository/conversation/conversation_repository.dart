@@ -7,9 +7,7 @@ import 'package:path/path.dart';
 import '../../api/api.dart' as api;
 import '../../api/api.dart';
 import '../../api/push_notifications/models/models.dart';
-import '../../db/entity_builder.dart';
-import '../../db/models/conversation_model.dart';
-import '../../db/models/user_model.dart';
+import '../../db/models/models.dart';
 import '../../db/network_bound_resource.dart';
 import '../../db/resource.dart';
 import '../../repository/messages/messages_repository.dart';
@@ -72,7 +70,7 @@ class ConversationRepository {
           description: message.conversation!.description)
         ..opponent = getConversationModelOpponent(owner, opponent, localUser)
         ..owner = owner
-        ..lastMessage = buildWithMessage(message.conversation!.lastMessage)
+        ..lastMessage = message.conversation!.lastMessage?.toMessageModel()
         ..avatar = getConversationModelAvatar(
             message.conversation!, owner, opponent, localUser);
       if (message.type == SystemChatMessageType.conversationCreated) {
@@ -109,7 +107,7 @@ class ConversationRepository {
         }
 
         final updatedConversation = conversation.copyWith(
-            lastMessage: buildWithMessage(message),
+            lastMessage: message.toMessageModel(),
             unreadMessagesCount: unreadMsgCountUpdated);
         localDatasource.updateConversationLocal(updatedConversation);
         _conversationsController.add(updatedConversation);
@@ -151,7 +149,7 @@ class ConversationRepository {
     // if (_participants.isNotEmpty) return _participants.values.toList();
 
     return (await api.fetchParticipants(cids))
-        .map((element) => buildWithUser(element)!)
+        .map((element) => element.toUserModel())
         .toList();
   }
 
@@ -294,21 +292,20 @@ class ConversationRepository {
 
     var localUser = await userRepository.getLocalUser();
     final opponent = participantsMap[conversation.opponentId];
-    final owner = localUser;
+    final owner = localUser?.toUserModel();
     var result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: getConversationName(
-            conversation, owner, buildWithUserModel(opponent), localUser),
+        name:
+            getConversationModelName(conversation, owner, opponent, localUser),
         unreadMessagesCount: conversation.unreadMessagesCount)
-      ..opponent = buildWithUser(getConversationOpponent(
-          owner, buildWithUserModel(opponent), localUser))
-      ..owner = buildWithUser(owner)
-      ..lastMessage = buildWithMessage(conversation.lastMessage)
-      ..avatar = buildWithAvatar(getConversationAvatar(
-          conversation, owner, buildWithUserModel(opponent), localUser));
+      ..opponent = getConversationModelOpponent(owner, opponent, localUser)
+      ..owner = owner
+      ..lastMessage = conversation.lastMessage?.toMessageModel()
+      ..avatar =
+          getConversationModelAvatar(conversation, owner, opponent, localUser);
 
     localDatasource.saveConversationLocal(result);
     // TODO RP check (added cause group is not shown if empty)
@@ -344,7 +341,7 @@ class ConversationRepository {
     var result = (await localDatasource.getConversationLocal(id))!.copyWith(
         name: conversation.name!,
         description: conversation.description,
-        avatar: buildWithAvatar(conversation.avatar));
+        avatar: conversation.avatar?.toAvatarModel());
     localDatasource.updateConversationLocal(result);
     _conversationsController.add(result);
     return result;
@@ -384,7 +381,7 @@ class ConversationRepository {
         unreadMessagesCount: conversation.unreadMessagesCount)
       ..opponent = getConversationModelOpponent(owner, opponent, localUser)
       ..owner = owner
-      ..lastMessage = buildWithMessage(conversation.lastMessage)
+      ..lastMessage = conversation.lastMessage?.toMessageModel()
       ..avatar =
           getConversationModelAvatar(conversation, owner, opponent, localUser);
   }

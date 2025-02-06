@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
+import '../../api/conversations/models/models.dart';
+
 @Entity()
 // ignore: must_be_immutable
 class AvatarModel extends Equatable {
@@ -22,4 +24,14 @@ class AvatarModel extends Equatable {
 
   @override
   List<Object?> get props => [fileId, fileName, fileBlurHash, imageUrl];
+}
+
+extension AvatarModelExtension on Avatar {
+  AvatarModel toAvatarModel() {
+    return AvatarModel(
+        fileId: fileId,
+        fileName: fileName,
+        fileBlurHash: fileBlurHash,
+        imageUrl: imageUrl);
+  }
 }

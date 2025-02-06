@@ -3,11 +3,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:sama_client_flutter/src/db/entity_builder.dart';
 
 import '../../api/api.dart';
 import '../../api/api.dart' as api;
-import '../../db/models/user_model.dart';
+import '../../db/models/models.dart';
 import '../../repository/user/user_data_source.dart';
 import '../../shared/secure_storage.dart';
 import '../../shared/utils/media_utils.dart';
@@ -18,6 +17,7 @@ class UserRepository {
   UserRepository({required this.localDataSource});
 
   Future<User?> getLocalUser() async {
+    // UserModel
     return SecureStorage.instance.getLocalUser();
   }
 
@@ -69,7 +69,7 @@ class UserRepository {
     if (idsNone.isNotEmpty) {
       await api.getUsersByIds(idsNone).then((users) async {
         var usersLocal = await localDataSource
-            .saveUsersLocal(users.map((user) => buildWithUser(user)!).toList());
+            .saveUsersLocal(users.map((user) => user.toUserModel()).toList());
         participants
             .addEntries(usersLocal.map((user) => MapEntry(user.id!, user)));
       });
