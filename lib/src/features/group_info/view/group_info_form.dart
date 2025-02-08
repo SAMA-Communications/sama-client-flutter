@@ -52,7 +52,7 @@ class AvatarDescriptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
-        context.read<AuthenticationBloc>().state.user.id!;
+        context.read<AuthenticationBloc>().state.user?.id!;
 
     return ListTile(
       titleAlignment: ListTileTitleAlignment.top,
@@ -240,7 +240,7 @@ class GroupInfoCard extends StatelessWidget {
             previous.participants != current.participants,
         builder: (context, state) {
           var ownerId = state.conversation.owner?.id ?? '';
-          var localUserId = context.read<AuthenticationBloc>().state.user.id!;
+          var localUserId = context.read<AuthenticationBloc>().state.user?.id!;
           var isOwner = ownerId == localUserId;
           return Padding(
               padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
@@ -256,7 +256,7 @@ class GroupInfoCard extends StatelessWidget {
                             child: _ParticipantsListForm(
                                 isOwner: isOwner,
                                 ownerId: ownerId,
-                                localUserId: localUserId)),
+                                localUserId: localUserId!)),
                       ]),
                     ),
                   )));
@@ -319,7 +319,7 @@ class _ParticipantsListForm extends StatelessWidget {
           title:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
-              getUserModelName(user),
+              getUserName(user),
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

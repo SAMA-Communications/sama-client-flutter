@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:app_set_id/app_set_id.dart';
 
+import '../../db/models/models.dart';
 import '../../features/conversations_list/conversations_list.dart';
 import '../../shared/secure_storage.dart';
 import '../connection/connection.dart';
@@ -51,7 +52,7 @@ Future<AccessToken> loginHttp(User user) {
         User.fromJson(response['user']).copyWith(deviceId: user.deviceId);
     var accessToken = AccessToken.fromJson(response);
     var refreshToken = response['refresh_token'];
-    SecureStorage.instance.saveLocalUserIfNeed(loggedUser);
+    SecureStorage.instance.saveLocalUserIfNeed(loggedUser.toUserModel());
     SecureStorage.instance.saveAccessToken(accessToken);
     SecureStorage.instance.saveRefreshToken(refreshToken);
     return accessToken;

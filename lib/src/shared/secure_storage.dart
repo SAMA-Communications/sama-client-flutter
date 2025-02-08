@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../api/api.dart';
 import '../api/utils/config.dart';
+import '../db/models/models.dart';
 
 const String storageUserId = "storage_user_id";
 const String storageUserLogin = "storage_user_login";
@@ -25,14 +26,14 @@ class SecureStorage {
 
   static SecureStorage get instance => _instance;
 
-  Future<void> saveLocalUserIfNeed(User user) async {
+  Future<void> saveLocalUserIfNeed(UserModel user) async {
     if (await hasLocalUser() && await localUserWasNotUpdated(user)) {
       return;
     }
     saveLocalUser(user);
   }
 
-  Future<void> saveLocalUser(User user) async {
+  Future<void> saveLocalUser(UserModel user) async {
     if (user.id != null) {
       _storage.write(key: storageUserId, value: user.id);
     }
@@ -59,7 +60,7 @@ class SecureStorage {
     }
   }
 
-  Future<User?> getLocalUser() async {
+  Future<UserModel?> getLocalUser() async {
     String? id = await _storage.read(key: storageUserId);
     String? login = await _storage.read(key: storageUserLogin);
     String? deviceId = await _storage.read(key: storageUserDeviceId);
@@ -69,15 +70,15 @@ class SecureStorage {
     String? email = await _storage.read(key: storageUserEmail);
     String? avatarUrl = await _storage.read(key: storageUserAvatar);
     if (login != null) {
-      return User(
+      return UserModel(
           id: id,
           login: login,
-          avatar: Avatar(imageUrl: avatarUrl),
           deviceId: deviceId,
           firstName: firstName,
           lastName: lastName,
           phone: phone,
-          email: email);
+          email: email)
+        ..avatar = AvatarModel(imageUrl: avatarUrl);
     }
     return null;
   }
@@ -86,7 +87,7 @@ class SecureStorage {
     return await _storage.containsKey(key: storageUserLogin);
   }
 
-  Future<bool> localUserWasNotUpdated(User user) async {
+  Future<bool> localUserWasNotUpdated(UserModel user) async {
     return await getLocalUser() == user;
   }
 

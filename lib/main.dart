@@ -7,13 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'src/api/api.dart';
 import 'src/db/db_service.dart';
 import 'src/db/local/conversation_local_datasource.dart';
+import 'src/db/local/user_local_datasource.dart';
 import 'src/navigation/app_router.dart';
 import 'src/repository/attachments/attachments_repository.dart';
 import 'src/repository/authentication/authentication_repository.dart';
 import 'src/repository/conversation/conversation_repository.dart';
 import 'src/repository/global_search/global_search_repository.dart';
 import 'src/repository/messages/messages_repository.dart';
-import 'src/repository/user/user_data_source.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
@@ -63,7 +63,7 @@ class _AppState extends State<App> {
         userRepository: _userRepository,
         messagesRepository: _messagesRepository);
     _globalSearchRepository =
-        GlobalSearchRepository(localDataSource: _conversationLocalDatasource);
+        GlobalSearchRepository(conversationRepository: _conversationRepository);
   }
 
   @override

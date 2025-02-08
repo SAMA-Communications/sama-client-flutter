@@ -1,10 +1,49 @@
+import '../../api/api.dart';
+import '../../db/db_service.dart';
+import '../../db/models/user_model.dart';
 import '../../shared/errors/exceptions.dart';
 
-import '../db_service.dart';
-import '../models/user_model.dart';
-
-class UserLocalDatasource {
+class UserLocalDataSource {
   final DatabaseService databaseService = DatabaseService.instance;
 
+  Future<Map<String, UserModel?>> getUsersModelByIds(List<String> ids) async {//rename to getUsersByIds
+    final users = await getUsersModelLocal(ids);
+    return {for (var v in users) v.id!: v};
+  }
 
+  // Future<List<UserModel>> getUsersByCids(List<String> cids) async {
+  //   try {
+  //     return await databaseService.getUsersModelByCidsLocal(cids);
+  //   } catch (e) {
+  //     print('saveConversationLocal e ${e.toString()}');
+  //     throw DatabaseException(e.toString());
+  //   }
+  // }
+
+  Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
+    try {
+      return await databaseService.saveUsersLocal(items);
+    } catch (e) {
+      print('saveConversationLocal e ${e.toString()}');
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<List<UserModel>> getUsersModelLocal(List<String> ids) async {
+    try {
+      return await databaseService.getUsersModelLocal(ids);
+    } catch (e) {
+      print('saveConversationLocal e ${e.toString()}');
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<UserModel?> getUserLocal(String id) async {
+    try {
+      return await databaseService.getUserLocal(id);
+    } catch (e) {
+      print('saveConversationLocal e ${e.toString()}');
+      throw DatabaseException(e.toString());
+    }
+  }
 }

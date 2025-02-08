@@ -19,8 +19,6 @@ class MessageModel extends Equatable {
   @Property(type: PropertyType.date)
   final DateTime? createdAt;
 
-  // final Map<String, dynamic>? extension; //x
-
   MessageModel({
     this.bid,
     this.id,
@@ -37,8 +35,7 @@ class MessageModel extends Equatable {
   @override
   String toString() {
     return 'MessageModel{bid: $bid, id: $id}';
-  } // List<AttachmentModel>? get attachments => attachmentsBind;
-  // set attachments(List<AttachmentModel>? item) => attachmentsBind = item;
+  }
 
   @override
   List<Object?> get props => [

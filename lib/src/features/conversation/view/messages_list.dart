@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../api/api.dart';
+import '../../../db/models/models.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -163,10 +163,10 @@ class _MessagesListState extends State<MessagesList> {
           notification = '';
       }
 
-      User? initiator;
+      UserModel? initiator;
 
       if (message.extension?['user'] != null) {
-        initiator = User.fromJson((message.extension?['user']));
+        initiator = User.fromJson((message.extension?['user'])).toUserModel();
       }
 
       return ServiceMessageBubble(

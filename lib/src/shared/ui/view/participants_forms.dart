@@ -218,7 +218,7 @@ class _ParticipantsListItem extends StatelessWidget {
             height: 40,
             child: Stack(fit: StackFit.expand, children: [
               AvatarLetterIcon(
-                name: getUserModelName(user),
+                name: getUserName(user),
                 padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 4.0),
                 size: const Size(50.0, 50.0),
               ),
@@ -239,7 +239,7 @@ class _ParticipantsListItem extends StatelessWidget {
                   : const SizedBox.shrink(),
             ])),
         Text(
-          getUserModelName(user),
+          getUserName(user),
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontSize: 10.0,

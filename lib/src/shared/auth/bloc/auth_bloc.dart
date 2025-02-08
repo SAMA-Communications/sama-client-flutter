@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../api/api.dart' as api;
 import '../../../api/utils/logger.dart';
+import '../../../db/models/models.dart';
 import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../../secure_storage.dart';
@@ -81,7 +82,7 @@ class AuthenticationBloc
     } catch (_) {}
   }
 
-  Future<api.User?> tryGetUser() async {
+  Future<UserModel?> tryGetUser() async {
     try {
       return await _userRepository.getLocalUser();
     } catch (_) {

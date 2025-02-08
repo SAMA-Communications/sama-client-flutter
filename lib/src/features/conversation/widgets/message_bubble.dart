@@ -37,12 +37,12 @@ class MessageBubble extends StatelessWidget {
             GestureDetector(
                 onTap: () => context.push(userInfoPath, extra: sender),
                 child:AvatarLetterIcon(
-              name: getUserModelName(sender),
+              name: getUserName(sender),
               lastName: sender.lastName,
               size: const Size(40.0, 40.0),
               backgroundColor: isOwn ? slateBlue : gainsborough,
               avatar: sender.avatar,
-              isDeleted: isDeletedUserModel(sender),
+              isDeleted: isDeletedUser(sender),
             )),
           if (!isLast && !isOwn)
             const SizedBox(
@@ -66,7 +66,7 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   if (isFirst && !isOwn)
                     Text(
-                      getUserModelName(sender),
+                      getUserName(sender),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

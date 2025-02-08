@@ -3,14 +3,14 @@ import '../db_service.dart';
 import '../models/conversation_model.dart';
 
 class ConversationLocalDatasource {
-  final DatabaseService databaseService = DatabaseService.instance;
+  final DatabaseService _databaseService = DatabaseService.instance;
 
   // ConversationLocalDataSource(this.databaseService);
 
   Future<List<ConversationModel>> getAllConversationsLocal() async {
     print('getAllConversationsLocal');
     try {
-      return await databaseService.getAllConversationsLocal();
+      return await _databaseService.getAllConversationsLocal();
     } catch (e) {
       print('getAllConversationsLocal e ${e.toString()}');
       throw DatabaseException(e.toString());
@@ -19,7 +19,7 @@ class ConversationLocalDatasource {
 
   Future<ConversationModel?> getConversationLocal(String cid) async {
     try {
-      return await databaseService.getConversationLocal(cid);
+      return await _databaseService.getConversationLocal(cid);
     } catch (e) {
       throw DatabaseException(e.toString());
     }
@@ -28,7 +28,7 @@ class ConversationLocalDatasource {
   Future<List<ConversationModel>> getConversationsLocal(
       List<String> ids) async {
     try {
-      return await databaseService.getConversationsLocal(ids);
+      return await _databaseService.getConversationsLocal(ids);
     } catch (e) {
       throw DatabaseException(e.toString());
     }
@@ -37,7 +37,7 @@ class ConversationLocalDatasource {
   Future<bool> saveConversationsLocal(List<ConversationModel> items) async {
     print('saveConversationLocal');
     try {
-      return await databaseService.saveConversationsLocal(items);
+      return await _databaseService.saveConversationsLocal(items);
     } catch (e) {
       print('saveConversationLocal e ${e.toString()}');
       throw DatabaseException(e.toString());
@@ -46,7 +46,7 @@ class ConversationLocalDatasource {
 
   Future<bool> saveConversationLocal(ConversationModel item) async {
     try {
-      return await databaseService.saveConversationLocal(item);
+      return await _databaseService.saveConversationLocal(item);
     } catch (e) {
       throw DatabaseException(e.toString());
     }
@@ -54,7 +54,7 @@ class ConversationLocalDatasource {
 
   Future<bool> updateConversationLocal(ConversationModel item) async {
     try {
-      return await databaseService.updateConversationLocal(item);
+      return await _databaseService.updateConversationLocal(item);
     } catch (e) {
       throw DatabaseException(e.toString());
     }
@@ -62,7 +62,7 @@ class ConversationLocalDatasource {
 
   Future<bool> removeConversationLocal(String id) async {
     try {
-      return await databaseService.removeConversationLocal(id);
+      return await _databaseService.removeConversationLocal(id);
     } catch (e) {
       throw DatabaseException(e.toString());
     }

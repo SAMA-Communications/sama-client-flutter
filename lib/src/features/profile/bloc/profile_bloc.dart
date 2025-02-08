@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
 
 import '../../../api/api.dart';
+import '../../../db/models/models.dart';
 import '../../../repository/user/user_repository.dart';
 import '../models/models.dart';
 import '../models/user_avatar.dart';
@@ -165,7 +166,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileResetChanges event,
     Emitter<ProfileState> emit,
   ) async {
-    User? user = await _userRepository.getLocalUser();
+    var user = await _userRepository.getLocalUser();
     emit(
       state.copyWith(
           status: FormzSubmissionStatus.canceled,
@@ -186,7 +187,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
 
       try {
-        User user = await _userRepository.updateLocalUser(
+        var user = await _userRepository.updateLocalUser(
             currentPsw: state.userPassword.isValid
                 ? state.userPassword.currentPsw
                 : null,
@@ -216,7 +217,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             userEmail: UserEmail.pure(user.email ?? ''),
             informationMessage: 'User was successfully updated'));
       } catch (e) {
-        User? user = await _userRepository.getLocalUser();
+        var user = await _userRepository.getLocalUser();
         emit(state.copyWith(
             status: FormzSubmissionStatus.failure,
             isValid: false,

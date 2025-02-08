@@ -35,7 +35,7 @@ class UserInfoPage extends StatelessWidget {
             color: white, //change your color here
           ),
           title: Text(
-            getUserModelName(user),
+            getUserName(user),
             style: const TextStyle(color: white),
             overflow: TextOverflow.ellipsis,
           ),

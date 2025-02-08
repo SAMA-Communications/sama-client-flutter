@@ -49,7 +49,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
           description:
               GroupDescription.pure(state.conversation.description ?? ''),
           avatar: GroupAvatar.pure(state.conversation.avatar?.imageUrl),
-          localUser: (await _userRepository.getLocalUser())?.toUserModel(),
+          localUser: await _userRepository.getLocalUser(),
           participants: GroupParticipants.pure(event.participants.toSet())),
     );
   }

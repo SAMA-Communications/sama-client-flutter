@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../models/models.dart';
@@ -18,7 +17,7 @@ class UnsupportedMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MessageBubble(
-      sender: message.sender.toUserModel(),
+      sender: message.sender,
       isFirst: message.isFirstUserMessage,
       isLast: message.isLastUserMessage,
       isOwn: message.isOwn,

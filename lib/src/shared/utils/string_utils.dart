@@ -1,9 +1,7 @@
 import '../../api/api.dart';
-import '../../db/models/avatar_model.dart';
-import '../../db/models/conversation_model.dart';
-import '../../db/models/user_model.dart';
+import '../../db/models/models.dart';
 
-String getUserName(User? user) {
+String getUserName(UserModel? user) {
   if (user == null) return 'Deleted user';
 
   return (user.lastName?.isEmpty ?? true && (user.firstName?.isEmpty ?? true))
@@ -11,31 +9,16 @@ String getUserName(User? user) {
       : '${user.firstName ?? ''} ${user.lastName ?? ''}';
 }
 
-String getUserModelName(UserModel? user) {
-  if (user == null) return 'Deleted user';
-
-  return (user.lastName?.isEmpty ?? true && (user.firstName?.isEmpty ?? true))
-      ? user.email ?? user.login ?? 'Deleted user'
-      : '${user.firstName ?? ''} ${user.lastName ?? ''}';
-}
-
-String getConversationName(
-    Conversation conversation, User? owner, User? opponent, User? localUser) {
+String getConversationName(Conversation conversation, UserModel? owner,
+    UserModel? opponent, UserModel? localUser) {
   if (conversation.type! == 'g') return conversation.name!;
   var user = conversation.opponentId == localUser?.id ? owner : opponent;
   return getUserName(user);
 }
 
-String getConversationModelName(
-    Conversation conversation, UserModel? owner, UserModel? opponent, User? localUser) {
-  if (conversation.type! == 'g') return conversation.name!;
-  var user = conversation.opponentId == localUser?.id ? owner : opponent;
-  return getUserModelName(user);
-}
-
-String getSystemMessagePushBody(
-    ConversationModel conversation, SystemChatMessage message, UserModel? opponent) {
-  var opponentName = getUserModelName(opponent);
+String getSystemMessagePushBody(ConversationModel conversation,
+    SystemChatMessage message, UserModel? opponent) {
+  var opponentName = getUserName(opponent);
   return message.type == SystemChatMessageType.conversationKicked
       ? '$opponentName removed you from conversation'
       : message.type == SystemChatMessageType.conversationUpdated
@@ -45,26 +28,18 @@ String getSystemMessagePushBody(
               : 'message';
 }
 
-Avatar? getConversationAvatar(
-    Conversation conversation, User? owner, User? opponent, User? localUser) {
+AvatarModel? getConversationAvatar(Conversation conversation, UserModel? owner,
+    UserModel? opponent, UserModel? localUser) {
   return conversation.type == 'u'
       ? conversation.opponentId == localUser?.id
           ? owner?.avatar
           : opponent?.avatar
-      : conversation.avatar;
-}
-
-AvatarModel? getConversationModelAvatar(
-    Conversation conversation, UserModel? owner, UserModel? opponent, User? localUser) {
-  return conversation.type == 'u'
-      ? conversation.opponentId == localUser?.id
-      ? owner?.avatar
-      : opponent?.avatar
       : conversation.avatar?.toAvatarModel();
 }
 
 // set opponent always as real opponent for current user
-User? getConversationOpponent(User? owner, User? opponent, User? localUser) {
+UserModel? getConversationOpponent(
+    UserModel? owner, UserModel? opponent, UserModel? localUser) {
   return opponent == null
       ? null
       : opponent.id == localUser?.id
@@ -72,14 +47,5 @@ User? getConversationOpponent(User? owner, User? opponent, User? localUser) {
           : opponent;
 }
 
-// set opponent always as real opponent for current user
-UserModel? getConversationModelOpponent (UserModel? owner, UserModel? opponent, User? localUser) {
-  return opponent == null
-      ? null
-      : opponent.id == localUser?.id
-          ? owner
-          : opponent;
-}
-
-bool isDeletedUserModel(UserModel? user) =>
+bool isDeletedUser(UserModel? user) =>
     user == null || (user.email == null && user.login == null);

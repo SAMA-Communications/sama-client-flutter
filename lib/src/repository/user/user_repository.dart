@@ -6,8 +6,8 @@ import 'package:path/path.dart';
 
 import '../../api/api.dart';
 import '../../api/api.dart' as api;
+import '../../db/local/user_local_datasource.dart';
 import '../../db/models/models.dart';
-import '../../repository/user/user_data_source.dart';
 import '../../shared/secure_storage.dart';
 import '../../shared/utils/media_utils.dart';
 
@@ -16,12 +16,11 @@ class UserRepository {
 
   UserRepository({required this.localDataSource});
 
-  Future<User?> getLocalUser() async {
-    // UserModel
+  Future<UserModel?> getLocalUser() async {
     return SecureStorage.instance.getLocalUser();
   }
 
-  Future<User> updateLocalUser(
+  Future<UserModel> updateLocalUser(
       {String? currentPsw,
       String? newPassword,
       String? firstName,
@@ -29,7 +28,7 @@ class UserRepository {
       String? email,
       String? phone,
       Avatar? avatar}) async {
-    User result = await api.userEdit(
+    var user = await api.userEdit(
         currentPassword: currentPsw,
         newPassword: newPassword,
         firstName: firstName,
@@ -41,14 +40,14 @@ class UserRepository {
     if (avatar != null) {
       final filesUrls = await api.getFilesUrls({avatar.fileId!});
       avatar = avatar.copyWith(imageUrl: filesUrls[avatar.fileId!]);
-      result = result.copyWith(avatar: avatar);
+      user = user.copyWith(avatar: avatar);
     }
-
+    var result = user.toUserModel();
     SecureStorage.instance.saveLocalUserIfNeed(result);
     return result;
   }
 
-  Future<User> updateAvatar(File avatarUrl) async {
+  Future<UserModel> updateAvatar(File avatarUrl) async {
     var compressedFile =
         await compressImageFile(avatarUrl, const Size(640, 480));
     final blur = await getImageHashInIsolate(compressedFile);
@@ -77,8 +76,19 @@ class UserRepository {
     return participants;
   }
 
-  Future<Map<String, User?>> getStoredUsersByIds(List<String> ids) async {
-    return localDataSource.getUsersByIds(ids);
+  Future<List<UserModel>> getUsersByCids(List<String> cids) async {
+    return (await api.fetchParticipants(cids))
+        .map((element) => element.toUserModel())
+        .toList();
+  }
+
+  Future<UserModel?> getUserById(String id) async {
+    var user = await localDataSource.getUserLocal(id);
+    if (user == null) {
+      user = (await api.getUsersByIds({id})).first.toUserModel();
+      user = (await localDataSource.saveUsersLocal([user])).first;
+    }
+    return user;
   }
 
   Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
