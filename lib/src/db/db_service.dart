@@ -30,6 +30,7 @@ class DatabaseService {
 
   void drop() async {
     try {
+      close();
       var dir = await getApplicationDocumentsDirectory();
       Directory('${dir.path}/$dbName').deleteSync(recursive: true);
       print(
@@ -43,6 +44,7 @@ class DatabaseService {
   void close() async {
     try {
       _store?.close();
+      _store = null;
     } catch (e) {
       return;
     }

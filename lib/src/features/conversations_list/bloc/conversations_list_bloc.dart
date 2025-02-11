@@ -87,7 +87,9 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
       }
     } catch (err) {
       print("_onConversationFetched err= $err");
-      emit(state.copyWith(status: ConversationsStatus.failure));
+      if (state.conversations.isEmpty) {
+        emit(state.copyWith(status: ConversationsStatus.failure));
+      }
     }
   }
 
