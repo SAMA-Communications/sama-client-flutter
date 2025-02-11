@@ -61,7 +61,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
               initial: true),
         );
       }
-
+      //TODO RP fix with pagination
       var resource = await _conversationRepository.getAllConversations();
       switch (resource.status) {
         case Status.success:

@@ -175,6 +175,7 @@ class DatabaseService {
     var usersMap = {for (var v in usersInDb) v.id!: v};
     for (var user in items) {
       user.bid = usersMap[user.id]?.bid;
+      user.avatar?.bid = usersMap[user.id]?.avatar?.bid;
     }
 
     return await db
