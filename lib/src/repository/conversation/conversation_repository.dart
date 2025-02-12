@@ -163,13 +163,19 @@ class ConversationRepository {
     final localUser = await userRepository.getLocalUser();
     final participants = await getParticipantsAsMap(cids);
 
-    final List<ConversationModel> result = conversations.map((conversation) {
-      return _buildConversationModel(conversation, participants, localUser);
+    final List<ConversationModel> result =
+        conversations.fold<List<ConversationModel>>([], (prev, conversation) {
+      if ((conversation.type == 'u' && conversation.lastMessage == null) ||
+          (conversation.isEncrypted ?? false)) {
+        return prev;
+      }
+      var chat = _buildConversationModel(conversation, participants, localUser);
+      prev.add(chat);
+      return prev;
     }).toList();
 
     localDataSource.setConversations({for (var v in result) v.id: v});
     _sortConversations(result);
-    _removeEmptyPrivateConversations(result);
     return result;
   }
 
