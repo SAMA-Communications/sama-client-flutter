@@ -104,7 +104,7 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
 
   void _onScroll() {
     if (_isBottom)
-      context.read<ConversationsBloc>().add(ConversationsFetched());
+      context.read<ConversationsBloc>().add(ConversationsMoreFetched());
   }
 
   bool get _isBottom {

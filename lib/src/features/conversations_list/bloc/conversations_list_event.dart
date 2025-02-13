@@ -9,4 +9,6 @@ sealed class ConversationsEvent extends Equatable {
 
 final class ConversationsFetched extends ConversationsEvent {}
 
+final class ConversationsMoreFetched extends ConversationsEvent {}
+
 final class ConversationsRefreshed extends ConversationsEvent {}

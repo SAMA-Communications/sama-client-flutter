@@ -29,7 +29,8 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     required ConversationRepository conversationRepository,
   })  : _conversationRepository = conversationRepository,
         super(const ConversationsState()) {
-    on<ConversationsFetched>(
+    on<ConversationsFetched>(_onConversationsFetched);
+    on<ConversationsMoreFetched>(
       _onConversationsFetched,
       transformer: throttleDroppable(throttleDuration),
     );
@@ -45,8 +46,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     });
   }
 
-  Future<void> _onConversationsFetched(
-      ConversationsFetched event, Emitter<ConversationsState> emit) async {
+  Future<void> _onConversationsFetched(event, emit) async {
     if (state.hasReachedMax && !state.initial) return;
     try {
       if (state.status == ConversationsStatus.initial) {
