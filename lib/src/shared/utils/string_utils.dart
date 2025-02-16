@@ -10,9 +10,9 @@ String getUserName(UserModel? user) {
 }
 
 String getConversationName(Conversation conversation, UserModel? owner,
-    UserModel? opponent, UserModel? localUser) {
+    UserModel? opponent, UserModel? currentUser) {
   if (conversation.type! == 'g') return conversation.name!;
-  var user = conversation.opponentId == localUser?.id ? owner : opponent;
+  var user = conversation.opponentId == currentUser?.id ? owner : opponent;
   return getUserName(user);
 }
 
@@ -29,9 +29,9 @@ String getSystemMessagePushBody(ConversationModel conversation,
 }
 
 AvatarModel? getConversationAvatar(Conversation conversation, UserModel? owner,
-    UserModel? opponent, UserModel? localUser) {
+    UserModel? opponent, UserModel? currentUser) {
   return conversation.type == 'u'
-      ? conversation.opponentId == localUser?.id
+      ? conversation.opponentId == currentUser?.id
           ? owner?.avatar
           : opponent?.avatar
       : conversation.avatar?.toAvatarModel();
@@ -39,10 +39,10 @@ AvatarModel? getConversationAvatar(Conversation conversation, UserModel? owner,
 
 // set opponent always as real opponent for current user
 UserModel? getConversationOpponent(
-    UserModel? owner, UserModel? opponent, UserModel? localUser) {
+    UserModel? owner, UserModel? opponent, UserModel? currentUser) {
   return opponent == null
       ? null
-      : opponent.id == localUser?.id
+      : opponent.id == currentUser?.id
           ? owner
           : opponent;
 }

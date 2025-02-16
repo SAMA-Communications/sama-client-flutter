@@ -129,7 +129,7 @@ class PushNotificationsManager {
             ? 'ios'
             : '';
 
-    String? deviceId = (await SecureStorage.instance.getLocalUser())?.deviceId;
+    String? deviceId = (await SecureStorage.instance.getCurrentUser())?.deviceId;
     if (deviceId == null) {
       print('[subscribe] skip subscription for unregistered user');
       return;
@@ -145,7 +145,7 @@ class PushNotificationsManager {
   }
 
   Future<void> unsubscribe() {
-    return SecureStorage.instance.getLocalUser().then((user) {
+    return SecureStorage.instance.getCurrentUser().then((user) {
       String? deviceId = user?.deviceId;
       if (deviceId != null) {
         return deleteSubscription(deviceId).whenComplete(() {

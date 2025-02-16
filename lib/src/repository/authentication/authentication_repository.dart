@@ -5,6 +5,7 @@ import '../../api/api.dart' as api;
 import '../../api/api.dart';
 import '../../db/db_service.dart';
 import '../../shared/secure_storage.dart';
+import '../user/user_repository.dart';
 
 enum AuthenticationStatus {
   unknown,
@@ -15,11 +16,14 @@ enum AuthenticationStatus {
 
 class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
+  final UserRepository userRepository;
+
+  AuthenticationRepository(this.userRepository);
 
   Stream<AuthenticationStatus> get status async* {
     //TODO RP not clear why this delay is needed, commented for now
     // await Future<void>.delayed(const Duration(seconds: 1));
-    if (await SecureStorage.instance.hasLocalUser()) {
+    if (await SecureStorage.instance.hasCurrentUser()) {
       yield AuthenticationStatus.canBeAuthenticated;
     } else {
       yield AuthenticationStatus.unauthenticated;
@@ -37,8 +41,9 @@ class AuthenticationRepository {
           login: username,
           password: password,
           deviceId: deviceId ?? await AppSetId().getIdentifier());
-      var accessToken = await api.loginHttp(user);
+      var (accessToken, loggedUser) = await api.loginHttp(user);
       await loginWithAccessToken(accessToken);
+      await userRepository.updateUserLocal(loggedUser);
       return Future.value(null);
     } catch (e) {
       _controller.add(AuthenticationStatus.unauthenticated);
@@ -92,19 +97,19 @@ class AuthenticationRepository {
   Future<void> logOut() async {
     await api.PushNotificationsManager.instance.unsubscribe();
     await api.logout().whenComplete(() {
-      disposeLocalUser();
+      disposeCurrentUser();
     });
   }
 
   Future<void> signOut() async {
     await api.PushNotificationsManager.instance.unsubscribe();
     await api.signOut().then((success) {
-      disposeLocalUser();
+      disposeCurrentUser();
     });
   }
 
-  disposeLocalUser() async {
-    await SecureStorage.instance.deleteLocalUser();
+  disposeCurrentUser() async {
+    await SecureStorage.instance.deleteCurrentUser();
     api.ReconnectionManager.instance.destroy();
     api.SamaConnectionService.instance.closeConnection();
     DatabaseService.instance.drop();

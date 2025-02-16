@@ -26,14 +26,14 @@ class SecureStorage {
 
   static SecureStorage get instance => _instance;
 
-  Future<void> saveLocalUserIfNeed(UserModel user) async {
-    if (await hasLocalUser() && await localUserWasNotUpdated(user)) {
+  Future<void> saveCurrentUserIfNeed(UserModel user) async {
+    if (await hasCurrentUser() && await currentUserWasNotUpdated(user)) {
       return;
     }
-    saveLocalUser(user);
+    saveCurrentUser(user);
   }
 
-  Future<void> saveLocalUser(UserModel user) async {
+  Future<void> saveCurrentUser(UserModel user) async {
     if (user.id != null) {
       _storage.write(key: storageUserId, value: user.id);
     }
@@ -60,7 +60,7 @@ class SecureStorage {
     }
   }
 
-  Future<UserModel?> getLocalUser() async {
+  Future<UserModel?> getCurrentUser() async {
     String? id = await _storage.read(key: storageUserId);
     String? login = await _storage.read(key: storageUserLogin);
     String? deviceId = await _storage.read(key: storageUserDeviceId);
@@ -83,15 +83,15 @@ class SecureStorage {
     return null;
   }
 
-  Future<bool> hasLocalUser() async {
+  Future<bool> hasCurrentUser() async {
     return await _storage.containsKey(key: storageUserLogin);
   }
 
-  Future<bool> localUserWasNotUpdated(UserModel user) async {
-    return await getLocalUser() == user;
+  Future<bool> currentUserWasNotUpdated(UserModel user) async {
+    return await getCurrentUser() == user;
   }
 
-  Future<void> deleteLocalUser() async {
+  Future<void> deleteCurrentUser() async {
     _storage.delete(key: storageUserId);
     _storage.delete(key: storageUserLogin);
     _storage.delete(key: storageUserDeviceId);
@@ -108,7 +108,7 @@ class SecureStorage {
   }
 
   Future<void> deleteAllData() async {
-    deleteLocalUser();
+    deleteCurrentUser();
     _storage.delete(key: storageEnvironmentUrl);
   }
 

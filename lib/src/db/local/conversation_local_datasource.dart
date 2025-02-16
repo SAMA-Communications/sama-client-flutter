@@ -18,6 +18,7 @@ class ConversationLocalDatasource {
   }
 
   Future<ConversationModel?> getConversationLocal(String cid) async {
+    print('getConversationLocal cid= $cid');
     try {
       return await _databaseService.getConversationLocal(cid);
     } catch (e) {
@@ -35,16 +36,17 @@ class ConversationLocalDatasource {
   }
 
   Future<bool> saveConversationsLocal(List<ConversationModel> items) async {
-    print('saveConversationLocal');
+    print('saveConversationsLocal');
     try {
       return await _databaseService.saveConversationsLocal(items);
     } catch (e) {
-      print('saveConversationLocal e ${e.toString()}');
+      print('saveConversationsLocal e ${e.toString()}');
       throw DatabaseException(e.toString());
     }
   }
 
   Future<bool> saveConversationLocal(ConversationModel item) async {
+    print('saveConversationLocal= $item');
     try {
       return await _databaseService.saveConversationLocal(item);
     } catch (e) {

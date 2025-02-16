@@ -39,7 +39,7 @@ class MessagesRepository {
       if (parameters != null && parameters.isNotEmpty) ...parameters
     });
 
-    var currentUser = await userRepository.getLocalUser();
+    var currentUser = await userRepository.getCurrentUser();
 
     var users = await userRepository.getUsersByCids([cid]);
     var participants = {}..addEntries(
@@ -77,7 +77,7 @@ class MessagesRepository {
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
-    var currentUser = await userRepository.getLocalUser();
+    var currentUser = await userRepository.getCurrentUser();
 
     _incomingMessagesController
         .add(message.toChatMessage(currentUser!, true, true, true));
@@ -100,7 +100,7 @@ class MessagesRepository {
     incomingMessagesSubscription = api
         .MessagesManager.instance.incomingMessagesStream
         .listen((message) async {
-      var currentUser = await userRepository.getLocalUser();
+      var currentUser = await userRepository.getCurrentUser();
       var sender = await userRepository.getUserById(message.from ?? '');
 
       sender ??= UserModel();
@@ -143,7 +143,7 @@ class MessagesRepository {
 
     return api.sendMessage(message: message).then(
       (_) async {
-        var currentUser = await userRepository.getLocalUser();
+        var currentUser = await userRepository.getCurrentUser();
 
         _incomingMessagesController
             .add(message.toChatMessage(currentUser!, true, true, true));

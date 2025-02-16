@@ -226,11 +226,11 @@ class _PopupMenuButton extends StatelessWidget {
 }
 
 Future<void> _infoAction(BuildContext context) async {
-  var localUserId = context.read<AuthenticationBloc>().state.user?.id;
+  var currentUserId = context.read<AuthenticationBloc>().state.userId;
   var state = context.read<ConversationBloc>().state;
 
   if (state.conversation.type == 'u') {
-    var user = state.participants.firstWhere((user) => user.id != localUserId);
+    var user = state.participants.firstWhere((user) => user.id != currentUserId);
     context.push(userInfoPath, extra: user);
   } else {
     bool conversationUpdated =

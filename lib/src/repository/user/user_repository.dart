@@ -16,11 +16,19 @@ class UserRepository {
 
   UserRepository({required this.localDataSource});
 
-  Future<UserModel?> getLocalUser() async {
-    return SecureStorage.instance.getLocalUser();
+  Future<String?> getCurrentUserId() async {
+    return (await SecureStorage.instance.getCurrentUser())?.id;
   }
 
-  Future<UserModel> updateLocalUser(
+  Future<UserModel?> getCurrentUser() async {
+    return localDataSource.getUserLocal((await getCurrentUserId())!);
+  }
+
+  Future<UserModel?> updateUserLocal(UserModel user) async {
+    return localDataSource.updateUserLocal(user);
+  }
+
+  Future<UserModel> updateCurrentUser(
       {String? currentPsw,
       String? newPassword,
       String? firstName,
@@ -43,7 +51,7 @@ class UserRepository {
       user = user.copyWith(avatar: avatar);
     }
     var result = user.toUserModel();
-    SecureStorage.instance.saveLocalUserIfNeed(result);
+    result = await localDataSource.updateUserLocal(result);
     return result;
   }
 
@@ -55,7 +63,7 @@ class UserRepository {
     final name = basename(compressedFile.path);
     Avatar avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
 
-    return await updateLocalUser(avatar: avatar);
+    return await updateCurrentUser(avatar: avatar);
   }
 
   // TODO RP finish later
@@ -89,6 +97,10 @@ class UserRepository {
       user = (await localDataSource.saveUsersLocal([user])).first;
     }
     return user;
+  }
+
+  Future<List<UserModel>> updateUsers(List<UserModel> items) async {
+    return localDataSource.updateUsersLocal(items);
   }
 
   Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {

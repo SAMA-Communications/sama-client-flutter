@@ -85,7 +85,7 @@ class DatabaseService {
         .box<ConversationModel>()
         .query(ConversationModel_.id.oneOf(ids))
         .build();
-    final results = await query.findAsync();
+    final results = query.findAsync();
     query.close();
     return results;
   }
@@ -156,9 +156,27 @@ class DatabaseService {
   Future<UserModel?> getUserLocal(String id) async {
     final db = await store;
     final query = db!.box<UserModel>().query(UserModel_.id.equals(id)).build();
-    final results = await query.findAsync();
+    final user = query.findFirst();
     query.close();
-    return results[0];
+    return user;
+  }
+
+  Future<UserModel> saveUserLocal(UserModel item) async {
+    final db = await store;
+    return db!.box<UserModel>().putAndGetAsync(item, mode: PutMode.put);
+  }
+
+  Future<UserModel> updateUserLocal(UserModel item) async {
+    final db = await store;
+
+    final query =
+        db!.box<UserModel>().query(UserModel_.id.equals(item.id!)).build();
+    final userInDb = query.findFirst();
+    query.close();
+
+    item.bid = userInDb?.bid;
+    item.avatar?.bid = userInDb?.avatar?.bid;
+    return db.box<UserModel>().putAndGetAsync(item, mode: PutMode.put);
   }
 
   Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
@@ -178,16 +196,14 @@ class DatabaseService {
       user.avatar?.bid = usersMap[user.id]?.avatar?.bid;
     }
 
-    return await db
-        .box<UserModel>()
-        .putAndGetManyAsync(items, mode: PutMode.put);
+    return db.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);
   }
 
   Future<List<UserModel>> getUsersModelLocal(List<String> ids) async {
     final db = await store;
 
     final query = db!.box<UserModel>().query(UserModel_.id.oneOf(ids)).build();
-    final results = await query.findAsync();
+    final results = query.findAsync();
     query.close();
     return results;
   }

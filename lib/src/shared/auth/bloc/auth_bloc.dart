@@ -52,7 +52,7 @@ class AuthenticationBloc
         final user = await tryGetUser();
         return emit(
           user != null
-              ? AuthenticationState.authenticated(user)
+              ? AuthenticationState.authenticated(user.id!)
               : const AuthenticationState.unauthenticated(),
         );
       case AuthenticationStatus.unknown:
@@ -84,7 +84,7 @@ class AuthenticationBloc
 
   Future<UserModel?> tryGetUser() async {
     try {
-      return await _userRepository.getLocalUser();
+      return await SecureStorage.instance.getCurrentUser();
     } catch (_) {
       return null;
     }
@@ -97,14 +97,14 @@ class AuthenticationBloc
       log('tryAuthUser e= $e');
       //TODO RP CHECK ME
       if (e.toString().contains('Expired')) {
-        _authenticationRepository.disposeLocalUser();
+        _authenticationRepository.disposeCurrentUser();
       }
     }
   }
 
-  Future<bool> tryGetHasLocalUser() async {
+  Future<bool> tryGetHasCurrentUser() async {
     try {
-      return await SecureStorage.instance.hasLocalUser();
+      return await SecureStorage.instance.hasCurrentUser();
     } catch (_) {
       return false;
     }

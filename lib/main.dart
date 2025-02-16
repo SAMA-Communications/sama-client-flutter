@@ -54,16 +54,17 @@ class _AppState extends State<App> {
     super.initState();
     _conversationLocalDatasource = ConversationLocalDatasource();
     _userLocalDataSource = UserLocalDataSource();
-    _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository(localDataSource: _userLocalDataSource);
+    _authenticationRepository = AuthenticationRepository(_userRepository);
     _messagesRepository = MessagesRepository(userRepository: _userRepository);
     _attachmentsRepository = AttachmentsRepository();
     _conversationRepository = ConversationRepository(
         localDatasource: _conversationLocalDatasource,
         userRepository: _userRepository,
         messagesRepository: _messagesRepository);
-    _globalSearchRepository =
-        GlobalSearchRepository(conversationRepository: _conversationRepository);
+    _globalSearchRepository = GlobalSearchRepository(
+        conversationRepository: _conversationRepository,
+        userRepository: _userRepository);
   }
 
   @override

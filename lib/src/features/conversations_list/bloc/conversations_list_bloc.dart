@@ -67,7 +67,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
         case Status.success:
           var conversations = resource.data ?? List.empty();
           conversations.isEmpty
-              ? emit(state.copyWith(hasReachedMax: true))
+              ? emit(state.copyWith(hasReachedMax: true, initial: false))
               : emit(
                   state.copyWith(
                     status: ConversationsStatus.success,

@@ -30,7 +30,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<ProfileResetChanges>(_onResetChanges);
     on<ProfileSubmitted>(_onSubmitted);
 
-    _userRepository.getLocalUser().then((user) {
+    _userRepository.getCurrentUser().then((user) {
       add(ProfileUserReceived(user));
     });
   }
@@ -166,7 +166,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileResetChanges event,
     Emitter<ProfileState> emit,
   ) async {
-    var user = await _userRepository.getLocalUser();
+    var user = await _userRepository.getCurrentUser();
     emit(
       state.copyWith(
           status: FormzSubmissionStatus.canceled,
@@ -187,7 +187,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
 
       try {
-        var user = await _userRepository.updateLocalUser(
+        var user = await _userRepository.updateCurrentUser(
             currentPsw: state.userPassword.isValid
                 ? state.userPassword.currentPsw
                 : null,
@@ -217,7 +217,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             userEmail: UserEmail.pure(user.email ?? ''),
             informationMessage: 'User was successfully updated'));
       } catch (e) {
-        var user = await _userRepository.getLocalUser();
+        var user = await _userRepository.getCurrentUser();
         emit(state.copyWith(
             status: FormzSubmissionStatus.failure,
             isValid: false,

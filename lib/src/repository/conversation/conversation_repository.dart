@@ -54,7 +54,7 @@ class ConversationRepository {
           message.conversation!.opponentId!
       ]);
 
-      var localUser = await userRepository.getLocalUser();
+      var currentUser = await userRepository.getCurrentUser();
       final opponent = participants[message.conversation!.opponentId] ??
           participants[message.from!];
       final owner = participants[message.conversation!.ownerId];
@@ -65,14 +65,14 @@ class ConversationRepository {
           updatedAt: message.conversation!.updatedAt!,
           type: message.conversation!.type!,
           name: getConversationName(
-              message.conversation!, owner, opponent, localUser),
+              message.conversation!, owner, opponent, currentUser),
           unreadMessagesCount: message.conversation!.unreadMessagesCount,
           description: message.conversation!.description)
-        ..opponent = getConversationOpponent(owner, opponent, localUser)
+        ..opponent = getConversationOpponent(owner, opponent, currentUser)
         ..owner = owner
         ..lastMessage = message.conversation!.lastMessage?.toMessageModel()
         ..avatar = getConversationAvatar(
-            message.conversation!, owner, opponent, localUser);
+            message.conversation!, owner, opponent, currentUser);
 
       if (message.type == SystemChatMessageType.conversationCreated) {
         localDatasource.saveConversationLocal(conversation);
@@ -200,7 +200,7 @@ class ConversationRepository {
       'limit': limit,
     });
 
-    final localUser = await userRepository.getLocalUser();
+    final currentUser = await userRepository.getCurrentUser();
     final cids = conversations.map((element) => element.id!).toList();
     var usersMap = await getParticipantsAsMap(cids);
 
@@ -209,7 +209,7 @@ class ConversationRepository {
       if (conversation.type == 'u' && conversation.lastMessage == null) {
         return prev;
       }
-      var chat = _buildConversationModel(conversation, usersMap, localUser);
+      var chat = _buildConversationModel(conversation, usersMap, currentUser);
       prev.add(chat);
       return prev;
     }).toList();
@@ -223,9 +223,9 @@ class ConversationRepository {
     if (conversation == null) {
       final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
       if (conversation == null) return null;
-      final localUser = await userRepository.getLocalUser();
+      final currentUser = await userRepository.getCurrentUser();
       final participants = await getParticipantsAsMap([cid]);
-      return _buildConversationModel(conversation, participants, localUser);
+      return _buildConversationModel(conversation, participants, currentUser);
     }
     return conversation;
   }
@@ -247,23 +247,23 @@ class ConversationRepository {
         participants.map((user) => user.id!).toList(), type, name, avatar);
     final participantsMap = {for (var v in participants) v.id!: v};
 
-    var localUser = await userRepository.getLocalUser();
+    var currentUser = await userRepository.getCurrentUser();
     final opponent = participantsMap[conversation.opponentId];
-    final owner = localUser;
+    final owner = currentUser;
     var result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: getConversationName(conversation, owner, opponent, localUser),
+        name: getConversationName(conversation, owner, opponent, currentUser),
         unreadMessagesCount: conversation.unreadMessagesCount)
-      ..opponent = getConversationOpponent(owner, opponent, localUser)
+      ..opponent = getConversationOpponent(owner, opponent, currentUser)
       ..owner = owner
       ..lastMessage = conversation.lastMessage?.toMessageModel()
       ..avatar =
-          getConversationAvatar(conversation, owner, opponent, localUser);
+          getConversationAvatar(conversation, owner, opponent, currentUser);
 
-    localDatasource.saveConversationLocal(result);
+    localDatasource.saveConversationLocal(result); //
     // TODO RP check (added cause group is not shown if empty)
     _conversationsController.add(result);
     return result;
@@ -311,7 +311,7 @@ class ConversationRepository {
   }
 
   ConversationModel _buildConversationModel(Conversation conversation,
-      Map<String, UserModel> participants, UserModel? localUser) {
+      Map<String, UserModel> participants, UserModel? currentUser) {
     final opponent = participants[conversation.opponentId];
     //can be null if user deleted
     final owner = participants[conversation.ownerId];
@@ -321,13 +321,13 @@ class ConversationRepository {
         createdAt: conversation.createdAt!,
         updatedAt: conversation.updatedAt!,
         type: conversation.type!,
-        name: getConversationName(conversation, owner, opponent, localUser),
+        name: getConversationName(conversation, owner, opponent, currentUser),
         description: conversation.description,
         unreadMessagesCount: conversation.unreadMessagesCount)
-      ..opponent = getConversationOpponent(owner, opponent, localUser)
+      ..opponent = getConversationOpponent(owner, opponent, currentUser)
       ..owner = owner
       ..lastMessage = conversation.lastMessage?.toMessageModel()
       ..avatar =
-          getConversationAvatar(conversation, owner, opponent, localUser);
+          getConversationAvatar(conversation, owner, opponent, currentUser);
   }
 }

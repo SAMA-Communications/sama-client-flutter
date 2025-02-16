@@ -42,20 +42,21 @@ Future<User> createUser({
   });
 }
 
-Future<AccessToken> loginHttp(User user) {
+Future<(AccessToken, UserModel)> loginHttp(User user) {
   return sendHTTPRequest(httpLoginRequestName, {
     'login': user.login,
     'password': user.password,
     'device_id': user.deviceId,
   }).then((response) {
-    var loggedUser =
-        User.fromJson(response['user']).copyWith(deviceId: user.deviceId);
+    var loggedUser = User.fromJson(response['user'])
+        .copyWith(deviceId: user.deviceId)
+        .toUserModel();
     var accessToken = AccessToken.fromJson(response);
     var refreshToken = response['refresh_token'];
-    SecureStorage.instance.saveLocalUserIfNeed(loggedUser.toUserModel());
+    SecureStorage.instance.saveCurrentUserIfNeed(loggedUser);
     SecureStorage.instance.saveAccessToken(accessToken);
     SecureStorage.instance.saveRefreshToken(refreshToken);
-    return accessToken;
+    return (accessToken, loggedUser);
   });
 }
 
