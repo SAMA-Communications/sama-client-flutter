@@ -204,9 +204,10 @@ class ConversationRepository {
     final cids = conversations.map((element) => element.id!).toList();
     var usersMap = await getParticipantsAsMap(cids);
 
-    List<ConversationModel> result =
+    final List<ConversationModel> result =
         conversations.fold<List<ConversationModel>>([], (prev, conversation) {
-      if (conversation.type == 'u' && conversation.lastMessage == null) {
+      if ((conversation.type == 'u' && conversation.lastMessage == null) ||
+          (conversation.isEncrypted ?? false)) {
         return prev;
       }
       var chat = _buildConversationModel(conversation, usersMap, currentUser);
