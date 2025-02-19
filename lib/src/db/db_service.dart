@@ -106,7 +106,8 @@ class DatabaseService {
         if (chatInDb.avatar?.fileId == chat.avatar?.fileId) {
           chat.avatar?.bid = chatInDb.avatar?.bid;
         }
-        if (chatInDb.lastMessage?.id == chat.lastMessage?.id) {
+
+        if (chatInDb.lastMessage == chat.lastMessage) {
           chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
         }
       }
@@ -164,7 +165,9 @@ class DatabaseService {
     query.close();
 
     item.bid = userInDb?.bid;
-    item.avatar?.bid = userInDb?.avatar?.bid;
+    if (userInDb?.avatar?.fileId == item.avatar?.fileId) {
+      item.avatar?.bid = userInDb?.avatar?.bid;
+    }
     return store!.box<UserModel>().putAndGetAsync(item, mode: PutMode.put);
   }
 
@@ -179,10 +182,12 @@ class DatabaseService {
 
     var usersMap = {for (var v in usersInDb) v.id!: v};
     for (var user in items) {
-      user.bid = usersMap[user.id]?.bid;
-      user.avatar?.bid = usersMap[user.id]?.avatar?.bid;
+      final userInDb = usersMap[user.id];
+      user.bid = userInDb?.bid;
+      if (userInDb?.avatar?.fileId == user.avatar?.fileId) {
+        user.avatar?.bid = userInDb?.avatar?.bid;
+      }
     }
-
     return store!.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);
   }
 

@@ -211,15 +211,13 @@ class _PopupMenuButton extends StatelessWidget {
                 title: Text('Info'),
               ),
             ),
-            if (state.conversation.lastMessage != null) ...[
-              const PopupMenuItem<_Menu>(
-                  padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                  value: _Menu.deleteAndLeave,
-                  child: ListTile(
-                    leading: Icon(Icons.exit_to_app_outlined),
-                    title: Text('Delete and leave'),
-                  ))
-            ],
+            const PopupMenuItem<_Menu>(
+                padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                value: _Menu.deleteAndLeave,
+                child: ListTile(
+                  leading: Icon(Icons.exit_to_app_outlined),
+                  title: Text('Delete and leave'),
+                ))
           ];
         });
   }
@@ -230,7 +228,8 @@ Future<void> _infoAction(BuildContext context) async {
   var state = context.read<ConversationBloc>().state;
 
   if (state.conversation.type == 'u') {
-    var user = state.participants.firstWhere((user) => user.id != currentUserId);
+    var user =
+        state.participants.firstWhere((user) => user.id != currentUserId);
     context.push(userInfoPath, extra: user);
   } else {
     bool conversationUpdated =

@@ -23,7 +23,7 @@ class AvatarModel extends Equatable {
   });
 
   @override
-  List<Object?> get props => [fileId, fileName, fileBlurHash, imageUrl];
+  List<Object?> get props => [fileId, fileName, fileBlurHash];
 }
 
 extension AvatarModelExtension on Avatar {

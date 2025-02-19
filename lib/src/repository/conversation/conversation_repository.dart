@@ -111,7 +111,7 @@ class ConversationRepository {
             lastMessage: message.toMessageModel(),
             unreadMessagesCount: unreadMsgCountUpdated,
             updatedAt: message.createdAt);
-        localDatasource.updateConversationLocal(updatedConversation);
+        await localDatasource.updateConversationLocal(updatedConversation);
         _conversationsController.add(updatedConversation);
 
         api.showNotificationIfAppPaused(PushMessageData(

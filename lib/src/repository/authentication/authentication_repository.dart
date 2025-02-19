@@ -55,6 +55,7 @@ class AuthenticationRepository {
   Future<void> loginWithAccessToken([AccessToken? accessToken]) async {
     //TODO RP FIX auto relogin
     ReconnectionManager.instance.init();
+    DatabaseService.instance.init();
     try {
       await api.loginWithToken(accessToken);
 

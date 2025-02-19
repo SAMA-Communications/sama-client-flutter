@@ -70,9 +70,7 @@ class UserRepository {
   Future<Map<String, UserModel?>> getUsersByIds(List<String> ids) async {
     Map<String, UserModel?> participants =
         await localDataSource.getUsersModelByIds(ids);
-    Set<String> idsNone =
-        participants.keys.where((key) => participants[key] == null).toSet();
-
+    Set<String> idsNone = ids.where((key) => participants[key] == null).toSet();
     if (idsNone.isNotEmpty) {
       await api.getUsersByIds(idsNone).then((users) async {
         var usersLocal = await localDataSource
