@@ -49,7 +49,8 @@ class MessagesRepository {
 
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-      var sender = participants[message.from] ?? UserModel();
+      var sender = participants[message.from] ??
+          await userRepository.getUserById(message.from!);
       var isOwn = currentUser?.id == message.from;
 
       var chatMessage = message.toChatMessage(
