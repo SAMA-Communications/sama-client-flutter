@@ -20,6 +20,7 @@ class ConversationModel extends Equatable {
   final String name;
   final String? description;
   final int? unreadMessagesCount;
+  final bool? isEncrypted;
 
   ConversationModel({
     this.bid,
@@ -30,6 +31,7 @@ class ConversationModel extends Equatable {
     required this.type,
     this.unreadMessagesCount,
     this.description,
+    this.isEncrypted,
   });
 
   final lastMessageBind = ToOne<MessageModel>();
@@ -38,15 +40,20 @@ class ConversationModel extends Equatable {
   final avatarBind = ToOne<AvatarModel>();
 
   MessageModel? get lastMessage => lastMessageBind.target;
+
   UserModel? get opponent => opponentBind.target;
+
   UserModel? get owner => ownerBind.target;
+
   AvatarModel? get avatar => avatarBind.target;
 
   set lastMessage(MessageModel? item) => lastMessageBind.target = item;
-  set opponent(UserModel? item) => opponentBind.target = item;
-  set owner(UserModel? item) => ownerBind.target = item;
-  set avatar(AvatarModel? item) => avatarBind.target = item;
 
+  set opponent(UserModel? item) => opponentBind.target = item;
+
+  set owner(UserModel? item) => ownerBind.target = item;
+
+  set avatar(AvatarModel? item) => avatarBind.target = item;
 
   ConversationModel copyWith({
     int? bid,
@@ -55,6 +62,7 @@ class ConversationModel extends Equatable {
     DateTime? updatedAt,
     String? type,
     String? name,
+    bool? isEncrypted,
     String? description,
     int? unreadMessagesCount,
     MessageModel? lastMessage,
@@ -70,7 +78,8 @@ class ConversationModel extends Equatable {
         type: type ?? this.type,
         name: name ?? this.name,
         description: description ?? this.description,
-        unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount)
+        unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
+        isEncrypted: isEncrypted ?? this.isEncrypted)
       ..lastMessage = lastMessage ?? this.lastMessage
       ..opponent = opponent ?? this.opponent
       ..owner = owner ?? this.owner
@@ -88,12 +97,9 @@ class ConversationModel extends Equatable {
           : unreadMessagesCount,
       description:
           description != item.description ? item.description : description,
-      lastMessage: lastMessage != item.lastMessage
-          ? item.lastMessage
-          : lastMessage,
-      avatar: avatar!= item.avatar
-          ? item.avatar
-          : avatar,
+      lastMessage:
+          lastMessage != item.lastMessage ? item.lastMessage : lastMessage,
+      avatar: avatar != item.avatar ? item.avatar : avatar,
     );
   }
 
@@ -111,6 +117,7 @@ class ConversationModel extends Equatable {
         name,
         description,
         unreadMessagesCount,
+        isEncrypted,
         lastMessage,
         opponent,
         owner,

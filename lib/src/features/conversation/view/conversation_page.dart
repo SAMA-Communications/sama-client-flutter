@@ -16,6 +16,7 @@ import '../../../repository/user/user_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/screen_factor.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -88,7 +89,10 @@ class ConversationPage extends StatelessWidget {
             const Flexible(child: MessagesList()),
             Padding(
                 //need extra space for safe area on ios
-                padding: EdgeInsets.only(bottom: Platform.isIOS ? 16.0 : 0.0),
+                padding: EdgeInsets.only(
+                    bottom: Platform.isIOS && !keyboardIsOpen(context)
+                        ? 16.0
+                        : 0.0),
                 child: context.read<SharingIntentBloc>().state.status ==
                         SharingIntentStatus.processing
                     ? BlocListener<SendMessageBloc, SendMessageState>(

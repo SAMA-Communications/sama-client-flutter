@@ -203,7 +203,7 @@
     },
     {
       "id": "13:9106374520578572502",
-      "lastPropertyId": "14:5058682722642913901",
+      "lastPropertyId": "15:8834178211781701775",
       "name": "ConversationModel",
       "properties": [
         {
@@ -280,6 +280,11 @@
           "flags": 520,
           "indexId": "35:2642777293408708995",
           "relationTarget": "UserModel"
+        },
+        {
+          "id": "15:8834178211781701775",
+          "name": "isEncrypted",
+          "type": 1
         }
       ],
       "relations": []

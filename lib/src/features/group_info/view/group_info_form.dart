@@ -355,7 +355,6 @@ class _ParticipantsListForm extends StatelessWidget {
 }
 
 void _showSearchScreenDialog(BuildContext context) {
-  bool keyboardIsOpen = MediaQuery.of(context).viewInsets.bottom != 0;
   showDialog(
       context: context,
       useSafeArea: false,
@@ -418,7 +417,7 @@ void _showSearchScreenDialog(BuildContext context) {
                   ),
                 ),
                 floatingActionButton: Visibility(
-                  visible: !keyboardIsOpen,
+                  visible: !keyboardIsOpen(context),
                   child: FloatingActionButton(
                     backgroundColor: dullGray,
                     tooltip: 'Add participants',

@@ -8,7 +8,7 @@ class NetworkBoundResources<ResultType, RequestType> {
     required bool Function(ResultType? data, ResultType? slice) shouldFetch,
     Future<ResultType> Function()? createCallSlice,
     required Future<RequestType> Function() createCall,
-    ResultType Function(RequestType result)? processResponse,
+    ResultType Function(ResultType result)? processResponse,
     required Future Function(RequestType item)? saveCallResult,
   }) {
     assert(
@@ -16,7 +16,7 @@ class NetworkBoundResources<ResultType, RequestType> {
           (!(RequestType == ResultType) && processResponse != null),
       "You need to specify the `processResponse` when the types are different",
     );
-    processResponse ??= (value) => value as ResultType;
+
     return Resource.asFuture<ResultType>(() async {
       var value = await loadFromDb();
       var slice = createCallSlice != null ? await createCallSlice() : null;
@@ -25,7 +25,7 @@ class NetworkBoundResources<ResultType, RequestType> {
         value = await loadFromDb();
       }
 
-      return value;
+      return processResponse != null ? processResponse(value) : value;
     });
   }
 

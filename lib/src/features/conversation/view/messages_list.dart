@@ -72,6 +72,7 @@ class _MessagesListState extends State<MessagesList> {
               },
               itemCount: state.messages.length,
               controller: _scrollController,
+              padding: EdgeInsets.zero,
               separatorBuilder: (context, index) => const SizedBox(
                 height: 5,
               ),

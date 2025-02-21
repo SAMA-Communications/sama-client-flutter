@@ -54,8 +54,14 @@ class DatabaseService {
   /// ////////////////////////////////
 
   Future<List<ConversationModel>> getAllConversationsLocal() async {
+    var filter = ConversationModel_.type
+        .equals('u')
+        .and(ConversationModel_.lastMessageBind.notEquals(0))
+        .or(ConversationModel_.type.equals('g'));
+
     final query = store!
         .box<ConversationModel>()
+        // .query(filtered ? filter : null)
         .query()
         .order(ConversationModel_.updatedAt, flags: Order.descending)
         .build();
@@ -100,16 +106,7 @@ class DatabaseService {
     for (var chat in items) {
       final chatInDb = chatsInDbMap[chat.id];
       if (chatInDb != null) {
-        chat.bid = chatInDb.bid;
-        chat.opponent?.bid = chatInDb.opponent?.bid;
-        chat.owner?.bid = chatInDb.owner?.bid;
-        if (chatInDb.avatar?.fileId == chat.avatar?.fileId) {
-          chat.avatar?.bid = chatInDb.avatar?.bid;
-        }
-
-        if (chatInDb.lastMessage == chat.lastMessage) {
-          chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
-        }
+        assignConversation(chat, chatInDb);
       }
     }
 
@@ -125,6 +122,18 @@ class DatabaseService {
   }
 
   Future<bool> updateConversationLocal(ConversationModel item) async {
+    if (item.bid == null) {
+      final query = store!
+          .box<ConversationModel>()
+          .query(ConversationModel_.id.equals(item.id))
+          .build();
+      final chatInDb = await query.findFirstAsync();
+      query.close();
+
+      if (chatInDb != null) {
+        assignConversation(item, chatInDb);
+      }
+    }
     await store!.box<ConversationModel>().putAsync(item, mode: PutMode.put);
     return true;
   }
@@ -140,6 +149,21 @@ class DatabaseService {
     // query.close();
     // await store!.box<ConversationModel>().removeAsync(item!.bid!);
     return true;
+  }
+
+  void assignConversation(ConversationModel chat, ConversationModel chatInDb) {
+    chat.bid = chatInDb.bid;
+    chat.opponent?.bid = chatInDb.opponent?.bid;
+
+    if (chatInDb.owner?.id == chat.owner?.id) {
+      chat.owner?.bid = chatInDb.owner?.bid;
+    }
+    if (chatInDb.avatar?.fileId == chat.avatar?.fileId) {
+      chat.avatar?.bid = chatInDb.avatar?.bid;
+    }
+    if (chatInDb.lastMessage == chat.lastMessage) {
+      chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
+    }
   }
 
   /// ////////////////////////

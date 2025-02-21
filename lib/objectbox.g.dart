@@ -218,7 +218,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(13, 9106374520578572502),
       name: 'ConversationModel',
-      lastPropertyId: const obx_int.IdUid(14, 5058682722642913901),
+      lastPropertyId: const obx_int.IdUid(15, 8834178211781701775),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -289,7 +289,12 @@ final _entities = <obx_int.ModelEntity>[
             type: 11,
             flags: 520,
             indexId: const obx_int.IdUid(35, 2642777293408708995),
-            relationTarget: 'UserModel')
+            relationTarget: 'UserModel'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(15, 8834178211781701775),
+            name: 'isEncrypted',
+            type: 1,
+            flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
@@ -718,7 +723,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionOffset = object.description == null
               ? null
               : fbb.writeString(object.description!);
-          fbb.startTable(15);
+          fbb.startTable(16);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addInt64(2, object.createdAt.millisecondsSinceEpoch);
@@ -731,6 +736,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(11, object.avatarBind.targetId);
           fbb.addInt64(12, object.opponentBind.targetId);
           fbb.addInt64(13, object.ownerBind.targetId);
+          fbb.addBool(14, object.isEncrypted);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -754,6 +760,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 16);
+          final isEncryptedParam =
+              const fb.BoolReader().vTableGetNullable(buffer, rootOffset, 32);
           final object = ConversationModel(
               bid: bidParam,
               id: idParam,
@@ -762,7 +770,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               name: nameParam,
               type: typeParam,
               unreadMessagesCount: unreadMessagesCountParam,
-              description: descriptionParam);
+              description: descriptionParam,
+              isEncrypted: isEncryptedParam);
           object.lastMessageBind.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
           object.lastMessageBind.attach(store);
@@ -967,4 +976,8 @@ class ConversationModel_ {
   /// See [ConversationModel.ownerBind].
   static final ownerBind = obx.QueryRelationToOne<ConversationModel, UserModel>(
       _entities[4].properties[11]);
+
+  /// See [ConversationModel.isEncrypted].
+  static final isEncrypted =
+      obx.QueryBooleanProperty<ConversationModel>(_entities[4].properties[12]);
 }

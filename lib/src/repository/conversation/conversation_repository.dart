@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
@@ -41,6 +43,9 @@ class ConversationRepository {
   Stream<ConversationModel> get updateConversationStream =>
       _conversationsController.stream;
 
+  bool _chatsFilter(ConversationModel c) =>
+      c.type == 'u' && c.lastMessage == null || (c.isEncrypted ?? false);
+
   void initChatListeners() {
     if (incomingSystemMessagesSubscription != null) return;
 
@@ -75,19 +80,22 @@ class ConversationRepository {
             message.conversation!, owner, opponent, currentUser);
 
       if (message.type == SystemChatMessageType.conversationCreated) {
-        localDatasource.saveConversationLocal(conversation);
+        final conversationStored =
+            await localDatasource.getConversationLocal(message.cid);
+        if (conversationStored != null) return;
+        await localDatasource.saveConversationLocal(conversation);
       } else if (message.type == SystemChatMessageType.conversationUpdated) {
         final conversationStored =
             await localDatasource.getConversationLocal(message.cid);
         if (conversationStored != null) {
           var updatedConversation =
               conversationStored.copyWithItem(item: conversation);
-          localDatasource.updateConversationLocal(updatedConversation);
+          await localDatasource.updateConversationLocal(updatedConversation);
         } else {
-          localDatasource.saveConversationLocal(conversation);
+          await localDatasource.saveConversationLocal(conversation);
         }
       } else if (message.type == SystemChatMessageType.conversationKicked) {
-        localDatasource.removeConversationLocal(message.cid);
+        await localDatasource.removeConversationLocal(message.cid);
       }
       _conversationsController.add(conversation);
 
@@ -136,13 +144,13 @@ class ConversationRepository {
     final conversation =
         await localDatasource.getConversationLocal(conversationId);
     final updatedConversation = conversation?.copyWith(unreadMessagesCount: 0);
-    localDatasource.updateConversationLocal(updatedConversation!);
+    await localDatasource.updateConversationLocal(updatedConversation!);
     _conversationsController.add(updatedConversation);
   }
 
   Future<List<ConversationModel>> getStoredConversations() async {
     var conversations = await localDatasource.getAllConversationsLocal();
-    return conversations;
+    return conversations.whereNot((c) => _chatsFilter(c)).toList();
   }
 
   Future<List<UserModel>> getParticipants(List<String> cids) async {
@@ -157,20 +165,23 @@ class ConversationRepository {
     return {for (var v in await getParticipants(cids)) v.id!: v};
   }
 
-  //FIXME RP uncomment after server fix
   Future<Resource<List<ConversationModel>>> getAllConversations() async {
     return NetworkBoundResources<List<ConversationModel>,
             List<ConversationModel>>()
         .asFuture(
       loadFromDb: localDatasource.getAllConversationsLocal,
       shouldFetch: (data, slice) {
-        // var oldData = data?.take(10).toList();
-        // var result = data != null && !listEquals(oldData, slice);
-        return true;
+        var oldData = data?.take(10).toList();
+        slice?.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+        var result = data != null && !listEquals(oldData, slice);
+        return result;
       },
-      // createCallSlice: () => _fetchConversationsWithParticipants(10),
+      createCallSlice: () => _fetchConversationsWithParticipants(10),
       createCall: _fetchConversationsWithParticipants,
       saveCallResult: localDatasource.saveConversationsLocal,
+      processResponse: (data) {
+        return data.whereNot((c) => _chatsFilter(c)).toList();
+      },
     );
   }
 
@@ -194,9 +205,9 @@ class ConversationRepository {
   Future<List<ConversationModel>> _fetchConversationsWithParticipants(
       [int limit = 100]) async {
     final conversations = await api.fetchConversations({
-      // 'updated_at': {
-      //   'lt': DateTime.now().toIso8601String(),
-      // },
+      'updated_at': {
+        'lt': DateTime.now().toIso8601String(),
+      },
       'limit': limit,
     });
 
@@ -204,15 +215,8 @@ class ConversationRepository {
     final cids = conversations.map((element) => element.id!).toList();
     var usersMap = await getParticipantsAsMap(cids);
 
-    final List<ConversationModel> result =
-        conversations.fold<List<ConversationModel>>([], (prev, conversation) {
-      if ((conversation.type == 'u' && conversation.lastMessage == null) ||
-          (conversation.isEncrypted ?? false)) {
-        return prev;
-      }
-      var chat = _buildConversationModel(conversation, usersMap, currentUser);
-      prev.add(chat);
-      return prev;
+    final List<ConversationModel> result = conversations.map((conversation) {
+      return _buildConversationModel(conversation, usersMap, currentUser);
     }).toList();
 
     return result;
@@ -229,6 +233,20 @@ class ConversationRepository {
       return _buildConversationModel(conversation, participants, currentUser);
     }
     return conversation;
+  }
+
+  Future<ConversationModel?> fetchConversationById(String cid) async {
+    final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
+    if (conversation == null) {
+      //if no internet try return local conversation
+      return localDatasource.getConversationLocal(cid);
+    }
+    final currentUser = await userRepository.getCurrentUser();
+    final participants = await getParticipantsAsMap([cid]);
+    var conversationModel =
+        _buildConversationModel(conversation, participants, currentUser);
+    localDatasource.updateConversationLocal(conversationModel);
+    return conversationModel;
   }
 
   Future<ConversationModel> createConversation(
@@ -324,10 +342,12 @@ class ConversationRepository {
         type: conversation.type!,
         name: getConversationName(conversation, owner, opponent, currentUser),
         description: conversation.description,
-        unreadMessagesCount: conversation.unreadMessagesCount)
+        unreadMessagesCount: conversation.unreadMessagesCount,
+        isEncrypted: conversation.isEncrypted)
       ..opponent = getConversationOpponent(owner, opponent, currentUser)
       ..owner = owner
-      ..lastMessage = conversation.lastMessage?.toMessageModel()
+      ..lastMessage =
+          conversation.lastMessage?.toMessageModel() // maybe set cid from chat
       ..avatar =
           getConversationAvatar(conversation, owner, opponent, currentUser);
   }
