@@ -51,9 +51,6 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
               ),
             );
           case ConversationsStatus.success:
-            if (state.initial) {
-              context.read<ConversationsBloc>().add(ConversationsFetched());
-            }
             if (state.conversations.isEmpty) {
               return state.initial
                   ? const Center(child: CircularProgressIndicator())

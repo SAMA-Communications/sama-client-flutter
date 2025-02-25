@@ -52,7 +52,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
       if (state.status == ConversationsStatus.initial) {
         final conversations =
             await _conversationRepository.getStoredConversations();
-        return emit(
+        emit(
           state.copyWith(
               status: ConversationsStatus.success,
               conversations: conversations,
@@ -60,6 +60,8 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
                   false, //FixME RP when if pagination will be implemented
               initial: true),
         );
+        add(ConversationsFetched());
+        return;
       }
       //TODO RP fix with pagination
       var resource = await _conversationRepository.getAllConversations();

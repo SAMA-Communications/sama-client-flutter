@@ -56,7 +56,7 @@ class PushNotificationsBloc
     Map<String, dynamic> payloadObject = jsonDecode(state.payload);
     String cid = payloadObject['cid'] ?? '';
     print("[_onPushNotificationsProcessing] cid: $cid");
-    var conversation = await _conversationRepository.fetchConversationById(cid);
+    var conversation = await _conversationRepository.getConversationById(cid);
     print("[_onPushNotificationsProcessing] conversation: $conversation");
     return emit(state.copyWith(
       status: PushNotificationsStatus.processing,
