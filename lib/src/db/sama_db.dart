@@ -1,7 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'models/user.dart';
 
 const int dbVersion = 1;
 const String dbName = 'sama_db.db';
@@ -34,7 +33,7 @@ class SamaDB {
 
   Future<List<void>> _createDatabase(Database db, int version) async {
     return await Future.wait([
-      createUsersTable(db, version),
+      // createUsersTable(db, version),
     ]);
   }
 

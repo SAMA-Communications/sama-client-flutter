@@ -11,3 +11,5 @@ final double heightScreen =
         WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
 double keyboardHeight(BuildContext ctx) => MediaQuery.of(ctx).viewInsets.bottom;
+
+bool keyboardIsOpen(BuildContext ctx) => keyboardHeight(ctx) != 0;

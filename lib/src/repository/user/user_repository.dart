@@ -6,7 +6,8 @@ import 'package:path/path.dart';
 
 import '../../api/api.dart';
 import '../../api/api.dart' as api;
-import '../../repository/user/user_data_source.dart';
+import '../../db/local/user_local_datasource.dart';
+import '../../db/models/models.dart';
 import '../../shared/secure_storage.dart';
 import '../../shared/utils/media_utils.dart';
 
@@ -15,11 +16,19 @@ class UserRepository {
 
   UserRepository({required this.localDataSource});
 
-  Future<User?> getLocalUser() async {
-    return SecureStorage.instance.getLocalUser();
+  Future<String?> getCurrentUserId() async {
+    return (await SecureStorage.instance.getCurrentUser())?.id;
   }
 
-  Future<User> updateLocalUser(
+  Future<UserModel?> getCurrentUser() async {
+    return localDataSource.getUserLocal((await getCurrentUserId())!);
+  }
+
+  Future<UserModel?> updateUserLocal(UserModel user) async {
+    return localDataSource.updateUserLocal(user);
+  }
+
+  Future<UserModel> updateCurrentUser(
       {String? currentPsw,
       String? newPassword,
       String? firstName,
@@ -27,7 +36,7 @@ class UserRepository {
       String? email,
       String? phone,
       Avatar? avatar}) async {
-    User result = await api.userEdit(
+    var user = await api.userEdit(
         currentPassword: currentPsw,
         newPassword: newPassword,
         firstName: firstName,
@@ -39,14 +48,14 @@ class UserRepository {
     if (avatar != null) {
       final filesUrls = await api.getFilesUrls({avatar.fileId!});
       avatar = avatar.copyWith(imageUrl: filesUrls[avatar.fileId!]);
-      result = result.copyWith(avatar: avatar);
+      user = user.copyWith(avatar: avatar);
     }
-
-    SecureStorage.instance.saveLocalUserIfNeed(result);
+    var result = user.toUserModel();
+    result = await localDataSource.updateUserLocal(result);
     return result;
   }
 
-  Future<User> updateAvatar(File avatarUrl) async {
+  Future<UserModel> updateAvatar(File avatarUrl) async {
     var compressedFile =
         await compressImageFile(avatarUrl, const Size(640, 480));
     final blur = await getImageHashInIsolate(compressedFile);
@@ -54,25 +63,45 @@ class UserRepository {
     final name = basename(compressedFile.path);
     Avatar avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
 
-    return await updateLocalUser(avatar: avatar);
+    return await updateCurrentUser(avatar: avatar);
   }
 
   // TODO RP finish later
-  Future<Map<String, User?>> getUsersByIds(List<String> ids) async {
-    Map<String, User?> participants = localDataSource.getUsersByIds(ids);
-    Set<String> idsNone =
-        participants.keys.where((key) => participants[key] == null).toSet();
-
+  Future<Map<String, UserModel?>> getUsersByIds(List<String> ids) async {
+    Map<String, UserModel?> participants =
+        await localDataSource.getUsersModelByIds(ids);
+    Set<String> idsNone = ids.where((key) => participants[key] == null).toSet();
     if (idsNone.isNotEmpty) {
-      await api.getUsersByIds(idsNone).then((users) {
-        participants.addEntries(users.map((user) => MapEntry(user.id!, user)));
-        localDataSource.addUsersList(users);
+      await api.getUsersByIds(idsNone).then((users) async {
+        var usersLocal = await localDataSource
+            .saveUsersLocal(users.map((user) => user.toUserModel()).toList());
+        participants
+            .addEntries(usersLocal.map((user) => MapEntry(user.id!, user)));
       });
     }
     return participants;
   }
 
-  Future<Map<String, User?>> getStoredUsersByIds(List<String> ids) async {
-    return localDataSource.getUsersByIds(ids);
+  Future<List<UserModel>> getUsersByCids(List<String> cids) async {
+    return (await api.fetchParticipants(cids))
+        .map((element) => element.toUserModel())
+        .toList();
+  }
+
+  Future<UserModel?> getUserById(String id) async {
+    var user = await localDataSource.getUserLocal(id);
+    if (user == null) {
+      user = (await api.getUsersByIds({id})).first.toUserModel();
+      user = (await localDataSource.saveUsersLocal([user])).first;
+    }
+    return user;
+  }
+
+  Future<List<UserModel>> updateUsers(List<UserModel> items) async {
+    return localDataSource.updateUsersLocal(items);
+  }
+
+  Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
+    return localDataSource.saveUsersLocal(items);
   }
 }

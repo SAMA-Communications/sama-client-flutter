@@ -38,8 +38,7 @@ class HomePage extends StatelessWidget {
           },
           child: BlocListener<AuthenticationBloc, AuthenticationState>(
             listener: (context, state) {
-              if (state.status == AuthenticationStatus.authenticated &&
-                  context.read<ConversationsBloc>().state.status ==
+              if (context.read<ConversationsBloc>().state.status ==
                       ConversationsStatus.initial) {
                 BlocProvider.of<ConversationsBloc>(context)
                     .add(ConversationsFetched());

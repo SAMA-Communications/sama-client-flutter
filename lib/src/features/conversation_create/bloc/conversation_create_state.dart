@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
 
 sealed class ConversationCreateState extends Equatable {
   const ConversationCreateState();

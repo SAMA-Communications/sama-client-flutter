@@ -6,8 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../api/api.dart';
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../db/models/user_model.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
@@ -16,6 +16,7 @@ import '../../../repository/user/user_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/screen_factor.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -88,7 +89,10 @@ class ConversationPage extends StatelessWidget {
             const Flexible(child: MessagesList()),
             Padding(
                 //need extra space for safe area on ios
-                padding: EdgeInsets.only(bottom: Platform.isIOS ? 16.0 : 0.0),
+                padding: EdgeInsets.only(
+                    bottom: Platform.isIOS && !keyboardIsOpen(context)
+                        ? 16.0
+                        : 0.0),
                 child: context.read<SharingIntentBloc>().state.status ==
                         SharingIntentStatus.processing
                     ? BlocListener<SendMessageBloc, SendMessageState>(
@@ -117,7 +121,7 @@ class ConversationPage extends StatelessWidget {
 
   String _getSubtitle(
     ConversationModel conversation,
-    Set<User> participants,
+    Set<UserModel> participants,
   ) {
     if (conversation.type == 'u') {
       if (conversation.opponent?.recentActivity != null) {
@@ -211,26 +215,25 @@ class _PopupMenuButton extends StatelessWidget {
                 title: Text('Info'),
               ),
             ),
-            if (state.conversation.lastMessage != null) ...[
-              const PopupMenuItem<_Menu>(
-                  padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                  value: _Menu.deleteAndLeave,
-                  child: ListTile(
-                    leading: Icon(Icons.exit_to_app_outlined),
-                    title: Text('Delete and leave'),
-                  ))
-            ],
+            const PopupMenuItem<_Menu>(
+                padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                value: _Menu.deleteAndLeave,
+                child: ListTile(
+                  leading: Icon(Icons.exit_to_app_outlined),
+                  title: Text('Delete and leave'),
+                ))
           ];
         });
   }
 }
 
 Future<void> _infoAction(BuildContext context) async {
-  var localUserId = context.read<AuthenticationBloc>().state.user.id;
+  var currentUserId = context.read<AuthenticationBloc>().state.userId;
   var state = context.read<ConversationBloc>().state;
 
   if (state.conversation.type == 'u') {
-    User user = state.participants.firstWhere((user) => user.id != localUserId);
+    var user =
+        state.participants.firstWhere((user) => user.id != currentUserId);
     context.push(userInfoPath, extra: user);
   } else {
     bool conversationUpdated =

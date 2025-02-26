@@ -6,7 +6,8 @@ import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../api/api.dart';
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../db/models/user_model.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
@@ -171,8 +172,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(participants: Set.of(participants)));
   }
 
-  Future<void> _onConversationUpdated(
-      _ConversationUpdated event, Emitter<ConversationState> emit) async {
+  Future<void> _onConversationUpdated(event, emit) async {
     emit(state.copyWith(conversation: event.conversation));
   }
 

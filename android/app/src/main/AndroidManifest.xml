@@ -5,6 +5,8 @@
     <application
         android:label="SAMA"
         android:name="${applicationName}"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
         <meta-data

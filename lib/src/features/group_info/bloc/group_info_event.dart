@@ -10,7 +10,7 @@ sealed class GroupInfoEvent extends Equatable {
 final class GroupParticipantsReceived extends GroupInfoEvent {
   const GroupParticipantsReceived(this.participants);
 
-  final List<User> participants;
+  final List<UserModel> participants;
 
   @override
   List<Object> get props => [participants];
@@ -39,7 +39,7 @@ final class GroupDescriptionChanged extends GroupInfoEvent {
 final class GroupAddParticipantsAdded extends GroupInfoEvent {
   const GroupAddParticipantsAdded(this.participant);
 
-  final User participant;
+  final UserModel participant;
 
   @override
   List<Object> get props => [participant];
@@ -48,7 +48,7 @@ final class GroupAddParticipantsAdded extends GroupInfoEvent {
 final class GroupAddParticipantsRemoved extends GroupInfoEvent {
   const GroupAddParticipantsRemoved(this.participant);
 
-  final User participant;
+  final UserModel participant;
 
   @override
   List<Object> get props => [participant];
@@ -57,7 +57,7 @@ final class GroupAddParticipantsRemoved extends GroupInfoEvent {
 final class GroupRemoveParticipants extends GroupInfoEvent {
   const GroupRemoveParticipants(this.participant);
 
-  final User participant;
+  final UserModel participant;
 
   @override
   List<Object> get props => [participant];

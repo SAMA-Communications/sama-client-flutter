@@ -4,6 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../api/api.dart' as api;
+import '../../../api/utils/logger.dart';
+import '../../../db/models/models.dart';
 import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../../secure_storage.dart';
@@ -50,7 +52,7 @@ class AuthenticationBloc
         final user = await tryGetUser();
         return emit(
           user != null
-              ? AuthenticationState.authenticated(user)
+              ? AuthenticationState.authenticated(user.id!)
               : const AuthenticationState.unauthenticated(),
         );
       case AuthenticationStatus.unknown:
@@ -80,9 +82,9 @@ class AuthenticationBloc
     } catch (_) {}
   }
 
-  Future<api.User?> tryGetUser() async {
+  Future<UserModel?> tryGetUser() async {
     try {
-      return await _userRepository.getLocalUser();
+      return await SecureStorage.instance.getCurrentUser();
     } catch (_) {
       return null;
     }
@@ -92,14 +94,17 @@ class AuthenticationBloc
     try {
       await _authenticationRepository.loginWithAccessToken();
     } catch (e) {
-      print('tryAuthUser e= $e');
-      _authenticationRepository.disposeLocalUser();
+      log('tryAuthUser e= $e');
+      //TODO RP CHECK ME
+      if (e.toString().contains('Expired')) {
+        _authenticationRepository.disposeCurrentUser();
+      }
     }
   }
 
-  Future<bool> tryGetHasLocalUser() async {
+  Future<bool> tryGetHasCurrentUser() async {
     try {
-      return await SecureStorage.instance.hasLocalUser();
+      return await SecureStorage.instance.hasCurrentUser();
     } catch (_) {
       return false;
     }

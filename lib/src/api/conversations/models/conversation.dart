@@ -31,10 +31,13 @@ class Conversation extends Equatable {
       this.unreadMessagesCount,
       this.avatar});
 
+  // need to make DateTime toLocal(), wrong save in database - https://github.com/objectbox/objectbox-dart/issues/308
   Conversation.fromJson(Map<String, dynamic> json)
       : id = json['_id'],
-        createdAt = DateTime.tryParse(json['created_at']?.toString() ?? ''),
-        updatedAt = DateTime.tryParse(json['updated_at']?.toString() ?? ''),
+        createdAt =
+            DateTime.tryParse(json['created_at']?.toString() ?? '')?.toLocal(),
+        updatedAt =
+            DateTime.tryParse(json['updated_at']?.toString() ?? '')?.toLocal(),
         lastMessage = json['last_message'] != null
             ? Message.fromJson(json['last_message'])
             : null,

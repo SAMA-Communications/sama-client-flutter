@@ -1,9 +1,10 @@
 import '../../../api/api.dart';
+import '../../../db/models/models.dart';
 
 enum ChatMessageStatus { none, pending, sent, read }
 
 class ChatMessage extends Message {
-  final User sender;
+  final UserModel sender;
   final bool isOwn;
   final bool isFirstUserMessage;
   final bool isLastUserMessage;
@@ -27,7 +28,7 @@ class ChatMessage extends Message {
   });
 
   ChatMessage copyWith({
-    User? sender,
+    UserModel? sender,
     bool? isOwn,
     bool? isFirstUserMessage,
     bool? isLastUserMessage,
@@ -67,7 +68,7 @@ class ChatMessage extends Message {
 
 extension ChatMessageExtension on Message {
   ChatMessage toChatMessage(
-      User sender, bool isOwn, bool isLastUserMessage, bool isFirstUserMessage,
+      UserModel sender, bool isOwn, bool isLastUserMessage, bool isFirstUserMessage,
       [ChatMessageStatus status = ChatMessageStatus.none]) {
     return ChatMessage(
         sender: sender,

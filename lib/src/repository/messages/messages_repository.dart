@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:uuid/uuid.dart';
 
 import '../../api/api.dart' as api;
+import '../../db/models/models.dart';
 import '../../features/conversation/models/models.dart';
 import '../user/user_repository.dart';
 
 class MessagesRepository {
   final UserRepository userRepository;
-  final Map<String, api.User> participants = {};
 
   MessagesRepository({required this.userRepository}) {
     initChatListeners();
@@ -39,18 +39,18 @@ class MessagesRepository {
       if (parameters != null && parameters.isNotEmpty) ...parameters
     });
 
-    var currentUser = await userRepository.getLocalUser();
+    var currentUser = await userRepository.getCurrentUser();
 
-    await api.fetchParticipants([cid]).then((participants) {
-      this.participants.addEntries(participants
-          .map((participant) => MapEntry(participant.id!, participant)));
-    });
+    var users = await userRepository.getUsersByCids([cid]);
+    var participants = {}..addEntries(
+        users.map((participant) => MapEntry(participant.id!, participant)));
 
     var result = <ChatMessage>[];
 
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-      var sender = participants[message.from] ?? api.User.empty;
+      var sender = participants[message.from] ??
+          await userRepository.getUserById(message.from!);
       var isOwn = currentUser?.id == message.from;
 
       var chatMessage = message.toChatMessage(
@@ -78,7 +78,7 @@ class MessagesRepository {
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
-    var currentUser = await userRepository.getLocalUser();
+    var currentUser = await userRepository.getCurrentUser();
 
     _incomingMessagesController
         .add(message.toChatMessage(currentUser!, true, true, true));
@@ -101,17 +101,10 @@ class MessagesRepository {
     incomingMessagesSubscription = api
         .MessagesManager.instance.incomingMessagesStream
         .listen((message) async {
-      var currentUser = await userRepository.getLocalUser();
-      var sender = participants[message.from];
+      var currentUser = await userRepository.getCurrentUser();
+      var sender = await userRepository.getUserById(message.from ?? '');
 
-      if (sender == null) {
-        await api.getUsersByIds({message.from!}).then((users) {
-          participants
-              .addEntries(users.map((user) => MapEntry(user.id!, user)));
-        });
-      }
-
-      sender ??= participants[message.from] ?? api.User.empty;
+      sender ??= UserModel();
 
       var chatMessage = message.toChatMessage(
           sender, currentUser?.id == message.from, true, true);
@@ -151,7 +144,7 @@ class MessagesRepository {
 
     return api.sendMessage(message: message).then(
       (_) async {
-        var currentUser = await userRepository.getLocalUser();
+        var currentUser = await userRepository.getCurrentUser();
 
         _incomingMessagesController
             .add(message.toChatMessage(currentUser!, true, true, true));

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/colors.dart';

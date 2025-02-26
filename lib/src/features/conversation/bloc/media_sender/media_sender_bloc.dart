@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart';
 
 import '../../../../api/api.dart';
-import '../../../../db/models/conversation.dart';
+import '../../../../db/models/conversation_model.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../../../shared/utils/media_utils.dart';

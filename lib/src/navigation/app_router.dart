@@ -141,7 +141,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
               : state.fullPath;
         } else {
           return BlocProvider.of<AuthenticationBloc>(context)
-              .tryGetHasLocalUser()
+              .tryGetHasCurrentUser()
               .then((hasUser) {
             return hasUser ? conversationListScreenPath : loginScreenPath;
           });

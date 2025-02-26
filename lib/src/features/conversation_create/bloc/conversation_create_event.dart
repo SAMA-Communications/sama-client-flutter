@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/user_model.dart';
 
 sealed class ConversationCreateEvent extends Equatable {
   const ConversationCreateEvent();
@@ -14,7 +14,7 @@ sealed class ConversationCreateEvent extends Equatable {
 final class ConversationCreated extends ConversationCreateEvent {
   const ConversationCreated({required this.user, required this.type});
 
-  final User user;
+  final UserModel user;
   final String type;
 
   @override
@@ -31,7 +31,7 @@ final class ConversationGroupCreated extends ConversationCreateEvent {
       required this.name,
       required this.avatarUrl});
 
-  final List<User> users;
+  final List<UserModel> users;
   final String type;
   final String name;
   final File? avatarUrl;

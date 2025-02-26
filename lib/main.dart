@@ -5,14 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'src/api/api.dart';
+import 'src/db/db_service.dart';
+import 'src/db/local/conversation_local_datasource.dart';
+import 'src/db/local/user_local_datasource.dart';
 import 'src/navigation/app_router.dart';
 import 'src/repository/attachments/attachments_repository.dart';
 import 'src/repository/authentication/authentication_repository.dart';
-import 'src/repository/conversation/conversation_data_source.dart';
 import 'src/repository/conversation/conversation_repository.dart';
 import 'src/repository/global_search/global_search_repository.dart';
 import 'src/repository/messages/messages_repository.dart';
-import 'src/repository/user/user_data_source.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
@@ -28,7 +29,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-
+  DatabaseService.instance.init();
   runApp(const App());
 }
 
@@ -45,25 +46,26 @@ class _AppState extends State<App> {
   late final ConversationRepository _conversationRepository;
   late final MessagesRepository _messagesRepository;
   late final GlobalSearchRepository _globalSearchRepository;
-  late final ConversationLocalDataSource _conversationLocalDataSource;
+  late final ConversationLocalDatasource _conversationLocalDatasource;
   late final AttachmentsRepository _attachmentsRepository;
   late final UserLocalDataSource _userLocalDataSource;
 
   @override
   void initState() {
     super.initState();
-    _conversationLocalDataSource = ConversationLocalDataSource();
+    _conversationLocalDatasource = ConversationLocalDatasource();
     _userLocalDataSource = UserLocalDataSource();
-    _authenticationRepository = AuthenticationRepository();
     _userRepository = UserRepository(localDataSource: _userLocalDataSource);
+    _authenticationRepository = AuthenticationRepository(_userRepository);
     _messagesRepository = MessagesRepository(userRepository: _userRepository);
     _attachmentsRepository = AttachmentsRepository();
     _conversationRepository = ConversationRepository(
-        localDataSource: _conversationLocalDataSource,
+        localDatasource: _conversationLocalDatasource,
         userRepository: _userRepository,
         messagesRepository: _messagesRepository);
-    _globalSearchRepository =
-        GlobalSearchRepository(localDataSource: _conversationLocalDataSource);
+    _globalSearchRepository = GlobalSearchRepository(
+        conversationRepository: _conversationRepository,
+        userRepository: _userRepository);
   }
 
   @override
@@ -71,6 +73,7 @@ class _AppState extends State<App> {
     _authenticationRepository.dispose();
     _messagesRepository.dispose();
     _conversationRepository.dispose();
+    DatabaseService.instance.close();
     super.dispose();
   }
 

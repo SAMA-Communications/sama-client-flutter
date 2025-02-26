@@ -5,7 +5,8 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../db/resource.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 
 part 'conversations_list_event.dart';
@@ -28,7 +29,8 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     required ConversationRepository conversationRepository,
   })  : _conversationRepository = conversationRepository,
         super(const ConversationsState()) {
-    on<ConversationsFetched>(
+    on<ConversationsFetched>(_onConversationsFetched);
+    on<ConversationsMoreFetched>(
       _onConversationsFetched,
       transformer: throttleDroppable(throttleDuration),
     );
@@ -44,39 +46,52 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     });
   }
 
-  Future<void> _onConversationsFetched(
-      ConversationsFetched event, Emitter<ConversationsState> emit) async {
-    if (state.hasReachedMax) return;
+  Future<void> _onConversationsFetched(event, emit) async {
+    if (state.hasReachedMax && !state.initial) return;
     try {
       if (state.status == ConversationsStatus.initial) {
         final conversations =
-            await _conversationRepository.getConversationsWithParticipants();
-        return emit(
+            await _conversationRepository.getStoredConversations();
+        emit(
           state.copyWith(
-            status: ConversationsStatus.success,
-            conversations: conversations,
-            hasReachedMax:
-                true, //FixME RP when if pagination will be implemented
-          ),
+              status: ConversationsStatus.success,
+              conversations: conversations,
+              hasReachedMax:
+                  false, //FixME RP when if pagination will be implemented
+              initial: true),
         );
+        add(ConversationsFetched());
+        return;
       }
-
-      final List<ConversationModel> conversations =
-          await _conversationRepository.getConversationsWithParticipants();
-
-      conversations.isEmpty
-          ? emit(state.copyWith(hasReachedMax: true))
-          : emit(
-              state.copyWith(
-                status: ConversationsStatus.success,
-                conversations: List.of(state.conversations)
-                  ..addAll(conversations),
-                hasReachedMax: false,
-              ),
-            );
+      //TODO RP fix with pagination
+      var resource = await _conversationRepository.getAllConversations();
+      switch (resource.status) {
+        case Status.success:
+          var conversations = resource.data ?? List.empty();
+          conversations.isEmpty
+              ? emit(state.copyWith(hasReachedMax: true, initial: false))
+              : emit(
+                  state.copyWith(
+                    status: ConversationsStatus.success,
+                    conversations: state.initial
+                        ? List.of(conversations)
+                        : (List.of(state.conversations)..addAll(conversations)),
+                    hasReachedMax: false,
+                    initial: false,
+                  ),
+                );
+          break;
+        case Status.failed:
+          emit(state.copyWith(status: ConversationsStatus.failure));
+          break;
+        case Status.loading:
+          break;
+      }
     } catch (err) {
       print("_onConversationFetched err= $err");
-      emit(state.copyWith(status: ConversationsStatus.failure));
+      if (state.conversations.isEmpty) {
+        emit(state.copyWith(status: ConversationsStatus.failure));
+      }
     }
   }
 

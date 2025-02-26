@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../api/api.dart';
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../db/models/user_model.dart';
 import '../../../features/search/view/search_bar.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/ui/view/loading_overlay.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_event.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
@@ -81,7 +80,7 @@ class _SearchBody extends StatelessWidget {
 class _SearchResults extends StatelessWidget {
   const _SearchResults({required this.users, required this.conversations});
 
-  final List<User> users;
+  final List<UserModel> users;
   final List<ConversationModel> conversations;
 
   Widget _header(String title) {
