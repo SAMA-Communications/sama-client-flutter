@@ -91,7 +91,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(11, 6168919874786736956),
       name: 'MessageModel',
-      lastPropertyId: const obx_int.IdUid(8, 1010284661967327878),
+      lastPropertyId: const obx_int.IdUid(9, 1875750503242122079),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -103,7 +103,7 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 3431085295353515294),
             name: 'id',
             type: 9,
-            flags: 34848,
+            flags: 2080,
             indexId: const obx_int.IdUid(27, 1312181892016791297)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 298933995628152516),
@@ -134,6 +134,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(8, 1010284661967327878),
             name: 'createdAt',
             type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 1875750503242122079),
+            name: 'dbExtension',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[
@@ -564,7 +569,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
               : fbb.writeString(object.rawStatus!);
           final bodyOffset =
               object.body == null ? null : fbb.writeString(object.body!);
-          fbb.startTable(9);
+          final dbExtensionOffset = object.dbExtension == null
+              ? null
+              : fbb.writeString(object.dbExtension!);
+          fbb.startTable(10);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addOffset(2, fromOffset);
@@ -573,6 +581,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(5, bodyOffset);
           fbb.addInt64(6, object.t);
           fbb.addInt64(7, object.createdAt?.millisecondsSinceEpoch);
+          fbb.addOffset(8, dbExtensionOffset);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -606,7 +615,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
               rawStatus: rawStatusParam,
               body: bodyParam,
               createdAt: createdAtParam,
-              t: tParam);
+              t: tParam)
+            ..dbExtension = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 20);
           obx_int.InternalToManyAccess.setRelInfo<MessageModel>(
               object.attachments,
               store,
@@ -866,6 +877,10 @@ class MessageModel_ {
   /// See [MessageModel.createdAt].
   static final createdAt =
       obx.QueryDateProperty<MessageModel>(_entities[2].properties[7]);
+
+  /// See [MessageModel.dbExtension].
+  static final dbExtension =
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[8]);
 
   /// see [MessageModel.attachments]
   static final attachments =

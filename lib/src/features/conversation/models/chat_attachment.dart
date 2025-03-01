@@ -1,7 +1,7 @@
-import 'package:sama_client_flutter/src/api/conversations/models/models.dart';
+import '../../../db/models/attachment_model.dart';
 
 // ignore_for_file: must_be_immutable
-class ChatAttachment extends Attachment {
+class ChatAttachment extends AttachmentModel {
   String? url;
 
   ChatAttachment({
@@ -18,7 +18,7 @@ class ChatAttachment extends Attachment {
   ];
 }
 
-extension ChatAttachmentExtension on Attachment {
+extension ChatAttachmentExtension on AttachmentModel {
   ChatAttachment toChatAttachment([String? url]) => ChatAttachment(
       url: url, fileId: fileId, fileName: fileName, fileBlurHash: fileBlurHash);
 }

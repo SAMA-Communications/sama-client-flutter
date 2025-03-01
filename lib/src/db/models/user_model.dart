@@ -39,6 +39,7 @@ class UserModel extends Equatable {
 
   final avatarBind = ToOne<AvatarModel>();
 
+  @Transient()
   AvatarModel? get avatar => avatarBind.target;
 
   set avatar(AvatarModel? item) => avatarBind.target = item;

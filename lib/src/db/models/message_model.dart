@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
@@ -9,7 +11,7 @@ import 'attachment_model.dart';
 class MessageModel extends Equatable {
   @Id()
   int? bid;
-  @Unique(onConflict: ConflictStrategy.replace)
+  @Unique()
   final String? id;
   final String? from;
   final String? cid;
@@ -18,6 +20,16 @@ class MessageModel extends Equatable {
   final int? t;
   @Property(type: PropertyType.date)
   final DateTime? createdAt;
+  @Transient()
+  Map<String, dynamic>? extension;
+
+  String? get dbExtension {
+    return jsonEncode(extension);
+  }
+
+  set dbExtension(String? value) {
+    if (value != null) extension = jsonDecode(value);
+  }
 
   MessageModel({
     this.bid,
@@ -28,13 +40,15 @@ class MessageModel extends Equatable {
     this.body,
     this.createdAt,
     this.t,
+    this.extension,
   });
 
   final attachments = ToMany<AttachmentModel>();
 
+
   @override
   String toString() {
-    return 'MessageModel{bid: $bid, id: $id}';
+    return 'MessageModel{id: $id, body: $body, t: $t}';
   }
 
   @override
@@ -46,6 +60,7 @@ class MessageModel extends Equatable {
         body,
         t,
         createdAt,
+        extension,
       ];
 }
 
@@ -59,6 +74,7 @@ extension MessageModelExtension on Message {
       body: body,
       createdAt: createdAt,
       t: t,
+      extension: extension,
     );
     if (attachments != null) {
       messageModel.attachments.addAll(

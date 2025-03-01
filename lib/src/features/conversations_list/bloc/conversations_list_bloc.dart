@@ -31,7 +31,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
         super(const ConversationsState()) {
     on<ConversationsFetched>(_onConversationsFetched);
     on<ConversationsMoreFetched>(
-      _onConversationsFetched,
+      _onConversationsMoreFetched,
       transformer: throttleDroppable(throttleDuration),
     );
     on<ConversationsRefreshed>(
@@ -63,35 +63,53 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
         add(ConversationsFetched());
         return;
       }
-      //TODO RP fix with pagination
-      var resource = await _conversationRepository.getAllConversations();
-      switch (resource.status) {
-        case Status.success:
-          var conversations = resource.data ?? List.empty();
-          conversations.isEmpty
-              ? emit(state.copyWith(hasReachedMax: true, initial: false))
-              : emit(
-                  state.copyWith(
-                    status: ConversationsStatus.success,
-                    conversations: state.initial
-                        ? List.of(conversations)
-                        : (List.of(state.conversations)..addAll(conversations)),
-                    hasReachedMax: false,
-                    initial: false,
-                  ),
-                );
-          break;
-        case Status.failed:
-          emit(state.copyWith(status: ConversationsStatus.failure));
-          break;
-        case Status.loading:
-          break;
-      }
+      await _getAllConversations(emit);
     } catch (err) {
       print("_onConversationFetched err= $err");
       if (state.conversations.isEmpty) {
         emit(state.copyWith(status: ConversationsStatus.failure));
       }
+    }
+  }
+
+  Future<void> _onConversationsMoreFetched(event, emit) async {
+    if (state.hasReachedMax && !state.initial) return;
+    try {
+      await _getAllConversations(emit,
+          ltDate: state.conversations.lastOrNull?.createdAt);
+    } catch (err) {
+      print("_onConversationFetched err= $err");
+      if (state.conversations.isEmpty) {
+        emit(state.copyWith(status: ConversationsStatus.failure));
+      }
+    }
+  }
+
+  _getAllConversations(Emitter<ConversationsState> emit,
+      {DateTime? ltDate}) async {
+    var resource =
+        await _conversationRepository.getAllConversations(ltDate: ltDate);
+    switch (resource.status) {
+      case Status.success:
+        var conversations = resource.data ?? List.empty();
+        conversations.isEmpty
+            ? emit(state.copyWith(hasReachedMax: true, initial: false))
+            : emit(
+                state.copyWith(
+                  status: ConversationsStatus.success,
+                  conversations: state.initial
+                      ? List.of(conversations)
+                      : (List.of(state.conversations)..addAll(conversations)),
+                  hasReachedMax: false,
+                  initial: false,
+                ),
+              );
+        break;
+      case Status.failed:
+        emit(state.copyWith(status: ConversationsStatus.failure));
+        break;
+      case Status.loading:
+        break;
     }
   }
 

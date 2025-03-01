@@ -39,12 +39,16 @@ class ConversationModel extends Equatable {
   final ownerBind = ToOne<UserModel>();
   final avatarBind = ToOne<AvatarModel>();
 
+  @Transient()
   MessageModel? get lastMessage => lastMessageBind.target;
 
+  @Transient()
   UserModel? get opponent => opponentBind.target;
 
+  @Transient()
   UserModel? get owner => ownerBind.target;
 
+  @Transient()
   AvatarModel? get avatar => avatarBind.target;
 
   set lastMessage(MessageModel? item) => lastMessageBind.target = item;

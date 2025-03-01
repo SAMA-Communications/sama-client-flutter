@@ -12,6 +12,7 @@ import '../../api/push_notifications/models/models.dart';
 import '../../db/models/models.dart';
 import '../../db/network_bound_resource.dart';
 import '../../db/resource.dart';
+import '../../features/conversation/models/chat_message.dart';
 import '../../repository/messages/messages_repository.dart';
 import '../../shared/utils/media_utils.dart';
 import '../../shared/utils/string_utils.dart';
@@ -38,7 +39,7 @@ class ConversationRepository {
   final StreamController<ConversationModel> _conversationsController =
       StreamController.broadcast();
 
-  StreamSubscription<api.Message>? incomingMessagesSubscription;
+  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
 
   Stream<ConversationModel> get updateConversationStream =>
       _conversationsController.stream;
@@ -116,7 +117,7 @@ class ConversationRepository {
         }
 
         final updatedConversation = conversation.copyWith(
-            lastMessage: message.toMessageModel(),
+            lastMessage: message,
             unreadMessagesCount: unreadMsgCountUpdated,
             updatedAt: message.createdAt);
         await localDatasource.updateConversationLocal(updatedConversation);
@@ -165,21 +166,23 @@ class ConversationRepository {
     return {for (var v in await getParticipants(cids)) v.id!: v};
   }
 
-  Future<Resource<List<ConversationModel>>> getAllConversations() async {
+  Future<Resource<List<ConversationModel>>> getAllConversations(
+      {DateTime? ltDate}) async {
     return NetworkBoundResources<List<ConversationModel>,
             List<ConversationModel>>()
         .asFuture(
-      loadFromDb: localDatasource.getAllConversationsLocal,
+      loadFromDb: () => localDatasource.getAllConversationsLocal(),
       shouldFetch: (data, slice) {
         var oldData = data?.take(10).toList();
         slice?.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
         var result = data != null && !listEquals(oldData, slice);
         return result;
       },
-      createCallSlice: () => _fetchConversationsWithParticipants(10),
-      createCall: _fetchConversationsWithParticipants,
+      createCallSlice: () => _fetchConversationsWithParticipants(
+          ltDate: DateTime.now(), limit: 10),
+      createCall: () => _fetchConversationsWithParticipants(ltDate: ltDate),
       saveCallResult: localDatasource.saveConversationsLocal,
-      processResponse: (data) {
+      processResponse: (data) async {
         return data.whereNot((c) => _chatsFilter(c)).toList();
       },
     );
@@ -203,11 +206,12 @@ class ConversationRepository {
   }
 
   Future<List<ConversationModel>> _fetchConversationsWithParticipants(
-      [int limit = 100]) async {
+      {DateTime? ltDate, int limit = 100}) async {
     final conversations = await api.fetchConversations({
-      'updated_at': {
-        'lt': DateTime.now().toIso8601String(),
-      },
+      if (ltDate != null)
+        'updated_at': {
+          'lt': ltDate.toIso8601String(),
+        },
       'limit': limit,
     });
 

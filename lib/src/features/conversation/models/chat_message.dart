@@ -1,16 +1,16 @@
-import '../../../api/api.dart';
 import '../../../db/models/models.dart';
 
 enum ChatMessageStatus { none, pending, sent, read }
 
-class ChatMessage extends Message {
+// ignore: must_be_immutable
+class ChatMessage extends MessageModel {
   final UserModel sender;
   final bool isOwn;
   final bool isFirstUserMessage;
   final bool isLastUserMessage;
   final ChatMessageStatus status;
 
-  const ChatMessage({
+  ChatMessage({
     required this.sender,
     required this.isOwn,
     required this.isFirstUserMessage,
@@ -21,7 +21,6 @@ class ChatMessage extends Message {
     super.cid,
     super.rawStatus,
     super.body,
-    super.attachments,
     super.createdAt,
     super.t,
     super.extension,
@@ -38,27 +37,31 @@ class ChatMessage extends Message {
     String? cid,
     String? rawStatus,
     String? body,
-    List<Attachment>? attachments,
     int? t,
     DateTime? createdAt,
     Map<String, dynamic>? extension,
+    List<AttachmentModel>? attachments,
   }) {
     return ChatMessage(
-      sender: sender ?? this.sender,
-      isOwn: isOwn ?? this.isOwn,
-      isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
-      isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
-      status: status ?? this.status,
-      id: id ?? this.id,
-      from: from ?? this.from,
-      cid: cid ?? this.cid,
-      body: body ?? this.body,
-      rawStatus: rawStatus ?? this.rawStatus,
-      attachments: attachments ?? this.attachments,
-      createdAt: createdAt ?? this.createdAt,
-      t: t ?? this.t,
-      extension: extension ?? this.extension,
-    );
+        sender: sender ?? this.sender,
+        isOwn: isOwn ?? this.isOwn,
+        isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
+        isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
+        status: status ?? this.status,
+        id: id ?? this.id,
+        from: from ?? this.from,
+        cid: cid ?? this.cid,
+        body: body ?? this.body,
+        rawStatus: rawStatus ?? this.rawStatus,
+        createdAt: createdAt ?? this.createdAt,
+        t: t ?? this.t,
+        extension: extension ?? this.extension)
+      ..attachments.addAll(attachments ?? this.attachments);
+  }
+
+  @override
+  String toString() {
+    return 'ChatMessage{sender: $sender, isOwn: $isOwn, isFirstUserMessage: $isFirstUserMessage, isLastUserMessage: $isLastUserMessage, status: $status, attachments: $attachments}';
   }
 
   @override
@@ -66,9 +69,9 @@ class ChatMessage extends Message {
       [...super.props, isLastUserMessage, isFirstUserMessage, status];
 }
 
-extension ChatMessageExtension on Message {
-  ChatMessage toChatMessage(
-      UserModel sender, bool isOwn, bool isLastUserMessage, bool isFirstUserMessage,
+extension ChatMessageExtension on MessageModel {
+  ChatMessage toChatMessage(UserModel sender, bool isOwn,
+      bool isLastUserMessage, bool isFirstUserMessage,
       [ChatMessageStatus status = ChatMessageStatus.none]) {
     return ChatMessage(
         sender: sender,
@@ -81,9 +84,9 @@ extension ChatMessageExtension on Message {
         cid: cid,
         rawStatus: rawStatus,
         body: body,
-        attachments: attachments,
         createdAt: createdAt,
         t: t,
-        extension: extension);
+        extension: extension)
+      ..attachments.addAll(attachments);
   }
 }

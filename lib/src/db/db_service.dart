@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 
 import '../../objectbox.g.dart';
 import 'models/conversation_model.dart';
+import 'models/message_model.dart';
 import 'models/user_model.dart';
 
 const dbName = 'SamaObjectBox';
@@ -161,7 +162,7 @@ class DatabaseService {
     if (chatInDb.avatar?.fileId == chat.avatar?.fileId) {
       chat.avatar?.bid = chatInDb.avatar?.bid;
     }
-    if (chatInDb.lastMessage == chat.lastMessage) {
+    if (chatInDb.lastMessage?.id == chat.lastMessage?.id) {
       chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
     }
   }
@@ -226,4 +227,56 @@ class DatabaseService {
   /// ///////////////////////////
   /// Message Store Functions ///
   /// ///////////////////////////
+
+  Future<List<MessageModel>> getAllMessagesLocal(String cid) async {
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.cid.equals(cid))
+        .order(MessageModel_.createdAt, flags: Order.descending)
+        .build();
+    final results = await query.findAsync();
+    query.close();
+    return results;
+  }
+
+  Future<bool> saveMessagesLocal(List<MessageModel> items) async {
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.id
+            .oneOf(items.map((element) => element.id!).toList()))
+        .build();
+
+    final messagesInDb = await query.findAsync();
+    query.close();
+
+    var messagesInDbMap = {for (var v in messagesInDb) v.id: v};
+    for (var message in items) {
+      final messageInDb = messagesInDbMap[message.id];
+      if (messageInDb != null) {
+        message.bid = messageInDb.bid;
+        // message.attachments?.forEach((a) {
+        //   a.bid = messageInDb.attachments.bid ;
+        // }
+      }
+    }
+
+    await store!.box<MessageModel>().putManyAsync(items, mode: PutMode.put);
+    return true;
+  }
+
+  Future<MessageModel?> getMessageLocal(String id) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.equals(id)).build();
+    final message = query.findFirst();
+    query.close();
+    return message;
+  }
+
+  Future<List<MessageModel>> getMessagesLocal(List<String> ids) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.oneOf(ids)).build();
+    final results = query.findAsync();
+    query.close();
+    return results;
+  }
 }

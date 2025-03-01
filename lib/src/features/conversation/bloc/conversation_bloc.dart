@@ -8,6 +8,7 @@ import 'package:stream_transform/stream_transform.dart';
 import '../../../api/api.dart';
 import '../../../db/models/conversation_model.dart';
 import '../../../db/models/user_model.dart';
+import '../../../db/resource.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
@@ -47,8 +48,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.messagesRepository,
     required this.userRepository,
   }) : super(ConversationState(conversation: currentConversation)) {
-    on<MessagesRequested>(
-      _onMessagesRequested,
+    on<MessagesRequested>(_onMessagesRequested);
+    on<MessagesMoreRequested>(
+      _onMessagesMoreRequested,
       transformer: throttleDroppable(throttleDuration),
     );
     on<ParticipantsReceived>(
@@ -120,49 +122,68 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     MessagesRequested event,
     Emitter<ConversationState> emit,
   ) async {
-    if (state.hasReachedMax) return;
+    if (state.hasReachedMax && !state.initial) return;
 
     try {
       if (state.status == ConversationStatus.initial) {
-        final messages = await _fetchMessages();
-        return emit(
+        final messages = await messagesRepository
+            .getStoredConversations(currentConversation.id);
+        emit(
           state.copyWith(
-            status: ConversationStatus.success,
-            messages: messages,
-            hasReachedMax: false,
-          ),
+              status: ConversationStatus.success,
+              messages: messages,
+              hasReachedMax: false,
+              initial: true),
         );
+        add(const MessagesRequested());
+        return;
       }
-
-      final messages =
-          await _fetchMessages(ltDate: state.messages.last.createdAt);
-      messages.isEmpty
-          ? emit(state.copyWith(hasReachedMax: true))
-          : emit(
-              state.copyWith(
-                status: ConversationStatus.success,
-                messages: List.of(state.messages)..addAll(messages),
-                hasReachedMax: false,
-              ),
-            );
+      await _getAllMessages(emit);
     } catch (e) {
       log('[ConversationBloc]', stringData: e.toString());
       emit(state.copyWith(status: ConversationStatus.failure));
     }
   }
 
-  Future<List<ChatMessage>> _fetchMessages(
+  Future<void> _onMessagesMoreRequested(
+    MessagesMoreRequested event,
+    Emitter<ConversationState> emit,
+  ) async {
+    if (state.hasReachedMax && !state.initial) return;
+    try {
+      await _getAllMessages(emit, ltDate: state.messages.lastOrNull?.createdAt);
+    } catch (e) {
+      log('[ConversationBloc]', stringData: e.toString());
+      emit(state.copyWith(status: ConversationStatus.failure));
+    }
+  }
+
+  _getAllMessages(Emitter<ConversationState> emit,
       {DateTime? ltDate, DateTime? gtTime}) async {
-    return messagesRepository.getMessages(currentConversation.id, parameters: {
-      if (ltDate != null)
-        'updated_at': {
-          'lt': ltDate.toIso8601String(),
-        },
-      if (gtTime != null)
-        'updated_at': {
-          'gt': gtTime.toIso8601String(),
-        },
-    });
+    var resource = await messagesRepository
+        .getAllMessages(currentConversation.id, ltDate: ltDate, gtTime: gtTime);
+    switch (resource.status) {
+      case Status.success:
+        var messages = resource.data ?? List.empty();
+        messages.isEmpty
+            ? emit(state.copyWith(hasReachedMax: true))
+            : emit(
+                state.copyWith(
+                  status: ConversationStatus.success,
+                  messages: state.initial
+                      ? List.of(messages)
+                      : (List.of(state.messages)..addAll(messages)),
+                  hasReachedMax: false,
+                  initial: false,
+                ),
+              );
+        break;
+      case Status.failed:
+        emit(state.copyWith(status: ConversationStatus.failure));
+        break;
+      case Status.loading:
+        break;
+    }
   }
 
   Future<void> _onParticipantsReceived(
