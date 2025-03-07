@@ -6,13 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:get_thumbnail_video/index.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_compress/video_compress.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:get_thumbnail_video/video_thumbnail.dart';
 
 import 'file_utils.dart';
 
@@ -161,7 +162,7 @@ Future<String?> getVideoThumbnailByUrl(String url, String fileId) async {
     maxHeight: 640,
     quality: 80,
   ).then((path) {
-    return File(path!).rename(target).then((file) {
+    return File(path.path).rename(target).then((file) {
       return file.path;
     });
   });

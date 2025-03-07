@@ -31,7 +31,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
 
     _conversationRepository
         .getParticipants([state.conversation.id]).then((users) {
-      add(GroupParticipantsReceived(users));
+      add(GroupParticipantsReceived(users.$2));
     });
   }
 
@@ -184,7 +184,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
           isValid: false,
           name: Groupname.pure(chat?.name ?? ''),
           description: GroupDescription.pure(chat?.description ?? ''),
-          participants: GroupParticipants.pure(participants.toSet()),
+          participants: GroupParticipants.pure(participants.$2.toSet()),
           addParticipants: const GroupParticipants.pure(),
           removeParticipants: const GroupParticipants.pure()),
     );
@@ -221,7 +221,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
             isValid: false,
             name: Groupname.pure(chat?.name ?? ''),
             description: GroupDescription.pure(chat?.description ?? ''),
-            participants: GroupParticipants.pure(Set.of(participants)),
+            participants: GroupParticipants.pure(Set.of(participants.$2)),
             addParticipants: const GroupParticipants.pure(),
             removeParticipants: const GroupParticipants.pure(),
             informationMessage: 'Chat was successfully updated'));
@@ -235,7 +235,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
             isValid: false,
             name: Groupname.pure(chat.name),
             description: GroupDescription.pure(chat.description ?? ''),
-            participants: GroupParticipants.pure(participants.toSet()),
+            participants: GroupParticipants.pure(participants.$2.toSet()),
             addParticipants: const GroupParticipants.pure(),
             removeParticipants: const GroupParticipants.pure(),
             errorMessage: 'Chat wasn\'t updated: ${e.message}'));

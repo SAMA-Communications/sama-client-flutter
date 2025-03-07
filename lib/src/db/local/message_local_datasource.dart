@@ -41,4 +41,31 @@ class MessageLocalDatasource {
       throw DatabaseException(e.toString());
     }
   }
+
+  Future<bool> saveMessageLocal(MessageModel item) async {
+    print('saveMessageLocal= $item');
+    try {
+      return await _databaseService.saveMessageLocal(item);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<MessageModel> updateMessageLocal(MessageModel item) async {
+    print('updateMessageLocal= $item');
+    try {
+      return await _databaseService.updateMessageLocal(item);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<bool> updateMessagesLocal(List<MessageModel> items) async {
+    print('updateMessagesLocal= $items');
+    try {
+      return await _databaseService.saveMessagesLocal(items);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
 }

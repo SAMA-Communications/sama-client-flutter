@@ -37,6 +37,7 @@ class ConversationModel extends Equatable {
   final lastMessageBind = ToOne<MessageModel>();
   final opponentBind = ToOne<UserModel>();
   final ownerBind = ToOne<UserModel>();
+  final participants = ToMany<UserModel>();
   final avatarBind = ToOne<AvatarModel>();
 
   @Transient()
@@ -72,6 +73,7 @@ class ConversationModel extends Equatable {
     MessageModel? lastMessage,
     UserModel? opponent,
     UserModel? owner,
+    List<UserModel>? participants,
     AvatarModel? avatar,
   }) {
     return ConversationModel(
@@ -87,7 +89,8 @@ class ConversationModel extends Equatable {
       ..lastMessage = lastMessage ?? this.lastMessage
       ..opponent = opponent ?? this.opponent
       ..owner = owner ?? this.owner
-      ..avatar = avatar ?? this.avatar;
+      ..avatar = avatar ?? this.avatar
+      ..participants.addAll(participants ?? this.participants);
   }
 
   ConversationModel copyWithItem({

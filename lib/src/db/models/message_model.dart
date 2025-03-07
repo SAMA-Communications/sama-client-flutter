@@ -45,22 +45,43 @@ class MessageModel extends Equatable {
 
   final attachments = ToMany<AttachmentModel>();
 
+  MessageModel copyWith({
+    int? bid,
+    String? id,
+    String? from,
+    String? cid,
+    String? rawStatus,
+    String? body,
+    DateTime? createdAt,
+    int? t,
+    Map<String, dynamic>? extension,
+    List<AttachmentModel>? attachments,
+  }) {
+    return MessageModel(
+        bid: bid ?? this.bid,
+        id: id ?? this.id,
+        from: from ?? this.from,
+        cid: cid ?? this.cid,
+        rawStatus: rawStatus ?? this.rawStatus,
+        body: body ?? this.body,
+        createdAt: createdAt ?? this.createdAt,
+        t: t ?? this.t,
+        extension: extension ?? this.extension)
+      ..attachments.addAll(attachments ?? this.attachments);
+  }
 
   @override
   String toString() {
-    return 'MessageModel{id: $id, body: $body, t: $t}';
+    return 'MessageModel{bid: $bid, id: $id, from: $from, cid: $cid, rawStatus: $rawStatus, body: $body, t: $t, createdAt: $createdAt, extension: $extension, attachments: $attachments}';
   }
 
   @override
   List<Object?> get props => [
         id,
         from,
-        cid,
         rawStatus,
         body,
         t,
-        createdAt,
-        extension,
       ];
 }
 

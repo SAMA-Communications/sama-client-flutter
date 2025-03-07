@@ -6,8 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../api/api.dart';
-import '../../../db/models/conversation_model.dart';
-import '../../../db/models/user_model.dart';
+import '../../../db/models/models.dart';
 import '../../../db/resource.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
@@ -76,8 +75,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _onConversationDeleted,
     );
 
-    add(const ParticipantsReceived());
-
     updateConversationStreamSubscription =
         conversationRepository.updateConversationStream.listen((chat) async {
       if (chat.id != currentConversation.id) return;
@@ -126,13 +123,14 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     try {
       if (state.status == ConversationStatus.initial) {
-        final messages = await messagesRepository
-            .getStoredConversations(currentConversation.id);
+        final messages =
+            await messagesRepository.getStoredMessages(currentConversation);
         emit(
           state.copyWith(
               status: ConversationStatus.success,
               messages: messages,
               hasReachedMax: false,
+              participants: currentConversation.participants.toSet(),
               initial: true),
         );
         add(const MessagesRequested());
@@ -190,7 +188,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       ParticipantsReceived event, Emitter<ConversationState> emit) async {
     var participants =
         await conversationRepository.getParticipants([currentConversation.id]);
-    emit(state.copyWith(participants: Set.of(participants)));
+    emit(state.copyWith(participants: Set.of(participants.$2)));
   }
 
   Future<void> _onConversationUpdated(event, emit) async {
@@ -243,25 +241,34 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   FutureOr<void> _onSentStatusReceived(
-      _SentStatusReceived event, Emitter<ConversationState> emit) {
+      _SentStatusReceived event, Emitter<ConversationState> emit) async {
     var messages = [...state.messages];
 
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
-    messages[messages.indexOf(msg)] = msg.copyWith(
+    var msgUpdated = msg.copyWith(
         id: event.status.serverMessageId, status: ChatMessageStatus.sent);
-
+    messages[messages.indexOf(msg)] = msgUpdated;
+    var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
+    conversationRepository.updateConversationLocal(
+        currentConversation, msgLocal);
     emit(state.copyWith(messages: messages));
   }
 
   FutureOr<void> _onReadStatusReceived(
-      _ReadStatusReceived event, Emitter<ConversationState> emit) {
+      _ReadStatusReceived event, Emitter<ConversationState> emit) async {
     var messages = {for (var v in state.messages) v.id!: v};
+    var msgListUpdated = <MessageModel>[];
     event.status.msgIds?.forEach((id) {
       if (messages[id]?.status != ChatMessageStatus.read) {
-        messages[id] = messages[id]!.copyWith(status: ChatMessageStatus.read);
+        var msg = messages[id]!.copyWith(status: ChatMessageStatus.read);
+        messages[id] = msg;
+        msgListUpdated.add(msg);
       }
     });
-
+    await messagesRepository.updateMessagesLocal(msgListUpdated);
+    // TODO RP CHECK ME
+    // conversationRepository.updateConversationLocal(
+    //     currentConversation, msgListUpdated.last);
     emit(state.copyWith(messages: messages.values.toList()));
   }
 

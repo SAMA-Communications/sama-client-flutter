@@ -110,7 +110,8 @@ class ConversationRepository {
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
           await localDatasource.getConversationLocal(message.cid!);
-      if (conversation != null) {
+      if (conversation != null &&
+          (message.status.index > 1 || !message.isOwn)) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {
           unreadMsgCountUpdated = (conversation.unreadMessagesCount ?? 0) + 1;
@@ -154,16 +155,16 @@ class ConversationRepository {
     return conversations.whereNot((c) => _chatsFilter(c)).toList();
   }
 
-  Future<List<UserModel>> getParticipants(List<String> cids) async {
-    var users = (await api.fetchParticipants(cids))
-        .map((element) => element.toUserModel())
-        .toList();
-    var usersLocal = await userRepository.saveUsersLocal(users);
-    return usersLocal;
+  Future<(Map<String, List<String>>, List<UserModel>)> getParticipants(
+      List<String> cids) async {
+    var (participants, users) = await api.fetchParticipants(cids);
+    var usersModels = users.map((element) => element.toUserModel()).toList();
+    var usersLocal = await userRepository.saveUsersLocal(usersModels);
+    return (participants, usersLocal);
   }
 
-  Future<Map<String, UserModel>> getParticipantsAsMap(List<String> cids) async {
-    return {for (var v in await getParticipants(cids)) v.id!: v};
+  Map<String, UserModel> getParticipantsAsMap(List<UserModel> users) {
+    return {for (var v in users) v.id!: v};
   }
 
   Future<Resource<List<ConversationModel>>> getAllConversations(
@@ -217,10 +218,14 @@ class ConversationRepository {
 
     final currentUser = await userRepository.getCurrentUser();
     final cids = conversations.map((element) => element.id!).toList();
-    var usersMap = await getParticipantsAsMap(cids);
+    var (participants, users) = await getParticipants(cids);
+    var usersMap = getParticipantsAsMap(users);
 
     final List<ConversationModel> result = conversations.map((conversation) {
-      return _buildConversationModel(conversation, usersMap, currentUser);
+      var chatParticipants =
+          participants[conversation.id]!.map((id) => usersMap[id]!).toList();
+      return _buildConversationModel(
+          conversation, usersMap, chatParticipants, currentUser);
     }).toList();
 
     return result;
@@ -233,8 +238,12 @@ class ConversationRepository {
       final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
       if (conversation == null) return null;
       final currentUser = await userRepository.getCurrentUser();
-      final participants = await getParticipantsAsMap([cid]);
-      return _buildConversationModel(conversation, participants, currentUser);
+      var (allParticipants, users) = await getParticipants([cid]);
+      final usersMap = getParticipantsAsMap(users);
+      var participantsModels =
+          allParticipants[conversation.id]!.map((id) => usersMap[id]!).toList();
+      return _buildConversationModel(
+          conversation, usersMap, participantsModels, currentUser);
     }
     return conversation;
   }
@@ -246,9 +255,12 @@ class ConversationRepository {
       return localDatasource.getConversationLocal(cid);
     }
     final currentUser = await userRepository.getCurrentUser();
-    final participants = await getParticipantsAsMap([cid]);
-    var conversationModel =
-        _buildConversationModel(conversation, participants, currentUser);
+    var (allParticipants, users) = await getParticipants([cid]);
+    final usersMap = getParticipantsAsMap(users);
+    var participantsModels =
+        allParticipants[conversation.id]!.map((id) => usersMap[id]!).toList();
+    var conversationModel = _buildConversationModel(
+        conversation, usersMap, participantsModels, currentUser);
     localDatasource.updateConversationLocal(conversationModel);
     return conversationModel;
   }
@@ -326,6 +338,13 @@ class ConversationRepository {
     return result;
   }
 
+  Future<void> updateConversationLocal(
+      ConversationModel chat, MessageModel msg) async {
+    var chatUpdated = chat.copyWith(lastMessage: msg);
+    await localDatasource.updateConversationLocal(chatUpdated);
+    _conversationsController.add(chatUpdated);
+  }
+
   Future<bool> deleteConversation(ConversationModel conversation) async {
     var result = await api.deleteConversation(conversation.id);
     if (result) await localDatasource.removeConversationLocal(conversation.id);
@@ -333,11 +352,14 @@ class ConversationRepository {
     return result;
   }
 
-  ConversationModel _buildConversationModel(Conversation conversation,
-      Map<String, UserModel> participants, UserModel? currentUser) {
-    final opponent = participants[conversation.opponentId];
+  ConversationModel _buildConversationModel(
+      Conversation conversation,
+      Map<String, UserModel> users,
+      List<UserModel> participants,
+      UserModel? currentUser) {
+    final opponent = users[conversation.opponentId];
     //can be null if user deleted
-    final owner = participants[conversation.ownerId];
+    final owner = users[conversation.ownerId];
 
     return ConversationModel(
         id: conversation.id!,
@@ -353,6 +375,7 @@ class ConversationRepository {
       ..lastMessage =
           conversation.lastMessage?.toMessageModel() // maybe set cid from chat
       ..avatar =
-          getConversationAvatar(conversation, owner, opponent, currentUser);
+          getConversationAvatar(conversation, owner, opponent, currentUser)
+      ..participants.addAll(participants);
   }
 }

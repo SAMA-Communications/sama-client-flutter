@@ -1,6 +1,6 @@
 import '../../shared/errors/exceptions.dart';
 import '../db_service.dart';
-import '../models/conversation_model.dart';
+import '../models/models.dart';
 
 class ConversationLocalDatasource {
   final DatabaseService _databaseService = DatabaseService.instance;
@@ -21,6 +21,33 @@ class ConversationLocalDatasource {
     print('getConversationLocal cid= $cid');
     try {
       return await _databaseService.getConversationLocal(cid);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<ConversationModel?> getConversationLocalByMsgId(String id) async {
+    print('getConversationLocalByMsgId cid= $id');
+    try {
+      return await _databaseService.getConversationLocalByMsgId(id);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<MessageModel?> getConversationLastMessage(String id) async {
+    print('getConversationLastMessage id= $id');
+    try {
+      return await _databaseService.getMessageLocal(id);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<MessageModel> updateConversationLastMessage(MessageModel item) async {
+    print('updateConversationLastMessage item= $item');
+    try {
+      return await _databaseService.updateConversationLastMessage(item);
     } catch (e) {
       throw DatabaseException(e.toString());
     }
@@ -50,6 +77,7 @@ class ConversationLocalDatasource {
     try {
       return await _databaseService.saveConversationLocal(item);
     } catch (e) {
+      print('saveConversationLocal e ${e.toString()}');
       throw DatabaseException(e.toString());
     }
   }
@@ -59,6 +87,7 @@ class ConversationLocalDatasource {
     try {
       return await _databaseService.updateConversationLocal(item);
     } catch (e) {
+      print('updateConversationLocal e ${e.toString()}');
       throw DatabaseException(e.toString());
     }
   }

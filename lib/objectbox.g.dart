@@ -301,7 +301,12 @@ final _entities = <obx_int.ModelEntity>[
             type: 1,
             flags: 0)
       ],
-      relations: <obx_int.ModelRelation>[],
+      relations: <obx_int.ModelRelation>[
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(5, 7785256265115248397),
+            name: 'participants',
+            targetId: const obx_int.IdUid(12, 6516061588255621718))
+      ],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -342,7 +347,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       entities: _entities,
       lastEntityId: const obx_int.IdUid(13, 9106374520578572502),
       lastIndexId: const obx_int.IdUid(35, 2642777293408708995),
-      lastRelationId: const obx_int.IdUid(4, 5100230969978387914),
+      lastRelationId: const obx_int.IdUid(5, 7785256265115248397),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
         8221608220756309685,
@@ -722,7 +727,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
               object.opponentBind,
               object.ownerBind
             ],
-        toManyRelations: (ConversationModel object) => {},
+        toManyRelations: (ConversationModel object) => {
+              obx_int.RelInfo<ConversationModel>.toMany(5, object.bid!):
+                  object.participants
+            },
         getId: (ConversationModel object) => object.bid,
         setId: (ConversationModel object, int id) {
           object.bid = id;
@@ -795,6 +803,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.ownerBind.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 30, 0);
           object.ownerBind.attach(store);
+          obx_int.InternalToManyAccess.setRelInfo<ConversationModel>(
+              object.participants,
+              store,
+              obx_int.RelInfo<ConversationModel>.toMany(5, object.bid!));
           return object;
         })
   };
@@ -995,4 +1007,9 @@ class ConversationModel_ {
   /// See [ConversationModel.isEncrypted].
   static final isEncrypted =
       obx.QueryBooleanProperty<ConversationModel>(_entities[4].properties[12]);
+
+  /// see [ConversationModel.participants]
+  static final participants =
+      obx.QueryRelationToMany<ConversationModel, UserModel>(
+          _entities[4].relations[0]);
 }

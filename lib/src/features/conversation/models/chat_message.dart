@@ -16,6 +16,7 @@ class ChatMessage extends MessageModel {
     required this.isFirstUserMessage,
     required this.isLastUserMessage,
     this.status = ChatMessageStatus.none,
+    super.bid,
     super.id,
     super.from,
     super.cid,
@@ -26,12 +27,14 @@ class ChatMessage extends MessageModel {
     super.extension,
   });
 
+  @override
   ChatMessage copyWith({
     UserModel? sender,
     bool? isOwn,
     bool? isFirstUserMessage,
     bool? isLastUserMessage,
     ChatMessageStatus? status,
+    int? bid,
     String? id,
     String? from,
     String? cid,
@@ -48,11 +51,12 @@ class ChatMessage extends MessageModel {
         isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
         isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
         status: status ?? this.status,
+        bid: bid ?? this.bid,
         id: id ?? this.id,
         from: from ?? this.from,
         cid: cid ?? this.cid,
         body: body ?? this.body,
-        rawStatus: rawStatus ?? this.rawStatus,
+        rawStatus: rawStatus ?? status?.name ?? this.rawStatus,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         extension: extension ?? this.extension)
@@ -61,7 +65,7 @@ class ChatMessage extends MessageModel {
 
   @override
   String toString() {
-    return 'ChatMessage{sender: $sender, isOwn: $isOwn, isFirstUserMessage: $isFirstUserMessage, isLastUserMessage: $isLastUserMessage, status: $status, attachments: $attachments}';
+    return 'ChatMessage{sender: $sender, isOwn: $isOwn, isFirstUserMessage: $isFirstUserMessage, isLastUserMessage: $isLastUserMessage, status: $status, attachments: $attachments ${super.toString()}';
   }
 
   @override

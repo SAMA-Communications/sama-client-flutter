@@ -292,12 +292,18 @@
           "type": 1
         }
       ],
-      "relations": []
+      "relations": [
+        {
+          "id": "5:7785256265115248397",
+          "name": "participants",
+          "targetId": "12:6516061588255621718"
+        }
+      ]
     }
   ],
   "lastEntityId": "13:9106374520578572502",
   "lastIndexId": "35:2642777293408708995",
-  "lastRelationId": "4:5100230969978387914",
+  "lastRelationId": "5:7785256265115248397",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,

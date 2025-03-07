@@ -107,13 +107,12 @@ class MessagesRepository {
     return result;
   }
 
-  Future<List<ChatMessage>> getStoredConversations(String cid) async {
-    var messages = await localDatasource.getAllMessagesLocal(cid);
+  Future<List<ChatMessage>> getStoredMessages(ConversationModel chat) async {
+    var messages = await localDatasource.getAllMessagesLocal(chat.id);
     var currentUser = await userRepository.getCurrentUser();
 
-    var users = await userRepository.getUsersByCids([cid]);
     var participants = {}..addEntries(
-        users.map((participant) => MapEntry(participant.id!, participant)));
+        chat.participants.map((participant) => MapEntry(participant.id!, participant)));
 
     var result = <ChatMessage>[];
 
@@ -140,14 +139,15 @@ class MessagesRepository {
   }
 
   Future<void> sendTextMessage(String body, String cid) async {
+    var currentUser = await userRepository.getCurrentUser();
     var message = api.Message(
         body: body.trim(),
         cid: cid,
+        from: currentUser?.id,
         id: const Uuid().v1(),
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
-    var currentUser = await userRepository.getCurrentUser();
     var msgModel = message.toMessageModel();
     _incomingMessagesController
         .add(msgModel.toChatMessage(currentUser!, true, true, true));
@@ -162,6 +162,18 @@ class MessagesRepository {
 
   Future<bool> sendStatusReadMessages(String cid) {
     return api.readMessages(api.ReadMessagesStatus.fromJson({'cid': cid}));
+  }
+
+  Future<void> saveMessageLocal(MessageModel message) async {
+    await localDatasource.saveMessageLocal(message);
+  }
+
+  Future<MessageModel> updateMessageLocal(MessageModel message) async {
+    return await localDatasource.updateMessageLocal(message);
+  }
+
+  Future<void> updateMessagesLocal(List<MessageModel> messages) async {
+    await localDatasource.updateMessagesLocal(messages);
   }
 
   void initChatListeners() {
