@@ -211,7 +211,7 @@ class ConversationRepository {
     final conversations = await api.fetchConversations({
       if (ltDate != null)
         'updated_at': {
-          'lt': ltDate.toIso8601String(),
+          'lt': ltDate.toUtc().toIso8601String(),
         },
       'limit': limit,
     });

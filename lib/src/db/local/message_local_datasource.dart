@@ -5,10 +5,11 @@ import '../models/message_model.dart';
 class MessageLocalDatasource {
   final DatabaseService _databaseService = DatabaseService.instance;
 
-  Future<List<MessageModel>> getAllMessagesLocal(String cid) async {
+  Future<List<MessageModel>> getAllMessagesLocal(String cid,
+      {DateTime? ltDate}) async {
     print('getAllMessagesLocal');
     try {
-      return await _databaseService.getAllMessagesLocal(cid);
+      return await _databaseService.getAllMessagesLocal(cid, ltDate);
     } catch (e) {
       print('getAllMessagesLocal e ${e.toString()}');
       throw DatabaseException(e.toString());

@@ -40,15 +40,13 @@ class MessagesRepository {
       {DateTime? ltDate, DateTime? gtTime}) async {
     return NetworkBoundResources<List<ChatMessage>, List<MessageModel>>()
         .asFuture(
-      loadFromDb: () => localDatasource.getAllMessagesLocal(cid),
+      loadFromDb: () => localDatasource.getAllMessagesLocal(cid, ltDate: ltDate),
       shouldFetch: (data, slice) {
         var oldData = data?.take(10).toList();
         var result = data != null && !listEquals(oldData, slice);
-
-        return true;
       },
       createCallSlice: () =>
-          _fetchMessages(cid, ltDate: DateTime.now(), limit: 10),
+          _fetchMessages(cid, ltDate: ltDate?? DateTime.now(), limit: 10),
       createCall: () => _fetchMessages(cid, ltDate: ltDate, gtTime: gtTime),
       saveCallResult: localDatasource.saveMessagesLocal,
       processResponse: (data) async {
@@ -88,7 +86,7 @@ class MessagesRepository {
       'cid': cid,
       if (ltDate != null)
         'updated_at': {
-          'lt': ltDate.toIso8601String(),
+          'lt': ltDate.toUtc().toIso8601String(),
         },
       if (gtTime != null)
         'updated_at': {

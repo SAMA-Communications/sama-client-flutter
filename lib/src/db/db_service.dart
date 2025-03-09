@@ -253,10 +253,12 @@ class DatabaseService {
   /// Message Store Functions ///
   /// ///////////////////////////
 
-  Future<List<MessageModel>> getAllMessagesLocal(String cid) async {
+  Future<List<MessageModel>> getAllMessagesLocal(
+      String cid, DateTime? ltDate) async {
     final query = store!
         .box<MessageModel>()
-        .query(MessageModel_.cid.equals(cid))
+        .query(MessageModel_.cid.equals(cid).and(
+            MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now())))
         .order(MessageModel_.createdAt, flags: Order.descending)
         .build();
     final results = await query.findAsync();
