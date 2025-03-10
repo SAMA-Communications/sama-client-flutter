@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/api.dart';
 import '../api/utils/config.dart';
@@ -151,5 +152,15 @@ class SecureStorage {
 
   Future<String> getEnvironmentUrl() async {
     return (await _storage.read(key: storageEnvironmentUrl)) ?? EnvType.dev.url;
+  }
+}
+
+//fix to clear iOS data when uninstall app (can/should be removed when app is stable)
+void clearKeychainValuesIfUninstall() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  if (prefs.getBool('is_first_app_launch') ?? true) {
+    await SecureStorage.instance.deleteAllData();
+    await prefs.setBool('is_first_app_launch', false);
   }
 }

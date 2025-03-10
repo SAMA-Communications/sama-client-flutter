@@ -18,6 +18,7 @@ import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
+import 'src/shared/secure_storage.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
 import 'src/shared/ui/colors.dart';
 
@@ -55,6 +56,7 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+    clearKeychainValuesIfUninstall();
     _conversationLocalDatasource = ConversationLocalDatasource();
     _messageLocalDatasource = MessageLocalDatasource();
     _userLocalDataSource = UserLocalDataSource();

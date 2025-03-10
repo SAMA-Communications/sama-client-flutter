@@ -164,7 +164,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       case Status.success:
         var messages = resource.data ?? List.empty();
         messages.isEmpty
-            ? emit(state.copyWith(hasReachedMax: true))
+            ? emit(state.copyWith(hasReachedMax: true, initial: false))
             : emit(
                 state.copyWith(
                   status: ConversationStatus.success,

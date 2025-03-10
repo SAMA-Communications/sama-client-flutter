@@ -44,6 +44,7 @@ class MessagesRepository {
       shouldFetch: (data, slice) {
         var oldData = data?.take(10).toList();
         var result = data != null && !listEquals(oldData, slice);
+        return result;
       },
       createCallSlice: () =>
           _fetchMessages(cid, ltDate: ltDate?? DateTime.now(), limit: 10),
@@ -109,8 +110,8 @@ class MessagesRepository {
     var messages = await localDatasource.getAllMessagesLocal(chat.id);
     var currentUser = await userRepository.getCurrentUser();
 
-    var participants = {}..addEntries(
-        chat.participants.map((participant) => MapEntry(participant.id!, participant)));
+    var participants = {}..addEntries(chat.participants
+        .map((participant) => MapEntry(participant.id!, participant)));
 
     var result = <ChatMessage>[];
 

@@ -53,32 +53,19 @@ class ConversationRepository {
     incomingSystemMessagesSubscription = api
         .MessagesManager.instance.systemChatMessagesStream
         .listen((message) async {
-      Map<String, UserModel?> participants =
-          await userRepository.getUsersByIds([
-        message.from!,
-        if (message.conversation?.opponentId != null)
-          message.conversation!.opponentId!
-      ]);
+      var (participants, users) =
+          await getParticipants([message.conversation!.id!]);
+      var usersMap = getParticipantsAsMap(users);
+
+      var chatParticipants =
+          usersMap.entries.map((entry) => entry.value).toList();
 
       var currentUser = await userRepository.getCurrentUser();
-      final opponent = participants[message.conversation!.opponentId] ??
-          participants[message.from!];
-      final owner = participants[message.conversation!.ownerId];
+      final opponent =
+          usersMap[message.conversation!.opponentId] ?? usersMap[message.from!];
 
-      final conversation = ConversationModel(
-          id: message.conversation!.id!,
-          createdAt: message.conversation!.createdAt!,
-          updatedAt: message.conversation!.updatedAt!,
-          type: message.conversation!.type!,
-          name: getConversationName(
-              message.conversation!, owner, opponent, currentUser),
-          unreadMessagesCount: message.conversation!.unreadMessagesCount,
-          description: message.conversation!.description)
-        ..opponent = getConversationOpponent(owner, opponent, currentUser)
-        ..owner = owner
-        ..lastMessage = message.conversation!.lastMessage?.toMessageModel()
-        ..avatar = getConversationAvatar(
-            message.conversation!, owner, opponent, currentUser);
+      final conversation = _buildConversationModel(
+          message.conversation!, usersMap, chatParticipants, currentUser);
 
       if (message.type == SystemChatMessageType.conversationCreated) {
         final conversationStored =
@@ -110,8 +97,8 @@ class ConversationRepository {
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
           await localDatasource.getConversationLocal(message.cid!);
-      if (conversation != null &&
-          (message.status.index > 1 || !message.isOwn)) {
+      var ignoreUnsentOwnMsg = message.status.index > 1 || !message.isOwn;
+      if (conversation != null && ignoreUnsentOwnMsg) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {
           unreadMsgCountUpdated = (conversation.unreadMessagesCount ?? 0) + 1;

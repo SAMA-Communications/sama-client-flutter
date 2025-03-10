@@ -5,7 +5,7 @@ import '../../shared/errors/exceptions.dart';
 class UserLocalDataSource {
   final DatabaseService databaseService = DatabaseService.instance;
 
-  Future<Map<String, UserModel?>> getUsersModelByIds(List<String> ids) async {
+  Future<Map<String, UserModel>> getUsersModelByIds(List<String> ids) async {
     //rename to getUsersByIds
     final users = await getUsersModelLocal(ids);
     return {for (var v in users) v.id!: v};
