@@ -209,8 +209,12 @@ class ConversationRepository {
     var usersMap = getParticipantsAsMap(users);
 
     final List<ConversationModel> result = conversations.map((conversation) {
-      var chatParticipants =
-          participants[conversation.id]!.map((id) => usersMap[id]!).toList();
+      var chatParticipants = participants[conversation.id]!
+          .map((id) => usersMap[id])
+          .toList()
+          .nonNulls
+          .toList();
+
       return _buildConversationModel(
           conversation, usersMap, chatParticipants, currentUser);
     }).toList();
