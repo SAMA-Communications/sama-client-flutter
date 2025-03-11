@@ -150,6 +150,14 @@ class ConversationRepository {
     return (participants, usersLocal);
   }
 
+  Future<List<UserModel>> updateParticipants(ConversationModel chat) async {
+    var (participants, users) = await api.fetchParticipants([chat.id]);
+    var usersModels = users.map((element) => element.toUserModel()).toList();
+    var usersLocal = await userRepository.saveUsersLocal(usersModels);
+    await updateConversationLocal(chat.copyWith(participants: usersLocal));
+    return usersLocal;
+  }
+
   Map<String, UserModel> getParticipantsAsMap(List<UserModel> users) {
     return {for (var v in users) v.id!: v};
   }
@@ -329,11 +337,9 @@ class ConversationRepository {
     return result;
   }
 
-  Future<void> updateConversationLocal(
-      ConversationModel chat, MessageModel msg) async {
-    var chatUpdated = chat.copyWith(lastMessage: msg);
-    await localDatasource.updateConversationLocal(chatUpdated);
-    _conversationsController.add(chatUpdated);
+  Future<void> updateConversationLocal(ConversationModel chat) async {
+    await localDatasource.updateConversationLocal(chat);
+    _conversationsController.add(chat);
   }
 
   Future<bool> deleteConversation(ConversationModel conversation) async {

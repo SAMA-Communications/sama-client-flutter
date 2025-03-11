@@ -36,26 +36,26 @@ class MessagesRepository {
   Stream<api.MessageSendStatus> get statusMessagesStream =>
       _statusMessagesController.stream;
 
-  Future<Resource<List<ChatMessage>>> getAllMessages(String cid,
+  Future<Resource<List<ChatMessage>>> getAllMessages(ConversationModel chat,
       {DateTime? ltDate, DateTime? gtTime}) async {
     return NetworkBoundResources<List<ChatMessage>, List<MessageModel>>()
         .asFuture(
-      loadFromDb: () => localDatasource.getAllMessagesLocal(cid, ltDate: ltDate),
+      loadFromDb: () =>
+          localDatasource.getAllMessagesLocal(chat.id, ltDate: ltDate),
       shouldFetch: (data, slice) {
         var oldData = data?.take(10).toList();
         var result = data != null && !listEquals(oldData, slice);
         return result;
       },
       createCallSlice: () =>
-          _fetchMessages(cid, ltDate: ltDate?? DateTime.now(), limit: 10),
-      createCall: () => _fetchMessages(cid, ltDate: ltDate, gtTime: gtTime),
+          _fetchMessages(chat.id, ltDate: ltDate ?? DateTime.now(), limit: 10),
+      createCall: () => _fetchMessages(chat.id, ltDate: ltDate, gtTime: gtTime),
       saveCallResult: localDatasource.saveMessagesLocal,
       processResponse: (data) async {
         var currentUser = await userRepository.getCurrentUser();
 
-        var users = await userRepository.getUsersByCids([cid]);
-        var participants = {}..addEntries(
-            users.map((participant) => MapEntry(participant.id!, participant)));
+        var participants = {}..addEntries(chat.participants
+            .map((participant) => MapEntry(participant.id!, participant)));
 
         var result = <ChatMessage>[];
 

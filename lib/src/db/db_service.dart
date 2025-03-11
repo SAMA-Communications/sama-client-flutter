@@ -123,7 +123,7 @@ class DatabaseService {
     for (var chat in items) {
       final chatInDb = chatsInDbMap[chat.id];
       if (chatInDb != null) {
-        assignConversation(chat, chatInDb);
+        await assignConversation(chat, chatInDb);
       }
     }
 

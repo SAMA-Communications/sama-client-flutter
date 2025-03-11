@@ -46,7 +46,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.conversationRepository,
     required this.messagesRepository,
     required this.userRepository,
-  }) : super(ConversationState(conversation: currentConversation)) {
+  }) : super(ConversationState(
+            conversation: currentConversation,
+            participants: currentConversation.participants.toSet())) {
     on<MessagesRequested>(_onMessagesRequested);
     on<MessagesMoreRequested>(
       _onMessagesMoreRequested,
@@ -74,6 +76,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ConversationDeleted>(
       _onConversationDeleted,
     );
+
+    add(const ParticipantsReceived());
 
     updateConversationStreamSubscription =
         conversationRepository.updateConversationStream.listen((chat) async {
@@ -158,8 +162,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   _getAllMessages(Emitter<ConversationState> emit,
       {DateTime? ltDate, DateTime? gtTime}) async {
-    var resource = await messagesRepository
-        .getAllMessages(currentConversation.id, ltDate: ltDate, gtTime: gtTime);
+    var resource = await messagesRepository.getAllMessages(currentConversation,
+        ltDate: ltDate, gtTime: gtTime);
     switch (resource.status) {
       case Status.success:
         var messages = resource.data ?? List.empty();
@@ -187,8 +191,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   Future<void> _onParticipantsReceived(
       ParticipantsReceived event, Emitter<ConversationState> emit) async {
     var participants =
-        await conversationRepository.getParticipants([currentConversation.id]);
-    emit(state.copyWith(participants: Set.of(participants.$2)));
+        await conversationRepository.updateParticipants(currentConversation);
+    emit(state.copyWith(participants: Set.of(participants)));
   }
 
   Future<void> _onConversationUpdated(event, emit) async {
@@ -250,7 +254,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     messages[messages.indexOf(msg)] = msgUpdated;
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
     conversationRepository.updateConversationLocal(
-        currentConversation, msgLocal);
+        currentConversation.copyWith(lastMessage: msgLocal));
     emit(state.copyWith(messages: messages));
   }
 

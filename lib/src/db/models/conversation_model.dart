@@ -76,7 +76,7 @@ class ConversationModel extends Equatable {
     List<UserModel>? participants,
     AvatarModel? avatar,
   }) {
-    return ConversationModel(
+    var chat = ConversationModel(
         bid: bid ?? this.bid,
         id: id ?? this.id,
         createdAt: createdAt ?? this.createdAt,
@@ -89,8 +89,16 @@ class ConversationModel extends Equatable {
       ..lastMessage = lastMessage ?? this.lastMessage
       ..opponent = opponent ?? this.opponent
       ..owner = owner ?? this.owner
-      ..avatar = avatar ?? this.avatar
-      ..participants.addAll(participants ?? this.participants);
+      ..avatar = avatar ?? this.avatar;
+    if (participants != null) {
+      if (this.participants.isNotEmpty) {
+        this.participants.clear();
+        this.participants.applyToDb();
+      }
+      chat.participants.addAll(participants);
+    }
+
+    return chat;
   }
 
   ConversationModel copyWithItem({
@@ -107,6 +115,8 @@ class ConversationModel extends Equatable {
       lastMessage:
           lastMessage != item.lastMessage ? item.lastMessage : lastMessage,
       avatar: avatar != item.avatar ? item.avatar : avatar,
+      participants:
+          participants != item.participants ? item.participants : participants,
     );
   }
 
@@ -129,5 +139,6 @@ class ConversationModel extends Equatable {
         opponent,
         owner,
         avatar,
+        participants
       ];
 }
