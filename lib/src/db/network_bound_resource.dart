@@ -4,11 +4,11 @@ import 'resource.dart';
 
 class NetworkBoundResources<ResultType, RequestType> {
   Future<Resource<ResultType>> asFuture({
-    required Future<ResultType> Function() loadFromDb,
-    required bool Function(ResultType? data, ResultType? slice) shouldFetch,
-    Future<ResultType> Function()? createCallSlice,
+    required Future<RequestType> Function() loadFromDb,
+    required bool Function(RequestType? data, RequestType? slice) shouldFetch,
+    Future<RequestType> Function()? createCallSlice,
     required Future<RequestType> Function() createCall,
-    ResultType Function(ResultType result)? processResponse,
+    Future<ResultType> Function(RequestType result)? processResponse,
     required Future Function(RequestType item)? saveCallResult,
   }) {
     assert(
@@ -25,7 +25,9 @@ class NetworkBoundResources<ResultType, RequestType> {
         value = await loadFromDb();
       }
 
-      return processResponse != null ? processResponse(value) : value;
+      return processResponse != null
+          ? await processResponse(value)
+          : value as ResultType;
     });
   }
 
@@ -35,7 +37,7 @@ class NetworkBoundResources<ResultType, RequestType> {
     required Future<ResultType> Function() loadFromDb,
     required bool Function(ResultType? data) shouldFetch,
     required Future<RequestType> Function() createCall,
-    ResultType Function(RequestType result)? processResponse,
+    ResultType Function(ResultType result)? processResponse,
     required Future Function(RequestType item)? saveCallResult,
   }) {
     _result = StreamController<Resource<ResultType>>();
@@ -53,7 +55,8 @@ class NetworkBoundResources<ResultType, RequestType> {
         sink.add(Resource.loading(data: event));
 
         try {
-          await _fetchFromNetwork(createCall, saveCallResult, event);
+          await _fetchFromNetwork(
+              createCall, saveCallResult, event as RequestType);
           print("Fetching success");
           var value = await loadFromDb();
           sink.add(Resource.success(data: value));
@@ -73,7 +76,7 @@ class NetworkBoundResources<ResultType, RequestType> {
   Future<void> _fetchFromNetwork(
       Future<RequestType> Function() createCall,
       Future Function(RequestType item)? saveCallResult,
-      ResultType? unconfirmedResult) async {
+      RequestType? unconfirmedResult) async {
     return await createCall().then((value) async {
       if (value != unconfirmedResult) {
         if (saveCallResult != null) await saveCallResult(value);

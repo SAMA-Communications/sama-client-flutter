@@ -49,19 +49,21 @@ class _MessagesListState extends State<MessagesList> {
             );
           case ConversationStatus.success:
             if (state.messages.isEmpty) {
-              return Center(
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(24),
-                  child: const Text(
-                    'Write the first message...',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              );
+              return state.initial
+                  ? const Center(child: CircularProgressIndicator())
+                  : Center(
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(24),
+                        child: const Text(
+                          'Write the first message...',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    );
             }
             markAsReadIfNeed();
             return ListView.separated(
@@ -106,7 +108,7 @@ class _MessagesListState extends State<MessagesList> {
 
   void _onScroll() {
     if (_isTop) {
-      context.read<ConversationBloc>().add(const MessagesRequested());
+      context.read<ConversationBloc>().add(const MessagesMoreRequested());
     }
   }
 

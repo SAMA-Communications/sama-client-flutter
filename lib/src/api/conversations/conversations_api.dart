@@ -31,18 +31,18 @@ Future<List<Conversation>> fetchConversations(
   });
 }
 
-Future<List<User>> fetchParticipants(List<String> cids) async {
+Future<(Map<String, List<String>>, List<User>)> fetchParticipants(
+    List<String> cids) async {
   return SamaConnectionService.instance.sendRequest(getParticipantsByCids, {
     'cids': cids,
   }).then((response) {
-    List<User> users;
-    List<dynamic> items = List.of(response['users']);
-    if (items.isEmpty) {
-      users = [];
-    } else {
-      users = items.map((element) => User.fromJson(element)).toList();
-    }
-    return users;
+    List<User> users = List.of(response['users'])
+        .map((element) => User.fromJson(element))
+        .toList();
+
+    Map<String, List<String>> participants = Map.of(response['conversations'])
+        .map((k, v) => MapEntry(k, v.cast<String>()));
+    return (participants, users);
   });
 }
 

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'src/api/api.dart';
 import 'src/db/db_service.dart';
 import 'src/db/local/conversation_local_datasource.dart';
+import 'src/db/local/message_local_datasource.dart';
 import 'src/db/local/user_local_datasource.dart';
 import 'src/navigation/app_router.dart';
 import 'src/repository/attachments/attachments_repository.dart';
@@ -17,6 +18,7 @@ import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
+import 'src/shared/secure_storage.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
 import 'src/shared/ui/colors.dart';
 
@@ -47,17 +49,22 @@ class _AppState extends State<App> {
   late final MessagesRepository _messagesRepository;
   late final GlobalSearchRepository _globalSearchRepository;
   late final ConversationLocalDatasource _conversationLocalDatasource;
+  late final MessageLocalDatasource _messageLocalDatasource;
   late final AttachmentsRepository _attachmentsRepository;
   late final UserLocalDataSource _userLocalDataSource;
 
   @override
   void initState() {
     super.initState();
+    clearKeychainValuesIfUninstall();
     _conversationLocalDatasource = ConversationLocalDatasource();
+    _messageLocalDatasource = MessageLocalDatasource();
     _userLocalDataSource = UserLocalDataSource();
     _userRepository = UserRepository(localDataSource: _userLocalDataSource);
     _authenticationRepository = AuthenticationRepository(_userRepository);
-    _messagesRepository = MessagesRepository(userRepository: _userRepository);
+    _messagesRepository = MessagesRepository(
+        localDatasource: _messageLocalDatasource,
+        userRepository: _userRepository);
     _attachmentsRepository = AttachmentsRepository();
     _conversationRepository = ConversationRepository(
         localDatasource: _conversationLocalDatasource,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 
@@ -9,7 +11,7 @@ import 'attachment_model.dart';
 class MessageModel extends Equatable {
   @Id()
   int? bid;
-  @Unique(onConflict: ConflictStrategy.replace)
+  @Unique()
   final String? id;
   final String? from;
   final String? cid;
@@ -18,6 +20,16 @@ class MessageModel extends Equatable {
   final int? t;
   @Property(type: PropertyType.date)
   final DateTime? createdAt;
+  @Transient()
+  Map<String, dynamic>? extension;
+
+  String? get dbExtension {
+    return jsonEncode(extension);
+  }
+
+  set dbExtension(String? value) {
+    if (value != null) extension = jsonDecode(value);
+  }
 
   MessageModel({
     this.bid,
@@ -28,24 +40,48 @@ class MessageModel extends Equatable {
     this.body,
     this.createdAt,
     this.t,
+    this.extension,
   });
 
   final attachments = ToMany<AttachmentModel>();
 
+  MessageModel copyWith({
+    int? bid,
+    String? id,
+    String? from,
+    String? cid,
+    String? rawStatus,
+    String? body,
+    DateTime? createdAt,
+    int? t,
+    Map<String, dynamic>? extension,
+    List<AttachmentModel>? attachments,
+  }) {
+    return MessageModel(
+        bid: bid ?? this.bid,
+        id: id ?? this.id,
+        from: from ?? this.from,
+        cid: cid ?? this.cid,
+        rawStatus: rawStatus ?? this.rawStatus,
+        body: body ?? this.body,
+        createdAt: createdAt ?? this.createdAt,
+        t: t ?? this.t,
+        extension: extension ?? this.extension)
+      ..attachments.addAll(attachments ?? this.attachments);
+  }
+
   @override
   String toString() {
-    return 'MessageModel{bid: $bid, id: $id}';
+    return 'MessageModel{bid: $bid, id: $id, from: $from, cid: $cid, rawStatus: $rawStatus, body: $body, t: $t, createdAt: $createdAt, extension: $extension, attachments: $attachments}';
   }
 
   @override
   List<Object?> get props => [
         id,
         from,
-        cid,
         rawStatus,
         body,
         t,
-        createdAt,
       ];
 }
 
@@ -59,6 +95,7 @@ extension MessageModelExtension on Message {
       body: body,
       createdAt: createdAt,
       t: t,
+      extension: extension,
     );
     if (attachments != null) {
       messageModel.attachments.addAll(

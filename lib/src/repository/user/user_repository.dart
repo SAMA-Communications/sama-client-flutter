@@ -67,8 +67,8 @@ class UserRepository {
   }
 
   // TODO RP finish later
-  Future<Map<String, UserModel?>> getUsersByIds(List<String> ids) async {
-    Map<String, UserModel?> participants =
+  Future<Map<String, UserModel>> getUsersByIds(List<String> ids) async {
+    Map<String, UserModel> participants =
         await localDataSource.getUsersModelByIds(ids);
     Set<String> idsNone = ids.where((key) => participants[key] == null).toSet();
     if (idsNone.isNotEmpty) {
@@ -83,7 +83,7 @@ class UserRepository {
   }
 
   Future<List<UserModel>> getUsersByCids(List<String> cids) async {
-    return (await api.fetchParticipants(cids))
+    return (await api.fetchParticipants(cids)).$2
         .map((element) => element.toUserModel())
         .toList();
   }

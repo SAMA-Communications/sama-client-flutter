@@ -8,10 +8,14 @@ sealed class ConversationEvent extends Equatable {
 }
 
 final class MessagesRequested extends ConversationEvent {
+  const MessagesRequested();
+}
+
+final class MessagesMoreRequested extends ConversationEvent {
   final DateTime? startDate;
   final DateTime? endDate;
 
-  const MessagesRequested({this.startDate, this.endDate});
+  const MessagesMoreRequested({this.startDate, this.endDate});
 }
 
 final class _MessageReceived extends ConversationEvent {

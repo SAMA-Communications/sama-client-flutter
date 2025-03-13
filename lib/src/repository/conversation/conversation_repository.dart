@@ -12,6 +12,7 @@ import '../../api/push_notifications/models/models.dart';
 import '../../db/models/models.dart';
 import '../../db/network_bound_resource.dart';
 import '../../db/resource.dart';
+import '../../features/conversation/models/chat_message.dart';
 import '../../repository/messages/messages_repository.dart';
 import '../../shared/utils/media_utils.dart';
 import '../../shared/utils/string_utils.dart';
@@ -38,7 +39,7 @@ class ConversationRepository {
   final StreamController<ConversationModel> _conversationsController =
       StreamController.broadcast();
 
-  StreamSubscription<api.Message>? incomingMessagesSubscription;
+  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
 
   Stream<ConversationModel> get updateConversationStream =>
       _conversationsController.stream;
@@ -52,32 +53,19 @@ class ConversationRepository {
     incomingSystemMessagesSubscription = api
         .MessagesManager.instance.systemChatMessagesStream
         .listen((message) async {
-      Map<String, UserModel?> participants =
-          await userRepository.getUsersByIds([
-        message.from!,
-        if (message.conversation?.opponentId != null)
-          message.conversation!.opponentId!
-      ]);
+      var (participants, users) =
+          await getParticipants([message.conversation!.id!]);
+      var usersMap = getParticipantsAsMap(users);
+
+      var chatParticipants =
+          usersMap.entries.map((entry) => entry.value).toList();
 
       var currentUser = await userRepository.getCurrentUser();
-      final opponent = participants[message.conversation!.opponentId] ??
-          participants[message.from!];
-      final owner = participants[message.conversation!.ownerId];
+      final opponent =
+          usersMap[message.conversation!.opponentId] ?? usersMap[message.from!];
 
-      final conversation = ConversationModel(
-          id: message.conversation!.id!,
-          createdAt: message.conversation!.createdAt!,
-          updatedAt: message.conversation!.updatedAt!,
-          type: message.conversation!.type!,
-          name: getConversationName(
-              message.conversation!, owner, opponent, currentUser),
-          unreadMessagesCount: message.conversation!.unreadMessagesCount,
-          description: message.conversation!.description)
-        ..opponent = getConversationOpponent(owner, opponent, currentUser)
-        ..owner = owner
-        ..lastMessage = message.conversation!.lastMessage?.toMessageModel()
-        ..avatar = getConversationAvatar(
-            message.conversation!, owner, opponent, currentUser);
+      final conversation = _buildConversationModel(
+          message.conversation!, usersMap, chatParticipants, currentUser);
 
       if (message.type == SystemChatMessageType.conversationCreated) {
         final conversationStored =
@@ -109,14 +97,15 @@ class ConversationRepository {
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
           await localDatasource.getConversationLocal(message.cid!);
-      if (conversation != null) {
+      var ignoreUnsentOwnMsg = message.status.index > 1 || !message.isOwn;
+      if (conversation != null && ignoreUnsentOwnMsg) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {
           unreadMsgCountUpdated = (conversation.unreadMessagesCount ?? 0) + 1;
         }
 
         final updatedConversation = conversation.copyWith(
-            lastMessage: message.toMessageModel(),
+            lastMessage: message,
             unreadMessagesCount: unreadMsgCountUpdated,
             updatedAt: message.createdAt);
         await localDatasource.updateConversationLocal(updatedConversation);
@@ -153,33 +142,43 @@ class ConversationRepository {
     return conversations.whereNot((c) => _chatsFilter(c)).toList();
   }
 
-  Future<List<UserModel>> getParticipants(List<String> cids) async {
-    var users = (await api.fetchParticipants(cids))
-        .map((element) => element.toUserModel())
-        .toList();
-    var usersLocal = await userRepository.saveUsersLocal(users);
+  Future<(Map<String, List<String>>, List<UserModel>)> getParticipants(
+      List<String> cids) async {
+    var (participants, users) = await api.fetchParticipants(cids);
+    var usersModels = users.map((element) => element.toUserModel()).toList();
+    var usersLocal = await userRepository.saveUsersLocal(usersModels);
+    return (participants, usersLocal);
+  }
+
+  Future<List<UserModel>> updateParticipants(ConversationModel chat) async {
+    var (participants, users) = await api.fetchParticipants([chat.id]);
+    var usersModels = users.map((element) => element.toUserModel()).toList();
+    var usersLocal = await userRepository.saveUsersLocal(usersModels);
+    await updateConversationLocal(chat.copyWith(participants: usersLocal));
     return usersLocal;
   }
 
-  Future<Map<String, UserModel>> getParticipantsAsMap(List<String> cids) async {
-    return {for (var v in await getParticipants(cids)) v.id!: v};
+  Map<String, UserModel> getParticipantsAsMap(List<UserModel> users) {
+    return {for (var v in users) v.id!: v};
   }
 
-  Future<Resource<List<ConversationModel>>> getAllConversations() async {
+  Future<Resource<List<ConversationModel>>> getAllConversations(
+      {DateTime? ltDate}) async {
     return NetworkBoundResources<List<ConversationModel>,
             List<ConversationModel>>()
         .asFuture(
-      loadFromDb: localDatasource.getAllConversationsLocal,
+      loadFromDb: () => localDatasource.getAllConversationsLocal(),
       shouldFetch: (data, slice) {
         var oldData = data?.take(10).toList();
         slice?.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
         var result = data != null && !listEquals(oldData, slice);
         return result;
       },
-      createCallSlice: () => _fetchConversationsWithParticipants(10),
-      createCall: _fetchConversationsWithParticipants,
+      createCallSlice: () => _fetchConversationsWithParticipants(
+          ltDate: DateTime.now(), limit: 10),
+      createCall: () => _fetchConversationsWithParticipants(ltDate: ltDate),
       saveCallResult: localDatasource.saveConversationsLocal,
-      processResponse: (data) {
+      processResponse: (data) async {
         return data.whereNot((c) => _chatsFilter(c)).toList();
       },
     );
@@ -203,20 +202,29 @@ class ConversationRepository {
   }
 
   Future<List<ConversationModel>> _fetchConversationsWithParticipants(
-      [int limit = 100]) async {
+      {DateTime? ltDate, int limit = 100}) async {
     final conversations = await api.fetchConversations({
-      'updated_at': {
-        'lt': DateTime.now().toIso8601String(),
-      },
+      if (ltDate != null)
+        'updated_at': {
+          'lt': ltDate.toUtc().toIso8601String(),
+        },
       'limit': limit,
     });
 
     final currentUser = await userRepository.getCurrentUser();
     final cids = conversations.map((element) => element.id!).toList();
-    var usersMap = await getParticipantsAsMap(cids);
+    var (participants, users) = await getParticipants(cids);
+    var usersMap = getParticipantsAsMap(users);
 
     final List<ConversationModel> result = conversations.map((conversation) {
-      return _buildConversationModel(conversation, usersMap, currentUser);
+      var chatParticipants = participants[conversation.id]!
+          .map((id) => usersMap[id])
+          .toList()
+          .nonNulls
+          .toList();
+
+      return _buildConversationModel(
+          conversation, usersMap, chatParticipants, currentUser);
     }).toList();
 
     return result;
@@ -229,8 +237,12 @@ class ConversationRepository {
       final conversation = (await fetchConversationsByIds([cid])).firstOrNull;
       if (conversation == null) return null;
       final currentUser = await userRepository.getCurrentUser();
-      final participants = await getParticipantsAsMap([cid]);
-      return _buildConversationModel(conversation, participants, currentUser);
+      var (allParticipants, users) = await getParticipants([cid]);
+      final usersMap = getParticipantsAsMap(users);
+      var participantsModels =
+          allParticipants[conversation.id]!.map((id) => usersMap[id]!).toList();
+      return _buildConversationModel(
+          conversation, usersMap, participantsModels, currentUser);
     }
     return conversation;
   }
@@ -242,9 +254,12 @@ class ConversationRepository {
       return localDatasource.getConversationLocal(cid);
     }
     final currentUser = await userRepository.getCurrentUser();
-    final participants = await getParticipantsAsMap([cid]);
-    var conversationModel =
-        _buildConversationModel(conversation, participants, currentUser);
+    var (allParticipants, users) = await getParticipants([cid]);
+    final usersMap = getParticipantsAsMap(users);
+    var participantsModels =
+        allParticipants[conversation.id]!.map((id) => usersMap[id]!).toList();
+    var conversationModel = _buildConversationModel(
+        conversation, usersMap, participantsModels, currentUser);
     localDatasource.updateConversationLocal(conversationModel);
     return conversationModel;
   }
@@ -322,6 +337,11 @@ class ConversationRepository {
     return result;
   }
 
+  Future<void> updateConversationLocal(ConversationModel chat) async {
+    await localDatasource.updateConversationLocal(chat);
+    _conversationsController.add(chat);
+  }
+
   Future<bool> deleteConversation(ConversationModel conversation) async {
     var result = await api.deleteConversation(conversation.id);
     if (result) await localDatasource.removeConversationLocal(conversation.id);
@@ -329,11 +349,14 @@ class ConversationRepository {
     return result;
   }
 
-  ConversationModel _buildConversationModel(Conversation conversation,
-      Map<String, UserModel> participants, UserModel? currentUser) {
-    final opponent = participants[conversation.opponentId];
+  ConversationModel _buildConversationModel(
+      Conversation conversation,
+      Map<String, UserModel> users,
+      List<UserModel> participants,
+      UserModel? currentUser) {
+    final opponent = users[conversation.opponentId];
     //can be null if user deleted
-    final owner = participants[conversation.ownerId];
+    final owner = users[conversation.ownerId];
 
     return ConversationModel(
         id: conversation.id!,
@@ -349,6 +372,7 @@ class ConversationRepository {
       ..lastMessage =
           conversation.lastMessage?.toMessageModel() // maybe set cid from chat
       ..avatar =
-          getConversationAvatar(conversation, owner, opponent, currentUser);
+          getConversationAvatar(conversation, owner, opponent, currentUser)
+      ..participants.addAll(participants);
   }
 }

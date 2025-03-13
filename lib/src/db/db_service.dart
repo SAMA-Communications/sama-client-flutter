@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 
 import '../../objectbox.g.dart';
 import 'models/conversation_model.dart';
+import 'models/message_model.dart';
 import 'models/user_model.dart';
 
 const dbName = 'SamaObjectBox';
@@ -80,6 +81,22 @@ class DatabaseService {
     return result;
   }
 
+  Future<ConversationModel?> getConversationLocalByMsgId(String id) async {
+    final lastMessage = await getMessageLocal(id);
+
+    final query = store!
+        .box<ConversationModel>()
+        .query(ConversationModel_.lastMessageBind.equals(lastMessage!.bid!))
+        .build();
+    final result = await query.findFirstAsync();
+    query.close();
+    return result;
+  }
+
+  Future<MessageModel> updateConversationLastMessage(MessageModel item) async {
+    return store!.box<MessageModel>().putAndGetAsync(item, mode: PutMode.put);
+  }
+
   Future<List<ConversationModel>> getConversationsLocal(
       List<String> ids) async {
     final query = store!
@@ -106,7 +123,7 @@ class DatabaseService {
     for (var chat in items) {
       final chatInDb = chatsInDbMap[chat.id];
       if (chatInDb != null) {
-        assignConversation(chat, chatInDb);
+        await assignConversation(chat, chatInDb);
       }
     }
 
@@ -131,7 +148,7 @@ class DatabaseService {
       query.close();
 
       if (chatInDb != null) {
-        assignConversation(item, chatInDb);
+        await assignConversation(item, chatInDb);
       }
     }
     await store!.box<ConversationModel>().putAsync(item, mode: PutMode.put);
@@ -151,18 +168,27 @@ class DatabaseService {
     return true;
   }
 
-  void assignConversation(ConversationModel chat, ConversationModel chatInDb) {
+  Future<void> assignConversation(
+      ConversationModel chat, ConversationModel chatInDb) async {
     chat.bid = chatInDb.bid;
     chat.opponent?.bid = chatInDb.opponent?.bid;
-
     if (chatInDb.owner?.id == chat.owner?.id) {
       chat.owner?.bid = chatInDb.owner?.bid;
     }
     if (chatInDb.avatar?.fileId == chat.avatar?.fileId) {
       chat.avatar?.bid = chatInDb.avatar?.bid;
     }
-    if (chatInDb.lastMessage == chat.lastMessage) {
+    if (chatInDb.lastMessage?.id == chat.lastMessage?.id) {
       chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
+
+      if (chat.lastMessage != chatInDb.lastMessage) {
+        var msg = chatInDb.lastMessage
+            ?.copyWith(rawStatus: chat.lastMessage?.rawStatus);
+        await store!.box<MessageModel>().putAsync(msg!, mode: PutMode.update);
+      }
+    } else {
+      final lastMessage = await getMessageLocal(chat.lastMessage!.id!);
+      chat.lastMessage?.bid = lastMessage?.bid;
     }
   }
 
@@ -226,4 +252,85 @@ class DatabaseService {
   /// ///////////////////////////
   /// Message Store Functions ///
   /// ///////////////////////////
+
+  Future<List<MessageModel>> getAllMessagesLocal(
+      String cid, DateTime? ltDate) async {
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.cid.equals(cid).and(
+            MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now())))
+        .order(MessageModel_.createdAt, flags: Order.descending)
+        .build();
+    final results = await query.findAsync();
+    query.close();
+    return results;
+  }
+
+  Future<bool> saveMessagesLocal(List<MessageModel> items) async {
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.id
+            .oneOf(items.map((element) => element.id!).toList()))
+        .build();
+
+    final messagesInDb = await query.findAsync();
+    query.close();
+
+    var messagesInDbMap = {for (var v in messagesInDb) v.id: v};
+    for (var message in items) {
+      final messageInDb = messagesInDbMap[message.id];
+      if (messageInDb != null) {
+        message.bid = messageInDb.bid;
+        // message.attachments?.forEach((a) {
+        //   a.bid = messageInDb.attachments.bid ;
+        // }
+      }
+    }
+
+    await store!.box<MessageModel>().putManyAsync(items, mode: PutMode.put);
+    return true;
+  }
+
+  Future<MessageModel?> getMessageLocal(String id) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.equals(id)).build();
+    final message = query.findFirst();
+    query.close();
+    return message;
+  }
+
+  Future<List<MessageModel>> getMessagesLocal(List<String> ids) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.oneOf(ids)).build();
+    final results = query.findAsync();
+    query.close();
+    return results;
+  }
+
+  Future<bool> saveMessageLocal(MessageModel item) async {
+    await store!.box<MessageModel>().putAsync(item, mode: PutMode.put);
+    return true;
+  }
+
+  Future<MessageModel> updateMessageLocal(MessageModel item) async {
+    if (item.bid == null) {
+      final query = store!
+          .box<MessageModel>()
+          .query(MessageModel_.id.equals(item.id!))
+          .build();
+      final msgInDb = await query.findFirstAsync();
+      query.close();
+
+      if (msgInDb != null) {
+        assignMessage(item, msgInDb);
+      }
+    }
+    return await store!
+        .box<MessageModel>()
+        .putAndGetAsync(item, mode: PutMode.put);
+  }
+
+  Future<void> assignMessage(MessageModel msg, MessageModel msgInDb) async {
+    msg.bid = msgInDb.bid;
+  }
 }

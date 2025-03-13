@@ -72,7 +72,7 @@
     },
     {
       "id": "11:6168919874786736956",
-      "lastPropertyId": "8:1010284661967327878",
+      "lastPropertyId": "9:1875750503242122079",
       "name": "MessageModel",
       "properties": [
         {
@@ -85,7 +85,7 @@
           "id": "2:3431085295353515294",
           "name": "id",
           "type": 9,
-          "flags": 34848,
+          "flags": 2080,
           "indexId": "27:1312181892016791297"
         },
         {
@@ -117,6 +117,11 @@
           "id": "8:1010284661967327878",
           "name": "createdAt",
           "type": 10
+        },
+        {
+          "id": "9:1875750503242122079",
+          "name": "dbExtension",
+          "type": 9
         }
       ],
       "relations": [
@@ -287,12 +292,18 @@
           "type": 1
         }
       ],
-      "relations": []
+      "relations": [
+        {
+          "id": "5:7785256265115248397",
+          "name": "participants",
+          "targetId": "12:6516061588255621718"
+        }
+      ]
     }
   ],
   "lastEntityId": "13:9106374520578572502",
   "lastIndexId": "35:2642777293408708995",
-  "lastRelationId": "4:5100230969978387914",
+  "lastRelationId": "5:7785256265115248397",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,

@@ -9,6 +9,7 @@ final class ConversationState extends Equatable {
     this.messages = const <ChatMessage>[],
     this.participants = const <UserModel>{},
     this.hasReachedMax = false,
+    this.initial = false,
   });
 
   final ConversationModel conversation;
@@ -16,6 +17,7 @@ final class ConversationState extends Equatable {
   final List<ChatMessage> messages;
   final Set<UserModel> participants;
   final bool hasReachedMax;
+  final bool initial;
 
   ConversationState copyWith({
     ConversationModel? conversation,
@@ -23,6 +25,7 @@ final class ConversationState extends Equatable {
     List<ChatMessage>? messages,
     Set<UserModel>? participants,
     bool? hasReachedMax,
+    bool? initial,
   }) {
     return ConversationState(
       conversation: conversation ?? this.conversation,
@@ -30,15 +33,16 @@ final class ConversationState extends Equatable {
       messages: messages ?? this.messages,
       participants: participants ?? this.participants,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      initial: initial ?? this.initial,
     );
   }
 
   @override
   String toString() {
-    return 'ConversationState { status: $status, hasReachedMax: $hasReachedMax, messages: ${messages.length}, participants: ${participants.length} }';
+    return 'ConversationState { status: $status, hasReachedMax: $hasReachedMax, initial: $initial, messages: ${messages.length}, participants: ${participants.length} }';
   }
 
   @override
   List<Object> get props =>
-      [conversation, status, messages, hasReachedMax, participants];
+      [conversation, status, messages, hasReachedMax, initial, participants];
 }

@@ -91,7 +91,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(11, 6168919874786736956),
       name: 'MessageModel',
-      lastPropertyId: const obx_int.IdUid(8, 1010284661967327878),
+      lastPropertyId: const obx_int.IdUid(9, 1875750503242122079),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -103,7 +103,7 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 3431085295353515294),
             name: 'id',
             type: 9,
-            flags: 34848,
+            flags: 2080,
             indexId: const obx_int.IdUid(27, 1312181892016791297)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 298933995628152516),
@@ -134,6 +134,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(8, 1010284661967327878),
             name: 'createdAt',
             type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 1875750503242122079),
+            name: 'dbExtension',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[
@@ -296,7 +301,12 @@ final _entities = <obx_int.ModelEntity>[
             type: 1,
             flags: 0)
       ],
-      relations: <obx_int.ModelRelation>[],
+      relations: <obx_int.ModelRelation>[
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(5, 7785256265115248397),
+            name: 'participants',
+            targetId: const obx_int.IdUid(12, 6516061588255621718))
+      ],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -337,7 +347,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       entities: _entities,
       lastEntityId: const obx_int.IdUid(13, 9106374520578572502),
       lastIndexId: const obx_int.IdUid(35, 2642777293408708995),
-      lastRelationId: const obx_int.IdUid(4, 5100230969978387914),
+      lastRelationId: const obx_int.IdUid(5, 7785256265115248397),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
         8221608220756309685,
@@ -564,7 +574,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
               : fbb.writeString(object.rawStatus!);
           final bodyOffset =
               object.body == null ? null : fbb.writeString(object.body!);
-          fbb.startTable(9);
+          final dbExtensionOffset = object.dbExtension == null
+              ? null
+              : fbb.writeString(object.dbExtension!);
+          fbb.startTable(10);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addOffset(2, fromOffset);
@@ -573,6 +586,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(5, bodyOffset);
           fbb.addInt64(6, object.t);
           fbb.addInt64(7, object.createdAt?.millisecondsSinceEpoch);
+          fbb.addOffset(8, dbExtensionOffset);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -606,7 +620,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
               rawStatus: rawStatusParam,
               body: bodyParam,
               createdAt: createdAtParam,
-              t: tParam);
+              t: tParam)
+            ..dbExtension = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 20);
           obx_int.InternalToManyAccess.setRelInfo<MessageModel>(
               object.attachments,
               store,
@@ -711,7 +727,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
               object.opponentBind,
               object.ownerBind
             ],
-        toManyRelations: (ConversationModel object) => {},
+        toManyRelations: (ConversationModel object) => {
+              obx_int.RelInfo<ConversationModel>.toMany(5, object.bid!):
+                  object.participants
+            },
         getId: (ConversationModel object) => object.bid,
         setId: (ConversationModel object, int id) {
           object.bid = id;
@@ -784,6 +803,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.ownerBind.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 30, 0);
           object.ownerBind.attach(store);
+          obx_int.InternalToManyAccess.setRelInfo<ConversationModel>(
+              object.participants,
+              store,
+              obx_int.RelInfo<ConversationModel>.toMany(5, object.bid!));
           return object;
         })
   };
@@ -866,6 +889,10 @@ class MessageModel_ {
   /// See [MessageModel.createdAt].
   static final createdAt =
       obx.QueryDateProperty<MessageModel>(_entities[2].properties[7]);
+
+  /// See [MessageModel.dbExtension].
+  static final dbExtension =
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[8]);
 
   /// see [MessageModel.attachments]
   static final attachments =
@@ -980,4 +1007,9 @@ class ConversationModel_ {
   /// See [ConversationModel.isEncrypted].
   static final isEncrypted =
       obx.QueryBooleanProperty<ConversationModel>(_entities[4].properties[12]);
+
+  /// see [ConversationModel.participants]
+  static final participants =
+      obx.QueryRelationToMany<ConversationModel, UserModel>(
+          _entities[4].relations[0]);
 }
