@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../features/profile/view/profile_form.dart';
-import '../../../navigation/constants.dart';
 import '../../../repository/user/user_repository.dart';
+import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/widget/env_dialog_widget.dart';
-import '../../../shared/widget/multi_gesture_detector.dart';
 import '../bloc/profile_bloc.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -30,12 +27,11 @@ class ProfilePage extends StatelessWidget {
           centerTitle: true,
         ),
         body: BlocProvider(
-          create: (context) {
-            return ProfileBloc(
-              userRepository: RepositoryProvider.of<UserRepository>(context),
-            );
-          },
-          child: const ProfileForm(),
-        ));
+            create: (context) {
+              return ProfileBloc(
+                userRepository: RepositoryProvider.of<UserRepository>(context),
+              );
+            },
+            child: const ConnectionChecker(child: ProfileForm())));
   }
 }

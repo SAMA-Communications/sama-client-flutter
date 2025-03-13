@@ -54,16 +54,20 @@ class DatabaseService {
   /// Conversation Store Functions ///
   /// ////////////////////////////////
 
-  Future<List<ConversationModel>> getAllConversationsLocal() async {
+  Future<List<ConversationModel>> getAllConversationsLocal(
+      DateTime? ltDate) async {
     var filter = ConversationModel_.type
         .equals('u')
-        .and(ConversationModel_.lastMessageBind.notEquals(0))
+        .and(ConversationModel_.lastMessageBind.notEquals(0).and(
+            ConversationModel_.updatedAt
+                .lessThanDate(ltDate ?? DateTime.now())))
         .or(ConversationModel_.type.equals('g'));
 
     final query = store!
         .box<ConversationModel>()
         // .query(filtered ? filter : null)
-        .query()
+        .query(
+            ConversationModel_.updatedAt.lessThanDate(ltDate ?? DateTime.now()))
         .order(ConversationModel_.updatedAt, flags: Order.descending)
         .build();
     final results = await query.findAsync();

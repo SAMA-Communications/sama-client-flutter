@@ -167,7 +167,7 @@ class ConversationRepository {
     return NetworkBoundResources<List<ConversationModel>,
             List<ConversationModel>>()
         .asFuture(
-      loadFromDb: () => localDatasource.getAllConversationsLocal(),
+      loadFromDb: () => localDatasource.getAllConversationsLocal(ltDate: ltDate),
       shouldFetch: (data, slice) {
         var oldData = data?.take(10).toList();
         slice?.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
@@ -175,7 +175,7 @@ class ConversationRepository {
         return result;
       },
       createCallSlice: () => _fetchConversationsWithParticipants(
-          ltDate: DateTime.now(), limit: 10),
+          ltDate: ltDate ?? DateTime.now(), limit: 10),
       createCall: () => _fetchConversationsWithParticipants(ltDate: ltDate),
       saveCallResult: localDatasource.saveConversationsLocal,
       processResponse: (data) async {

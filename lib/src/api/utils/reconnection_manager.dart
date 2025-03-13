@@ -28,7 +28,7 @@ class ReconnectionManager {
 
   void init() {
     log('[ReconnectionManager][init]');
-    _connectionStateSubscription =
+    _connectionStateSubscription ??=
         SamaConnectionService.instance.connectionStateStream.listen((state) {
       log('[ReconnectionManager]',
           stringData: 'connection state changed to $state');
@@ -37,7 +37,7 @@ class ReconnectionManager {
       }
     });
 
-    _networkConnectionStateSubscription = ConnectivityManager
+    _networkConnectionStateSubscription ??= ConnectivityManager
         .instance.connectivityStream
         .listen((networkConnectionState) {
       log('[ReconnectionManager]',

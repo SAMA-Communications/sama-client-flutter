@@ -26,7 +26,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
       routes: <RouteBase>[
         GoRoute(
           path: rootScreenPath,
-          builder: (context, state) => const HomePage(),
+          builder: (context, state) => HomePage.route(),
           redirect: (context, state) {
             final status = context.read<AuthenticationBloc>().state.status;
             print(
@@ -44,7 +44,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         GoRoute(
           path: conversationListScreenPath,
           builder: (context, state) {
-            return const HomePage();
+            return HomePage.route();
           },
           routes: [
             GoRoute(
@@ -143,7 +143,11 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
           return BlocProvider.of<AuthenticationBloc>(context)
               .tryGetHasCurrentUser()
               .then((hasUser) {
-            return hasUser ? conversationListScreenPath : loginScreenPath;
+            return hasUser
+                ? state.fullPath == rootScreenPath
+                    ? conversationListScreenPath
+                    : state.fullPath
+                : loginScreenPath;
           });
         }
       },
@@ -157,9 +161,8 @@ class GoRouterRefreshBloc extends ChangeNotifier {
     _blocStream = authBloc.stream.listen(
       (AuthenticationState authenticationState) {
         print('[GoRouterRefreshBloc][listen] state: $authenticationState');
-        if (authenticationState.status == AuthenticationStatus.authenticated ||
-            authenticationState.status ==
-                AuthenticationStatus.unauthenticated) {
+        if (authenticationState.status ==
+            AuthenticationStatus.unauthenticated) {
           print('[GoRouterRefreshBloc][listen] notifyListeners');
           notifyListeners();
         }

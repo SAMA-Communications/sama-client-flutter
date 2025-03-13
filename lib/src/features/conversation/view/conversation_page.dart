@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ConnectionState;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +14,8 @@ import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
+import '../../../shared/connection/bloc/connection_bloc.dart';
+import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';
@@ -86,7 +88,14 @@ class ConversationPage extends StatelessWidget {
         ),
         body: Column(
           children: [
-            const Flexible(child: MessagesList()),
+            BlocListener<ConnectionBloc, ConnectionState>(
+                listener: (context, state) {
+                  if (state.status == ConnectionStatus.connected) {
+                    BlocProvider.of<ConversationBloc>(context)
+                        .add(const MessagesRequested(force: true));
+                  }
+                },
+                child: const Flexible(child: MessagesList())),
             Padding(
                 //need extra space for safe area on ios
                 padding: EdgeInsets.only(
@@ -104,15 +113,16 @@ class ConversationPage extends StatelessWidget {
                                 .add(SharingIntentCompleted());
                           }
                         },
-                        child: MessageInput(
-                            sharedText: context
-                                .read<SharingIntentBloc>()
-                                .state
-                                .sharedFiles
-                                .firstOrNull
-                                ?.path),
+                        child: ConnectionChecker(
+                            child: MessageInput(
+                                sharedText: context
+                                    .read<SharingIntentBloc>()
+                                    .state
+                                    .sharedFiles
+                                    .firstOrNull
+                                    ?.path)),
                       )
-                    : const MessageInput())
+                    : const ConnectionChecker(child: MessageInput()))
           ],
         ),
       );
@@ -162,7 +172,6 @@ enum _Menu { info, deleteAndLeave }
 class _PopupMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var state = context.read<ConversationBloc>().state;
     return PopupMenuButton<_Menu>(
         position: PopupMenuPosition.under,
         onSelected: (_Menu item) {
@@ -171,33 +180,35 @@ class _PopupMenuButton extends StatelessWidget {
               _infoAction(context);
               break;
             case _Menu.deleteAndLeave:
-              showDialog(
-                  context: context,
-                  builder: (_) {
-                    return BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                        child: AlertDialog(
-                          title: const Text('Delete chat',
-                              style: TextStyle(fontSize: 20)),
-                          content: const Text(
-                              'Do you want to delete this chat?',
-                              style: TextStyle(fontSize: 16)),
-                          actions: <Widget>[
-                            TextButton(
-                              child: const Text("Cancel"),
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
-                            TextButton(
-                              child: const Text("Ok"),
-                              onPressed: () {
-                                context
-                                    .read<ConversationBloc>()
-                                    .add(const ConversationDeleted());
-                              },
-                            ),
-                          ],
-                        ));
-                  });
+              connectionChecker(
+                  context,
+                  () => showDialog(
+                      context: context,
+                      builder: (_) {
+                        return BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                            child: AlertDialog(
+                              title: const Text('Delete chat',
+                                  style: TextStyle(fontSize: 20)),
+                              content: const Text(
+                                  'Do you want to delete this chat?',
+                                  style: TextStyle(fontSize: 16)),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text("Cancel"),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                                TextButton(
+                                  child: const Text("Ok"),
+                                  onPressed: () {
+                                    context
+                                        .read<ConversationBloc>()
+                                        .add(const ConversationDeleted());
+                                  },
+                                ),
+                              ],
+                            ));
+                      }));
               break;
           }
         },
@@ -228,13 +239,9 @@ class _PopupMenuButton extends StatelessWidget {
 }
 
 Future<void> _infoAction(BuildContext context) async {
-  var currentUserId = context.read<AuthenticationBloc>().state.userId;
   var state = context.read<ConversationBloc>().state;
-
   if (state.conversation.type == 'u') {
-    var user =
-        state.participants.firstWhere((user) => user.id != currentUserId);
-    context.push(userInfoPath, extra: user);
+    context.push(userInfoPath, extra: state.conversation.opponent);
   } else {
     bool conversationUpdated =
         await context.push(groupInfoPath, extra: state.conversation) as bool;

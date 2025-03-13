@@ -17,6 +17,7 @@ import 'src/repository/global_search/global_search_repository.dart';
 import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
+import 'src/shared/connection/bloc/connection_bloc.dart';
 import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
 import 'src/shared/secure_storage.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
@@ -110,10 +111,9 @@ class _AppState extends State<App> {
       child: MultiBlocProvider(providers: [
         BlocProvider(
           create: (context) => AuthenticationBloc(
-            authenticationRepository: _authenticationRepository,
-            userRepository: _userRepository,
-          ),
+              authenticationRepository: _authenticationRepository),
         ),
+        BlocProvider(create: (context) => ConnectionBloc()),
         BlocProvider(create: (context) => SharingIntentBloc()),
         BlocProvider(
             create: (context) => PushNotificationsBloc(
