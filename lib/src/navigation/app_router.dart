@@ -136,6 +136,13 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         }
 
         if (status == AuthenticationStatus.authenticated) {
+          // fix for https://github.com/flutter/flutter/issues/146616
+          if (state.fullPath ==
+                  '$conversationListScreenPath/$conversationScreenSubPath' &&
+              state.extra == null) {
+            context.goNamed(state.matchedLocation);
+          }
+
           return state.fullPath == loginScreenPath
               ? rootScreenPath
               : state.fullPath;
@@ -161,8 +168,9 @@ class GoRouterRefreshBloc extends ChangeNotifier {
     _blocStream = authBloc.stream.listen(
       (AuthenticationState authenticationState) {
         print('[GoRouterRefreshBloc][listen] state: $authenticationState');
-        if (authenticationState.status ==
-            AuthenticationStatus.unauthenticated) {
+        if (authenticationState.status == AuthenticationStatus.authenticated ||
+            authenticationState.status ==
+                AuthenticationStatus.unauthenticated) {
           print('[GoRouterRefreshBloc][listen] notifyListeners');
           notifyListeners();
         }

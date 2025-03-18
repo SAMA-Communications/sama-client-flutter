@@ -113,7 +113,7 @@ class _AppState extends State<App> {
           create: (context) => AuthenticationBloc(
               authenticationRepository: _authenticationRepository),
         ),
-        BlocProvider(create: (context) => ConnectionBloc()),
+        BlocProvider(create: (context) => ConnectionBloc(), lazy: false),
         BlocProvider(create: (context) => SharingIntentBloc()),
         BlocProvider(
             create: (context) => PushNotificationsBloc(

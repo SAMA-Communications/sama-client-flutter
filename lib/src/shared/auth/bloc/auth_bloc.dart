@@ -31,9 +31,9 @@ class AuthenticationBloc
         .listen((status) async {
       if (status == api.ConnectionState.connected &&
           state.status == AuthenticationStatus.unauthenticated) {
-        if (await SecureStorage.instance.hasCurrentUser()) {
-          tryAuthUser();
-        }
+        //TODO RP fix to set authenticated when open app without network
+        add(const _AuthenticationStatusChanged(
+            AuthenticationStatus.authenticated));
       }
     });
   }

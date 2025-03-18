@@ -16,10 +16,15 @@ class HomePage extends StatelessWidget {
   static BlocProvider route() {
     return BlocProvider<ConversationsBloc>(
         create: (context) {
-          return ConversationsBloc(
+          final bloc = ConversationsBloc(
               conversationRepository:
                   RepositoryProvider.of<ConversationRepository>(context))
             ..add(const ConversationsFetched());
+          if (context.read<ConnectionBloc>().state.status ==
+              ConnectionStatus.connected) {
+            bloc.add(const ConversationsFetched(force: true));
+          }
+          return bloc;
         },
         child: const HomePage());
   }

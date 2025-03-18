@@ -48,7 +48,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
 
   Future<void> _onConversationsFetched(event, emit) async {
     try {
-      if (state.status == ConversationsStatus.initial) {
+      if (state.status == ConversationsStatus.initial && !event.force) {
         final conversations =
             await _conversationRepository.getStoredConversations();
         return emit(
