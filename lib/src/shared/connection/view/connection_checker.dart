@@ -17,13 +17,7 @@ class ConnectionChecker extends StatelessWidget {
       return Listener(
           onPointerDown: (event) {
             if (absorbPointer) {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'Oops! You need to be online to perform this action')),
-                );
+              _showConnectionErrorSnackBar(context);
             }
           },
           child: AbsorbPointer(
@@ -34,16 +28,21 @@ class ConnectionChecker extends StatelessWidget {
   }
 }
 
-connectionChecker(BuildContext ctx, Function() func) {
-  if (ctx.read<ConnectionBloc>().state.status == ConnectionStatus.connected) {
+connectionChecker(BuildContext context, Function() func) {
+  if (context.read<ConnectionBloc>().state.status ==
+      ConnectionStatus.connected) {
     func.call();
   } else {
-    ScaffoldMessenger.of(ctx)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-            content:
-                Text('Oops! You need to be online to perform this action')),
-      );
+    _showConnectionErrorSnackBar(context);
   }
+}
+
+_showConnectionErrorSnackBar(BuildContext context) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      const SnackBar(
+          duration: Duration(seconds: 2),
+          content: Text('Oops! You need to be online to perform this action')),
+    );
 }
