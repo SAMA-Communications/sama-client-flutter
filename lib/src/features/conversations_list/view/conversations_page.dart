@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
+import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
+import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/connection/bloc/connection_bloc.dart';
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
@@ -37,13 +39,27 @@ class HomePage extends StatelessWidget {
           appBar: state.status == SharingIntentStatus.processing
               ? const SelectChatAppBar() as PreferredSizeWidget
               : const ChatAppBar(),
-          body: BlocListener<ConnectionBloc, ConnectionState>(
-            listener: (context, state) {
-              if (state.status == ConnectionStatus.connected) {
-                BlocProvider.of<ConversationsBloc>(context)
-                    .add(const ConversationsFetched(force: true));
-              }
-            },
+          body: MultiBlocListener(
+            listeners: [
+              BlocListener<AuthenticationBloc, AuthenticationState>(
+                listener: (context, state) {
+                  if (state.status == AuthenticationStatus.authenticated) {
+                    BlocProvider.of<ConversationsBloc>(context)
+                        .add(const ConversationsFetched(force: true));
+                  }
+                },
+              ),
+              BlocListener<ConnectionBloc, ConnectionState>(
+                listener: (context, state) {
+                  if (state.status == ConnectionStatus.connected &&
+                      context.read<AuthenticationBloc>().state.status ==
+                          AuthenticationStatus.authenticated) {
+                    BlocProvider.of<ConversationsBloc>(context)
+                        .add(const ConversationsFetched(force: true));
+                  }
+                },
+              ),
+            ],
             child: const ConversationsList(),
           ),
           floatingActionButton: state.status == SharingIntentStatus.processing
