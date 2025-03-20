@@ -213,18 +213,19 @@ class MessagesRepository {
   }
 
   Future<void> sendMediaMessage(cid,
-      {String? body, List<api.Attachment> attachments = const []}) {
+      {String? body, List<api.Attachment> attachments = const []}) async {
+    var currentUser = await userRepository.getCurrentUser();
     var message = api.Message(
         cid: cid,
         body: body?.trim(),
         attachments: attachments,
+        from: currentUser?.id,
         id: const Uuid().v1(),
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
     return api.sendMessage(message: message).then(
-      (_) async {
-        var currentUser = await userRepository.getCurrentUser();
+      (_) {
         var msgModel = message.toMessageModel();
         _incomingMessagesController
             .add(msgModel.toChatMessage(currentUser!, true, true, true));
