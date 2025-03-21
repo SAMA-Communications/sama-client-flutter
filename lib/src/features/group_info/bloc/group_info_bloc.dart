@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
 
 import '../../../api/api.dart';
-import '../../../db/models/conversation.dart';
+import '../../../db/models/models.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/user/user_repository.dart';
 import '../models/models.dart';
@@ -29,9 +29,11 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
     on<GroupInfoResetChanges>(_onResetChanges);
     on<GroupInfoSubmitted>(_onSubmitted);
 
+    add(GroupParticipantsReceived(conversation.participants.toList()));
+
     _conversationRepository
         .getParticipants([state.conversation.id]).then((users) {
-      add(GroupParticipantsReceived(users));
+      add(GroupParticipantsReceived(users.$2));
     });
   }
 
@@ -49,7 +51,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
           description:
               GroupDescription.pure(state.conversation.description ?? ''),
           avatar: GroupAvatar.pure(state.conversation.avatar?.imageUrl),
-          localUser: await _userRepository.getLocalUser(),
+          currentUser: await _userRepository.getCurrentUser(),
           participants: GroupParticipants.pure(event.participants.toSet())),
     );
   }
@@ -184,7 +186,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
           isValid: false,
           name: Groupname.pure(chat?.name ?? ''),
           description: GroupDescription.pure(chat?.description ?? ''),
-          participants: GroupParticipants.pure(participants.toSet()),
+          participants: GroupParticipants.pure(participants.$2.toSet()),
           addParticipants: const GroupParticipants.pure(),
           removeParticipants: const GroupParticipants.pure()),
     );
@@ -221,7 +223,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
             isValid: false,
             name: Groupname.pure(chat?.name ?? ''),
             description: GroupDescription.pure(chat?.description ?? ''),
-            participants: GroupParticipants.pure(Set.of(participants)),
+            participants: GroupParticipants.pure(Set.of(participants.$2)),
             addParticipants: const GroupParticipants.pure(),
             removeParticipants: const GroupParticipants.pure(),
             informationMessage: 'Chat was successfully updated'));
@@ -235,7 +237,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
             isValid: false,
             name: Groupname.pure(chat.name),
             description: GroupDescription.pure(chat.description ?? ''),
-            participants: GroupParticipants.pure(participants.toSet()),
+            participants: GroupParticipants.pure(participants.$2.toSet()),
             addParticipants: const GroupParticipants.pure(),
             removeParticipants: const GroupParticipants.pure(),
             errorMessage: 'Chat wasn\'t updated: ${e.message}'));

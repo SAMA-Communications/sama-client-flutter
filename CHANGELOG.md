@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0
+
+### Features:
+- Implemented local database for Chats
+- Implemented local database for Messages
+- Enhance app by adding offline stubs for some functionalities
+- Implemented CI
+
 ## 0.7.0
 
 ### Features:

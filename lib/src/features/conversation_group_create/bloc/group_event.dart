@@ -21,7 +21,7 @@ final class GroupAvatarPicked extends GroupEvent {}
 final class GroupParticipantsAdded extends GroupEvent {
   const GroupParticipantsAdded(this.user);
 
-  final User user;
+  final UserModel user;
 
   @override
   List<Object> get props => [user];
@@ -30,7 +30,7 @@ final class GroupParticipantsAdded extends GroupEvent {
 final class GroupParticipantsRemoved extends GroupEvent {
   const GroupParticipantsRemoved(this.user);
 
-  final User user;
+  final UserModel user;
 
   @override
   List<Object> get props => [user];

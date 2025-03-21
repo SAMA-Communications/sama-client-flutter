@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../api/api.dart';
+import '../../../db/models/models.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -34,34 +34,33 @@ class _MessagesListState extends State<MessagesList> {
       builder: (context, state) {
         switch (state.status) {
           case ConversationStatus.failure:
-            return Center(
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(24),
-                child: const Text(
-                  'The chat is unavailable. Please check your Internet connection.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            );
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'The chat update is unavailable. Please check your Internet connection.')),
+                  ));
+            continue success;
+          success:
           case ConversationStatus.success:
             if (state.messages.isEmpty) {
-              return Center(
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(24),
-                  child: const Text(
-                    'Write the first message...',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              );
+              return state.initial
+                  ? const Center(child: CircularProgressIndicator())
+                  : Center(
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(24),
+                        child: const Text(
+                          'Write the first message...',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    );
             }
             markAsReadIfNeed();
             return ListView.separated(
@@ -72,6 +71,7 @@ class _MessagesListState extends State<MessagesList> {
               },
               itemCount: state.messages.length,
               controller: _scrollController,
+              padding: EdgeInsets.zero,
               separatorBuilder: (context, index) => const SizedBox(
                 height: 5,
               ),
@@ -105,7 +105,7 @@ class _MessagesListState extends State<MessagesList> {
 
   void _onScroll() {
     if (_isTop) {
-      context.read<ConversationBloc>().add(const MessagesRequested());
+      context.read<ConversationBloc>().add(const MessagesMoreRequested());
     }
   }
 
@@ -163,10 +163,10 @@ class _MessagesListState extends State<MessagesList> {
           notification = '';
       }
 
-      User? initiator;
+      UserModel? initiator;
 
       if (message.extension?['user'] != null) {
-        initiator = User.fromJson((message.extension?['user']));
+        initiator = User.fromJson((message.extension?['user'])).toUserModel();
       }
 
       return ServiceMessageBubble(

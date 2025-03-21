@@ -228,7 +228,7 @@ class SamaConnectionService {
     if (requestInfo != null) {
       var completer = requestInfo.completer;
       if (error != null) {
-        var responseException = ResponseException.fromJson(error);
+        var responseException = ResponseException.fromJson(error);//CHECK AFTER FIX https://connectycube-apps.atlassian.net/browse/FM-114
         if (responseException.status == HttpStatus.unauthorized) {
           print('Unauthorized wait to reconnect $unauthorizedTimeout seconds');
           //Unauthorized wait to reconnect

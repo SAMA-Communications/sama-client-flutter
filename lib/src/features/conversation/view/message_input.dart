@@ -5,18 +5,26 @@ import '../../../shared/ui/colors.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import 'media_sender.dart';
 
-class MessageInput extends StatelessWidget {
+class MessageInput extends StatefulWidget {
   final String? sharedText;
-  late final TextEditingController textEditingController =
-      TextEditingController(text: sharedText);
 
-  MessageInput({this.sharedText, super.key});
+  const MessageInput({super.key, this.sharedText});
+
+  @override
+  State<StatefulWidget> createState() {
+    return _MessageInputState();
+  }
+}
+
+class _MessageInputState extends State<MessageInput> {
+  late final TextEditingController textEditingController =
+      TextEditingController(text: widget.sharedText);
 
   @override
   Widget build(BuildContext context) {
-    if (sharedText != null) {
+    if (widget.sharedText != null) {
       BlocProvider.of<SendMessageBloc>(context)
-          .add(TextMessageChanged(sharedText!));
+          .add(TextMessageChanged(widget.sharedText!));
     }
     return BlocListener<SendMessageBloc, SendMessageState>(
       listener: (context, state) {

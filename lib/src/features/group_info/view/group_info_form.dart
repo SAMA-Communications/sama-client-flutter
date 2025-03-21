@@ -52,7 +52,7 @@ class AvatarDescriptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
-        context.read<AuthenticationBloc>().state.user.id!;
+        context.read<GroupInfoBloc>().state.currentUser?.id;
 
     return ListTile(
       titleAlignment: ListTileTitleAlignment.top,
@@ -240,8 +240,9 @@ class GroupInfoCard extends StatelessWidget {
             previous.participants != current.participants,
         builder: (context, state) {
           var ownerId = state.conversation.owner?.id ?? '';
-          var localUserId = context.read<AuthenticationBloc>().state.user.id!;
-          var isOwner = ownerId == localUserId;
+          var currentUserId =
+              context.read<GroupInfoBloc>().state.currentUser?.id ?? '';
+          var isOwner = ownerId == currentUserId;
           return Padding(
               padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
               child: SizedBox(
@@ -256,7 +257,7 @@ class GroupInfoCard extends StatelessWidget {
                             child: _ParticipantsListForm(
                                 isOwner: isOwner,
                                 ownerId: ownerId,
-                                localUserId: localUserId)),
+                                currentUserId: currentUserId)),
                       ]),
                     ),
                   )));
@@ -298,12 +299,12 @@ class _ParticipantsHeaderForm extends StatelessWidget {
 class _ParticipantsListForm extends StatelessWidget {
   final bool isOwner;
   final String ownerId;
-  final String localUserId;
+  final String currentUserId;
 
   const _ParticipantsListForm(
       {required this.isOwner,
       required this.ownerId,
-      required this.localUserId});
+      required this.currentUserId});
 
   @override
   Widget build(BuildContext context) {
@@ -332,11 +333,11 @@ class _ParticipantsListForm extends StatelessWidget {
           ]),
           contentPadding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
           onTap: () {
-            user.id == localUserId
+            user.id == currentUserId
                 ? context.push(profilePath)
                 : context.push(userInfoPath, extra: user);
           },
-          trailing: isOwner && user.id != localUserId
+          trailing: isOwner && user.id != currentUserId
               ? IconButton(
                   icon: const Icon(Icons.person_remove_outlined,
                       color: signalBlack),
@@ -355,7 +356,6 @@ class _ParticipantsListForm extends StatelessWidget {
 }
 
 void _showSearchScreenDialog(BuildContext context) {
-  bool keyboardIsOpen = MediaQuery.of(context).viewInsets.bottom != 0;
   showDialog(
       context: context,
       useSafeArea: false,
@@ -389,7 +389,7 @@ void _showSearchScreenDialog(BuildContext context) {
                           current.addParticipants;
                     }, builder: (context, state) {
                       var currentParticipants = List.of(
-                          state.participants.value..remove(state.localUser));
+                          state.participants.value..remove(state.currentUser));
                       return ParticipantsForm(
                         users: currentParticipants
                           ..addAll(state.addParticipants.value),
@@ -418,7 +418,7 @@ void _showSearchScreenDialog(BuildContext context) {
                   ),
                 ),
                 floatingActionButton: Visibility(
-                  visible: !keyboardIsOpen,
+                  visible: !keyboardIsOpen(context),
                   child: FloatingActionButton(
                     backgroundColor: dullGray,
                     tooltip: 'Add participants',

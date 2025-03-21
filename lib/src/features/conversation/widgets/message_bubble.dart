@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/user_model.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 
 class MessageBubble extends StatelessWidget {
-  final User sender;
+  final UserModel sender;
   final bool isFirst;
   final bool isLast;
   final bool isOwn;

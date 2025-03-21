@@ -6,7 +6,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path/path.dart';
 
-import '../../../db/models/conversation.dart';
+import '../../../db/models/conversation_model.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';

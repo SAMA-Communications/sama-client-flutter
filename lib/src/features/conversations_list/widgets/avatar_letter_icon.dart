@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/avatar_model.dart';
 import '../../../shared/ui/colors.dart';
 
 class AvatarLetterIcon extends StatelessWidget {
@@ -25,7 +25,7 @@ class AvatarLetterIcon extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Color backgroundColor;
   final Color textColor;
-  final Avatar? avatar;
+  final AvatarModel? avatar;
   final bool? isDeleted;
 
   String getText() {
@@ -55,21 +55,29 @@ class AvatarLetterIcon extends StatelessWidget {
                   height: size.height,
                   width: size.width,
                   fit: BoxFit.cover,
+                  errorBuilder: (BuildContext context, Object exception,
+                      StackTrace? stackTrace) {
+                    return _defaultIcon();
+                  },
                 )
               : isDeleted ?? false
                   ? const Icon(
                       Icons.person_off_outlined,
                       size: 30.0,
                     )
-                  : Text(
-                      getText(),
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: textColor,
-                          fontSize: size.height / 2.7),
-                    ),
+                  : _defaultIcon(),
         ),
       ),
+    );
+  }
+
+  Widget _defaultIcon() {
+    return Text(
+      getText(),
+      style: TextStyle(
+          fontWeight: FontWeight.w400,
+          color: textColor,
+          fontSize: size.height / 2.7),
     );
   }
 }

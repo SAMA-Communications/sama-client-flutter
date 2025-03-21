@@ -1,7 +1,7 @@
 import '../../api/api.dart';
-import '../../db/models/conversation.dart';
+import '../../db/models/models.dart';
 
-String getUserName(User? user) {
+String getUserName(UserModel? user) {
   if (user == null) return 'Deleted user';
 
   return (user.lastName?.isEmpty ?? true && (user.firstName?.isEmpty ?? true))
@@ -9,15 +9,15 @@ String getUserName(User? user) {
       : '${user.firstName ?? ''} ${user.lastName ?? ''}';
 }
 
-String getConversationName(
-    Conversation conversation, User? owner, User? opponent, User? localUser) {
+String getConversationName(Conversation conversation, UserModel? owner,
+    UserModel? opponent, UserModel? currentUser) {
   if (conversation.type! == 'g') return conversation.name!;
-  var user = conversation.opponentId == localUser?.id ? owner : opponent;
+  var user = conversation.opponentId == currentUser?.id ? owner : opponent;
   return getUserName(user);
 }
 
-String getSystemMessagePushBody(
-    ConversationModel conversation, SystemChatMessage message, User? opponent) {
+String getSystemMessagePushBody(ConversationModel conversation,
+    SystemChatMessage message, UserModel? opponent) {
   var opponentName = getUserName(opponent);
   return message.type == SystemChatMessageType.conversationKicked
       ? '$opponentName removed you from conversation'
@@ -28,23 +28,24 @@ String getSystemMessagePushBody(
               : 'message';
 }
 
-Avatar? getConversationAvatar(
-    Conversation conversation, User? owner, User? opponent, User? localUser) {
+AvatarModel? getConversationAvatar(Conversation conversation, UserModel? owner,
+    UserModel? opponent, UserModel? currentUser) {
   return conversation.type == 'u'
-      ? conversation.opponentId == localUser?.id
+      ? conversation.opponentId == currentUser?.id
           ? owner?.avatar
           : opponent?.avatar
-      : conversation.avatar;
+      : conversation.avatar?.toAvatarModel();
 }
 
 // set opponent always as real opponent for current user
-User? getConversationOpponent(User? owner, User? opponent, User? localUser) {
+UserModel? getConversationOpponent(
+    UserModel? owner, UserModel? opponent, UserModel? currentUser) {
   return opponent == null
       ? null
-      : opponent == localUser
+      : opponent.id == currentUser?.id
           ? owner
           : opponent;
 }
 
-bool isDeletedUser(User? user) =>
+bool isDeletedUser(UserModel? user) =>
     user == null || (user.email == null && user.login == null);

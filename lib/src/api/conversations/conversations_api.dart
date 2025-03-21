@@ -14,9 +14,11 @@ const String conversationCreate = 'conversation_create';
 const String conversationUpdate = 'conversation_update';
 const String conversationDelete = 'conversation_delete';
 
-Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
+Future<List<Conversation>> fetchConversations(
+    Map<String, dynamic>? params) async {
   return SamaConnectionService.instance
-      .sendRequest(conversationsRequest, {}).then((response) {
+      .sendRequest(conversationsRequest, params)
+      .then((response) {
     List<Conversation> conversations;
     List<dynamic> items = List.of(response['conversations']);
     if (items.isEmpty) {
@@ -29,18 +31,18 @@ Future<List<Conversation>> fetchConversations([int startIndex = 0]) async {
   });
 }
 
-Future<List<User>> fetchParticipants(List<String> cids) async {
+Future<(Map<String, List<String>>, List<User>)> fetchParticipants(
+    List<String> cids) async {
   return SamaConnectionService.instance.sendRequest(getParticipantsByCids, {
     'cids': cids,
   }).then((response) {
-    List<User> users;
-    List<dynamic> items = List.of(response['users']);
-    if (items.isEmpty) {
-      users = [];
-    } else {
-      users = items.map((element) => User.fromJson(element)).toList();
-    }
-    return users;
+    List<User> users = List.of(response['users'])
+        .map((element) => User.fromJson(element))
+        .toList();
+
+    Map<String, List<String>> participants = Map.of(response['conversations'])
+        .map((k, v) => MapEntry(k, v.cast<String>()));
+    return (participants, users);
   });
 }
 

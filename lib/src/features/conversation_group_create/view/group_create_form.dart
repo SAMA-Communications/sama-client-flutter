@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 
-import '../../../api/api.dart';
+import '../../../db/models/user_model.dart';
 import '../../../features/conversation_create/bloc/conversation_create_event.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/participants_forms.dart';
 import '../../../shared/utils/api_utils.dart';
+import '../../../shared/utils/screen_factor.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../../search/view/search_bar.dart';
@@ -30,7 +31,6 @@ class GroupCreateFormState extends State<GroupCreateForm> {
 
   @override
   Widget build(BuildContext context) {
-    bool keyboardIsOpen = MediaQuery.of(context).viewInsets.bottom != 0;
     return Scaffold(
         appBar: const GlobalSearchBar(),
         body: Container(
@@ -83,7 +83,7 @@ class GroupCreateFormState extends State<GroupCreateForm> {
           return previous.participants != current.participants;
         }, builder: (context, state) {
           return Visibility(
-            visible: !keyboardIsOpen,
+            visible: !keyboardIsOpen(context),
             child: Visibility(
               visible: state.participants.isValid,
               child: FloatingActionButton(
@@ -101,7 +101,6 @@ class GroupCreateFormState extends State<GroupCreateForm> {
 }
 
 void _showGroupDetails(BuildContext context) {
-  bool keyboardIsOpen = MediaQuery.of(context).viewInsets.bottom != 0;
   showDialog(
       context: context,
       useSafeArea: false,
@@ -120,7 +119,7 @@ void _showGroupDetails(BuildContext context) {
                 value: BlocProvider.of<GroupBloc>(context),
                 child: _GroupDetailsForm()),
             floatingActionButton: Visibility(
-              visible: !keyboardIsOpen,
+              visible: !keyboardIsOpen(context),
               child: FloatingActionButton(
                 backgroundColor: slateBlue,
                 tooltip: 'Create chat',
@@ -269,7 +268,7 @@ class _GroupNameInput extends StatelessWidget {
 class _Participants extends StatelessWidget {
   const _Participants({required this.users});
 
-  final List<User> users;
+  final List<UserModel> users;
 
   @override
   Widget build(BuildContext context) {

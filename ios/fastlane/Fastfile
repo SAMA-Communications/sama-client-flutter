@@ -1,0 +1,19 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    build_app(workspace: "Runner.xcworkspace", scheme: "Runner")
+    update_code_signing_settings(
+      use_automatic_signing: true,
+    )
+    app_store_connect_api_key(
+      key_id: "AK3WT5WRQ8",
+      issuer_id: "6d88c1be-5e00-4779-880d-f8f0954ad8a4",
+      key_filepath: "/Users/main/Documents/sama/AuthKey_AK3WT5WRQ8.p8",
+      duration: 1200, 
+      in_house: false 
+    )
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+  end
+end

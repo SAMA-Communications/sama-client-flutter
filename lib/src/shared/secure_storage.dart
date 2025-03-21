@@ -1,7 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/api.dart';
 import '../api/utils/config.dart';
+import '../db/models/models.dart';
 
 const String storageUserId = "storage_user_id";
 const String storageUserLogin = "storage_user_login";
@@ -25,14 +27,14 @@ class SecureStorage {
 
   static SecureStorage get instance => _instance;
 
-  Future<void> saveLocalUserIfNeed(User user) async {
-    if (await hasLocalUser() && await localUserWasNotUpdated(user)) {
+  Future<void> saveCurrentUserIfNeed(UserModel user) async {
+    if (await hasCurrentUser() && await currentUserWasNotUpdated(user)) {
       return;
     }
-    saveLocalUser(user);
+    saveCurrentUser(user);
   }
 
-  Future<void> saveLocalUser(User user) async {
+  Future<void> saveCurrentUser(UserModel user) async {
     if (user.id != null) {
       _storage.write(key: storageUserId, value: user.id);
     }
@@ -59,7 +61,7 @@ class SecureStorage {
     }
   }
 
-  Future<User?> getLocalUser() async {
+  Future<UserModel?> getCurrentUser() async {
     String? id = await _storage.read(key: storageUserId);
     String? login = await _storage.read(key: storageUserLogin);
     String? deviceId = await _storage.read(key: storageUserDeviceId);
@@ -69,28 +71,28 @@ class SecureStorage {
     String? email = await _storage.read(key: storageUserEmail);
     String? avatarUrl = await _storage.read(key: storageUserAvatar);
     if (login != null) {
-      return User(
+      return UserModel(
           id: id,
           login: login,
-          avatar: Avatar(imageUrl: avatarUrl),
           deviceId: deviceId,
           firstName: firstName,
           lastName: lastName,
           phone: phone,
-          email: email);
+          email: email)
+        ..avatar = AvatarModel(imageUrl: avatarUrl);
     }
     return null;
   }
 
-  Future<bool> hasLocalUser() async {
+  Future<bool> hasCurrentUser() async {
     return await _storage.containsKey(key: storageUserLogin);
   }
 
-  Future<bool> localUserWasNotUpdated(User user) async {
-    return await getLocalUser() == user;
+  Future<bool> currentUserWasNotUpdated(UserModel user) async {
+    return await getCurrentUser() == user;
   }
 
-  Future<void> deleteLocalUser() async {
+  Future<void> deleteCurrentUser() async {
     _storage.delete(key: storageUserId);
     _storage.delete(key: storageUserLogin);
     _storage.delete(key: storageUserDeviceId);
@@ -107,7 +109,7 @@ class SecureStorage {
   }
 
   Future<void> deleteAllData() async {
-    deleteLocalUser();
+    deleteCurrentUser();
     _storage.delete(key: storageEnvironmentUrl);
   }
 
@@ -150,5 +152,15 @@ class SecureStorage {
 
   Future<String> getEnvironmentUrl() async {
     return (await _storage.read(key: storageEnvironmentUrl)) ?? EnvType.dev.url;
+  }
+}
+
+//fix to clear iOS data when uninstall app (can/should be removed when app is stable)
+void clearKeychainValuesIfUninstall() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  if (prefs.getBool('is_first_app_launch') ?? true) {
+    await SecureStorage.instance.deleteAllData();
+    await prefs.setBool('is_first_app_launch', false);
   }
 }

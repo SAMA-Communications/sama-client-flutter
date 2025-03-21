@@ -52,19 +52,21 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
             );
           case ConversationsStatus.success:
             if (state.conversations.isEmpty) {
-              return Center(
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(24),
-                  child: const Text(
-                    'No conversations yet...',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              );
+              return state.initial
+                  ? const Center(child: CircularProgressIndicator())
+                  : Center(
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(24),
+                        child: const Text(
+                          'No conversations yet...',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    );
             }
             return ListView.separated(
                 itemBuilder: (BuildContext context, int index) {
@@ -73,9 +75,10 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
                       : ConversationListItem(
                           conversation: state.conversations[index]);
                 },
-                itemCount: state.hasReachedMax
-                    ? state.conversations.length
-                    : state.conversations.length + 1,
+                itemCount: state.conversations.length,
+                // itemCount: state.hasReachedMax
+                //     ? state.conversations.length
+                //     : state.conversations.length + 1,
                 controller: _scrollController,
                 separatorBuilder: (context, index) => const SizedBox(
                       height: 5,
@@ -97,8 +100,9 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
   }
 
   void _onScroll() {
-    if (_isBottom)
-      context.read<ConversationsBloc>().add(ConversationsFetched());
+    if (_isBottom) {
+      context.read<ConversationsBloc>().add(ConversationsMoreFetched());
+    }
   }
 
   bool get _isBottom {
