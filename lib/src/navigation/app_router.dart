@@ -26,7 +26,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
       routes: <RouteBase>[
         GoRoute(
           path: rootScreenPath,
-          builder: (context, state) => const HomePage(),
+          builder: (context, state) => HomePage.route(),
           redirect: (context, state) {
             final status = context.read<AuthenticationBloc>().state.status;
             print(
@@ -44,7 +44,7 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         GoRoute(
           path: conversationListScreenPath,
           builder: (context, state) {
-            return const HomePage();
+            return HomePage.route();
           },
           routes: [
             GoRoute(
@@ -136,6 +136,13 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         }
 
         if (status == AuthenticationStatus.authenticated) {
+          // fix for https://github.com/flutter/flutter/issues/146616
+          if (state.fullPath ==
+                  '$conversationListScreenPath/$conversationScreenSubPath' &&
+              state.extra == null) {
+            context.goNamed(state.matchedLocation);
+          }
+
           return state.fullPath == loginScreenPath
               ? rootScreenPath
               : state.fullPath;
@@ -143,7 +150,11 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
           return BlocProvider.of<AuthenticationBloc>(context)
               .tryGetHasCurrentUser()
               .then((hasUser) {
-            return hasUser ? conversationListScreenPath : loginScreenPath;
+            return hasUser
+                ? state.fullPath == rootScreenPath
+                    ? conversationListScreenPath
+                    : state.fullPath
+                : loginScreenPath;
           });
         }
       },

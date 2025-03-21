@@ -47,23 +47,19 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
   }
 
   Future<void> _onConversationsFetched(event, emit) async {
-    if (state.hasReachedMax && !state.initial) return;
     try {
-      if (state.status == ConversationsStatus.initial) {
+      if (state.status == ConversationsStatus.initial && !event.force) {
         final conversations =
             await _conversationRepository.getStoredConversations();
-        emit(
+        return emit(
           state.copyWith(
               status: ConversationsStatus.success,
               conversations: conversations,
-              hasReachedMax:
-                  false, //FixME RP when if pagination will be implemented
+              hasReachedMax: true,
               initial: true),
         );
-        add(ConversationsFetched());
-        return;
       }
-      await _getAllConversations(emit);
+      await _getAllConversations(emit, force: event.force);
     } catch (err) {
       print("_onConversationFetched err= $err");
       if (state.conversations.isEmpty) {
@@ -86,7 +82,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
   }
 
   _getAllConversations(Emitter<ConversationsState> emit,
-      {DateTime? ltDate}) async {
+      {bool force = false, DateTime? ltDate}) async {
     var resource =
         await _conversationRepository.getAllConversations(ltDate: ltDate);
     switch (resource.status) {
@@ -97,7 +93,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
             : emit(
                 state.copyWith(
                   status: ConversationsStatus.success,
-                  conversations: state.initial
+                  conversations: state.initial || force
                       ? List.of(conversations)
                       : (List.of(state.conversations)..addAll(conversations)),
                   hasReachedMax: false,

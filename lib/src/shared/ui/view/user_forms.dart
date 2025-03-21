@@ -21,20 +21,28 @@ class AvatarForm extends StatelessWidget {
         width: 85.0,
         child: Center(child: () {
           if (avatar == null || avatar!.isEmpty) {
-            return const Icon(
-              Icons.image_outlined,
-              color: dullGray,
-              size: 50.0,
-            );
+            return _defaultIcon();
           } else {
             return Image.network(
               avatar!,
               height: 75.0,
               width: 75.0,
               fit: BoxFit.cover,
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                return _defaultIcon();
+              },
             );
           }
         }()));
+  }
+
+  Widget _defaultIcon() {
+    return const Icon(
+      Icons.image_outlined,
+      color: dullGray,
+      size: 50.0,
+    );
   }
 }
 

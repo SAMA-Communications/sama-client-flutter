@@ -52,7 +52,7 @@ class AvatarDescriptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
-        context.read<AuthenticationBloc>().state.userId!;
+        context.read<GroupInfoBloc>().state.currentUser?.id;
 
     return ListTile(
       titleAlignment: ListTileTitleAlignment.top,
@@ -240,7 +240,8 @@ class GroupInfoCard extends StatelessWidget {
             previous.participants != current.participants,
         builder: (context, state) {
           var ownerId = state.conversation.owner?.id ?? '';
-          var currentUserId = context.read<AuthenticationBloc>().state.userId!;
+          var currentUserId =
+              context.read<GroupInfoBloc>().state.currentUser?.id ?? '';
           var isOwner = ownerId == currentUserId;
           return Padding(
               padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),

@@ -18,9 +18,7 @@ class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc({
     required AuthenticationRepository authenticationRepository,
-    required UserRepository userRepository,
   })  : _authenticationRepository = authenticationRepository,
-        _userRepository = userRepository,
         super(const AuthenticationState.unknown()) {
     on<_AuthenticationStatusChanged>(_onAuthenticationStatusChanged);
     on<AuthenticationLogoutRequested>(_onAuthenticationLogoutRequested);
@@ -28,16 +26,27 @@ class AuthenticationBloc
     _authenticationStatusSubscription = _authenticationRepository.status.listen(
       (status) => add(_AuthenticationStatusChanged(status)),
     );
+    _connectionStateSubscription = api
+        .SamaConnectionService.instance.connectionStateStream
+        .listen((status) async {
+      if (status == api.ConnectionState.connected &&
+          state.status == AuthenticationStatus.unauthenticated) {
+        //TODO RP fix to set authenticated when open app without network
+        add(const _AuthenticationStatusChanged(
+            AuthenticationStatus.authenticated));
+      }
+    });
   }
 
   final AuthenticationRepository _authenticationRepository;
-  final UserRepository _userRepository;
   late StreamSubscription<AuthenticationStatus>
       _authenticationStatusSubscription;
+  late StreamSubscription<api.ConnectionState> _connectionStateSubscription;
 
   @override
   Future<void> close() {
     _authenticationStatusSubscription.cancel();
+    _connectionStateSubscription.cancel();
     return super.close();
   }
 

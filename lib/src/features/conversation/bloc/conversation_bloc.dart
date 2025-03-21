@@ -123,8 +123,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     MessagesRequested event,
     Emitter<ConversationState> emit,
   ) async {
-    if (state.hasReachedMax && !state.initial) return;
-
     try {
       if (state.status == ConversationStatus.initial) {
         final messages =
@@ -140,7 +138,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         add(const MessagesRequested());
         return;
       }
-      await _getAllMessages(emit);
+      await _getAllMessages(emit, force: event.force);
     } catch (e) {
       log('[ConversationBloc]', stringData: e.toString());
       emit(state.copyWith(status: ConversationStatus.failure));
@@ -161,7 +159,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   _getAllMessages(Emitter<ConversationState> emit,
-      {DateTime? ltDate, DateTime? gtTime}) async {
+      {bool force = false, DateTime? ltDate, DateTime? gtTime}) async {
     var resource = await messagesRepository.getAllMessages(currentConversation,
         ltDate: ltDate, gtTime: gtTime);
     switch (resource.status) {
@@ -172,7 +170,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
             : emit(
                 state.copyWith(
                   status: ConversationStatus.success,
-                  messages: state.initial
+                  messages: state.initial || force
                       ? List.of(messages)
                       : (List.of(state.messages)..addAll(messages)),
                   hasReachedMax: false,
@@ -253,8 +251,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         id: event.status.serverMessageId, status: ChatMessageStatus.sent);
     messages[messages.indexOf(msg)] = msgUpdated;
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
-    conversationRepository.updateConversationLocal(
-        currentConversation.copyWith(lastMessage: msgLocal));
+    conversationRepository.updateConversationLocal(currentConversation.copyWith(
+        lastMessage: msgLocal, updatedAt: msgLocal.createdAt));
     emit(state.copyWith(messages: messages));
   }
 

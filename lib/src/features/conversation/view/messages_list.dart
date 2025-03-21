@@ -34,19 +34,16 @@ class _MessagesListState extends State<MessagesList> {
       builder: (context, state) {
         switch (state.status) {
           case ConversationStatus.failure:
-            return Center(
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(24),
-                child: const Text(
-                  'The chat is unavailable. Please check your Internet connection.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            );
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'The chat update is unavailable. Please check your Internet connection.')),
+                  ));
+            continue success;
+          success:
           case ConversationStatus.success:
             if (state.messages.isEmpty) {
               return state.initial
