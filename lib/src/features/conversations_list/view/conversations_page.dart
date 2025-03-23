@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
-import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/connection/bloc/connection_bloc.dart';
@@ -39,27 +38,13 @@ class HomePage extends StatelessWidget {
           appBar: state.status == SharingIntentStatus.processing
               ? const SelectChatAppBar() as PreferredSizeWidget
               : const ChatAppBar(),
-          body: MultiBlocListener(
-            listeners: [
-              BlocListener<AuthenticationBloc, AuthenticationState>(
-                listener: (context, state) {
-                  if (state.status == AuthenticationStatus.authenticated) {
-                    BlocProvider.of<ConversationsBloc>(context)
-                        .add(const ConversationsFetched(force: true));
-                  }
-                },
-              ),
-              BlocListener<ConnectionBloc, ConnectionState>(
-                listener: (context, state) {
-                  if (state.status == ConnectionStatus.connected &&
-                      context.read<AuthenticationBloc>().state.status ==
-                          AuthenticationStatus.authenticated) {
-                    BlocProvider.of<ConversationsBloc>(context)
-                        .add(const ConversationsFetched(force: true));
-                  }
-                },
-              ),
-            ],
+          body: BlocListener<ConnectionBloc, ConnectionState>(
+            listener: (context, state) {
+              if (state.status == ConnectionStatus.connected) {
+                BlocProvider.of<ConversationsBloc>(context)
+                    .add(const ConversationsFetched(force: true));
+              }
+            },
             child: const ConversationsList(),
           ),
           floatingActionButton: state.status == SharingIntentStatus.processing
@@ -128,10 +113,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 context.push(profilePath);
               },
             )),
-        title: const Text(
-          'Chat',
-          style: TextStyle(color: white),
-        ),
+        title: _getTitle(state),
         centerTitle: true,
         actions: <Widget>[
           ConnectionChecker(
@@ -147,6 +129,41 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       );
     });
+  }
+
+  Widget _getTitle(ConnectionState state) {
+    if (state.status == ConnectionStatus.connected) {
+      return _getTitleText(state);
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 10,
+      children: [
+        Transform.scale(
+            scale: 0.75,
+            child: const CircularProgressIndicator(
+                color: white, strokeWidth: 2.0)),
+        _getTitleText(state),
+      ],
+    );
+  }
+
+  Text _getTitleText(ConnectionState state) {
+    String title;
+    double fontSize = 22.0;
+    switch (state.status) {
+      case ConnectionStatus.connecting:
+        title = 'Connecting…';
+        break;
+      case ConnectionStatus.connected:
+        title = 'Chat';
+        break;
+      case ConnectionStatus.disconnected:
+      case ConnectionStatus.offline:
+        title = 'Waiting for network';
+        fontSize = 20.0;
+    }
+    return Text(title, style: TextStyle(color: white, fontSize: fontSize));
   }
 
   _openSearch(BuildContext context) {

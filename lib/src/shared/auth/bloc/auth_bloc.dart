@@ -29,11 +29,10 @@ class AuthenticationBloc
     _connectionStateSubscription = api
         .SamaConnectionService.instance.connectionStateStream
         .listen((status) async {
+      //fix to set authenticated when open app without network
       if (status == api.ConnectionState.connected &&
           state.status == AuthenticationStatus.unauthenticated) {
-        //TODO RP fix to set authenticated when open app without network
-        add(const _AuthenticationStatusChanged(
-            AuthenticationStatus.authenticated));
+        tryAuthUser();
       }
     });
   }

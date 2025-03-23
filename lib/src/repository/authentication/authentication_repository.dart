@@ -15,7 +15,7 @@ enum AuthenticationStatus {
 }
 
 class AuthenticationRepository {
-  final _controller = StreamController<AuthenticationStatus>();
+  final _controller = StreamController<AuthenticationStatus>.broadcast();
   final UserRepository userRepository;
 
   AuthenticationRepository(this.userRepository);
@@ -53,7 +53,6 @@ class AuthenticationRepository {
   }
 
   Future<void> loginWithAccessToken([AccessToken? accessToken]) async {
-    //TODO RP FIX auto relogin
     ReconnectionManager.instance.init();
     DatabaseService.instance.init();
     try {
@@ -63,9 +62,6 @@ class AuthenticationRepository {
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {
-      // add loginWithAccessToken to reconnect
-      // ReconnectionManager.instance.addTask(() => loginWithAccessToken(accessToken));
-      // SamaConnectionService.instance.updateConnectionState(ConnectionState.failed);
       _controller.add(AuthenticationStatus.unauthenticated);
       return Future.error((e as api.ResponseException).message ?? '');
     }
