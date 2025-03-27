@@ -10,35 +10,25 @@ Read a complete medium post **Introducing SAMA** about what is SAMA and what pro
 
 ## Development
 
-### Versioning
-
-Flutter SDK version: 3.29.2 <br />
-Dart Version: 3.7.2 <br />
-
 ### Preparations
 
-1. Prepare environment for Flutter and clone the project.
+1. Prepare environment for Flutter and clone the project. Versions: Flutter SDK version: 3.29.2, Dart Version: 3.7.2
 2. Install dependencies via `flutter pub get`
 3. Generate config file `firebase_options.dart` via https://firebase.google.com/docs/flutter/setup and put it in `lib/firebase_options.dart`;
 
-## Config
-
-config file `lib/src/api/utils/config.dart`
-
 ### Run on Android:
-- Right mouse button click on `main.dart`;
-- Chose 'Run 'main.dart''.
+- Open project in Android Studio
+- Right mouse button click on `main.dart`
+- Chose 'Run 'main.dart''
 
 The app will automatically run on your Android device.
 
 ### Run on iOS:
-- Start Xcode;
-- Select `Runner.xcworkspace` to run Xcode project;
-- Press the' Build' button to start project building.
+- Start Xcode
+- Select `Runner.xcworkspace` to run Xcode project
+- Press the' Build' button to start project building
 
 The app will automatically run on a selected iOS device or simulator.
-
-
 
 ## Community and Support
 
@@ -50,7 +40,7 @@ Join our community for support and discussions:
 
 ## License
 
-Apache 2.0
+[Apache 2.0](LICENSE)
 
 ## Help us!
 
