@@ -40,7 +40,7 @@ Join our community for support and discussions:
 
 ## License
 
-[Apache 2.0](LICENSE)
+[GPL-3.0](LICENSE)
 
 ## Help us!
 
