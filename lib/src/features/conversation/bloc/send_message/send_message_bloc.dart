@@ -35,8 +35,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   Future<void> _onSendTextMessage(
       SendTextMessage event, Emitter<SendMessageState> emit) async {
     try {
-      await messagesRepository.sendTextMessage(
-          event.message, currentConversation.id);
+      messagesRepository.sendTextMessage(event.message, currentConversation.id);
       emit(
           state.copyWith(isTextEmpty: true, status: SendMessageStatus.success));
     } catch (_) {

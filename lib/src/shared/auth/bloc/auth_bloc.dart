@@ -7,7 +7,6 @@ import '../../../api/api.dart' as api;
 import '../../../api/utils/logger.dart';
 import '../../../db/models/models.dart';
 import '../../../repository/authentication/authentication_repository.dart';
-import '../../../repository/user/user_repository.dart';
 import '../../secure_storage.dart';
 
 part 'auth_event.dart';

@@ -111,16 +111,17 @@ class SamaConnectionService {
     dynamic requestData, {
     String? retryRequestId,
     Completer<Map<String, dynamic>>? retryCompleter,
+    bool shouldRetry = true,
   }) {
     var requestId = retryRequestId ??= const Uuid().v4().toString();
 
     var requestCompleter = retryCompleter ??= Completer<Map<String, dynamic>>();
 
     awaitingRequests[requestId] = RequestInfo(
-      name: requestName,
-      data: requestData,
-      completer: requestCompleter,
-    );
+        name: requestName,
+        data: requestData,
+        completer: requestCompleter,
+        shouldRetry: shouldRetry);
 
     var request = {
       'request': {
@@ -259,12 +260,14 @@ class SamaConnectionService {
   void resendAwaitingRequests() {
     if (awaitingRequests.isNotEmpty) {
       Map.of(awaitingRequests).forEach((requestId, requestInfo) {
-        sendRequest(
-          requestInfo.name,
-          requestInfo.data,
-          retryRequestId: requestId,
-          retryCompleter: requestInfo.completer,
-        );
+        if (requestInfo.shouldRetry) {
+          sendRequest(
+            requestInfo.name,
+            requestInfo.data,
+            retryRequestId: requestId,
+            retryCompleter: requestInfo.completer,
+          );
+        }
       });
     }
   }
@@ -276,7 +279,11 @@ class RequestInfo {
   final String name;
   final dynamic data;
   final Completer<Map<String, dynamic>> completer;
+  final bool shouldRetry;
 
   RequestInfo(
-      {required this.name, required this.data, required this.completer});
+      {required this.name,
+      required this.data,
+      required this.completer,
+      required this.shouldRetry});
 }

@@ -311,6 +311,14 @@ class DatabaseService {
     return results;
   }
 
+  Future<List<MessageModel>> getMessagesLocalByStatus(String state) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.rawStatus.equals(state)).build();
+    final results = query.findAsync();
+    query.close();
+    return results;
+  }
+
   Future<bool> saveMessageLocal(MessageModel item) async {
     await store!.box<MessageModel>().putAsync(item, mode: PutMode.put);
     return true;
@@ -336,5 +344,15 @@ class DatabaseService {
 
   Future<void> assignMessage(MessageModel msg, MessageModel msgInDb) async {
     msg.bid = msgInDb.bid;
+  }
+
+  Future<bool> removeMessageLocal(String id) async {
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.id.equals(id))
+        .build();
+    var result = await query.removeAsync();
+    query.close();
+    return true;
   }
 }

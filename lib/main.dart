@@ -18,6 +18,7 @@ import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/connection/bloc/connection_bloc.dart';
+import 'src/shared/messages_collector/messages_collector.dart';
 import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
 import 'src/shared/secure_storage.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
@@ -74,6 +75,8 @@ class _AppState extends State<App> {
     _globalSearchRepository = GlobalSearchRepository(
         conversationRepository: _conversationRepository,
         userRepository: _userRepository);
+    MessagesCollector.instance
+        .init(_conversationRepository, _messagesRepository);
   }
 
   @override
@@ -81,6 +84,7 @@ class _AppState extends State<App> {
     _authenticationRepository.dispose();
     _messagesRepository.dispose();
     _conversationRepository.dispose();
+    MessagesCollector.instance.destroy();
     DatabaseService.instance.close();
     super.dispose();
   }

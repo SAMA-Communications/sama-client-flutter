@@ -228,17 +228,17 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       ),
     );
 
-    emit(state.copyWith(messages: messages));
+    emit(
+        state.copyWith(messages: messages, status: ConversationStatus.success));
   }
 
-  FutureOr<void> _onPendingStatusReceived(
-      _PendingStatusReceived event, Emitter<ConversationState> emit) {
+  Future<void> _onPendingStatusReceived(
+      _PendingStatusReceived event, Emitter<ConversationState> emit) async {
     var messages = [...state.messages];
 
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
-    messages[messages.indexOf(msg)] =
-        msg.copyWith(status: ChatMessageStatus.pending);
-
+    var msgUpdated = msg.copyWith(status: ChatMessageStatus.pending);
+    messages[messages.indexOf(msg)] = msgUpdated;
     emit(state.copyWith(messages: messages));
   }
 

@@ -22,7 +22,8 @@ Future<bool> sendMessage({
   };
 
   return SamaConnectionService.instance
-      .sendRequest(messageRequestName, dataToSend, retryRequestId: message.id)
+      .sendRequest(messageRequestName, dataToSend,
+          retryRequestId: message.id, shouldRetry: false)
       .timeout(messageRequestTimeout)
       .then((response) {
     if (message.id == response['mid']) {

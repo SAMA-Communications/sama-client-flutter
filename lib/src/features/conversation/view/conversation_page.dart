@@ -125,7 +125,7 @@ class ConversationPage extends StatelessWidget {
                                     .firstOrNull
                                     ?.path)),
                       )
-                    : const ConnectionChecker(child: MessageInput()))
+                    : const MessageInput())
           ],
         ),
       );
