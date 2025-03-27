@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../api/api.dart';
 import '../../../api/connection/connection.dart' as conn;
+import '../../../repository/authentication/authentication_repository.dart';
 
 part 'connection_event.dart';
 
@@ -13,13 +14,29 @@ part 'connection_state.dart';
 class ConnectionBloc extends Bloc<ConnectionEvent, ConnectionState> {
   StreamSubscription<conn.ConnectionState>? connectionStateSubscription;
   StreamSubscription<ConnectivityState>? networkStateSubscription;
+  StreamSubscription<AuthenticationStatus>? _authenticationStatusSubscription;
+  final AuthenticationRepository _authenticationRepository;
 
-  ConnectionBloc() : super(const ConnectionState()) {
+  ConnectionBloc({
+    required AuthenticationRepository authenticationRepository,
+  })  : _authenticationRepository = authenticationRepository,
+        super(const ConnectionState()) {
     on<ConnectionStatusChanged>(
       _onConnectionStatusChanged,
     );
+    on<ConnectionAuthStatusChanged>(
+      _onConnectionAuthStatusChanged,
+    );
 
     _initConnectionState();
+
+    _authenticationStatusSubscription =
+        _authenticationRepository.status.listen((status) {
+      add(ConnectionAuthStatusChanged(status));
+      if (status == AuthenticationStatus.authenticated) {
+        add(const ConnectionStatusChanged(ConnectionStatus.connected));
+      }
+    });
 
     connectionStateSubscription =
         SamaConnectionService.instance.connectionStateStream.listen((status) {
@@ -30,7 +47,9 @@ class ConnectionBloc extends Bloc<ConnectionEvent, ConnectionState> {
           add(const ConnectionStatusChanged(ConnectionStatus.connecting));
           break;
         case conn.ConnectionState.connected:
-          add(const ConnectionStatusChanged(ConnectionStatus.connected));
+          if (state._authStatus == AuthenticationStatus.authenticated) {
+            add(const ConnectionStatusChanged(ConnectionStatus.connected));
+          }
           break;
         case conn.ConnectionState.disconnected:
         case conn.ConnectionState.failed:
@@ -55,6 +74,11 @@ class ConnectionBloc extends Bloc<ConnectionEvent, ConnectionState> {
     return emit(state.copyWith(status: event.status));
   }
 
+  Future<void> _onConnectionAuthStatusChanged(
+      ConnectionAuthStatusChanged event, Emitter<ConnectionState> emit) async {
+    return emit(state.copyWith(authStatus: event.authStatus));
+  }
+
   _initConnectionState() {
     ConnectivityManager.instance
         .checkIfNetworkConnectionAvailable()
@@ -69,6 +93,7 @@ class ConnectionBloc extends Bloc<ConnectionEvent, ConnectionState> {
 
   @override
   Future<void> close() {
+    _authenticationStatusSubscription?.cancel();
     connectionStateSubscription?.cancel();
     networkStateSubscription?.cancel();
     return super.close();

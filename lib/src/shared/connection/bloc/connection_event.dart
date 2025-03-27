@@ -12,3 +12,9 @@ final class ConnectionStatusChanged extends ConnectionEvent {
 
   const ConnectionStatusChanged(this.status);
 }
+
+final class ConnectionAuthStatusChanged extends ConnectionEvent {
+  final AuthenticationStatus authStatus;
+
+  const ConnectionAuthStatusChanged(this.authStatus);
+}
