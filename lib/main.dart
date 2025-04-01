@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'src/api/api.dart';
 import 'src/db/db_service.dart';
+import 'src/db/local/attachment_local_datasource.dart';
 import 'src/db/local/conversation_local_datasource.dart';
 import 'src/db/local/message_local_datasource.dart';
 import 'src/db/local/user_local_datasource.dart';
@@ -54,6 +55,7 @@ class _AppState extends State<App> {
   late final MessageLocalDatasource _messageLocalDatasource;
   late final AttachmentsRepository _attachmentsRepository;
   late final UserLocalDataSource _userLocalDataSource;
+  late final AttachmentLocalDatasource _attachmentLocalDatasource;
 
   @override
   void initState() {
@@ -62,12 +64,13 @@ class _AppState extends State<App> {
     _conversationLocalDatasource = ConversationLocalDatasource();
     _messageLocalDatasource = MessageLocalDatasource();
     _userLocalDataSource = UserLocalDataSource();
+    _attachmentLocalDatasource = AttachmentLocalDatasource();
     _userRepository = UserRepository(localDataSource: _userLocalDataSource);
     _authenticationRepository = AuthenticationRepository(_userRepository);
     _messagesRepository = MessagesRepository(
         localDatasource: _messageLocalDatasource,
         userRepository: _userRepository);
-    _attachmentsRepository = AttachmentsRepository();
+    _attachmentsRepository = AttachmentsRepository(_attachmentLocalDatasource);
     _conversationRepository = ConversationRepository(
         localDatasource: _conversationLocalDatasource,
         userRepository: _userRepository,

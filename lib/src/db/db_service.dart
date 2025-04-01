@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import '../../objectbox.g.dart';
+import 'models/attachment_model.dart';
 import 'models/conversation_model.dart';
 import 'models/message_model.dart';
 import 'models/user_model.dart';
@@ -353,6 +354,28 @@ class DatabaseService {
         .build();
     var result = await query.removeAsync();
     query.close();
+    return true;
+  }
+
+  Future<bool> updateAttachmentsLocal(List<AttachmentModel> items) async {
+    final query = store!
+        .box<AttachmentModel>()
+        .query(AttachmentModel_.fileId
+        .oneOf(items.map((element) => element.fileId!).toList()))
+        .build();
+
+    final attachmentsInDb = await query.findAsync();
+    query.close();
+
+    var attachmentsInDbMap = {for (var v in attachmentsInDb) v.fileId: v};
+    for (var attachment in items) {
+      final attachmentInDb = attachmentsInDbMap[attachment.fileId];
+      if (attachmentInDb != null) {
+        attachment.bid = attachmentInDb.bid;
+      }
+    }
+
+    await store!.box<AttachmentModel>().putManyAsync(items, mode: PutMode.put);
     return true;
   }
 }
