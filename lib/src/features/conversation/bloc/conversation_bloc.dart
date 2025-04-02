@@ -261,7 +261,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var messages = {for (var v in state.messages) v.id!: v};
     var msgListUpdated = <MessageModel>[];
     event.status.msgIds?.forEach((id) {
-      if (messages[id]?.status != ChatMessageStatus.read) {
+      if (messages[id] != null &&
+          messages[id]?.status != ChatMessageStatus.read) {
         var msg = messages[id]!.copyWith(status: ChatMessageStatus.read);
         messages[id] = msg;
         msgListUpdated.add(msg);

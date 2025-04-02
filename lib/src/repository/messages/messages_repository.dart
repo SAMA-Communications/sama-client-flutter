@@ -97,10 +97,11 @@ class MessagesRepository {
     });
 
     var result = <MessageModel>[];
-
+    var currentUser = await userRepository.getCurrentUser();
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-      var messageModel = message.toMessageModel();
+      var isOwn = currentUser?.id == message.from;
+      var messageModel = message.toMessageModel(isOwn: isOwn);
       result.add(messageModel);
     }
     return result;

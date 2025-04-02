@@ -86,12 +86,12 @@ class MessageModel extends Equatable {
 }
 
 extension MessageModelExtension on Message {
-  MessageModel toMessageModel() {
+  MessageModel toMessageModel({bool? isOwn}) {
     var messageModel = MessageModel(
       id: id,
       from: from,
       cid: cid,
-      rawStatus: rawStatus,
+      rawStatus: isOwn ?? false ? rawStatus ?? 'sent' : null,
       body: body,
       createdAt: createdAt,
       t: t,
