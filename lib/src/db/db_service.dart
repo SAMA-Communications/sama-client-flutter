@@ -285,10 +285,7 @@ class DatabaseService {
     for (var message in items) {
       final messageInDb = messagesInDbMap[message.id];
       if (messageInDb != null) {
-        message.bid = messageInDb.bid;
-        // message.attachments?.forEach((a) {
-        //   a.bid = messageInDb.attachments.bid ;
-        // }
+        assignMessage(message, messageInDb);
       }
     }
 
@@ -313,8 +310,10 @@ class DatabaseService {
   }
 
   Future<List<MessageModel>> getMessagesLocalByStatus(String state) async {
-    final query =
-        store!.box<MessageModel>().query(MessageModel_.rawStatus.equals(state)).build();
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.rawStatus.equals(state))
+        .build();
     final results = query.findAsync();
     query.close();
     return results;
@@ -345,13 +344,14 @@ class DatabaseService {
 
   Future<void> assignMessage(MessageModel msg, MessageModel msgInDb) async {
     msg.bid = msgInDb.bid;
+    if (msg.attachments.isNotEmpty) {
+      msg.attachments.clear();
+    }
   }
 
   Future<bool> removeMessageLocal(String id) async {
-    final query = store!
-        .box<MessageModel>()
-        .query(MessageModel_.id.equals(id))
-        .build();
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.equals(id)).build();
     var result = await query.removeAsync();
     query.close();
     return true;
@@ -361,7 +361,7 @@ class DatabaseService {
     final query = store!
         .box<AttachmentModel>()
         .query(AttachmentModel_.fileId
-        .oneOf(items.map((element) => element.fileId!).toList()))
+            .oneOf(items.map((element) => element.fileId!).toList()))
         .build();
 
     final attachmentsInDb = await query.findAsync();

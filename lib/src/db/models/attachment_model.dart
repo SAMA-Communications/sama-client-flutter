@@ -8,7 +8,7 @@ import '../../api/conversations/models/models.dart';
 class AttachmentModel extends Equatable {
   @Id()
   int? bid;
-  @Unique(onConflict: ConflictStrategy.replace)
+  @Unique()
   final String? fileId;
   final String? fileName;
   final String? fileBlurHash;

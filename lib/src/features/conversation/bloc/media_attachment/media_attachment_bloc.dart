@@ -54,7 +54,7 @@ class MediaAttachmentBloc
         message.attachments.applyToDb();
         message.attachments.addAll(attachments);
 
-        attachmentsRepository.updateAttachmentsLocal(attachments);
+        await attachmentsRepository.updateAttachmentsLocal(attachments);
 
         add(_AttachmentsUrlsReceived(Map.from(urls)));
       });

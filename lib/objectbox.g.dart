@@ -38,7 +38,7 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 747399038920962484),
             name: 'fileId',
             type: 9,
-            flags: 34848,
+            flags: 2080,
             indexId: const obx_int.IdUid(37, 873959491954871870)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 768953523524252804),
