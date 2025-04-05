@@ -7,6 +7,7 @@ import 'package:formz/formz.dart';
 
 import '../../../features/profile/bloc/profile_bloc.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
+import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/user_forms.dart';
 import '../../../shared/utils/screen_factor.dart';
@@ -74,14 +75,14 @@ class ProfileCard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AvatarNameTile(),
-                _UsernameForm(),
+                ConnectionChecker(child: AvatarNameTile()),
+                ConnectionChecker(child: _UsernameForm()),
                 SizedBox(height: columnItemMargin),
-                _PhoneForm(),
+                ConnectionChecker(child: _PhoneForm()),
                 SizedBox(height: columnItemMargin),
-                _EmailForm(),
+                ConnectionChecker(child: _EmailForm()),
                 SizedBox(height: columnItemMargin),
-                _AccountForm(),
+                ConnectionChecker(child: _AccountForm()),
                 Expanded(
                     child: Align(
                         alignment: Alignment.bottomRight, child: _LogoutForm()))
