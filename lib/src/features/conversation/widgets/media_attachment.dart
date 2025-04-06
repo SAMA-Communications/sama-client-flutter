@@ -116,7 +116,8 @@ Widget _buildMediaGrid(List<AttachmentModel> attachments) {
     ),
     childrenDelegate: SliverChildBuilderDelegate(
       childCount: attachments.length,
-      (context, index) => _buildMediaAttachmentItem(attachments[index]),
+      (context, index) =>
+          _buildMediaAttachmentItem(context, attachments[index]),
     ),
   );
 }
@@ -168,8 +169,8 @@ Widget buildImageItem(AttachmentModel attachment) {
   return CachedNetworkImage(
     fadeInDuration: const Duration(milliseconds: 300),
     fadeOutDuration: const Duration(milliseconds: 100),
-    maxHeightDiskCache: 300,
-    maxWidthDiskCache: 300,
+    maxHeightDiskCache: 600,
+    maxWidthDiskCache: 600,
     placeholder: (context, url) => Center(
       child: !validateBlurhash(attachment.fileBlurHash ?? '')
           ? const SizedBox(
