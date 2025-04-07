@@ -13,6 +13,7 @@ import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../models/models.dart';
+import 'media_attachment_widget.dart';
 import 'message_bubble.dart';
 import 'message_status_widget.dart';
 
@@ -117,15 +118,19 @@ Widget _buildMediaGrid(List<AttachmentModel> attachments) {
     childrenDelegate: SliverChildBuilderDelegate(
       childCount: attachments.length,
       (context, index) =>
-          _buildMediaAttachmentItem(context, attachments[index]),
+          _buildMediaAttachmentItem(context, attachments, index),
     ),
   );
 }
 
-Widget _buildMediaAttachmentItem(AttachmentModel attachment) {
+Widget _buildMediaAttachmentItem(
+    BuildContext context, List<AttachmentModel> attachments, int index) {
+  var attachment = attachments[index];
   return GestureDetector(
     onTap: () {
-      launchUrl(Uri.parse(attachment.url!));
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => MediaAttachmentWidget(attachments, index)),
+      );
     },
     child: AbsorbPointer(
       child: ClipRRect(
