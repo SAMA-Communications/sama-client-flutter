@@ -110,5 +110,7 @@ class ReconnectionManager {
     _reconnectionTimer?.cancel();
     _connectionStateSubscription?.cancel();
     _networkConnectionStateSubscription?.cancel();
+    _connectionStateSubscription = null;
+    _networkConnectionStateSubscription = null;
   }
 }
