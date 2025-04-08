@@ -102,8 +102,8 @@ class AuthenticationBloc
       await _authenticationRepository.loginWithAccessToken();
     } catch (e) {
       log('tryAuthUser e= $e');
-      //TODO RP CHECK ME
-      if (e.toString().contains('Expired')) {
+      //TODO RP CHECK ME (use checking with code 422)
+      if (e.toString().contains('expired')) {
         _authenticationRepository.disposeCurrentUser();
       }
     }

@@ -47,6 +47,14 @@ class SamaConnectionService {
         _updateConnectionState(ConnectionState.failed);
       }
     });
+    //fix for iOS https://github.com/dart-lang/http/issues/1487
+    ConnectivityManager.instance.connectivityStream
+        .listen((networkConnectionState) {
+      log('[SamaConnectionService][network connection changed to $networkConnectionState]');
+      if (networkConnectionState == ConnectivityState.none) {
+        _updateConnectionState(ConnectionState.failed);
+      }
+    });
   }
 
   Future<WebSocketChannel> connect() async {
