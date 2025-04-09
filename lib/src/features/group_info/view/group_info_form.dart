@@ -51,21 +51,24 @@ class AvatarDescriptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
-        context.read<GroupInfoBloc>().state.currentUser?.id;
-
-    return ListTile(
-      titleAlignment: ListTileTitleAlignment.top,
-      title: Center(
-        child: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: _ChatAvatar(isOwner: isOwner)),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: _ChatNameDescription(isOwner: isOwner),
-      ),
-    );
+    return BlocBuilder<GroupInfoBloc, GroupInfoState>(
+        builder: (context, state) {
+      var isOwner =
+          context.read<GroupInfoBloc>().state.conversation.owner?.id ==
+              context.read<GroupInfoBloc>().state.currentUser?.id;
+      return ListTile(
+        titleAlignment: ListTileTitleAlignment.top,
+        title: Center(
+          child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: _ChatAvatar(isOwner: isOwner)),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: _ChatNameDescription(isOwner: isOwner),
+        ),
+      );
+    });
   }
 }
 
