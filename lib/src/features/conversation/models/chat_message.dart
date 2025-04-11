@@ -82,7 +82,11 @@ extension ChatMessageExtension on MessageModel {
         isOwn: isOwn,
         isLastUserMessage: isLastUserMessage,
         isFirstUserMessage: isFirstUserMessage,
-        status: rawStatus == 'read' ? ChatMessageStatus.read : status,
+        status: rawStatus == 'read'
+            ? ChatMessageStatus.read
+            : rawStatus == 'pending'
+                ? ChatMessageStatus.pending
+                : status,
         id: id,
         from: from,
         cid: cid,

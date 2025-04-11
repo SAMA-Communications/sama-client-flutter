@@ -139,6 +139,6 @@ class ConversationModel extends Equatable {
         opponent,
         owner,
         avatar,
-        participants
+        participants.toSet()
       ];
 }

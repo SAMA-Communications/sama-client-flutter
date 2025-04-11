@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../features/profile/view/profile_form.dart';
 import '../../../repository/user/user_repository.dart';
-import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/profile_bloc.dart';
 
@@ -32,6 +31,6 @@ class ProfilePage extends StatelessWidget {
                 userRepository: RepositoryProvider.of<UserRepository>(context),
               );
             },
-            child: const ConnectionChecker(child: ProfileForm())));
+            child: const ProfileForm()));
   }
 }

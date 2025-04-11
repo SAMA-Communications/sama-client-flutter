@@ -25,8 +25,6 @@ class AuthenticationRepository {
     // await Future<void>.delayed(const Duration(seconds: 1));
     if (await SecureStorage.instance.hasCurrentUser()) {
       yield AuthenticationStatus.canBeAuthenticated;
-    } else {
-      yield AuthenticationStatus.unauthenticated;
     }
     yield* _controller.stream;
   }

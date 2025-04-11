@@ -117,7 +117,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   Widget buildMessageListItem(ChatMessage message) {
-    if (message.attachments?.isNotEmpty ?? false) {
+    if (message.attachments.isNotEmpty) {
       try {
         return MediaAttachment.create(
           message: message,

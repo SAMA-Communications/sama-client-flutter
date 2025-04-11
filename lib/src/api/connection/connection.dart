@@ -9,7 +9,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../shared/secure_storage.dart';
 import '../api.dart';
 
-const unauthorizedTimeout = 5;
+const unauthorizedTimeout = Duration(seconds: 5);
+const logoutRequestTimeout = Duration(seconds: 2);
 
 class SamaConnectionService {
   static final _instance = SamaConnectionService._();
@@ -43,6 +44,14 @@ class SamaConnectionService {
     ConnectivityManager.instance.connectivityChangedStream.listen((_) {
       log('[SamaConnectionService][network connection changed]');
       if (connectionState != ConnectionState.failed) {
+        _updateConnectionState(ConnectionState.failed);
+      }
+    });
+    //fix for iOS https://github.com/dart-lang/http/issues/1487
+    ConnectivityManager.instance.connectivityStream
+        .listen((networkConnectionState) {
+      log('[SamaConnectionService][network connection changed to $networkConnectionState]');
+      if (networkConnectionState == ConnectivityState.none) {
         _updateConnectionState(ConnectionState.failed);
       }
     });
@@ -111,16 +120,17 @@ class SamaConnectionService {
     dynamic requestData, {
     String? retryRequestId,
     Completer<Map<String, dynamic>>? retryCompleter,
+    bool shouldRetry = true,
   }) {
     var requestId = retryRequestId ??= const Uuid().v4().toString();
 
     var requestCompleter = retryCompleter ??= Completer<Map<String, dynamic>>();
 
     awaitingRequests[requestId] = RequestInfo(
-      name: requestName,
-      data: requestData,
-      completer: requestCompleter,
-    );
+        name: requestName,
+        data: requestData,
+        completer: requestCompleter,
+        shouldRetry: shouldRetry);
 
     var request = {
       'request': {
@@ -233,7 +243,7 @@ class SamaConnectionService {
           print('Unauthorized wait to reconnect $unauthorizedTimeout seconds');
           //Unauthorized wait to reconnect
           awaitingRequests[responseId] = requestInfo;
-          Future.delayed(const Duration(seconds: unauthorizedTimeout), () {
+          Future.delayed(unauthorizedTimeout, () {
             if (awaitingRequests[responseId] != null) {
               print('Unauthorized completeError');
               awaitingRequests.remove(responseId);
@@ -259,12 +269,14 @@ class SamaConnectionService {
   void resendAwaitingRequests() {
     if (awaitingRequests.isNotEmpty) {
       Map.of(awaitingRequests).forEach((requestId, requestInfo) {
-        sendRequest(
-          requestInfo.name,
-          requestInfo.data,
-          retryRequestId: requestId,
-          retryCompleter: requestInfo.completer,
-        );
+        if (requestInfo.shouldRetry) {
+          sendRequest(
+            requestInfo.name,
+            requestInfo.data,
+            retryRequestId: requestId,
+            retryCompleter: requestInfo.completer,
+          );
+        }
       });
     }
   }
@@ -276,7 +288,11 @@ class RequestInfo {
   final String name;
   final dynamic data;
   final Completer<Map<String, dynamic>> completer;
+  final bool shouldRetry;
 
   RequestInfo(
-      {required this.name, required this.data, required this.completer});
+      {required this.name,
+      required this.data,
+      required this.completer,
+      required this.shouldRetry});
 }

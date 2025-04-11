@@ -26,7 +26,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(8, 6709400528399140612),
       name: 'AttachmentModel',
-      lastPropertyId: const obx_int.IdUid(4, 2743437583742703683),
+      lastPropertyId: const obx_int.IdUid(5, 5717160279142175066),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -38,8 +38,8 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 747399038920962484),
             name: 'fileId',
             type: 9,
-            flags: 34848,
-            indexId: const obx_int.IdUid(15, 626623788693270148)),
+            flags: 2080,
+            indexId: const obx_int.IdUid(37, 873959491954871870)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 768953523524252804),
             name: 'fileName',
@@ -48,6 +48,11 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelProperty(
             id: const obx_int.IdUid(4, 2743437583742703683),
             name: 'fileBlurHash',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 5717160279142175066),
+            name: 'url',
             type: 9,
             flags: 0)
       ],
@@ -346,7 +351,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
       lastEntityId: const obx_int.IdUid(13, 9106374520578572502),
-      lastIndexId: const obx_int.IdUid(35, 2642777293408708995),
+      lastIndexId: const obx_int.IdUid(37, 873959491954871870),
       lastRelationId: const obx_int.IdUid(5, 7785256265115248397),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
@@ -365,7 +370,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         8590772032330868498,
         8137762055088700512,
         7050184320199163165,
-        5813459946923529345
+        5813459946923529345,
+        626623788693270148,
+        6221333517652902864
       ],
       retiredPropertyUids: const [
         5244948909752663107,
@@ -471,11 +478,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final fileBlurHashOffset = object.fileBlurHash == null
               ? null
               : fbb.writeString(object.fileBlurHash!);
-          fbb.startTable(5);
+          final urlOffset =
+              object.url == null ? null : fbb.writeString(object.url!);
+          fbb.startTable(6);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, fileIdOffset);
           fbb.addOffset(2, fileNameOffset);
           fbb.addOffset(3, fileBlurHashOffset);
+          fbb.addOffset(4, urlOffset);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -491,11 +501,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final fileBlurHashParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 10);
+          final urlParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGetNullable(buffer, rootOffset, 12);
           final object = AttachmentModel(
               bid: bidParam,
               fileId: fileIdParam,
               fileName: fileNameParam,
-              fileBlurHash: fileBlurHashParam);
+              fileBlurHash: fileBlurHashParam,
+              url: urlParam);
 
           return object;
         }),
@@ -831,6 +844,10 @@ class AttachmentModel_ {
   /// See [AttachmentModel.fileBlurHash].
   static final fileBlurHash =
       obx.QueryStringProperty<AttachmentModel>(_entities[0].properties[3]);
+
+  /// See [AttachmentModel.url].
+  static final url =
+      obx.QueryStringProperty<AttachmentModel>(_entities[0].properties[4]);
 }
 
 /// [AvatarModel] entity fields to define ObjectBox queries.

@@ -112,9 +112,12 @@ Future<User> login(User user) {
 
 Future<bool> logout() {
   return SamaConnectionService.instance
-      .sendRequest(userLogoutRequestName, {}).then((response) {
-    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
-  });
+      .sendRequest(userLogoutRequestName, {})
+      .timeout(logoutRequestTimeout)
+      .then((response) {
+        return bool.tryParse(response['success']?.toString() ?? 'false') ??
+            false;
+      });
 }
 
 Future<bool> signOut() {

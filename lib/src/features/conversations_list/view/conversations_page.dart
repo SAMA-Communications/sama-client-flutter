@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
-import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/connection/bloc/connection_bloc.dart';
 import '../../../shared/connection/view/connection_checker.dart';
+import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../conversations_list.dart';
@@ -98,72 +98,35 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConnectionBloc, ConnectionState>(
-        builder: (BuildContext context, state) {
-      return AppBar(
-        backgroundColor: black,
-        automaticallyImplyLeading: false,
-        leading: Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              icon: const Icon(Icons.person_outline,
-                  color: lightWhite, size: 32.0),
-              tooltip: 'Profile',
-              onPressed: () {
-                context.push(profilePath);
-              },
-            )),
-        title: _getTitle(state),
-        centerTitle: true,
-        actions: <Widget>[
-          ConnectionChecker(
-            child: IconButton(
-              onPressed: () => _openSearch(context),
-              icon: const Icon(
-                Icons.search,
-                color: white,
-                size: 32,
-              ),
+    return AppBar(
+      backgroundColor: black,
+      automaticallyImplyLeading: false,
+      leading: Align(
+          alignment: Alignment.centerRight,
+          child: IconButton(
+            icon:
+                const Icon(Icons.person_outline, color: lightWhite, size: 32.0),
+            tooltip: 'Profile',
+            onPressed: () {
+              context.push(profilePath);
+            },
+          )),
+      title: const ConnectionTitle(
+          color: white, title: Text('Chat', style: TextStyle(color: white))),
+      centerTitle: true,
+      actions: <Widget>[
+        ConnectionChecker(
+          child: IconButton(
+            onPressed: () => _openSearch(context),
+            icon: const Icon(
+              Icons.search,
+              color: white,
+              size: 32,
             ),
           ),
-        ],
-      );
-    });
-  }
-
-  Widget _getTitle(ConnectionState state) {
-    if (state.status == ConnectionStatus.connected) {
-      return _getTitleText(state);
-    }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 10,
-      children: [
-        Transform.scale(
-            scale: 0.75,
-            child: const CircularProgressIndicator(
-                color: white, strokeWidth: 2.0)),
-        _getTitleText(state),
+        ),
       ],
     );
-  }
-
-  Text _getTitleText(ConnectionState state) {
-    String title;
-    double fontSize = 22.0;
-    switch (state.status) {
-      case ConnectionStatus.connecting:
-        title = 'Connecting…';
-        break;
-      case ConnectionStatus.connected:
-        title = 'Chat';
-        break;
-      case ConnectionStatus.disconnected:
-      case ConnectionStatus.offline:
-        title = 'Waiting for network';
-        fontSize = 20.0;
-    }
-    return Text(title, style: TextStyle(color: white, fontSize: fontSize));
   }
 
   _openSearch(BuildContext context) {

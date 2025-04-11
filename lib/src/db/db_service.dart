@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import '../../objectbox.g.dart';
+import 'models/attachment_model.dart';
 import 'models/conversation_model.dart';
 import 'models/message_model.dart';
 import 'models/user_model.dart';
@@ -284,10 +285,7 @@ class DatabaseService {
     for (var message in items) {
       final messageInDb = messagesInDbMap[message.id];
       if (messageInDb != null) {
-        message.bid = messageInDb.bid;
-        // message.attachments?.forEach((a) {
-        //   a.bid = messageInDb.attachments.bid ;
-        // }
+        assignMessage(message, messageInDb);
       }
     }
 
@@ -306,6 +304,16 @@ class DatabaseService {
   Future<List<MessageModel>> getMessagesLocal(List<String> ids) async {
     final query =
         store!.box<MessageModel>().query(MessageModel_.id.oneOf(ids)).build();
+    final results = query.findAsync();
+    query.close();
+    return results;
+  }
+
+  Future<List<MessageModel>> getMessagesLocalByStatus(String state) async {
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.rawStatus.equals(state))
+        .build();
     final results = query.findAsync();
     query.close();
     return results;
@@ -336,5 +344,38 @@ class DatabaseService {
 
   Future<void> assignMessage(MessageModel msg, MessageModel msgInDb) async {
     msg.bid = msgInDb.bid;
+    if (msg.attachments.isNotEmpty) {
+      msg.attachments.clear();
+    }
+  }
+
+  Future<bool> removeMessageLocal(String id) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.equals(id)).build();
+    var result = await query.removeAsync();
+    query.close();
+    return true;
+  }
+
+  Future<bool> updateAttachmentsLocal(List<AttachmentModel> items) async {
+    final query = store!
+        .box<AttachmentModel>()
+        .query(AttachmentModel_.fileId
+            .oneOf(items.map((element) => element.fileId!).toList()))
+        .build();
+
+    final attachmentsInDb = await query.findAsync();
+    query.close();
+
+    var attachmentsInDbMap = {for (var v in attachmentsInDb) v.fileId: v};
+    for (var attachment in items) {
+      final attachmentInDb = attachmentsInDbMap[attachment.fileId];
+      if (attachmentInDb != null) {
+        attachment.bid = attachmentInDb.bid;
+      }
+    }
+
+    await store!.box<AttachmentModel>().putManyAsync(items, mode: PutMode.put);
+    return true;
   }
 }
