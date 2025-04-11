@@ -197,6 +197,14 @@ class DatabaseService {
     }
   }
 
+  Stream<ConversationModel?> watchedConversation(String id) {
+    return store!
+        .box<ConversationModel>()
+        .query(ConversationModel_.id.equals(id))
+        .watch(triggerImmediately: true)
+        .map((query) => query.findFirst());
+  }
+
   /// ////////////////////////
   /// User Store Functions ///
   /// ////////////////////////
@@ -288,8 +296,14 @@ class DatabaseService {
         assignMessage(message, messageInDb);
       }
     }
+    try {
+      await store!.box<MessageModel>().putManyAsync(items, mode: PutMode.put);
+    } on UniqueViolationException catch (e) {
+      final id = int.tryParse(e.message.split(' ').last) ?? 0;
+      print('saveMessagesLocal UniqueViolationException e id= $id');
+      return saveMessagesLocal(items);
+    }
 
-    await store!.box<MessageModel>().putManyAsync(items, mode: PutMode.put);
     return true;
   }
 

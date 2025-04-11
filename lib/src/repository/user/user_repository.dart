@@ -91,8 +91,10 @@ class UserRepository {
   Future<UserModel?> getUserById(String id) async {
     var user = await localDataSource.getUserLocal(id);
     if (user == null) {
-      user = (await api.getUsersByIds({id})).first.toUserModel();
-      user = (await localDataSource.saveUsersLocal([user])).first;
+      user = (await api.getUsersByIds({id})).firstOrNull?.toUserModel();
+      if(user != null) {
+        user = (await localDataSource.saveUsersLocal([user])).first;
+      }
     }
     return user;
   }

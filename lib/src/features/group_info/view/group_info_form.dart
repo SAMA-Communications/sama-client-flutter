@@ -312,12 +312,13 @@ class _ParticipantsListForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var state = context.read<GroupInfoBloc>().state;
-
+    var participants = state.participants.value.toList()
+      ..sort((a, b) => a.login!.compareTo(b.login!));
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: state.participants.value.length,
+      itemCount: participants.length,
       itemBuilder: (BuildContext context, int index) {
-        final user = state.participants.value.elementAt(index);
+        final user = participants.elementAt(index);
         return ListTile(
           leading: AvatarLetterIcon(name: user.login!, avatar: user.avatar),
           title:
