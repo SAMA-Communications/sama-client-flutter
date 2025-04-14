@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
@@ -123,35 +124,46 @@ class VideoView extends StatefulWidget {
 }
 
 class VideoWidgetState extends State<VideoView> {
-  late VideoPlayerController _videoController;
-  late ChewieController _chewieController;
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
 
   @override
   void initState() {
     super.initState();
-    _videoController =
-        VideoPlayerController.networkUrl(Uri.parse(widget.attachment.url!))
-          ..initialize().then((_) {
-            _chewieController = ChewieController(
-              videoPlayerController: _videoController,
-              autoPlay: true,
-              looping: true,
-              // fix https://github.com/fluttercommunity/chewie/issues/907
-              progressIndicatorDelay:
-                  Platform.isAndroid ? const Duration(days: 1) : null,
-            );
-            // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-            setState(() {});
-          });
+    _init();
+  }
+
+  _init() async {
+    var fileInfo =
+        await DefaultCacheManager().getFileFromCache(widget.attachment.url!);
+    if (fileInfo?.file != null) {
+      _videoController = VideoPlayerController.file(fileInfo!.file);
+    } else {
+      DefaultCacheManager().downloadFile(widget.attachment.url!);
+      _videoController =
+          VideoPlayerController.networkUrl(Uri.parse(widget.attachment.url!));
+    }
+    _videoController?.initialize().then((_) {
+      _chewieController = ChewieController(
+        videoPlayerController: _videoController!,
+        autoPlay: true,
+        looping: true,
+        // fix https://github.com/fluttercommunity/chewie/issues/907
+        progressIndicatorDelay:
+            Platform.isAndroid ? const Duration(days: 1) : null,
+      );
+      // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: _videoController.value.isInitialized
+        child: _videoController != null && _videoController!.value.isInitialized
             ? AspectRatio(
-                aspectRatio: _videoController.value.aspectRatio,
-                child: Chewie(controller: _chewieController),
+                aspectRatio: _videoController!.value.aspectRatio,
+                child: Chewie(controller: _chewieController!),
               )
             : Stack(
                 alignment: Alignment.center,
@@ -176,8 +188,8 @@ class VideoWidgetState extends State<VideoView> {
 
   @override
   void dispose() {
-    _videoController.dispose();
-    _chewieController.dispose();
+    _videoController?.dispose();
+    _chewieController?.dispose();
     super.dispose();
   }
 }
