@@ -51,21 +51,24 @@ class AvatarDescriptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var isOwner = context.read<GroupInfoBloc>().state.conversation.owner?.id ==
-        context.read<GroupInfoBloc>().state.currentUser?.id;
-
-    return ListTile(
-      titleAlignment: ListTileTitleAlignment.top,
-      title: Center(
-        child: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: _ChatAvatar(isOwner: isOwner)),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: _ChatNameDescription(isOwner: isOwner),
-      ),
-    );
+    return BlocBuilder<GroupInfoBloc, GroupInfoState>(
+        builder: (context, state) {
+      var isOwner =
+          context.read<GroupInfoBloc>().state.conversation.owner?.id ==
+              context.read<GroupInfoBloc>().state.currentUser?.id;
+      return ListTile(
+        titleAlignment: ListTileTitleAlignment.top,
+        title: Center(
+          child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: _ChatAvatar(isOwner: isOwner)),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: _ChatNameDescription(isOwner: isOwner),
+        ),
+      );
+    });
   }
 }
 
@@ -309,12 +312,13 @@ class _ParticipantsListForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var state = context.read<GroupInfoBloc>().state;
-
+    var participants = state.participants.value.toList()
+      ..sort((a, b) => a.login!.compareTo(b.login!));
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: state.participants.value.length,
+      itemCount: participants.length,
       itemBuilder: (BuildContext context, int index) {
-        final user = state.participants.value.elementAt(index);
+        final user = participants.elementAt(index);
         return ListTile(
           leading: AvatarLetterIcon(name: user.login!, avatar: user.avatar),
           title:

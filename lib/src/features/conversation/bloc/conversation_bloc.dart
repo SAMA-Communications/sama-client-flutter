@@ -37,9 +37,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final MessagesRepository messagesRepository;
   final UserRepository userRepository;
 
-  StreamSubscription<ConversationModel>? updateConversationStreamSubscription;
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
+  StreamSubscription<ConversationModel?>? conversationWatcher;
 
   ConversationBloc({
     required this.currentConversation,
@@ -48,7 +48,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.userRepository,
   }) : super(ConversationState(
             conversation: currentConversation,
-            participants: currentConversation.participants.toSet())) {
+            participants: Set.of(currentConversation.participants))) {
     on<MessagesRequested>(_onMessagesRequested);
     on<MessagesMoreRequested>(
       _onMessagesMoreRequested,
@@ -79,16 +79,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     add(const ParticipantsReceived());
 
-    updateConversationStreamSubscription =
-        conversationRepository.updateConversationStream.listen((chat) async {
-      if (chat.id != currentConversation.id) return;
-
-      if (currentConversation != chat) {
-        currentConversation = currentConversation.copyWithItem(item: chat);
-        add(_ConversationUpdated(currentConversation));
-      }
-    });
-
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
       if (message.cid != currentConversation.id) return;
@@ -117,6 +107,15 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           break;
       }
     });
+
+    conversationWatcher = messagesRepository.localDatasource
+        .watchedConversation(currentConversation.id)
+        .listen((chat) {
+      if (chat != null && chat != currentConversation) {
+        currentConversation = currentConversation.copyWithItem(item: chat);
+        add(_ConversationUpdated(currentConversation));
+      }
+    });
   }
 
   Future<void> _onMessagesRequested(
@@ -132,7 +131,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
               status: ConversationStatus.success,
               messages: messages,
               hasReachedMax: false,
-              participants: currentConversation.participants.toSet(),
+              participants: Set.of(currentConversation.participants),
               initial: true),
         );
         add(const MessagesRequested());
@@ -188,8 +187,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Future<void> _onParticipantsReceived(
       ParticipantsReceived event, Emitter<ConversationState> emit) async {
-    var participants =
-        await conversationRepository.updateParticipants(currentConversation);
+    var participants = await conversationRepository
+        .updateParticipants(currentConversation.copyWith());
     emit(state.copyWith(participants: Set.of(participants)));
   }
 
@@ -277,9 +276,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   @override
   Future<void> close() {
-    updateConversationStreamSubscription?.cancel();
     incomingMessagesSubscription?.cancel();
     statusMessagesSubscription?.cancel();
+    conversationWatcher?.cancel();
     return super.close();
   }
 }

@@ -65,7 +65,7 @@ class MessagesRepository {
               await userRepository.getUserById(message.from!);
           var isOwn = currentUser?.id == message.from;
           var chatMessage = message.toChatMessage(
-              sender,
+              sender?? UserModel(),
               isOwn,
               i == 0 ||
                   isServiceMessage(data[i - 1]) ||
@@ -123,7 +123,7 @@ class MessagesRepository {
       var isOwn = currentUser?.id == message.from;
 
       var chatMessage = message.toChatMessage(
-          sender,
+          sender?? UserModel(),
           isOwn,
           i == 0 ||
               isServiceMessage(messages[i - 1]) ||

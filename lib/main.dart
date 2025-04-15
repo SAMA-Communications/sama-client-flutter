@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'sama_firebase_options.dart';
 import 'src/api/api.dart';
 import 'src/db/db_service.dart';
 import 'src/db/local/attachment_local_datasource.dart';
@@ -31,7 +31,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    options: await SamaFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
   DatabaseService.instance.init();
