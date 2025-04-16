@@ -13,9 +13,9 @@ import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
-import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/connection/bloc/connection_bloc.dart';
 import '../../../shared/connection/view/connection_checker.dart';
+import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';
@@ -66,21 +66,24 @@ class ConversationPage extends StatelessWidget {
           toolbarHeight: 64,
           centerTitle: false,
           titleSpacing: 0.0,
-          title: Padding(
-            padding: const EdgeInsets.only(top: 0.0),
-            child: ListTile(
-              onTap: () => _infoAction(context),
-              title: Text(
-                overflow: TextOverflow.ellipsis,
-                state.conversation.name,
-                style: const TextStyle(
-                    fontSize: 28.0, fontWeight: FontWeight.bold),
-                maxLines: 1,
-              ),
-              subtitle: Text(
-                _getSubtitle(state.conversation, state.participants),
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14.0),
+          title: ConnectionTitle(
+            color: black,
+            title: Padding(
+              padding: const EdgeInsets.only(top: 0.0),
+              child: ListTile(
+                onTap: () => _infoAction(context),
+                title: Text(
+                  overflow: TextOverflow.ellipsis,
+                  state.conversation.name,
+                  style: const TextStyle(
+                      fontSize: 28.0, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                ),
+                subtitle: Text(
+                  _getSubtitle(state.conversation, state.participants),
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14.0),
+                ),
               ),
             ),
           ),
@@ -122,7 +125,7 @@ class ConversationPage extends StatelessWidget {
                                     .firstOrNull
                                     ?.path)),
                       )
-                    : const ConnectionChecker(child: MessageInput()))
+                    : const MessageInput())
           ],
         ),
       );

@@ -1,6 +1,6 @@
 import '../../shared/errors/exceptions.dart';
 import '../db_service.dart';
-import '../models/message_model.dart';
+import '../models/models.dart';
 
 class MessageLocalDatasource {
   final DatabaseService _databaseService = DatabaseService.instance;
@@ -16,8 +16,8 @@ class MessageLocalDatasource {
     }
   }
 
-  Future<MessageModel?> getMessageLocal(String id) async {
-    print('getMessageLocal id= $id');
+  Future<MessageModel?> getMessageLocalById(String id) async {
+    print('getMessageLocalById id= $id');
     try {
       return await _databaseService.getMessageLocal(id);
     } catch (e) {
@@ -28,6 +28,14 @@ class MessageLocalDatasource {
   Future<List<MessageModel>> getMessagesLocal(List<String> ids) async {
     try {
       return await _databaseService.getMessagesLocal(ids);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<List<MessageModel>> getMessagesLocalByStatus(String status) async {
+    try {
+      return await _databaseService.getMessagesLocalByStatus(status);
     } catch (e) {
       throw DatabaseException(e.toString());
     }
@@ -65,6 +73,24 @@ class MessageLocalDatasource {
     print('updateMessagesLocal= $items');
     try {
       return await _databaseService.saveMessagesLocal(items);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Future<bool> removeMessageLocal(String id) async {
+    print('removeMessageLocal= $id');
+    try {
+      return await _databaseService.removeMessageLocal(id);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
+  Stream<ConversationModel?> watchedConversation(String id) {
+    print('watchedConversation');
+    try {
+      return _databaseService.watchedConversation(id);
     } catch (e) {
       throw DatabaseException(e.toString());
     }

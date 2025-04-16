@@ -7,7 +7,6 @@ import '../../../api/api.dart' as api;
 import '../../../api/utils/logger.dart';
 import '../../../db/models/models.dart';
 import '../../../repository/authentication/authentication_repository.dart';
-import '../../../repository/user/user_repository.dart';
 import '../../secure_storage.dart';
 
 part 'auth_event.dart';
@@ -29,11 +28,10 @@ class AuthenticationBloc
     _connectionStateSubscription = api
         .SamaConnectionService.instance.connectionStateStream
         .listen((status) async {
+      //fix to set authenticated when open app without network
       if (status == api.ConnectionState.connected &&
           state.status == AuthenticationStatus.unauthenticated) {
-        //TODO RP fix to set authenticated when open app without network
-        add(const _AuthenticationStatusChanged(
-            AuthenticationStatus.authenticated));
+        tryAuthUser();
       }
     });
   }
@@ -104,8 +102,8 @@ class AuthenticationBloc
       await _authenticationRepository.loginWithAccessToken();
     } catch (e) {
       log('tryAuthUser e= $e');
-      //TODO RP CHECK ME
-      if (e.toString().contains('Expired')) {
+      //TODO RP CHECK ME (use checking with code 422)
+      if (e.toString().contains('expired')) {
         _authenticationRepository.disposeCurrentUser();
       }
     }

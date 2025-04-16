@@ -44,8 +44,8 @@ class ReconnectionManager {
           stringData: 'network connection changed to $networkConnectionState');
 
       if (networkConnectionState == ConnectivityState.hasNetwork) {
-        if (SamaConnectionService.instance.connectionState ==
-            ConnectionState.failed) {
+        if (SamaConnectionService.instance.connectionState !=
+            ConnectionState.connected) {
           _reconnect(force: true);
         }
       }
@@ -110,5 +110,7 @@ class ReconnectionManager {
     _reconnectionTimer?.cancel();
     _connectionStateSubscription?.cancel();
     _networkConnectionStateSubscription?.cancel();
+    _connectionStateSubscription = null;
+    _networkConnectionStateSubscription = null;
   }
 }

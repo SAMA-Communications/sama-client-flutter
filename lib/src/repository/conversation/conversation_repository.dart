@@ -167,7 +167,8 @@ class ConversationRepository {
     return NetworkBoundResources<List<ConversationModel>,
             List<ConversationModel>>()
         .asFuture(
-      loadFromDb: () => localDatasource.getAllConversationsLocal(ltDate: ltDate),
+      loadFromDb: () =>
+          localDatasource.getAllConversationsLocal(ltDate: ltDate),
       shouldFetch: (data, slice) {
         var oldData = data?.take(10).toList();
         slice?.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
@@ -357,6 +358,7 @@ class ConversationRepository {
     final opponent = users[conversation.opponentId];
     //can be null if user deleted
     final owner = users[conversation.ownerId];
+    var isOwn = currentUser?.id == conversation.lastMessage?.from;
 
     return ConversationModel(
         id: conversation.id!,
@@ -369,8 +371,8 @@ class ConversationRepository {
         isEncrypted: conversation.isEncrypted)
       ..opponent = getConversationOpponent(owner, opponent, currentUser)
       ..owner = owner
-      ..lastMessage =
-          conversation.lastMessage?.toMessageModel() // maybe set cid from chat
+      ..lastMessage = conversation.lastMessage
+          ?.toMessageModel(isOwn: isOwn) // maybe set cid from chat
       ..avatar =
           getConversationAvatar(conversation, owner, opponent, currentUser)
       ..participants.addAll(participants);

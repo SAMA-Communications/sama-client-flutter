@@ -153,7 +153,7 @@ class PushNotificationsManager {
         });
       }
       return Future.value();
-    }).catchError((onError) {
+    }).timeout(logoutRequestTimeout).catchError((onError) {
       print('[unsubscribe] ERROR: $onError');
     });
   }

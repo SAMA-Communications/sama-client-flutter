@@ -1,11 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'sama_firebase_options.dart';
 import 'src/api/api.dart';
 import 'src/db/db_service.dart';
+import 'src/db/local/attachment_local_datasource.dart';
 import 'src/db/local/conversation_local_datasource.dart';
 import 'src/db/local/message_local_datasource.dart';
 import 'src/db/local/user_local_datasource.dart';
@@ -18,6 +19,7 @@ import 'src/repository/messages/messages_repository.dart';
 import 'src/repository/user/user_repository.dart';
 import 'src/shared/auth/bloc/auth_bloc.dart';
 import 'src/shared/connection/bloc/connection_bloc.dart';
+import 'src/shared/messages_collector/messages_collector.dart';
 import 'src/shared/push_notifications/bloc/push_notifications_bloc.dart';
 import 'src/shared/secure_storage.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
@@ -29,7 +31,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    options: await SamaFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
   DatabaseService.instance.init();
@@ -53,6 +55,7 @@ class _AppState extends State<App> {
   late final MessageLocalDatasource _messageLocalDatasource;
   late final AttachmentsRepository _attachmentsRepository;
   late final UserLocalDataSource _userLocalDataSource;
+  late final AttachmentLocalDatasource _attachmentLocalDatasource;
 
   @override
   void initState() {
@@ -61,12 +64,13 @@ class _AppState extends State<App> {
     _conversationLocalDatasource = ConversationLocalDatasource();
     _messageLocalDatasource = MessageLocalDatasource();
     _userLocalDataSource = UserLocalDataSource();
+    _attachmentLocalDatasource = AttachmentLocalDatasource();
     _userRepository = UserRepository(localDataSource: _userLocalDataSource);
     _authenticationRepository = AuthenticationRepository(_userRepository);
     _messagesRepository = MessagesRepository(
         localDatasource: _messageLocalDatasource,
         userRepository: _userRepository);
-    _attachmentsRepository = AttachmentsRepository();
+    _attachmentsRepository = AttachmentsRepository(_attachmentLocalDatasource);
     _conversationRepository = ConversationRepository(
         localDatasource: _conversationLocalDatasource,
         userRepository: _userRepository,
@@ -74,6 +78,8 @@ class _AppState extends State<App> {
     _globalSearchRepository = GlobalSearchRepository(
         conversationRepository: _conversationRepository,
         userRepository: _userRepository);
+    MessagesCollector.instance
+        .init(_conversationRepository, _messagesRepository);
   }
 
   @override
@@ -81,6 +87,7 @@ class _AppState extends State<App> {
     _authenticationRepository.dispose();
     _messagesRepository.dispose();
     _conversationRepository.dispose();
+    MessagesCollector.instance.destroy();
     DatabaseService.instance.close();
     super.dispose();
   }
@@ -113,7 +120,10 @@ class _AppState extends State<App> {
           create: (context) => AuthenticationBloc(
               authenticationRepository: _authenticationRepository),
         ),
-        BlocProvider(create: (context) => ConnectionBloc(), lazy: false),
+        BlocProvider(
+            create: (context) => ConnectionBloc(
+                authenticationRepository: _authenticationRepository),
+            lazy: false),
         BlocProvider(create: (context) => SharingIntentBloc()),
         BlocProvider(
             create: (context) => PushNotificationsBloc(

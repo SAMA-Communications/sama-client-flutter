@@ -65,7 +65,7 @@ class MessagesRepository {
               await userRepository.getUserById(message.from!);
           var isOwn = currentUser?.id == message.from;
           var chatMessage = message.toChatMessage(
-              sender,
+              sender?? UserModel(),
               isOwn,
               i == 0 ||
                   isServiceMessage(data[i - 1]) ||
@@ -97,10 +97,11 @@ class MessagesRepository {
     });
 
     var result = <MessageModel>[];
-
+    var currentUser = await userRepository.getCurrentUser();
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-      var messageModel = message.toMessageModel();
+      var isOwn = currentUser?.id == message.from;
+      var messageModel = message.toMessageModel(isOwn: isOwn);
       result.add(messageModel);
     }
     return result;
@@ -122,7 +123,7 @@ class MessagesRepository {
       var isOwn = currentUser?.id == message.from;
 
       var chatMessage = message.toChatMessage(
-          sender,
+          sender?? UserModel(),
           isOwn,
           i == 0 ||
               isServiceMessage(messages[i - 1]) ||
@@ -135,6 +136,27 @@ class MessagesRepository {
       result.add(chatMessage);
     }
     return result;
+  }
+
+  Future<MessageModel?> getMessageLocalById(String id) {
+    return localDatasource.getMessageLocalById(id);
+  }
+
+  Future<List<MessageModel>> getMessagesLocalByStatus(String status) {
+    return localDatasource.getMessagesLocalByStatus(status);
+  }
+
+  Future<void> resendTextMessage(MessageModel message) async {
+    var msg = api.Message(
+        body: message.body,
+        cid: message.cid,
+        from: message.from,
+        id: message.id,
+        t: message.t,
+        createdAt: message.createdAt);
+    await Future.delayed(const Duration(milliseconds: 100), () {
+      api.sendMessage(message: msg); // TODO RP shouldRetry - true?
+    });
   }
 
   Future<void> sendTextMessage(String body, String cid) async {
@@ -153,6 +175,8 @@ class MessagesRepository {
 
     return api.sendMessage(message: message).then((result) {
       if (!result) {
+        var msgUpdated = msgModel.copyWith(rawStatus: 'pending');
+        saveMessageLocal(msgUpdated);
         _statusMessagesController
             .add(api.PendingMessageStatus.fromJson({'mid': message.id}));
       }
@@ -173,6 +197,10 @@ class MessagesRepository {
 
   Future<void> updateMessagesLocal(List<MessageModel> messages) async {
     await localDatasource.updateMessagesLocal(messages);
+  }
+
+  Future<void> deleteMessagesLocal(String id) async {
+    await localDatasource.removeMessageLocal(id);
   }
 
   void initChatListeners() {

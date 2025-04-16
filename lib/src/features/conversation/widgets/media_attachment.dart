@@ -7,11 +7,11 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../db/models/attachment_model.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
-import '../models/chat_attachment.dart';
 import '../models/models.dart';
 import 'message_bubble.dart';
 import 'message_status_widget.dart';
@@ -37,22 +37,16 @@ class MediaAttachment extends StatelessWidget {
       isOwn: message.isOwn,
       child: BlocBuilder<MediaAttachmentBloc, MediaAttachmentState>(
         builder: (context, state) {
-          if (!state.urls.containsKey(message.attachments?.first.fileId)) {
+          if (message.attachments.first.url == null) {
             context
                 .read<MediaAttachmentBloc>()
                 .add(AttachmentsUrlsRequested(message));
           }
-
           return Stack(alignment: Alignment.bottomRight, children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildMediaGrid(
-                    message.attachments!
-                        .map((attachment) => attachment
-                            .toChatAttachment(state.urls[attachment.fileId]))
-                        .toList(),
-                    state.urls),
+                _buildMediaGrid(message.attachments),
                 if (message.body?.isNotEmpty ?? false) ...[
                   Text(
                     message.body ?? '',
@@ -109,8 +103,7 @@ class MediaAttachment extends StatelessWidget {
   }
 }
 
-Widget _buildMediaGrid(
-    List<ChatAttachment> attachments, Map<String, String> urls) {
+Widget _buildMediaGrid(List<AttachmentModel> attachments) {
   return GridView.custom(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
@@ -128,7 +121,7 @@ Widget _buildMediaGrid(
   );
 }
 
-Widget _buildMediaAttachmentItem(ChatAttachment attachment) {
+Widget _buildMediaAttachmentItem(AttachmentModel attachment) {
   return GestureDetector(
     onTap: () {
       launchUrl(Uri.parse(attachment.url!));
@@ -165,13 +158,13 @@ Widget _buildMediaAttachmentItem(ChatAttachment attachment) {
   );
 }
 
-Widget _buildMediaItem(ChatAttachment attachment) {
+Widget _buildMediaItem(AttachmentModel attachment) {
   return isImage(attachment.fileName!)
       ? buildImageItem(attachment)
       : buildVideoItem(attachment);
 }
 
-Widget buildImageItem(ChatAttachment attachment) {
+Widget buildImageItem(AttachmentModel attachment) {
   return CachedNetworkImage(
     fadeInDuration: const Duration(milliseconds: 300),
     fadeOutDuration: const Duration(milliseconds: 100),
@@ -209,7 +202,7 @@ Widget buildImageItem(ChatAttachment attachment) {
   );
 }
 
-Widget buildVideoItem(ChatAttachment attachment) {
+Widget buildVideoItem(AttachmentModel attachment) {
   Widget videoBackground = Container(
     color: white,
   );

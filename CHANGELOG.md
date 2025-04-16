@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0
+
+### Features:
+- Implemented offline mode for chats
+- Implemented offline mode for messages
+- Improved message attachments caching
+
 ## 0.8.0
 
 ### Features:

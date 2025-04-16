@@ -21,8 +21,14 @@ Future<bool> sendMessage({
     if (message.attachments != null) 'attachments': message.attachments,
   };
 
+  if (SamaConnectionService.instance.connectionState !=
+      ConnectionState.connected) {
+    return Future.value(false);
+  }
+
   return SamaConnectionService.instance
-      .sendRequest(messageRequestName, dataToSend, retryRequestId: message.id)
+      .sendRequest(messageRequestName, dataToSend,
+          retryRequestId: message.id, shouldRetry: false)
       .timeout(messageRequestTimeout)
       .then((response) {
     if (message.id == response['mid']) {

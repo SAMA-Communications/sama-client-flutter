@@ -29,7 +29,7 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
     on<GroupInfoResetChanges>(_onResetChanges);
     on<GroupInfoSubmitted>(_onSubmitted);
 
-    add(GroupParticipantsReceived(conversation.participants.toList()));
+    add(GroupParticipantsReceived(conversation.participants));
 
     _conversationRepository
         .getParticipants([state.conversation.id]).then((users) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import 'media_sender.dart';
@@ -54,25 +55,27 @@ class _MessageInputState extends State<MessageInput> {
                   icon: const Icon(Icons.attach_file_outlined),
                   color: dullGray,
                   onPressed: () {
-                    showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 10.0),
-                          actionsPadding: EdgeInsets.zero,
-                          buttonPadding: EdgeInsets.zero,
-                          content: SizedBox(
-                            width: double.maxFinite,
-                            child: MediaSender.create(
-                                currentConversation: rootContext
-                                    .watch<SendMessageBloc>()
-                                    .currentConversation),
-                          ),
-                        );
-                      },
-                    );
+                    connectionChecker(
+                        context,
+                        () => showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 10.0),
+                                  actionsPadding: EdgeInsets.zero,
+                                  buttonPadding: EdgeInsets.zero,
+                                  content: SizedBox(
+                                    width: double.maxFinite,
+                                    child: MediaSender.create(
+                                        currentConversation: rootContext
+                                            .watch<SendMessageBloc>()
+                                            .currentConversation),
+                                  ),
+                                );
+                              },
+                            ));
                   },
                 ),
                 Flexible(

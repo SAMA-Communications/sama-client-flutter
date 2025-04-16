@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
-import '../../../repository/authentication/authentication_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
-import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/connection/bloc/connection_bloc.dart';
 import '../../../shared/connection/view/connection_checker.dart';
+import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../conversations_list.dart';
@@ -39,27 +38,13 @@ class HomePage extends StatelessWidget {
           appBar: state.status == SharingIntentStatus.processing
               ? const SelectChatAppBar() as PreferredSizeWidget
               : const ChatAppBar(),
-          body: MultiBlocListener(
-            listeners: [
-              BlocListener<AuthenticationBloc, AuthenticationState>(
-                listener: (context, state) {
-                  if (state.status == AuthenticationStatus.authenticated) {
-                    BlocProvider.of<ConversationsBloc>(context)
-                        .add(const ConversationsFetched(force: true));
-                  }
-                },
-              ),
-              BlocListener<ConnectionBloc, ConnectionState>(
-                listener: (context, state) {
-                  if (state.status == ConnectionStatus.connected &&
-                      context.read<AuthenticationBloc>().state.status ==
-                          AuthenticationStatus.authenticated) {
-                    BlocProvider.of<ConversationsBloc>(context)
-                        .add(const ConversationsFetched(force: true));
-                  }
-                },
-              ),
-            ],
+          body: BlocListener<ConnectionBloc, ConnectionState>(
+            listener: (context, state) {
+              if (state.status == ConnectionStatus.connected) {
+                BlocProvider.of<ConversationsBloc>(context)
+                    .add(const ConversationsFetched(force: true));
+              }
+            },
             child: const ConversationsList(),
           ),
           floatingActionButton: state.status == SharingIntentStatus.processing
@@ -113,40 +98,35 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConnectionBloc, ConnectionState>(
-        builder: (BuildContext context, state) {
-      return AppBar(
-        backgroundColor: black,
-        automaticallyImplyLeading: false,
-        leading: Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              icon: const Icon(Icons.person_outline,
-                  color: lightWhite, size: 32.0),
-              tooltip: 'Profile',
-              onPressed: () {
-                context.push(profilePath);
-              },
-            )),
-        title: const Text(
-          'Chat',
-          style: TextStyle(color: white),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          ConnectionChecker(
-            child: IconButton(
-              onPressed: () => _openSearch(context),
-              icon: const Icon(
-                Icons.search,
-                color: white,
-                size: 32,
-              ),
+    return AppBar(
+      backgroundColor: black,
+      automaticallyImplyLeading: false,
+      leading: Align(
+          alignment: Alignment.centerRight,
+          child: IconButton(
+            icon:
+                const Icon(Icons.person_outline, color: lightWhite, size: 32.0),
+            tooltip: 'Profile',
+            onPressed: () {
+              context.push(profilePath);
+            },
+          )),
+      title: const ConnectionTitle(
+          color: white, title: Text('Chat', style: TextStyle(color: white))),
+      centerTitle: true,
+      actions: <Widget>[
+        ConnectionChecker(
+          child: IconButton(
+            onPressed: () => _openSearch(context),
+            icon: const Icon(
+              Icons.search,
+              color: white,
+              size: 32,
             ),
           ),
-        ],
-      );
-    });
+        ),
+      ],
+    );
   }
 
   _openSearch(BuildContext context) {

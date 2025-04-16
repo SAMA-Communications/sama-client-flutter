@@ -49,9 +49,14 @@ Future<Map<String, dynamic>> sendHTTPRequest(
     case 429:
     case 500:
     case 503:
-      final data = jsonDecode(response.body);
+      String message;
+      try {
+        message = jsonDecode(response.body);
+      } catch (e) {
+        message = response.body;
+      }
       completer.completeError(ResponseException.fromJson(
-          {'status': response.statusCode, 'message': data}));
+          {'status': response.statusCode, 'message': message}));
       break;
 
     default:
