@@ -39,6 +39,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
+  StreamSubscription<Map<String, dynamic>>? lastActivitySubscription;
   StreamSubscription<ConversationModel?>? conversationWatcher;
 
   ConversationBloc({
@@ -79,6 +80,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     add(const ParticipantsReceived());
 
+    subscribeOpponentLastActivity();
+
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
       if (message.cid != currentConversation.id) return;
@@ -108,6 +111,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       }
     });
 
+    lastActivitySubscription =
+        userRepository.lastActivityStream.listen((data) async {
+      var la = data[currentConversation.opponent?.id];
+      _updateOpponentRecentActivity(la);
+    });
+
     conversationWatcher = messagesRepository.localDatasource
         .watchedConversation(currentConversation.id)
         .listen((chat) {
@@ -116,6 +125,30 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         add(_ConversationUpdated(currentConversation));
       }
     });
+  }
+
+  subscribeOpponentLastActivity() async {
+    if (currentConversation.type == 'u') {
+      var la = await userRepository
+          .subscribeUserLastActivity(currentConversation.opponent!.id!);
+      _updateOpponentRecentActivity(la);
+    }
+  }
+
+  _updateOpponentRecentActivity(dynamic la) {
+    //FIXME temporary
+    var recentActivity = la == 'online' ? 0 : la;
+    var chat = currentConversation.copyWith(
+        opponent: currentConversation.opponent
+            ?.copyWith(recentActivity: recentActivity));
+
+    add(_ConversationUpdated(chat));
+  }
+
+  unsubscribeOpponentLastActivity() async {
+    if (currentConversation.type == 'u') {
+      userRepository.unsubscribeUserLastActivity();
+    }
   }
 
   Future<void> _onMessagesRequested(
@@ -276,8 +309,10 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   @override
   Future<void> close() {
+    unsubscribeOpponentLastActivity();
     incomingMessagesSubscription?.cancel();
     statusMessagesSubscription?.cancel();
+    lastActivitySubscription?.cancel();
     conversationWatcher?.cancel();
     return super.close();
   }

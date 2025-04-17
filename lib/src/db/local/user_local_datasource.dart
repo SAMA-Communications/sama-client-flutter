@@ -2,7 +2,7 @@ import '../../db/db_service.dart';
 import '../../db/models/user_model.dart';
 import '../../shared/errors/exceptions.dart';
 
-class UserLocalDataSource {
+class UserLocalDatasource {
   final DatabaseService databaseService = DatabaseService.instance;
 
   Future<Map<String, UserModel>> getUsersModelByIds(List<String> ids) async {

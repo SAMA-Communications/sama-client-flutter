@@ -54,7 +54,7 @@ class _AppState extends State<App> {
   late final ConversationLocalDatasource _conversationLocalDatasource;
   late final MessageLocalDatasource _messageLocalDatasource;
   late final AttachmentsRepository _attachmentsRepository;
-  late final UserLocalDataSource _userLocalDataSource;
+  late final UserLocalDatasource _userLocalDatasource;
   late final AttachmentLocalDatasource _attachmentLocalDatasource;
 
   @override
@@ -63,9 +63,9 @@ class _AppState extends State<App> {
     clearKeychainValuesIfUninstall();
     _conversationLocalDatasource = ConversationLocalDatasource();
     _messageLocalDatasource = MessageLocalDatasource();
-    _userLocalDataSource = UserLocalDataSource();
+    _userLocalDatasource = UserLocalDatasource();
     _attachmentLocalDatasource = AttachmentLocalDatasource();
-    _userRepository = UserRepository(localDataSource: _userLocalDataSource);
+    _userRepository = UserRepository(localDatasource: _userLocalDatasource);
     _authenticationRepository = AuthenticationRepository(_userRepository);
     _messagesRepository = MessagesRepository(
         localDatasource: _messageLocalDatasource,
@@ -87,6 +87,7 @@ class _AppState extends State<App> {
     _authenticationRepository.dispose();
     _messagesRepository.dispose();
     _conversationRepository.dispose();
+    _userRepository.dispose();
     MessagesCollector.instance.destroy();
     DatabaseService.instance.close();
     super.dispose();

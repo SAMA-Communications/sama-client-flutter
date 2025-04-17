@@ -14,6 +14,7 @@ const Color lightMallow = Color(0xFFDBDCFC);
 const Color slateBlue = Color(0xFF7678E5);
 const Color cyan = Color(0xFF00FFFF);
 const Color limeGreen = Color(0xFF00FF00);
+const Color green = Color(0xFF4CAF50);
 const Color gold = Color(0xFFFFD700);
 const Color yellow = Color(0xFFFFFF00);
 const Color lightPink = Color(0xFFFFB6C1);
