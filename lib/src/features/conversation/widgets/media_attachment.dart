@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../db/models/attachment_model.dart';
 import '../../../shared/ui/colors.dart';
@@ -128,9 +127,16 @@ Widget _buildMediaAttachmentItem(
   var attachment = attachments[index];
   return GestureDetector(
     onTap: () {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => MediaAttachmentWidget(attachments, index)),
-      );
+      showModalBottomSheet<dynamic>(
+          isScrollControlled: true,
+          useSafeArea: false,
+          context: context,
+          builder: (BuildContext bc) {
+            return Container(
+              margin: const EdgeInsets.only(top: 24),
+              child: MediaAttachmentWidget(attachments, index),
+            );
+          });
     },
     child: AbsorbPointer(
       child: ClipRRect(

@@ -12,7 +12,7 @@ dependencies:
   bloc_concurrency: ^0.2.5
   blurhash_dart: ^1.2.1
   cached_network_image: ^3.3.1
-  carousel_slider: 5.0.0
+  carousel_slider: ^5.0.0
   chewie: ^1.11.1
   collection: ^1.18.0
   connectivity_plus: ^6.0.3

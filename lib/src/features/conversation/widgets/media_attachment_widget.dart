@@ -36,22 +36,8 @@ class MediaAttachmentWidgetState extends State<MediaAttachmentWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 64,
-        centerTitle: false,
-        titleSpacing: 0.0,
-        title: const Padding(
-          padding: EdgeInsets.only(top: 0.0),
-          child: Text(
-            overflow: TextOverflow.ellipsis,
-            'Attachment preview',
-            style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold),
-            maxLines: 1,
-          ),
-        ),
-      ),
-      body: Column(children: [
+    return Column(
+      children: [
         Expanded(
           child: PhotoViewGestureDetectorScope(
             axis: Axis.horizontal,
@@ -103,7 +89,7 @@ class MediaAttachmentWidgetState extends State<MediaAttachmentWidget> {
             );
           }).toList(),
         ),
-      ]),
+      ],
     );
   }
 
