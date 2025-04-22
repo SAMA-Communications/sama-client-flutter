@@ -133,7 +133,8 @@ Widget _buildMediaAttachmentItem(
           context: context,
           builder: (BuildContext bc) {
             return Container(
-              margin: const EdgeInsets.only(top: 24),
+              margin: EdgeInsets.only(
+                  top: MediaQueryData.fromView(View.of(context)).padding.top),
               child: MediaAttachmentWidget(attachments, index),
             );
           });
