@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -138,11 +139,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   _updateOpponentRecentActivity(dynamic la) {
     //FIXME temporary
     var recentActivity = la == 'online' ? 0 : la;
-    var chat = currentConversation.copyWith(
+    currentConversation = currentConversation.copyWith(
         opponent: currentConversation.opponent
             ?.copyWith(recentActivity: recentActivity));
 
-    add(_ConversationUpdated(chat));
+    add(_ConversationUpdated(currentConversation));
   }
 
   unsubscribeOpponentLastActivity() async {
@@ -222,6 +223,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       ParticipantsReceived event, Emitter<ConversationState> emit) async {
     var participants = await conversationRepository
         .updateParticipants(currentConversation.copyWith());
+    if (currentConversation.opponent?.recentActivity == 0) {
+      var index = participants
+          .indexWhere((i) => i.id == currentConversation.opponent?.id);
+      participants[index] = participants[index].copyWith(recentActivity: 0);
+    }
     emit(state.copyWith(participants: Set.of(participants)));
   }
 
