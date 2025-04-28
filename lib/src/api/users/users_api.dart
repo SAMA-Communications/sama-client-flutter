@@ -17,6 +17,8 @@ const String userEditRequestName = 'user_edit';
 const String userDeleteRequestName = 'user_delete';
 const String userConnectRequestName = 'connect';
 const String usersGetByIdsRequestName = 'get_users_by_ids';
+const String userLastActivitySubscribe = 'user_last_activity_subscribe';
+const String userLastActivityUnsubscribe = 'user_last_activity_unsubscribe';
 
 const String httpLoginRequestName = 'login';
 
@@ -183,5 +185,20 @@ Future<List<User>> searchUsersByKeyword(String keyword,
       users = items.map((element) => User.fromJson(element)).toList();
     }
     return users;
+  });
+}
+
+Future<dynamic> subscribeUserLastActivity(String id) {
+  return SamaConnectionService.instance
+      .sendRequest(userLastActivitySubscribe, {'id': id}).then((response) {
+    var status = response['last_activity'][id];
+    return status;
+  });
+}
+
+Future<bool> unsubscribeUserLastActivity() {
+  return SamaConnectionService.instance
+      .sendRequest(userLastActivityUnsubscribe, {}).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }

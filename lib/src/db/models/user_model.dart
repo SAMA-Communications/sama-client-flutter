@@ -82,6 +82,7 @@ class UserModel extends Equatable {
         phone,
         email,
         avatar,
+        recentActivity,
       ];
 }
 
