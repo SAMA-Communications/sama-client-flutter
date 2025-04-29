@@ -59,6 +59,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ParticipantsReceived>(
       _onParticipantsReceived,
     );
+    on<_DraftMessageReceived>(
+      _onDraftMessageReceived,
+    );
+    on<RemoveDraftMessage>(
+      _onRemoveDraftMessage,
+    );
     on<_MessageReceived>(
       _onMessageReceived,
     );
@@ -82,6 +88,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     add(const ParticipantsReceived());
 
     subscribeOpponentLastActivity();
+
+    add(const _DraftMessageReceived());
 
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
@@ -229,6 +237,22 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       participants[index] = participants[index].copyWith(recentActivity: 0);
     }
     emit(state.copyWith(participants: Set.of(participants)));
+  }
+
+  Future<void> _onDraftMessageReceived(
+      _DraftMessageReceived event, Emitter<ConversationState> emit) async {
+    var draftMsg = await messagesRepository.getMessageLocalByStatus(
+        currentConversation.id, ChatMessageStatus.draft.name);
+    if (draftMsg != null) {
+      emit(state.copyWith(draftMessage: () => draftMsg));
+      messagesRepository.deleteMessageLocal(draftMsg.id!);
+    }
+  }
+
+  Future<void> _onRemoveDraftMessage(
+      RemoveDraftMessage event, Emitter<ConversationState> emit) async {
+    // messagesRepository.deleteMessageLocal(event.message.id!);
+    emit(state.copyWith(draftMessage: () => null));
   }
 
   Future<void> _onConversationUpdated(event, emit) async {

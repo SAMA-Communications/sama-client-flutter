@@ -104,10 +104,17 @@ class ConversationRepository {
           unreadMsgCountUpdated = (conversation.unreadMessagesCount ?? 0) + 1;
         }
 
-        final updatedConversation = conversation.copyWith(
-            lastMessage: message,
-            unreadMessagesCount: unreadMsgCountUpdated,
-            updatedAt: DateTime.now());
+        ConversationModel updatedConversation;
+        if (message.status == ChatMessageStatus.draft) {
+          updatedConversation =
+              conversation.copyWith(draftMessage: () => message);
+        } else {
+          updatedConversation = conversation.copyWith(
+              lastMessage: message,
+              unreadMessagesCount: unreadMsgCountUpdated,
+              updatedAt: DateTime.now());
+        }
+
         await localDatasource.updateConversationLocal(updatedConversation);
         _conversationsController.add(updatedConversation);
 
@@ -170,8 +177,14 @@ class ConversationRepository {
       loadFromDb: () =>
           localDatasource.getAllConversationsLocal(ltDate: ltDate),
       shouldFetch: (data, slice) {
-        var oldData = data?.take(10).toList();
+        var oldData = data
+            ?.take(10)
+            .map((c) => c.draftMessage != null
+                ? c.copyWith(draftMessage: () => null)
+                : c)
+            .toList();
         slice?.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+        // or Function unOrdDeepEq = const DeepCollectionEquality.unordered().equals;
         var result = data != null && !listEquals(oldData, slice);
         return result;
       },

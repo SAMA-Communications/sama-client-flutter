@@ -25,6 +25,16 @@ class MessageLocalDatasource {
     }
   }
 
+  Future<MessageModel?> getMessageLocalByStatus(
+      String cid, String status) async {
+    print('getMessageLocalByStatus= $cid');
+    try {
+      return await _databaseService.getMessageLocalByStatus(cid, status);
+    } catch (e) {
+      throw DatabaseException(e.toString());
+    }
+  }
+
   Future<List<MessageModel>> getMessagesLocal(List<String> ids) async {
     try {
       return await _databaseService.getMessagesLocal(ids);
@@ -51,7 +61,7 @@ class MessageLocalDatasource {
     }
   }
 
-  Future<bool> saveMessageLocal(MessageModel item) async {
+  Future<MessageModel> saveMessageLocal(MessageModel item) async {
     print('saveMessageLocal= $item');
     try {
       return await _databaseService.saveMessageLocal(item);

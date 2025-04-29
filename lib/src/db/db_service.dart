@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import '../../objectbox.g.dart';
+import '../features/conversation/models/chat_message.dart';
 import 'models/attachment_model.dart';
 import 'models/conversation_model.dart';
 import 'models/message_model.dart';
@@ -195,6 +196,9 @@ class DatabaseService {
       final lastMessage = await getMessageLocal(chat.lastMessage!.id!);
       chat.lastMessage?.bid = lastMessage?.bid;
     }
+    if (chatInDb.draftMessage != null) {
+      chat.draftMessage = chatInDb.draftMessage;
+    }
   }
 
   Stream<ConversationModel?> watchedConversation(String id) {
@@ -270,8 +274,12 @@ class DatabaseService {
       String cid, DateTime? ltDate) async {
     final query = store!
         .box<MessageModel>()
-        .query(MessageModel_.cid.equals(cid).and(
-            MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now())))
+        .query(MessageModel_.cid
+            .equals(cid)
+            .and(MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now()))
+            .and(MessageModel_.rawStatus
+                .notEquals(ChatMessageStatus.draft.name) //hide draft messages
+                .or(MessageModel_.rawStatus.isNull())))
         .order(MessageModel_.createdAt, flags: Order.descending)
         .build();
     final results = await query.findAsync();
@@ -323,19 +331,33 @@ class DatabaseService {
     return results;
   }
 
-  Future<List<MessageModel>> getMessagesLocalByStatus(String state) async {
+  Future<List<MessageModel>> getMessagesLocalByStatus(String status) async {
     final query = store!
         .box<MessageModel>()
-        .query(MessageModel_.rawStatus.equals(state))
+        .query(MessageModel_.rawStatus.equals(status))
         .build();
     final results = query.findAsync();
     query.close();
     return results;
   }
 
-  Future<bool> saveMessageLocal(MessageModel item) async {
-    await store!.box<MessageModel>().putAsync(item, mode: PutMode.put);
-    return true;
+  Future<MessageModel?> getMessageLocalByStatus(
+      String cid, String status) async {
+    final query = store!
+        .box<MessageModel>()
+        .query(MessageModel_.cid
+            .equals(cid)
+            .and(MessageModel_.rawStatus.equals(status)))
+        .build();
+    final result = await query.findFirstAsync();
+    query.close();
+    return result;
+  }
+
+  Future<MessageModel> saveMessageLocal(MessageModel item) async {
+    return await store!
+        .box<MessageModel>()
+        .putAndGetAsync(item, mode: PutMode.put);
   }
 
   Future<MessageModel> updateMessageLocal(MessageModel item) async {
