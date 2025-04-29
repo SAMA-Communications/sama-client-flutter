@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -39,6 +40,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
+  StreamSubscription<Map<String, dynamic>>? lastActivitySubscription;
   StreamSubscription<ConversationModel?>? conversationWatcher;
 
   ConversationBloc({
@@ -79,6 +81,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     add(const ParticipantsReceived());
 
+    subscribeOpponentLastActivity();
+
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
       if (message.cid != currentConversation.id) return;
@@ -108,6 +112,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       }
     });
 
+    lastActivitySubscription =
+        userRepository.lastActivityStream.listen((data) async {
+      var la = data[currentConversation.opponent?.id];
+      _updateOpponentRecentActivity(la);
+    });
+
     conversationWatcher = messagesRepository.localDatasource
         .watchedConversation(currentConversation.id)
         .listen((chat) {
@@ -116,6 +126,30 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         add(_ConversationUpdated(currentConversation));
       }
     });
+  }
+
+  subscribeOpponentLastActivity() async {
+    if (currentConversation.type == 'u') {
+      var la = await userRepository
+          .subscribeUserLastActivity(currentConversation.opponent!.id!);
+      _updateOpponentRecentActivity(la);
+    }
+  }
+
+  _updateOpponentRecentActivity(dynamic la) {
+    //FIXME temporary
+    var recentActivity = la == 'online' ? 0 : la;
+    currentConversation = currentConversation.copyWith(
+        opponent: currentConversation.opponent
+            ?.copyWith(recentActivity: recentActivity));
+
+    add(_ConversationUpdated(currentConversation));
+  }
+
+  unsubscribeOpponentLastActivity() async {
+    if (currentConversation.type == 'u') {
+      userRepository.unsubscribeUserLastActivity();
+    }
   }
 
   Future<void> _onMessagesRequested(
@@ -189,6 +223,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       ParticipantsReceived event, Emitter<ConversationState> emit) async {
     var participants = await conversationRepository
         .updateParticipants(currentConversation.copyWith());
+    if (currentConversation.opponent?.recentActivity == 0) {
+      var index = participants
+          .indexWhere((i) => i.id == currentConversation.opponent?.id);
+      participants[index] = participants[index].copyWith(recentActivity: 0);
+    }
     emit(state.copyWith(participants: Set.of(participants)));
   }
 
@@ -276,8 +315,10 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   @override
   Future<void> close() {
+    unsubscribeOpponentLastActivity();
     incomingMessagesSubscription?.cancel();
     statusMessagesSubscription?.cancel();
+    lastActivitySubscription?.cancel();
     conversationWatcher?.cancel();
     return super.close();
   }

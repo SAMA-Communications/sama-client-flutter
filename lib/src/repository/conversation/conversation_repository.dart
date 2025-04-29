@@ -107,7 +107,7 @@ class ConversationRepository {
         final updatedConversation = conversation.copyWith(
             lastMessage: message,
             unreadMessagesCount: unreadMsgCountUpdated,
-            updatedAt: message.createdAt);
+            updatedAt: DateTime.now());
         await localDatasource.updateConversationLocal(updatedConversation);
         _conversationsController.add(updatedConversation);
 

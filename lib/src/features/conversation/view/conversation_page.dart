@@ -79,11 +79,7 @@ class ConversationPage extends StatelessWidget {
                       fontSize: 28.0, fontWeight: FontWeight.bold),
                   maxLines: 1,
                 ),
-                subtitle: Text(
-                  _getSubtitle(state.conversation, state.participants),
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14.0),
-                ),
+                subtitle: _getSubtitle(state.conversation, state.participants),
               ),
             ),
           ),
@@ -132,10 +128,12 @@ class ConversationPage extends StatelessWidget {
     });
   }
 
-  String _getSubtitle(
+  Widget _getSubtitle(
     ConversationModel conversation,
     Set<UserModel> participants,
   ) {
+    String title = '';
+    Color color = dullGray;
     if (conversation.type == 'u') {
       if (conversation.opponent?.recentActivity != null) {
         var date = DateTime.fromMillisecondsSinceEpoch(
@@ -144,29 +142,35 @@ class ConversationPage extends StatelessWidget {
 
         DateTime justNow = DateTime.now().subtract(const Duration(minutes: 1));
 
-        String suffix;
-
-        if (!date.difference(justNow).isNegative) {
+        String? suffix;
+        if (conversation.opponent!.recentActivity! == 0) {
+          color = green;
+          title = 'online';
+        } else if (!date.difference(justNow).isNegative) {
           suffix = 'just now';
         } else if (justNow.difference(date).inHours < 24) {
-          suffix = DateFormat().addPattern('\'a\'t HH:MM').format(date);
+          suffix = DateFormat().addPattern('\'a\'t HH:mm').format(date);
           if (justNow.day != date.day) {
             suffix = 'yesterday $suffix';
           }
         } else if (justNow.difference(date).inDays < 4) {
-          suffix = DateFormat().addPattern('E \'a\'t HH:MM').format(date);
+          suffix = DateFormat().addPattern('E \'a\'t HH:mm').format(date);
         } else {
           suffix =
-              DateFormat().addPattern('dd/MM/yyyy \'a\'t HH:MM').format(date);
+              DateFormat().addPattern('dd/MM/yyyy \'a\'t HH:mm').format(date);
         }
-
-        return 'Last seen $suffix';
+        if (suffix != null) title = 'Last seen $suffix';
       } else {
-        return 'Last seen recently';
+        title = 'Last seen recently';
       }
     } else {
-      return '${participants.length} members';
+      title = '${participants.length} members';
     }
+    return Text(
+      title,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(fontSize: 14.0, color: color),
+    );
   }
 }
 

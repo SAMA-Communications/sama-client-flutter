@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../db/models/attachment_model.dart';
 import '../../../shared/ui/colors.dart';
@@ -13,6 +12,7 @@ import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../models/models.dart';
+import 'media_attachment_widget.dart';
 import 'message_bubble.dart';
 import 'message_status_widget.dart';
 
@@ -116,15 +116,28 @@ Widget _buildMediaGrid(List<AttachmentModel> attachments) {
     ),
     childrenDelegate: SliverChildBuilderDelegate(
       childCount: attachments.length,
-      (context, index) => _buildMediaAttachmentItem(attachments[index]),
+      (context, index) =>
+          _buildMediaAttachmentItem(context, attachments, index),
     ),
   );
 }
 
-Widget _buildMediaAttachmentItem(AttachmentModel attachment) {
+Widget _buildMediaAttachmentItem(
+    BuildContext context, List<AttachmentModel> attachments, int index) {
+  var attachment = attachments[index];
   return GestureDetector(
     onTap: () {
-      launchUrl(Uri.parse(attachment.url!));
+      showModalBottomSheet<dynamic>(
+          isScrollControlled: true,
+          useSafeArea: false,
+          context: context,
+          builder: (BuildContext bc) {
+            return Container(
+              margin: EdgeInsets.only(
+                  top: MediaQueryData.fromView(View.of(context)).padding.top),
+              child: MediaAttachmentWidget(attachments, index),
+            );
+          });
     },
     child: AbsorbPointer(
       child: ClipRRect(
@@ -168,8 +181,8 @@ Widget buildImageItem(AttachmentModel attachment) {
   return CachedNetworkImage(
     fadeInDuration: const Duration(milliseconds: 300),
     fadeOutDuration: const Duration(milliseconds: 100),
-    maxHeightDiskCache: 300,
-    maxWidthDiskCache: 300,
+    maxHeightDiskCache: 600,
+    maxWidthDiskCache: 600,
     placeholder: (context, url) => Center(
       child: !validateBlurhash(attachment.fileBlurHash ?? '')
           ? const SizedBox(

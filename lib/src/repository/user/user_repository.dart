@@ -12,20 +12,40 @@ import '../../shared/secure_storage.dart';
 import '../../shared/utils/media_utils.dart';
 
 class UserRepository {
-  final UserLocalDataSource localDataSource;
+  final UserLocalDatasource localDatasource;
 
-  UserRepository({required this.localDataSource});
+  UserRepository({required this.localDatasource}) {
+    initListeners();
+  }
+
+  StreamSubscription<Map<String, dynamic>>? _lastActivitySubscription;
+
+  final StreamController<Map<String, dynamic>> _lastActivityController =
+      StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get lastActivityStream =>
+      _lastActivityController.stream;
+
+  void initListeners() {
+    if (_lastActivitySubscription != null) return;
+
+    _lastActivitySubscription = api
+        .UsersManager.instance.lastActivityControllerStream
+        .listen((data) async {
+      _lastActivityController.add(data);
+    });
+  }
 
   Future<String?> getCurrentUserId() async {
     return (await SecureStorage.instance.getCurrentUser())?.id;
   }
 
   Future<UserModel?> getCurrentUser() async {
-    return localDataSource.getUserLocal((await getCurrentUserId())!);
+    return localDatasource.getUserLocal((await getCurrentUserId())!);
   }
 
   Future<UserModel?> updateUserLocal(UserModel user) async {
-    return localDataSource.updateUserLocal(user);
+    return localDatasource.updateUserLocal(user);
   }
 
   Future<UserModel> updateCurrentUser(
@@ -51,7 +71,7 @@ class UserRepository {
       user = user.copyWith(avatar: avatar);
     }
     var result = user.toUserModel();
-    result = await localDataSource.updateUserLocal(result);
+    result = await localDatasource.updateUserLocal(result);
     return result;
   }
 
@@ -69,11 +89,11 @@ class UserRepository {
   // TODO RP finish later
   Future<Map<String, UserModel>> getUsersByIds(List<String> ids) async {
     Map<String, UserModel> participants =
-        await localDataSource.getUsersModelByIds(ids);
+        await localDatasource.getUsersModelByIds(ids);
     Set<String> idsNone = ids.where((key) => participants[key] == null).toSet();
     if (idsNone.isNotEmpty) {
       await api.getUsersByIds(idsNone).then((users) async {
-        var usersLocal = await localDataSource
+        var usersLocal = await localDatasource
             .saveUsersLocal(users.map((user) => user.toUserModel()).toList());
         participants
             .addEntries(usersLocal.map((user) => MapEntry(user.id!, user)));
@@ -83,27 +103,41 @@ class UserRepository {
   }
 
   Future<List<UserModel>> getUsersByCids(List<String> cids) async {
-    return (await api.fetchParticipants(cids)).$2
+    return (await api.fetchParticipants(cids))
+        .$2
         .map((element) => element.toUserModel())
         .toList();
   }
 
   Future<UserModel?> getUserById(String id) async {
-    var user = await localDataSource.getUserLocal(id);
+    var user = await localDatasource.getUserLocal(id);
     if (user == null) {
       user = (await api.getUsersByIds({id})).firstOrNull?.toUserModel();
-      if(user != null) {
-        user = (await localDataSource.saveUsersLocal([user])).first;
+      if (user != null) {
+        user = (await localDatasource.saveUsersLocal([user])).first;
       }
     }
     return user;
   }
 
   Future<List<UserModel>> updateUsers(List<UserModel> items) async {
-    return localDataSource.updateUsersLocal(items);
+    return localDatasource.updateUsersLocal(items);
   }
 
   Future<List<UserModel>> saveUsersLocal(List<UserModel> items) async {
-    return localDataSource.saveUsersLocal(items);
+    return localDatasource.saveUsersLocal(items);
+  }
+
+  Future<dynamic> subscribeUserLastActivity(String id) {
+    return api.subscribeUserLastActivity(id);
+  }
+
+  Future<bool> unsubscribeUserLastActivity() {
+    return api.unsubscribeUserLastActivity();
+  }
+
+  void dispose() {
+    _lastActivitySubscription?.cancel();
+    api.UsersManager.instance.destroy();
   }
 }

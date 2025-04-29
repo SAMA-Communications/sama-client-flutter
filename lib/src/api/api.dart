@@ -8,6 +8,7 @@ export 'conversations/models/models.dart';
 export 'conversations/conversations_api.dart';
 export 'push_notifications/push_notifications_manager.dart';
 export 'users/models/models.dart';
+export 'users/realtime/users_manager.dart';
 export 'users/users_api.dart';
 export 'utils/connectivity_manager.dart';
 export 'utils/logger.dart';
