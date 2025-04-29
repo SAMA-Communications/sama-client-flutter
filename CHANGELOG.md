@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.10.0
+
+### Features:
+- Implemented a new view for media items within the app
+- Improved thumbnail quality for media item previews
+- Added caching to display media items in offline mode
+- Added a new media player to play videos within the app
+
+### Fixes:
+- Improved and stabilized the logic for the “Last Seen” user functionality
+
 ## 0.9.0
 
 ### Features:
