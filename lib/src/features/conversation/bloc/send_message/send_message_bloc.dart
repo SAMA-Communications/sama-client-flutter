@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
 import '../../../../repository/conversation/conversation_repository.dart';
 import '../../../../repository/messages/messages_repository.dart';
@@ -35,11 +36,14 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   Future<void> _onSendTextMessage(
       SendTextMessage event, Emitter<SendMessageState> emit) async {
     try {
-      messagesRepository.sendTextMessage(event.message, currentConversation.id);
-      emit(
-          state.copyWith(isTextEmpty: true, status: SendMessageStatus.success));
-    } catch (_) {
-      emit(state.copyWith(status: SendMessageStatus.failure));
+      emit(state.copyWith(
+          isTextEmpty: true, status: SendMessageStatus.processing));
+      await messagesRepository.sendTextMessage(
+          event.message, currentConversation.id);
+      emit(state.copyWith(status: SendMessageStatus.success));
+    } on ResponseException catch (ex) {
+      emit(state.copyWith(
+          errorMessage: ex.message, status: SendMessageStatus.failure));
     }
   }
 

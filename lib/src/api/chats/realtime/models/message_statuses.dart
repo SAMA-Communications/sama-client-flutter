@@ -45,6 +45,13 @@ class ReadMessagesStatus extends MessageStatus implements MessageSendStatus {
   ReadMessagesStatus.fromJson(super.json) : super.fromJson();
 }
 
+class FailedMessagesStatus implements MessageSendStatus {
+  final String messageId;
+
+  FailedMessagesStatus.fromJson(Map<String, dynamic> json)
+      : messageId = json['mid'];
+}
+
 class EditMessageStatus {
   final String messageId; // id
   final String newBody; // body

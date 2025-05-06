@@ -65,7 +65,7 @@ class MessagesRepository {
               await userRepository.getUserById(message.from!);
           var isOwn = currentUser?.id == message.from;
           var chatMessage = message.toChatMessage(
-              sender?? UserModel(),
+              sender ?? UserModel(),
               isOwn,
               i == 0 ||
                   isServiceMessage(data[i - 1]) ||
@@ -123,7 +123,7 @@ class MessagesRepository {
       var isOwn = currentUser?.id == message.from;
 
       var chatMessage = message.toChatMessage(
-          sender?? UserModel(),
+          sender ?? UserModel(),
           isOwn,
           i == 0 ||
               isServiceMessage(messages[i - 1]) ||
@@ -179,6 +179,12 @@ class MessagesRepository {
         saveMessageLocal(msgUpdated);
         _statusMessagesController
             .add(api.PendingMessageStatus.fromJson({'mid': message.id}));
+      }
+    }).catchError((onError) {
+      if (onError is api.ResponseException) {
+        _statusMessagesController
+            .add(api.FailedMessagesStatus.fromJson({'mid': message.id}));
+        throw onError;
       }
     });
   }

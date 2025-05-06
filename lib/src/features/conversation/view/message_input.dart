@@ -29,14 +29,15 @@ class _MessageInputState extends State<MessageInput> {
     }
     return BlocListener<SendMessageBloc, SendMessageState>(
       listener: (context, state) {
-        if (state.status == SendMessageStatus.success) {
+        if (state.status == SendMessageStatus.processing) {
           textEditingController.clear();
         } else if (state.status == SendMessageStatus.failure) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(
-                  content: Text('Can\'t send message due to some error(s)')),
+              SnackBar(
+                  content: Text(state.errorMessage ??
+                      'Can\'t send message due to some error(s)')),
             );
         }
       },

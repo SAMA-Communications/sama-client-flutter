@@ -72,6 +72,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _onReadStatusReceived,
       transformer: debounce(),
     );
+    on<_FailedStatusReceived>(
+      _onFailedStatusReceived,
+    );
     on<_ConversationUpdated>(
       _onConversationUpdated,
     );
@@ -108,6 +111,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           break;
         case ReadMessagesStatus():
           add(_ReadStatusReceived(status));
+          break;
+        case FailedMessagesStatus():
+          add(_FailedStatusReceived(status));
           break;
       }
     });
@@ -311,6 +317,18 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     // conversationRepository.updateConversationLocal(
     //     currentConversation, msgListUpdated.last);
     emit(state.copyWith(messages: messages.values.toList()));
+  }
+
+  Future<void> _onFailedStatusReceived(
+      _FailedStatusReceived event, Emitter<ConversationState> emit) async {
+    var messages = [...state.messages];
+
+    var msg = messages.firstWhere((o) => o.id == event.status.messageId);
+    //TODO RP or set failed status
+    // var msgUpdated = msg.copyWith(status: ChatMessageStatus.failed);
+    // messages[messages.indexOf(msg)] = msgUpdated;
+    messages.remove(msg);
+    emit(state.copyWith(messages: messages));
   }
 
   @override

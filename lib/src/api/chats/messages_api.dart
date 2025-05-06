@@ -1,6 +1,4 @@
-import '../connection/connection.dart';
-import '../conversations/models/models.dart';
-import 'realtime/models/models.dart';
+import '../api.dart';
 
 const String messageRequestName = 'message';
 const String messageEditRequestName = 'message_edit';
@@ -34,8 +32,6 @@ Future<bool> sendMessage({
     if (message.id == response['mid']) {
       return true;
     }
-    return false;
-  }).catchError((onError) {
     return false;
   });
 }
