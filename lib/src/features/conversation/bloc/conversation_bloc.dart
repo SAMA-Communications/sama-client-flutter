@@ -122,8 +122,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     lastActivitySubscription =
         userRepository.lastActivityStream.listen((data) async {
-      var la = data[currentConversation.opponent?.id];
-      _updateOpponentRecentActivity(la);
+      var recentActivity = data[currentConversation.opponent?.id];
+      _updateOpponentRecentActivity(recentActivity);
     });
 
     conversationWatcher = messagesRepository.localDatasource
@@ -138,15 +138,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   subscribeOpponentLastActivity() async {
     if (currentConversation.type == 'u') {
-      var la = await userRepository
+      var recentActivity = await userRepository
           .subscribeUserLastActivity(currentConversation.opponent!.id!);
-      _updateOpponentRecentActivity(la);
+      _updateOpponentRecentActivity(recentActivity);
     }
   }
 
-  _updateOpponentRecentActivity(dynamic la) {
-    //FIXME temporary
-    var recentActivity = la == 'online' ? 0 : la;
+  _updateOpponentRecentActivity(int recentActivity) {
     currentConversation = currentConversation.copyWith(
         opponent: currentConversation.opponent
             ?.copyWith(recentActivity: recentActivity));
@@ -251,7 +249,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Future<void> _onRemoveDraftMessage(
       RemoveDraftMessage event, Emitter<ConversationState> emit) async {
-    // messagesRepository.deleteMessageLocal(event.message.id!);
     emit(state.copyWith(draftMessage: () => null));
   }
 
@@ -262,7 +259,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   Future<void> _onConversationDeleted(
       ConversationDeleted event, Emitter<ConversationState> emit) async {
     await conversationRepository.deleteConversation(state.conversation)
-        ? emit(state.copyWith(status: ConversationStatus.delete))
+        ? emit(state.copyWith(
+            draftMessage: () => null, status: ConversationStatus.delete))
         : emit(state.copyWith(status: ConversationStatus.failure));
   }
 

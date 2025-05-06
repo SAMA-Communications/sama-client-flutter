@@ -93,6 +93,7 @@ class MessageLocalDatasource {
     try {
       return await _databaseService.removeMessageLocal(id);
     } catch (e) {
+      print('removeMessageLocal e= $id');
       throw DatabaseException(e.toString());
     }
   }

@@ -24,6 +24,9 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<TextMessageChanged>(
       _onTextChanged,
     );
+    on<TextMessageClear>(
+      _onTextMessageClear,
+    );
     on<SendTextMessage>(
       _onSendTextMessage,
     );
@@ -49,6 +52,11 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
         isTextEmpty: event.text.trim().isEmpty,
         text: event.text,
         status: SendMessageStatus.initial));
+  }
+
+  FutureOr<void> _onTextMessageClear(
+      TextMessageClear event, Emitter<SendMessageState> emit) {
+    emit(state.copyWith(isTextEmpty: true, text: ''));
   }
 
   Future<FutureOr<void>> _onSendStatusReadMessages(

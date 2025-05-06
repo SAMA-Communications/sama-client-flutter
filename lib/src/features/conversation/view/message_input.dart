@@ -121,7 +121,7 @@ class _MessageInputState extends State<MessageInput> {
     BlocProvider.of<SendMessageBloc>(context).add(SendTextMessage(text));
     if (widget.draftMessage != null) {
       BlocProvider.of<ConversationBloc>(context)
-          .add(RemoveDraftMessage(widget.draftMessage!));
+          .add(const RemoveDraftMessage());
     }
   }
 }

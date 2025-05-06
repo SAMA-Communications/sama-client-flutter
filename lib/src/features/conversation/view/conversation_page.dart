@@ -95,12 +95,7 @@ class ConversationPage extends StatelessWidget {
                   }
                 },
                 child: const Flexible(child: MessagesList())),
-            Padding(
-                //need extra space for safe area on ios
-                padding: EdgeInsets.only(
-                    bottom: Platform.isIOS && !keyboardIsOpen(context)
-                        ? 16.0
-                        : 0.0),
+            SafeArea(
                 child: context.read<SharingIntentBloc>().state.status ==
                         SharingIntentStatus.processing
                     ? BlocListener<SendMessageBloc, SendMessageState>(
@@ -208,6 +203,9 @@ class _PopupMenuButton extends StatelessWidget {
                                 TextButton(
                                   child: const Text("Ok"),
                                   onPressed: () {
+                                    context
+                                        .read<SendMessageBloc>()
+                                        .add(const TextMessageClear());
                                     context
                                         .read<ConversationBloc>()
                                         .add(const ConversationDeleted());

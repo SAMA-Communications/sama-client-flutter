@@ -162,11 +162,15 @@ class DatabaseService {
   }
 
   Future<bool> removeConversationLocal(String id) async {
+    removeMessagesLocalByCid(id);
+
     final query = store!
         .box<ConversationModel>()
         .query(ConversationModel_.id.equals(id))
         .build();
+
     var result = await query.removeAsync();
+
     query.close();
     // final item = await query.findFirstAsync();
     // query.close();
@@ -388,6 +392,14 @@ class DatabaseService {
   Future<bool> removeMessageLocal(String id) async {
     final query =
         store!.box<MessageModel>().query(MessageModel_.id.equals(id)).build();
+    var result = await query.removeAsync();
+    query.close();
+    return true;
+  }
+
+  Future<bool> removeMessagesLocalByCid(String cid) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.cid.equals(cid)).build();
     var result = await query.removeAsync();
     query.close();
     return true;

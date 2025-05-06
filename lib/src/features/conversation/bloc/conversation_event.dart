@@ -53,9 +53,7 @@ final class _DraftMessageReceived extends ConversationEvent {
 }
 
 final class RemoveDraftMessage extends ConversationEvent {
-  final MessageModel message;
-
-  const RemoveDraftMessage(this.message);
+  const RemoveDraftMessage();
 }
 
 final class _ConversationUpdated extends ConversationEvent {
