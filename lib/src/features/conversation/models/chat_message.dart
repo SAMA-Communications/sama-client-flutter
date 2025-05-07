@@ -1,6 +1,6 @@
 import '../../../db/models/models.dart';
 
-enum ChatMessageStatus { none, pending, sent, read }
+enum ChatMessageStatus { none, pending, draft, sent, read }
 
 // ignore: must_be_immutable
 class ChatMessage extends MessageModel {
@@ -78,15 +78,18 @@ extension ChatMessageExtension on MessageModel {
       bool isLastUserMessage, bool isFirstUserMessage,
       [ChatMessageStatus status = ChatMessageStatus.none]) {
     return ChatMessage(
+        bid: bid,
         sender: sender,
         isOwn: isOwn,
         isLastUserMessage: isLastUserMessage,
         isFirstUserMessage: isFirstUserMessage,
-        status: rawStatus == 'read'
+        status: rawStatus == ChatMessageStatus.read.name
             ? ChatMessageStatus.read
-            : rawStatus == 'pending'
+            : rawStatus == ChatMessageStatus.pending.name
                 ? ChatMessageStatus.pending
-                : status,
+                : rawStatus == ChatMessageStatus.draft.name
+                    ? ChatMessageStatus.draft
+                    : status,
         id: id,
         from: from,
         cid: cid,

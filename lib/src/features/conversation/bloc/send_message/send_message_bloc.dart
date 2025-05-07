@@ -24,6 +24,9 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<TextMessageChanged>(
       _onTextChanged,
     );
+    on<TextMessageClear>(
+      _onTextMessageClear,
+    );
     on<SendTextMessage>(
       _onSendTextMessage,
     );
@@ -36,8 +39,8 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       SendTextMessage event, Emitter<SendMessageState> emit) async {
     try {
       messagesRepository.sendTextMessage(event.message, currentConversation.id);
-      emit(
-          state.copyWith(isTextEmpty: true, status: SendMessageStatus.success));
+      emit(state.copyWith(
+          isTextEmpty: true, text: '', status: SendMessageStatus.success));
     } catch (_) {
       emit(state.copyWith(status: SendMessageStatus.failure));
     }
@@ -47,7 +50,13 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       TextMessageChanged event, Emitter<SendMessageState> emit) {
     emit(state.copyWith(
         isTextEmpty: event.text.trim().isEmpty,
+        text: event.text,
         status: SendMessageStatus.initial));
+  }
+
+  FutureOr<void> _onTextMessageClear(
+      TextMessageClear event, Emitter<SendMessageState> emit) {
+    emit(state.copyWith(isTextEmpty: true, text: ''));
   }
 
   Future<FutureOr<void>> _onSendStatusReadMessages(
@@ -59,5 +68,17 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
         conversationRepository.resetUnreadMessagesCount(currentConversation.id);
       }
     } catch (_) {}
+  }
+
+  saveDraftIfExist() {
+    if (state.text.isNotEmpty) {
+      messagesRepository.saveDraftMessage(state.text, currentConversation.id);
+    }
+  }
+
+  @override
+  Future<void> close() {
+    saveDraftIfExist();
+    return super.close();
   }
 }
