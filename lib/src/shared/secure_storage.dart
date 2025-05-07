@@ -17,7 +17,7 @@ const String storageAccessToken = "storage_access_token";
 const String storageAccessTokenExpiration = "storage_access_token_expiration";
 const String storageRefreshToken = "storage_refresh_token";
 const String storageSubscriptionToken = "storage_subscription_token";
-const String storageEnvironmentUrl = "storage_environment_url";
+const String storageEnvironmentType = "storage_environment_type";
 
 class SecureStorage {
   static final SecureStorage _instance = SecureStorage._internal();
@@ -110,7 +110,7 @@ class SecureStorage {
 
   Future<void> deleteAllData() async {
     deleteCurrentUser();
-    _storage.delete(key: storageEnvironmentUrl);
+    _storage.delete(key: storageEnvironmentType);
   }
 
   saveAccessToken(AccessToken token) {
@@ -143,15 +143,20 @@ class SecureStorage {
   }
 
   saveEnvironmentType(EnvType type) {
-    _storage.write(key: storageEnvironmentUrl, value: type.url);
+    _storage.write(key: storageEnvironmentType, value: type.name);
   }
 
   Future<EnvType> getDevEnvironmentType() async {
-    return EnvType.fromUrl(await getEnvironmentUrl());
+    return EnvType.values
+        .byName(await _storage.read(key: storageEnvironmentType) ?? 'dev');
   }
 
   Future<String> getEnvironmentUrl() async {
-    return (await _storage.read(key: storageEnvironmentUrl)) ?? EnvType.dev.url;
+    return (await getDevEnvironmentType()).url;
+  }
+
+  Future<String> getEnvironmentOrgId() async {
+    return (await getDevEnvironmentType()).organizationId;
   }
 }
 
