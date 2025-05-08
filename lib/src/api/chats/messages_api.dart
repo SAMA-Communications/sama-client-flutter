@@ -8,7 +8,7 @@ const String messagesDeleteRequestName = 'message_delete';
 
 const messageRequestTimeout = Duration(seconds: 5);
 
-Future<bool> sendMessage({
+Future<(bool, Message?)> sendMessage({
   required Message message,
 }) {
   var dataToSend = {
@@ -21,7 +21,7 @@ Future<bool> sendMessage({
 
   if (SamaConnectionService.instance.connectionState !=
       ConnectionState.connected) {
-    return Future.value(false);
+    return Future.value((false, null));
   }
 
   return SamaConnectionService.instance
@@ -30,9 +30,12 @@ Future<bool> sendMessage({
       .timeout(messageRequestTimeout)
       .then((response) {
     if (message.id == response['mid']) {
-      return true;
+      if (response['bot_message'] != null) {
+        return (true, Message.fromJson(response['bot_message']));
+      }
+      return (true, null);
     }
-    return false;
+    return (false, null);
   });
 }
 

@@ -295,8 +295,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         id: event.status.serverMessageId, status: ChatMessageStatus.sent);
     messages[messages.indexOf(msg)] = msgUpdated;
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
-    conversationRepository.updateConversationLocal(currentConversation.copyWith(
-        lastMessage: msgLocal, updatedAt: msgLocal.createdAt));
+
+    if (currentConversation.lastMessage!.t! < event.status.time) {
+      conversationRepository.updateConversationLocal(currentConversation
+          .copyWith(lastMessage: msgLocal, updatedAt: msg.createdAt));
+    }
     emit(state.copyWith(messages: messages));
   }
 
