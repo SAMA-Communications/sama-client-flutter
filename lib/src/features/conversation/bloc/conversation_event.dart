@@ -54,6 +54,14 @@ final class ParticipantsReceived extends ConversationEvent {
   const ParticipantsReceived();
 }
 
+final class _DraftMessageReceived extends ConversationEvent {
+  const _DraftMessageReceived();
+}
+
+final class RemoveDraftMessage extends ConversationEvent {
+  const RemoveDraftMessage();
+}
+
 final class _ConversationUpdated extends ConversationEvent {
   final ConversationModel conversation;
 

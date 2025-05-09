@@ -35,6 +35,7 @@ class ConversationModel extends Equatable {
   });
 
   final lastMessageBind = ToOne<MessageModel>();
+  final draftMessageBind = ToOne<MessageModel>();
   final opponentBind = ToOne<UserModel>();
   final ownerBind = ToOne<UserModel>();
   final participants = ToMany<UserModel>();
@@ -42,6 +43,9 @@ class ConversationModel extends Equatable {
 
   @Transient()
   MessageModel? get lastMessage => lastMessageBind.target;
+
+  @Transient()
+  MessageModel? get draftMessage => draftMessageBind.target;
 
   @Transient()
   UserModel? get opponent => opponentBind.target;
@@ -53,6 +57,8 @@ class ConversationModel extends Equatable {
   AvatarModel? get avatar => avatarBind.target;
 
   set lastMessage(MessageModel? item) => lastMessageBind.target = item;
+
+  set draftMessage(MessageModel? item) => draftMessageBind.target = item;
 
   set opponent(UserModel? item) => opponentBind.target = item;
 
@@ -71,6 +77,7 @@ class ConversationModel extends Equatable {
     String? description,
     int? unreadMessagesCount,
     MessageModel? lastMessage,
+    MessageModel? Function()? draftMessage,
     UserModel? opponent,
     UserModel? owner,
     List<UserModel>? participants,
@@ -87,6 +94,7 @@ class ConversationModel extends Equatable {
         unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
         isEncrypted: isEncrypted ?? this.isEncrypted)
       ..lastMessage = lastMessage ?? this.lastMessage
+      ..draftMessage = draftMessage != null ? draftMessage() : this.draftMessage
       ..opponent = opponent ?? this.opponent
       ..owner = owner ?? this.owner
       ..avatar = avatar ?? this.avatar;
@@ -96,8 +104,9 @@ class ConversationModel extends Equatable {
         this.participants.applyToDb();
       }
       chat.participants.addAll(participants);
+    } else {
+      chat.participants.addAll(this.participants);
     }
-
     return chat;
   }
 
@@ -122,7 +131,7 @@ class ConversationModel extends Equatable {
 
   @override
   String toString() {
-    return 'ConversationModel{bid: $bid, id: $id, lastMessage: $lastMessage}';
+    return 'ConversationModel{bid: $bid, id: $id, lastMessage: $lastMessage, draftMessage: $draftMessage}';
   }
 
   @override
@@ -136,6 +145,7 @@ class ConversationModel extends Equatable {
         unreadMessagesCount,
         isEncrypted,
         lastMessage,
+        draftMessage,
         opponent,
         owner,
         avatar,

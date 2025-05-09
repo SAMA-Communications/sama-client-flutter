@@ -213,7 +213,7 @@
     },
     {
       "id": "13:9106374520578572502",
-      "lastPropertyId": "15:8834178211781701775",
+      "lastPropertyId": "16:8214829155225431382",
       "name": "ConversationModel",
       "properties": [
         {
@@ -295,6 +295,14 @@
           "id": "15:8834178211781701775",
           "name": "isEncrypted",
           "type": 1
+        },
+        {
+          "id": "16:8214829155225431382",
+          "name": "draftMessageBindId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "38:1718185030575189588",
+          "relationTarget": "MessageModel"
         }
       ],
       "relations": [
@@ -307,7 +315,7 @@
     }
   ],
   "lastEntityId": "13:9106374520578572502",
-  "lastIndexId": "37:873959491954871870",
+  "lastIndexId": "38:1718185030575189588",
   "lastRelationId": "5:7785256265115248397",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

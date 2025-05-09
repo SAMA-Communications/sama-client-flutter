@@ -128,7 +128,7 @@ class UserRepository {
     return localDatasource.saveUsersLocal(items);
   }
 
-  Future<dynamic> subscribeUserLastActivity(String id) {
+  Future<int> subscribeUserLastActivity(String id) {
     return api.subscribeUserLastActivity(id);
   }
 

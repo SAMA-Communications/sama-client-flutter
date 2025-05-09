@@ -142,6 +142,10 @@ class MessagesRepository {
     return localDatasource.getMessageLocalById(id);
   }
 
+  Future<MessageModel?> getMessageLocalByStatus(String cid, String status) {
+    return localDatasource.getMessageLocalByStatus(cid, status);
+  }
+
   Future<List<MessageModel>> getMessagesLocalByStatus(String status) {
     return localDatasource.getMessagesLocalByStatus(status);
   }
@@ -202,8 +206,24 @@ class MessagesRepository {
     return api.readMessages(api.ReadMessagesStatus.fromJson({'cid': cid}));
   }
 
-  Future<void> saveMessageLocal(MessageModel message) async {
-    await localDatasource.saveMessageLocal(message);
+  Future<MessageModel> saveMessageLocal(MessageModel message) async {
+    return await localDatasource.saveMessageLocal(message);
+  }
+
+  Future<void> saveDraftMessage(String body, String cid) async {
+    var currentUser = await userRepository.getCurrentUser();
+    var message = MessageModel(
+        body: body.trim(),
+        cid: cid,
+        from: currentUser?.id,
+        id: const Uuid().v1(),
+        t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        createdAt: DateTime.now(),
+        rawStatus: ChatMessageStatus.draft.name);
+
+    var msg = await saveMessageLocal(message);
+    _incomingMessagesController
+        .add(msg.toChatMessage(currentUser!, true, true, true));
   }
 
   Future<MessageModel> updateMessageLocal(MessageModel message) async {
@@ -214,7 +234,7 @@ class MessagesRepository {
     await localDatasource.updateMessagesLocal(messages);
   }
 
-  Future<void> deleteMessagesLocal(String id) async {
+  Future<void> deleteMessageLocal(String id) async {
     await localDatasource.removeMessageLocal(id);
   }
 

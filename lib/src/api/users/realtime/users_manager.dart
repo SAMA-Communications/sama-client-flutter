@@ -15,10 +15,10 @@ class UsersManager {
 
   StreamSubscription<Map<String, dynamic>>? _dataListener;
 
-  final StreamController<Map<String, dynamic>> _lastActivityController =
+  final StreamController<Map<String, int>> _lastActivityController =
       StreamController.broadcast();
 
-  Stream<Map<String, dynamic>> get lastActivityControllerStream =>
+  Stream<Map<String, int>> get lastActivityControllerStream =>
       _lastActivityController.stream;
 
   _init() {
@@ -26,12 +26,12 @@ class UsersManager {
 
     _dataListener = SamaConnectionService.instance.dataStream.listen((data) {
       if (data['last_activity'] != null) {
-        _processLastActivity(data['last_activity'].cast<String, dynamic>());
+        _processLastActivity(data['last_activity'].cast<String, int>());
       }
     });
   }
 
-  void _processLastActivity(Map<String, dynamic> data) {
+  void _processLastActivity(Map<String, int> data) {
     _lastActivityController.add(data);
   }
 
