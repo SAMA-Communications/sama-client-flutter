@@ -274,25 +274,30 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _MessageReceived event, Emitter<ConversationState> emit) {
     var messages = [...state.messages];
 
-    if (messages.isNotEmpty) {
-      messages.first = messages.first.copyWith(
-        isLastUserMessage: isServiceMessage(messages.first) ||
-            event.message.from != messages.first.from,
-        isFirstUserMessage: messages.length == 1 ||
-            isServiceMessage(messages[1]) ||
-            messages[1].from != messages.first.from,
+    if (event.message.extension?['modified'] ?? false) {
+      var indexMsg = messages.indexWhere((m) => m.id == event.message.id);
+      messages[indexMsg] = event.message;
+    } else {
+      if (messages.isNotEmpty) {
+        messages.first = messages.first.copyWith(
+          isLastUserMessage: isServiceMessage(messages.first) ||
+              event.message.from != messages.first.from,
+          isFirstUserMessage: messages.length == 1 ||
+              isServiceMessage(messages[1]) ||
+              messages[1].from != messages.first.from,
+        );
+      }
+
+      messages.insert(
+        0,
+        event.message.copyWith(
+          isFirstUserMessage: messages.isEmpty ||
+              isServiceMessage(messages.first) ||
+              event.message.from != messages.first.from,
+          isLastUserMessage: true,
+        ),
       );
     }
-
-    messages.insert(
-      0,
-      event.message.copyWith(
-        isFirstUserMessage: messages.isEmpty ||
-            isServiceMessage(messages.first) ||
-            event.message.from != messages.first.from,
-        isLastUserMessage: true,
-      ),
-    );
 
     emit(
         state.copyWith(messages: messages, status: ConversationStatus.success));

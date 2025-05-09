@@ -32,6 +32,10 @@ Future<(bool, Message?)> sendMessage({
     if (message.id == response['mid']) {
       if (response['bot_message'] != null) {
         return (true, Message.fromJson(response['bot_message']));
+      } else if (response['modified'] != null) {
+        var msg = message.copyWith(
+            body: response['modified']['body'], extension: {'modified': true});
+        return (true, msg);
       }
       return (true, null);
     }

@@ -186,11 +186,16 @@ class MessagesRepository {
             .add(api.PendingMessageStatus.fromJson({'mid': message.id}));
       }
       if (msg != null) {
-        var sender = await userRepository.getUserById(msg.from ?? '');
-        sender ??= UserModel();
-        var chatMessage =
-            msg.toMessageModel().toChatMessage(sender, false, true, true);
-
+        ChatMessage chatMessage;
+        if (msg.extension?['modified'] ?? false) {
+          chatMessage =
+              msg.toMessageModel().toChatMessage(currentUser, true, true, true);
+        } else {
+          var sender = await userRepository.getUserById(msg.from ?? '');
+          sender ??= UserModel();
+          chatMessage =
+              msg.toMessageModel().toChatMessage(sender, false, true, true);
+        }
         _incomingMessagesController.add(chatMessage);
       }
     }).catchError((onError) {
