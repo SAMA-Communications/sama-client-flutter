@@ -44,6 +44,12 @@ final class _ReadStatusReceived extends ConversationEvent {
   const _ReadStatusReceived(this.status);
 }
 
+final class _FailedStatusReceived extends ConversationEvent {
+  final FailedMessagesStatus status;
+
+  const _FailedStatusReceived(this.status);
+}
+
 final class ParticipantsReceived extends ConversationEvent {
   const ParticipantsReceived();
 }

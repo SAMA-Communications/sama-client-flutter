@@ -173,16 +173,36 @@ class MessagesRepository {
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
-    var msgModel = message.toMessageModel();
-    _incomingMessagesController
-        .add(msgModel.toChatMessage(currentUser!, true, true, true));
+    var msgModel =
+        message.toMessageModel().toChatMessage(currentUser!, true, true, true);
+    _incomingMessagesController.add(msgModel);
 
-    return api.sendMessage(message: message).then((result) {
+    return api.sendMessage(message: message).then((response) async {
+      var (result, msg) = response;
       if (!result) {
         var msgUpdated = msgModel.copyWith(rawStatus: 'pending');
         saveMessageLocal(msgUpdated);
         _statusMessagesController
             .add(api.PendingMessageStatus.fromJson({'mid': message.id}));
+      }
+      if (msg != null) {
+        ChatMessage chatMessage;
+        if (msg.extension?['modified'] ?? false) {
+          chatMessage =
+              msg.toMessageModel().toChatMessage(currentUser, true, true, true);
+        } else {
+          var sender = await userRepository.getUserById(msg.from ?? '');
+          sender ??= UserModel();
+          chatMessage =
+              msg.toMessageModel().toChatMessage(sender, false, true, true);
+        }
+        _incomingMessagesController.add(chatMessage);
+      }
+    }).catchError((onError) {
+      if (onError is api.ResponseException) {
+        _statusMessagesController
+            .add(api.FailedMessagesStatus.fromJson({'mid': message.id}));
+        throw onError;
       }
     });
   }

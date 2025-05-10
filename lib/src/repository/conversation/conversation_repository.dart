@@ -97,8 +97,8 @@ class ConversationRepository {
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
           await localDatasource.getConversationLocal(message.cid!);
-      var ignoreUnsentOwnMsg = message.status.index > 1 || !message.isOwn;
-      if (conversation != null && ignoreUnsentOwnMsg) {
+      var shouldUpdate = message.status.index > 1 || !message.isOwn;//TODO RP redundant checking message.status.index > 1
+      if (conversation != null && shouldUpdate) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {
           unreadMsgCountUpdated = (conversation.unreadMessagesCount ?? 0) + 1;
