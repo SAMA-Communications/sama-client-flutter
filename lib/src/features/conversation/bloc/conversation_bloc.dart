@@ -323,7 +323,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     messages[messages.indexOf(msg)] = msgUpdated;
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
 
-    if (currentConversation.lastMessage!.t! < event.status.time) {
+    var chatLocal = await conversationRepository
+        .getConversationById(currentConversation.id);
+    if ((chatLocal?.lastMessage?.t ?? 0) < msgLocal.t!) {
       conversationRepository.updateConversationLocal(currentConversation
           .copyWith(lastMessage: msgLocal, updatedAt: msg.createdAt));
     }
@@ -343,9 +345,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       }
     });
     await messagesRepository.updateMessagesLocal(msgListUpdated);
-    // TODO RP CHECK ME
-    // conversationRepository.updateConversationLocal(
-    //     currentConversation, msgListUpdated.last);
     emit(state.copyWith(messages: messages.values.toList()));
   }
 
