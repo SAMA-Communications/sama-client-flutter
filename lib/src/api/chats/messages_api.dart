@@ -1,6 +1,4 @@
-import '../connection/connection.dart';
-import '../conversations/models/models.dart';
-import 'realtime/models/models.dart';
+import '../api.dart';
 
 const String messageRequestName = 'message';
 const String messageEditRequestName = 'message_edit';
@@ -10,7 +8,7 @@ const String messagesDeleteRequestName = 'message_delete';
 
 const messageRequestTimeout = Duration(seconds: 5);
 
-Future<bool> sendMessage({
+Future<(bool, Message?)> sendMessage({
   required Message message,
 }) {
   var dataToSend = {
@@ -23,7 +21,7 @@ Future<bool> sendMessage({
 
   if (SamaConnectionService.instance.connectionState !=
       ConnectionState.connected) {
-    return Future.value(false);
+    return Future.value((false, null));
   }
 
   return SamaConnectionService.instance
@@ -32,11 +30,16 @@ Future<bool> sendMessage({
       .timeout(messageRequestTimeout)
       .then((response) {
     if (message.id == response['mid']) {
-      return true;
+      if (response['bot_message'] != null) {
+        return (true, Message.fromJson(response['bot_message']));
+      } else if (response['modified'] != null) {
+        var msg = message.copyWith(
+            body: response['modified']['body'], extension: {'modified': true});
+        return (true, msg);
+      }
+      return (true, null);
     }
-    return false;
-  }).catchError((onError) {
-    return false;
+    return (false, null);
   });
 }
 

@@ -35,6 +35,8 @@ class MessagesCollector {
           break;
         case ReadMessagesStatus():
           break;
+        case FailedMessagesStatus():
+          break;
       }
     });
 

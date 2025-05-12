@@ -78,6 +78,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _onReadStatusReceived,
       transformer: debounce(),
     );
+    on<_FailedStatusReceived>(
+      _onFailedStatusReceived,
+    );
     on<_ConversationUpdated>(
       _onConversationUpdated,
     );
@@ -116,6 +119,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           break;
         case ReadMessagesStatus():
           add(_ReadStatusReceived(status));
+          break;
+        case FailedMessagesStatus():
+          add(_FailedStatusReceived(status));
           break;
       }
     });
@@ -268,25 +274,30 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _MessageReceived event, Emitter<ConversationState> emit) {
     var messages = [...state.messages];
 
-    if (messages.isNotEmpty) {
-      messages.first = messages.first.copyWith(
-        isLastUserMessage: isServiceMessage(messages.first) ||
-            event.message.from != messages.first.from,
-        isFirstUserMessage: messages.length == 1 ||
-            isServiceMessage(messages[1]) ||
-            messages[1].from != messages.first.from,
+    if (event.message.extension?['modified'] ?? false) {
+      var indexMsg = messages.indexWhere((m) => m.id == event.message.id);
+      messages[indexMsg] = event.message;
+    } else {
+      if (messages.isNotEmpty) {
+        messages.first = messages.first.copyWith(
+          isLastUserMessage: isServiceMessage(messages.first) ||
+              event.message.from != messages.first.from,
+          isFirstUserMessage: messages.length == 1 ||
+              isServiceMessage(messages[1]) ||
+              messages[1].from != messages.first.from,
+        );
+      }
+
+      messages.insert(
+        0,
+        event.message.copyWith(
+          isFirstUserMessage: messages.isEmpty ||
+              isServiceMessage(messages.first) ||
+              event.message.from != messages.first.from,
+          isLastUserMessage: true,
+        ),
       );
     }
-
-    messages.insert(
-      0,
-      event.message.copyWith(
-        isFirstUserMessage: messages.isEmpty ||
-            isServiceMessage(messages.first) ||
-            event.message.from != messages.first.from,
-        isLastUserMessage: true,
-      ),
-    );
 
     emit(
         state.copyWith(messages: messages, status: ConversationStatus.success));
@@ -311,8 +322,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         id: event.status.serverMessageId, status: ChatMessageStatus.sent);
     messages[messages.indexOf(msg)] = msgUpdated;
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
-    conversationRepository.updateConversationLocal(currentConversation.copyWith(
-        lastMessage: msgLocal, updatedAt: msgLocal.createdAt));
+
+    var chatLocal = await conversationRepository
+        .getConversationById(currentConversation.id);
+    if ((chatLocal?.lastMessage?.t ?? 0) < msgLocal.t!) {
+      conversationRepository.updateConversationLocal(currentConversation
+          .copyWith(lastMessage: msgLocal, updatedAt: msg.createdAt));
+    }
     emit(state.copyWith(messages: messages));
   }
 
@@ -329,10 +345,19 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       }
     });
     await messagesRepository.updateMessagesLocal(msgListUpdated);
-    // TODO RP CHECK ME
-    // conversationRepository.updateConversationLocal(
-    //     currentConversation, msgListUpdated.last);
     emit(state.copyWith(messages: messages.values.toList()));
+  }
+
+  Future<void> _onFailedStatusReceived(
+      _FailedStatusReceived event, Emitter<ConversationState> emit) async {
+    var messages = [...state.messages];
+
+    var msg = messages.firstWhere((o) => o.id == event.status.messageId);
+    //TODO RP or set failed status
+    // var msgUpdated = msg.copyWith(status: ChatMessageStatus.failed);
+    // messages[messages.indexOf(msg)] = msgUpdated;
+    messages.remove(msg);
+    emit(state.copyWith(messages: messages));
   }
 
   @override

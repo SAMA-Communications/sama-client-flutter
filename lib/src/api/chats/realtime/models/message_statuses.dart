@@ -33,16 +33,23 @@ class PendingMessageStatus implements MessageSendStatus {
 class SentMessageStatus implements MessageSendStatus {
   final String messageId; // mid
   final String serverMessageId; // server_mid
-  final DateTime time; // t
+  final int time; // t
 
   SentMessageStatus.fromJson(Map<String, dynamic> json)
       : messageId = json['mid'],
         serverMessageId = json['server_mid'],
-        time = DateTime.parse(json['t'].toString());
+        time = json['t'];
 }
 
 class ReadMessagesStatus extends MessageStatus implements MessageSendStatus {
   ReadMessagesStatus.fromJson(super.json) : super.fromJson();
+}
+
+class FailedMessagesStatus implements MessageSendStatus {
+  final String messageId;
+
+  FailedMessagesStatus.fromJson(Map<String, dynamic> json)
+      : messageId = json['mid'];
 }
 
 class EditMessageStatus {
