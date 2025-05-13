@@ -30,11 +30,12 @@ Future<User> createUser({
   String? lastName,
   String? email,
   String? phone,
-}) {
+}) async {
   return SamaConnectionService.instance.sendRequest(userCreateRequestName, {
     'login': login,
     'password': password,
     'device_id': deviceId,
+    'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
     if (email != null) 'email': email,
     if (phone != null) 'phone': phone,
     if (firstName != null) 'first_name': firstName,
