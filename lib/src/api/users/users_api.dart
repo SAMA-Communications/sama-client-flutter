@@ -44,12 +44,11 @@ Future<User> createUser({
   });
 }
 
-Future<(AccessToken, UserModel)> loginHttp(User user) async {
+Future<(AccessToken, UserModel)> loginHttp(User user) {
   return sendHTTPRequest(httpLoginRequestName, {
     'login': user.login,
     'password': user.password,
     'device_id': user.deviceId,
-    'organizationId': await SecureStorage.instance.getEnvironmentOrgId(),
   }).then((response) {
     var loggedUser = User.fromJson(response['user'])
         .copyWith(deviceId: user.deviceId)
