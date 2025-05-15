@@ -279,7 +279,8 @@ class DatabaseService {
     return results;
   }
 
-  Future<bool> saveMessagesLocal(List<MessageModel> items) async {
+  Future<bool> saveMessagesLocal(List<MessageModel> items,
+      [int violationId = 0]) async {
     final query = store!
         .box<MessageModel>()
         .query(MessageModel_.id
@@ -301,7 +302,9 @@ class DatabaseService {
     } on UniqueViolationException catch (e) {
       final id = int.tryParse(e.message.split(' ').last) ?? 0;
       print('saveMessagesLocal UniqueViolationException e id= $id');
-      return saveMessagesLocal(items);
+      return violationId > 0
+          ? throw Exception('UniqueViolationException')
+          : saveMessagesLocal(items, ++violationId);
     }
 
     return true;

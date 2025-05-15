@@ -8,7 +8,7 @@ import '../../api/conversations/models/models.dart';
 class AttachmentModel extends Equatable {
   @Id()
   int? bid;
-  @Unique()
+  @Unique(onConflict: ConflictStrategy.replace)
   final String? fileId;
   final String? fileName;
   final String? fileBlurHash;
@@ -38,12 +38,20 @@ class AttachmentModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [fileId,fileName, fileBlurHash, url];
+  String toString() {
+    return 'AttachmentModel{bid: $bid, fileId: $fileId, fileName: $fileName, fileBlurHash: $fileBlurHash, url: $url}';
+  }
+
+  @override
+  List<Object?> get props => [fileId, fileName, fileBlurHash, url];
 }
 
 extension AttachmentModelExtension on Attachment {
   AttachmentModel toAttachmentModel() {
     return AttachmentModel(
-        fileId: fileId, fileName: fileName, fileBlurHash: fileBlurHash);
+        fileId: fileId,
+        fileName: fileName,
+        fileBlurHash: fileBlurHash,
+        url: fileUrl);
   }
 }
