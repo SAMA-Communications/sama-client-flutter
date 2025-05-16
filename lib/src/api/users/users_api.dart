@@ -30,11 +30,12 @@ Future<User> createUser({
   String? lastName,
   String? email,
   String? phone,
-}) {
+}) async {
   return SamaConnectionService.instance.sendRequest(userCreateRequestName, {
     'login': login,
     'password': password,
     'device_id': deviceId,
+    'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
     if (email != null) 'email': email,
     if (phone != null) 'phone': phone,
     if (firstName != null) 'first_name': firstName,
@@ -188,7 +189,7 @@ Future<List<User>> searchUsersByKeyword(String keyword,
   });
 }
 
-Future<dynamic> subscribeUserLastActivity(String id) {
+Future<int> subscribeUserLastActivity(String id) {
   return SamaConnectionService.instance
       .sendRequest(userLastActivitySubscribe, {'id': id}).then((response) {
     var status = response['last_activity'][id];

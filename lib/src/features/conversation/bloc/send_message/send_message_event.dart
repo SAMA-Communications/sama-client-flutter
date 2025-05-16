@@ -19,6 +19,10 @@ final class TextMessageChanged extends SendMessageEvent {
   const TextMessageChanged(this.text);
 }
 
+final class TextMessageClear extends SendMessageEvent {
+  const TextMessageClear();
+}
+
 // TODO RP maybe later move to separate bloc along with editMessage and deleteMessages
 final class SendStatusReadMessages extends SendMessageEvent {
   const SendStatusReadMessages();

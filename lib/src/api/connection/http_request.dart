@@ -13,6 +13,8 @@ Future<Map<String, dynamic>> sendHTTPRequest(
     String requestName, dynamic requestData,
     [Map? requestHeaders]) async {
   final url = 'https://${await SecureStorage.instance.getEnvironmentUrl()}';
+  final orgId = await SecureStorage.instance.getEnvironmentOrgId();
+  requestData['organization_id'] = orgId;
   var urlQuery = buildQueryUrl(url, [requestName]);
   var body = jsonEncode(requestData);
   Map<String, String> headers = Map.of(_headers);
