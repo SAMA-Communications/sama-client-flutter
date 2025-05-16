@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0
+
+### Features:
+- Implemented the Draft feature to locally save unsent messages
+- Added support for Programmable Chat
+- Added support for verifying that a user belongs to a specific organization
+
+### Fixes:
+- Improved real-time updates for Online status to enhance compatibility with the web app
+
 ## 0.10.0
 
 ### Features:
