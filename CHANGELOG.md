@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.1
+
+### Fixes:
+- Added organization id for production environment
+
 ## 0.11.0
 
 ### Features:
