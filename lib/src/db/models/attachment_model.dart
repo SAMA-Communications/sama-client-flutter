@@ -13,6 +13,9 @@ class AttachmentModel extends Equatable {
   final String? fileName;
   final String? fileBlurHash;
   final String? url;
+  final String? contentType;
+  final int? fileHeight;
+  final int? fileWidth;
 
   AttachmentModel({
     this.bid,
@@ -20,6 +23,9 @@ class AttachmentModel extends Equatable {
     this.fileName,
     this.fileBlurHash,
     this.url,
+    this.contentType,
+    this.fileHeight,
+    this.fileWidth,
   });
 
   AttachmentModel copyWith({
@@ -28,22 +34,30 @@ class AttachmentModel extends Equatable {
     String? fileName,
     String? fileBlurHash,
     String? url,
+    String? contentType,
+    int? fileHeight,
+    int? fileWidth,
   }) {
     return AttachmentModel(
         bid: bid ?? this.bid,
         fileId: fileId ?? this.fileId,
         fileName: fileName ?? this.fileName,
         fileBlurHash: fileBlurHash ?? this.fileBlurHash,
-        url: url ?? this.url);
+        url: url ?? this.url,
+        contentType: contentType ?? this.contentType,
+        fileHeight: fileHeight ?? this.fileHeight,
+        fileWidth: fileWidth ?? this.fileWidth);
   }
 
   @override
   String toString() {
-    return 'AttachmentModel{bid: $bid, fileId: $fileId, fileName: $fileName, fileBlurHash: $fileBlurHash, url: $url}';
+    return 'AttachmentModel{bid: $bid, fileId: $fileId, fileName: $fileName, fileBlurHash: $fileBlurHash, '
+        'url: $url, contentType: $contentType, fileHeight: $fileHeight, fileWidth: $fileWidth}';
   }
 
   @override
-  List<Object?> get props => [fileId, fileName, fileBlurHash, url];
+  List<Object?> get props =>
+      [fileId, fileName, fileBlurHash, url, contentType, fileHeight, fileWidth];
 }
 
 extension AttachmentModelExtension on Attachment {
@@ -52,6 +66,9 @@ extension AttachmentModelExtension on Attachment {
         fileId: fileId,
         fileName: fileName,
         fileBlurHash: fileBlurHash,
-        url: fileUrl);
+        url: fileUrl,
+        contentType: fileContentType,
+        fileHeight: fileHeight,
+        fileWidth: fileWidth);
   }
 }

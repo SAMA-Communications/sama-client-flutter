@@ -142,7 +142,8 @@ Widget _buildMediaAttachmentItem(
     child: AbsorbPointer(
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(6)),
-        child: isImage(attachment.fileName!) || isVideo(attachment.fileName!)
+        child: isImage(attachment.fileName, attachment.contentType) ||
+                isVideo(attachment.fileName, attachment.contentType)
             ? _buildMediaItem(attachment)
             : Container(
                 color: white,
@@ -172,7 +173,7 @@ Widget _buildMediaAttachmentItem(
 }
 
 Widget _buildMediaItem(AttachmentModel attachment) {
-  return isImage(attachment.fileName!)
+  return isImage(attachment.fileName, attachment.contentType)
       ? buildImageItem(attachment)
       : buildVideoItem(attachment);
 }

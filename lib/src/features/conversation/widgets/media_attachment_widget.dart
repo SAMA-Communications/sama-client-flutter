@@ -94,7 +94,7 @@ class MediaAttachmentWidgetState extends State<MediaAttachmentWidget> {
   }
 
   Widget _buildAttachmentView(AttachmentModel attachment) {
-    return isImage(attachment.fileName!)
+    return isImage(attachment.fileName, attachment.contentType)
         ? PhotoView(imageProvider: CachedNetworkImageProvider(attachment.url!))
         : VideoView(attachment: attachment);
   }

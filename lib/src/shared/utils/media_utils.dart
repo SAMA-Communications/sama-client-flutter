@@ -17,14 +17,13 @@ import 'package:get_thumbnail_video/video_thumbnail.dart';
 
 import 'file_utils.dart';
 
-bool isImage(String path) {
-  final mimeType = lookupMimeType(path);
+bool isImage(String? path, [String? contentType]) {
+  final mimeType = contentType ?? lookupMimeType(path!);
   return mimeType?.startsWith('image/') ?? false;
 }
 
-bool isVideo(String path) {
-  final mimeType = lookupMimeType(path);
-
+bool isVideo(String? path, [String? contentType]) {
+  final mimeType = contentType ?? lookupMimeType(path!);
   return mimeType?.startsWith('video/') ?? false;
 }
 

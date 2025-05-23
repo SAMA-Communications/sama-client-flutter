@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "8:6709400528399140612",
-      "lastPropertyId": "5:5717160279142175066",
+      "lastPropertyId": "8:4936282859728421093",
       "name": "AttachmentModel",
       "properties": [
         {
@@ -35,6 +35,21 @@
           "id": "5:5717160279142175066",
           "name": "url",
           "type": 9
+        },
+        {
+          "id": "6:4647869943489747714",
+          "name": "contentType",
+          "type": 9
+        },
+        {
+          "id": "7:3882295953503253830",
+          "name": "fileHeight",
+          "type": 6
+        },
+        {
+          "id": "8:4936282859728421093",
+          "name": "fileWidth",
+          "type": 6
         }
       ],
       "relations": []
