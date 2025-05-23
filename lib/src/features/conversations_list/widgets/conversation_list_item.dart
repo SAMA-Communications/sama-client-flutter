@@ -3,7 +3,6 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../db/models/conversation_model.dart';
-import '../../../db/models/message_model.dart';
 import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
@@ -34,7 +33,7 @@ class ConversationListItem extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: BodyWidget(message: conversation.lastMessage),
+        subtitle: BodyWidget(conversation: conversation),
         trailing: DateUnreadWidget(conversation: conversation),
         isThreeLine: true,
         dense: false,
@@ -49,14 +48,14 @@ class ConversationListItem extends StatelessWidget {
 }
 
 class BodyWidget extends StatelessWidget {
-  const BodyWidget({required this.message, super.key});
+  const BodyWidget({required this.conversation, super.key});
 
-  final MessageModel? message;
+  final ConversationModel conversation;
 
   @override
   Widget build(BuildContext context) {
-    String? blurHash = message?.attachments.firstOrNull?.fileBlurHash;
-    String body = message?.body != null ? message!.body! : "";
+    String? blurHash =
+        conversation.lastMessage?.attachments.firstOrNull?.fileBlurHash;
 
     return Text.rich(
       TextSpan(
@@ -76,8 +75,14 @@ class BodyWidget extends StatelessWidget {
                 ),
               ),
             ),
+          if (conversation.draftMessage != null)
+            const TextSpan(
+              text: "Draft: ",
+              style: TextStyle(
+                  fontWeight: FontWeight.w300, fontSize: 16, color: green),
+            ),
           TextSpan(
-            text: body,
+            text: _getMessageBodyText(conversation),
             style: const TextStyle(fontWeight: FontWeight.w200, fontSize: 16),
           ),
         ],
@@ -85,6 +90,15 @@ class BodyWidget extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
+  }
+
+  String _getMessageBodyText(ConversationModel conversation) {
+    if (conversation.draftMessage != null) {
+      return conversation.draftMessage!.body!;
+    }
+    return conversation.lastMessage?.body != null
+        ? conversation.lastMessage!.body!
+        : "";
   }
 }
 

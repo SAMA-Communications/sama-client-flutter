@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../db/models/message_model.dart';
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
+import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import 'media_sender.dart';
 
 class MessageInput extends StatefulWidget {
   final String? sharedText;
+  final MessageModel? draftMessage;
 
-  const MessageInput({super.key, this.sharedText});
+  const MessageInput({super.key, this.sharedText, this.draftMessage});
 
   @override
   State<StatefulWidget> createState() {
@@ -26,17 +29,22 @@ class _MessageInputState extends State<MessageInput> {
     if (widget.sharedText != null) {
       BlocProvider.of<SendMessageBloc>(context)
           .add(TextMessageChanged(widget.sharedText!));
+    } else if (widget.draftMessage != null) {
+      textEditingController.text = widget.draftMessage!.body!;
+      BlocProvider.of<SendMessageBloc>(context)
+          .add(TextMessageChanged(widget.draftMessage!.body!));
     }
     return BlocListener<SendMessageBloc, SendMessageState>(
       listener: (context, state) {
-        if (state.status == SendMessageStatus.success) {
+        if (state.status == SendMessageStatus.processing) {
           textEditingController.clear();
         } else if (state.status == SendMessageStatus.failure) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(
-                  content: Text('Can\'t send message due to some error(s)')),
+              SnackBar(
+                  content: Text(state.errorMessage ??
+                      'Can\'t send message due to some error(s)')),
             );
         }
       },
@@ -112,5 +120,9 @@ class _MessageInputState extends State<MessageInput> {
 
   void onSendChatMessage(BuildContext context, String text) {
     BlocProvider.of<SendMessageBloc>(context).add(SendTextMessage(text));
+    if (widget.draftMessage != null) {
+      BlocProvider.of<ConversationBloc>(context)
+          .add(const RemoveDraftMessage());
+    }
   }
 }

@@ -189,7 +189,7 @@ Future<List<User>> searchUsersByKeyword(String keyword,
   });
 }
 
-Future<dynamic> subscribeUserLastActivity(String id) {
+Future<int> subscribeUserLastActivity(String id) {
   return SamaConnectionService.instance
       .sendRequest(userLastActivitySubscribe, {'id': id}).then((response) {
     var status = response['last_activity'][id];

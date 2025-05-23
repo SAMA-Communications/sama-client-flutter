@@ -228,7 +228,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(13, 9106374520578572502),
       name: 'ConversationModel',
-      lastPropertyId: const obx_int.IdUid(15, 8834178211781701775),
+      lastPropertyId: const obx_int.IdUid(16, 8214829155225431382),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -304,7 +304,14 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(15, 8834178211781701775),
             name: 'isEncrypted',
             type: 1,
-            flags: 0)
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(16, 8214829155225431382),
+            name: 'draftMessageBindId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(38, 1718185030575189588),
+            relationTarget: 'MessageModel')
       ],
       relations: <obx_int.ModelRelation>[
         obx_int.ModelRelation(
@@ -351,7 +358,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
       lastEntityId: const obx_int.IdUid(13, 9106374520578572502),
-      lastIndexId: const obx_int.IdUid(37, 873959491954871870),
+      lastIndexId: const obx_int.IdUid(38, 1718185030575189588),
       lastRelationId: const obx_int.IdUid(5, 7785256265115248397),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
@@ -738,7 +745,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               object.lastMessageBind,
               object.avatarBind,
               object.opponentBind,
-              object.ownerBind
+              object.ownerBind,
+              object.draftMessageBind
             ],
         toManyRelations: (ConversationModel object) => {
               obx_int.RelInfo<ConversationModel>.toMany(5, object.bid!):
@@ -755,7 +763,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionOffset = object.description == null
               ? null
               : fbb.writeString(object.description!);
-          fbb.startTable(16);
+          fbb.startTable(17);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addInt64(2, object.createdAt.millisecondsSinceEpoch);
@@ -769,6 +777,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(12, object.opponentBind.targetId);
           fbb.addInt64(13, object.ownerBind.targetId);
           fbb.addBool(14, object.isEncrypted);
+          fbb.addInt64(15, object.draftMessageBind.targetId);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -816,6 +825,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.ownerBind.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 30, 0);
           object.ownerBind.attach(store);
+          object.draftMessageBind.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 34, 0);
+          object.draftMessageBind.attach(store);
           obx_int.InternalToManyAccess.setRelInfo<ConversationModel>(
               object.participants,
               store,
@@ -1024,6 +1036,11 @@ class ConversationModel_ {
   /// See [ConversationModel.isEncrypted].
   static final isEncrypted =
       obx.QueryBooleanProperty<ConversationModel>(_entities[4].properties[12]);
+
+  /// See [ConversationModel.draftMessageBind].
+  static final draftMessageBind =
+      obx.QueryRelationToOne<ConversationModel, MessageModel>(
+          _entities[4].properties[13]);
 
   /// see [ConversationModel.participants]
   static final participants =

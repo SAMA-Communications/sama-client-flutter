@@ -49,10 +49,32 @@ class Message extends Equatable {
         't': createdAt,
       };
 
+  Message copyWith({
+    String? id,
+    String? from,
+    String? cid,
+    String? rawStatus,
+    String? body,
+    List<Attachment>? attachments,
+    int? t,
+    DateTime? createdAt,
+    Map<String, dynamic>? extension,
+  }) {
+    return Message(
+      id: id ?? this.id,
+      from: from ?? this.from,
+      cid: cid ?? this.cid,
+      rawStatus: rawStatus ?? this.rawStatus,
+      body: body ?? this.body,
+      attachments: attachments ?? this.attachments,
+      t: t ?? this.t,
+      createdAt: createdAt ?? this.createdAt,
+      extension: extension ?? this.extension,
+    );
+  }
+
   @override
-  List<Object?> get props => [
-        id, rawStatus, attachments, body
-      ];
+  List<Object?> get props => [id, rawStatus, attachments, body];
 
   static const empty = Message();
 }
