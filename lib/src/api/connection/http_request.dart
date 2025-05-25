@@ -7,26 +7,26 @@ import 'package:http/http.dart';
 import '../../shared/secure_storage.dart';
 import '../api.dart';
 
-const _headers = {'Content-type': 'application/json'};
+const _headers = {HttpHeaders.contentTypeHeader: 'application/json'};
 
 Future<Map<String, dynamic>> sendHTTPRequest(
-    String requestName, dynamic requestData,
+    String url, String requestName, dynamic requestData,
     [Map? requestHeaders]) async {
-  final url = 'https://${await SecureStorage.instance.getEnvironmentUrl()}';
-  final orgId = await SecureStorage.instance.getEnvironmentOrgId();
-  requestData['organization_id'] = orgId;
   var urlQuery = buildQueryUrl(url, [requestName]);
   var body = jsonEncode(requestData);
   Map<String, String> headers = Map.of(_headers);
   requestHeaders?.forEach((k, v) {
     headers[k] = v;
   });
+
   log('HTTP request', stringData: '$urlQuery $headers $body');
-
-  Response response =
-      await post(urlQuery, headers: headers, body: jsonEncode(requestData));
-
-  log('HTTP response statusCode ${response.statusCode}, headers $headers ${response.headers}');
+  Response? response;
+  try {
+    response = await post(urlQuery, headers: headers, body: body);
+  } catch (e) {
+    print('response e = ${e}');
+  }
+  log('HTTP response statusCode ${response!.statusCode}, headers $headers ${response.headers}');
 
   var completer = Completer<Map<String, dynamic>>();
   switch (response.statusCode) {
@@ -67,6 +67,16 @@ Future<Map<String, dynamic>> sendHTTPRequest(
   }
   log('HTTP response', jsonData: await completer.future);
   return completer.future;
+}
+
+Future<Map<String, dynamic>> sendSamaHTTPRequest(
+    String requestName, dynamic requestData,
+    [Map? requestHeaders]) async {
+  final url = 'https://${await SecureStorage.instance.getEnvironmentUrl()}';
+  final orgId = await SecureStorage.instance.getEnvironmentOrgId();
+  requestData['organization_id'] = orgId;
+
+  return sendHTTPRequest(url, requestName, requestData, requestHeaders);
 }
 
 Uri buildQueryUrl(String url, List<dynamic> specificParts) {

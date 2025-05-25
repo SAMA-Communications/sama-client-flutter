@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/regexp_utils.dart';
+import '../../../shared/widget/link_preview_widget.dart';
 
 class TextMessage extends StatelessWidget {
   final String body;
@@ -34,18 +35,33 @@ class TextMessage extends StatelessWidget {
     );
   }
 
-  WidgetSpan buildLinkComponent(String text, String linkToOpen) => WidgetSpan(
-      child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            splashColor: lightMallow,
-            borderRadius: BorderRadius.circular(6.0),
-            child: Text(
-              text,
-              style: linkStyle,
-            ),
-            onTap: () => openUrl(Uri.parse(linkToOpen)),
-          )));
+  WidgetSpan buildLinkPreviewComponent(String text, String linkToOpen) =>
+      WidgetSpan(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        LinkPreviewWidget(
+            link: linkToOpen,
+            errorBody: 'No description available',
+            key: Key(linkToOpen)),
+        const SizedBox(height: 25),
+        linkWidget(text, linkToOpen),
+      ]));
+
+  WidgetSpan buildLinkComponent(String text, String linkToOpen) =>
+      WidgetSpan(child: linkWidget(text, linkToOpen));
+
+  Widget linkWidget(String text, String linkToOpen) {
+    return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          splashColor: lightMallow,
+          borderRadius: BorderRadius.circular(6.0),
+          child: Text(
+            text,
+            style: linkStyle,
+          ),
+          onTap: () => openUrl(Uri.parse(linkToOpen)),
+        ));
+  }
 
   List<InlineSpan> linkify(String text) {
     final List<InlineSpan> list = <InlineSpan>[];
@@ -64,7 +80,7 @@ class TextMessage extends StatelessWidget {
 
     final String linkText = match.group(0)!;
     if (linkText.contains(RegExp(urlPattern))) {
-      list.add(buildLinkComponent(linkText, linkText));
+      list.add(buildLinkPreviewComponent(linkText, linkText));
     } else if (linkText.contains(RegExp(emailPattern))) {
       list.add(buildLinkComponent(linkText, 'mailto:$linkText'));
     } else if (linkText.contains(RegExp(phonePattern))) {
