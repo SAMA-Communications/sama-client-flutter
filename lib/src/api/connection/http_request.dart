@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 
 import '../../shared/secure_storage.dart';
@@ -89,4 +91,11 @@ Uri buildQueryUrl(String url, List<dynamic> specificParts) {
   }
 
   return Uri.parse(stringBuffer.toString());
+}
+
+Future<void> applyHTTPCert() async {
+  ByteData data =
+      await rootBundle.load('assets/certificate.connectycube.com.pem');
+  SecurityContext context = SecurityContext.defaultContext;
+  context.setTrustedCertificatesBytes(data.buffer.asUint8List());
 }

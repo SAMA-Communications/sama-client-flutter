@@ -49,38 +49,26 @@ class LinkPreviewWidget extends StatelessWidget {
                               valueColor:
                                   AlwaysStoppedAnimation<Color>(slateBlue),
                             ))),
-                    errorWidget: (context, url, error) => const Center(
-                      child: SizedBox.expand(
-                          child: Icon(
-                        Icons.image_outlined,
-                        color: dullGray,
-                        size: 50.0,
-                      )),
-                    ),
+                    errorWidget: (context, url, error) {
+                      return const Center(
+                        child: Icon(
+                          Icons.image_outlined,
+                          color: dullGray,
+                          size: 50.0,
+                        ),
+                      );
+                    },
                     imageUrl: linkPreview.images?.firstOrNull ?? '',
                     fit: BoxFit.fill,
                   ),
+                  const SizedBox(height: 8),
                   Text(
-                    linkPreview.title ?? '',
-                    // style: linkStyle,
+                    softWrap: true,
+                    textAlign: TextAlign.justify,
+                    linkPreview.description ?? '',
+                    style: const TextStyle(color: dullGray, fontSize: 12.0),
                   ),
                 ]);
-            // return Image.network(
-            //   snapshot.data ?? '',
-            //   height: 75.0,
-            //   width: 75.0,
-            //   fit: BoxFit.cover,
-            //   errorBuilder: (BuildContext context, Object exception,
-            //       StackTrace? stackTrace) {
-            //     return errorBody != null
-            //         ? Text(errorBody!)
-            //         : const Icon(
-            //             Icons.image_outlined,
-            //             color: dullGray,
-            //             size: 50.0,
-            //           );
-            //   },
-            // );
           }
           return const CenterLoader();
         });

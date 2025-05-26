@@ -43,27 +43,47 @@ class TextMessage extends StatelessWidget {
             errorBody: 'No description available',
             key: Key(linkToOpen)),
         const SizedBox(height: 25),
-        linkWidget(text, linkToOpen),
+        buildLinkComponent(
+            linkToOpen,
+            Align(
+                alignment: Alignment.centerLeft,
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      const WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Icon(Icons.public_outlined,
+                            color: dullGray, size: 25),
+                      ),
+                      const WidgetSpan(
+                        child: SizedBox(width: 4),
+                      ),
+                      TextSpan(text: text, style: linkStyle)
+                    ],
+                  ),
+                ))),
+            const SizedBox(height: 4),
       ]));
 
-  WidgetSpan buildLinkComponent(String text, String linkToOpen) =>
-      WidgetSpan(child: linkWidget(text, linkToOpen));
-
-  Widget linkWidget(String text, String linkToOpen) {
-    return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          splashColor: lightMallow,
-          borderRadius: BorderRadius.circular(6.0),
-          child: Text(
+  WidgetSpan buildTextComponent(String text, String linkToOpen) => WidgetSpan(
+      child: buildLinkComponent(
+          linkToOpen,
+          Text(
             text,
             style: linkStyle,
-          ),
-          onTap: () => openUrl(Uri.parse(linkToOpen)),
-        ));
-  }
+          )));
 
-  List<InlineSpan> linkify(String text) {
+  Widget buildLinkComponent(String linkToOpen, Widget widget) => Material(
+      color: Colors.transparent,
+      child: InkWell(
+        splashColor: lightMallow,
+        borderRadius: BorderRadius.circular(6.0),
+        child: widget,
+        onTap: () => openUrl(Uri.parse(linkToOpen)),
+      ));
+
+  List<InlineSpan> linkify(String text, [bool preview = true]) {
+    print('AMBRA linkify text= $text');
     final List<InlineSpan> list = <InlineSpan>[];
     final RegExp linkRegExp =
         RegExp('($urlPattern)|($emailPattern)|($phonePattern)');
@@ -80,15 +100,21 @@ class TextMessage extends StatelessWidget {
 
     final String linkText = match.group(0)!;
     if (linkText.contains(RegExp(urlPattern))) {
-      list.add(buildLinkPreviewComponent(linkText, linkText));
+      if (preview) {
+        preview = false;
+        list.add(buildLinkPreviewComponent(linkText, linkText));
+      } else {
+        list.add(buildTextComponent(linkText, linkText));
+      }
     } else if (linkText.contains(RegExp(emailPattern))) {
-      list.add(buildLinkComponent(linkText, 'mailto:$linkText'));
+      list.add(buildTextComponent(linkText, 'mailto:$linkText'));
     } else if (linkText.contains(RegExp(phonePattern))) {
-      list.add(buildLinkComponent(linkText, 'tel:$linkText'));
+      list.add(buildTextComponent(linkText, 'tel:$linkText'));
     } else {
       throw 'Unexpected match: $linkText';
     }
-    list.addAll(linkify(text.substring(match.start + linkText.length)));
+    list.addAll(
+        linkify(text.substring(match.start + linkText.length), preview));
 
     return list;
   }
