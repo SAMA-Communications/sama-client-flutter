@@ -156,7 +156,7 @@ class VideoWidgetState extends State<VideoView> {
                 children: <Widget>[
                   FutureBuilder(
                       future: getVideoThumbnailByUrl(
-                          widget.attachment.url!, widget.attachment.fileId!),
+                          widget.attachment.url!, widget.attachment.fileId),
                       builder: (context, snapshot) {
                         if (snapshot.hasError || !snapshot.hasData) {
                           return const SizedBox.shrink();

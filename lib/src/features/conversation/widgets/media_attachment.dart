@@ -232,7 +232,7 @@ Widget buildVideoItem(AttachmentModel attachment) {
 
   if (attachment.url?.isNotEmpty ?? false) {
     videoPreview = FutureBuilder(
-        future: getVideoThumbnailByUrl(attachment.url!, attachment.fileId!),
+        future: getVideoThumbnailByUrl(attachment.url!, attachment.fileId),
         builder: (context, snapshot) {
           if (snapshot.hasError || !snapshot.hasData) {
             return const SizedBox.shrink();
