@@ -32,10 +32,10 @@ class Attachment extends Equatable {
         'file_id': fileId,
         'file_name': fileName,
         'file_blur_hash': fileBlurHash,
-        'file_url': fileUrl,
-        'file_content_type': fileContentType,
-        'file_height': fileHeight,
-        'file_width': fileWidth,
+        if (fileUrl != null) 'file_url': fileUrl,
+        if (fileContentType != null) 'file_content_type': fileContentType,
+        if (fileHeight != null) 'file_height': fileHeight,
+        if (fileWidth != null) 'file_width': fileWidth,
       };
 
   @override
