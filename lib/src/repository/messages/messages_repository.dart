@@ -23,6 +23,7 @@ class MessagesRepository {
   StreamSubscription<api.Message>? incomingMessagesSubscription;
   StreamSubscription<api.MessageSendStatus>? sentMessageSubscription;
   StreamSubscription<api.MessageSendStatus>? readMessagesSubscription;
+  StreamSubscription<api.TypingStatus>? typingMessageSubscription;
 
   final StreamController<ChatMessage> _incomingMessagesController =
       StreamController.broadcast();
@@ -35,6 +36,12 @@ class MessagesRepository {
 
   Stream<api.MessageSendStatus> get statusMessagesStream =>
       _statusMessagesController.stream;
+
+  final StreamController<api.TypingStatus> _typingMessageController =
+      StreamController.broadcast();
+
+  Stream<api.TypingStatus> get typingMessageStream =>
+      _typingMessageController.stream;
 
   Future<Resource<List<ChatMessage>>> getAllMessages(ConversationModel chat,
       {DateTime? ltDate, DateTime? gtTime}) async {
@@ -271,12 +278,18 @@ class MessagesRepository {
         .listen((readStatus) async {
       _statusMessagesController.add(readStatus);
     });
+
+    typingMessageSubscription = api.MessagesManager.instance.typingStatusStream
+        .listen((typingStatus) async {
+      _typingMessageController.add(typingStatus);
+    });
   }
 
   void dispose() {
     incomingMessagesSubscription?.cancel();
     sentMessageSubscription?.cancel();
     readMessagesSubscription?.cancel();
+    typingMessageSubscription?.cancel();
     api.MessagesManager.instance.destroy();
   }
 

@@ -40,6 +40,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
+  StreamSubscription<TypingStatus>? typingMessageSubscription;
   StreamSubscription<Map<String, dynamic>>? lastActivitySubscription;
   StreamSubscription<ConversationModel?>? conversationWatcher;
 
@@ -125,6 +126,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           break;
       }
     });
+
+    typingMessageSubscription =
+        messagesRepository.typingMessageStream.listen((typing) async {
+          
+        });
 
     lastActivitySubscription =
         userRepository.lastActivityStream.listen((data) async {
@@ -365,6 +371,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     unsubscribeOpponentLastActivity();
     incomingMessagesSubscription?.cancel();
     statusMessagesSubscription?.cancel();
+    typingMessageSubscription?.cancel();
     lastActivitySubscription?.cancel();
     conversationWatcher?.cancel();
     return super.close();
