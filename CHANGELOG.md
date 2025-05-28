@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.2
+
+### Features:
+- Added support for Programmable Chat attachments
+- Added new attachments fields
+
 ## 0.11.1
 
 ### Fixes:

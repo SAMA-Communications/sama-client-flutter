@@ -94,7 +94,7 @@ class MediaAttachmentWidgetState extends State<MediaAttachmentWidget> {
   }
 
   Widget _buildAttachmentView(AttachmentModel attachment) {
-    return isImage(attachment.fileName!)
+    return isImage(attachment.fileName, attachment.contentType)
         ? PhotoView(imageProvider: CachedNetworkImageProvider(attachment.url!))
         : VideoView(attachment: attachment);
   }
@@ -156,7 +156,7 @@ class VideoWidgetState extends State<VideoView> {
                 children: <Widget>[
                   FutureBuilder(
                       future: getVideoThumbnailByUrl(
-                          widget.attachment.url!, widget.attachment.fileId!),
+                          widget.attachment.url!, widget.attachment.fileId),
                       builder: (context, snapshot) {
                         if (snapshot.hasError || !snapshot.hasData) {
                           return const SizedBox.shrink();
