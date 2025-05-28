@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../api.dart';
 import '../connection/http_request.dart';
 
@@ -7,7 +9,7 @@ const String messagesListRequestName = 'message_list';
 const String messagesReadRequestName = 'message_read';
 const String messagesDeleteRequestName = 'message_delete';
 
-const String linkPreviewUrl = 'https://linkpreview.connectycube.com/unfurl';
+String linkPreviewUrl = dotenv.env['LINK_PREVIEW_URL'] ?? '';
 
 const messageRequestTimeout = Duration(seconds: 5);
 
