@@ -42,7 +42,7 @@ class TextMessage extends StatelessWidget {
             link: linkToOpen,
             errorBody: 'No description available',
             key: Key(linkToOpen)),
-        const SizedBox(height: 25),
+        const SizedBox(height: 10),
         buildLinkComponent(
             linkToOpen,
             Align(
@@ -62,7 +62,7 @@ class TextMessage extends StatelessWidget {
                     ],
                   ),
                 ))),
-            const SizedBox(height: 4),
+        const SizedBox(height: 4),
       ]));
 
   WidgetSpan buildTextComponent(String text, String linkToOpen) => WidgetSpan(

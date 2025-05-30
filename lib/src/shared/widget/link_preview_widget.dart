@@ -30,7 +30,8 @@ class LinkPreviewWidget extends StatelessWidget {
     return FutureBuilder(
         future: linkPreview(),
         builder: (BuildContext context, AsyncSnapshot<LinkPreview> snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData &&
+              (snapshot.data?.images?.isNotEmpty ?? false)) {
             var linkPreview = snapshot.data!;
             return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -68,9 +69,11 @@ class LinkPreviewWidget extends StatelessWidget {
                     linkPreview.description ?? '',
                     style: const TextStyle(color: dullGray, fontSize: 12.0),
                   ),
+                  const SizedBox(height: 10),
                 ]);
+          } else {
+            return const SizedBox.shrink();
           }
-          return const CenterLoader();
         });
   }
 }
