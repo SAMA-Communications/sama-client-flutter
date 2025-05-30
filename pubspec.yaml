@@ -70,3 +70,4 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/certificate.connectycube.com.pem

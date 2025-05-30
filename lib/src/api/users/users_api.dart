@@ -46,7 +46,7 @@ Future<User> createUser({
 }
 
 Future<(AccessToken, UserModel)> loginHttp(User user) {
-  return sendHTTPRequest(httpLoginRequestName, {
+  return sendSamaHTTPRequest(httpLoginRequestName, {
     'login': user.login,
     'password': user.password,
     'device_id': user.deviceId,
@@ -87,7 +87,7 @@ Future<bool> _loginWithAccessToken(String token, String deviceId) {
 
 Future<AccessToken> _refreshToken(
     String accessToken, String refreshToken, String deviceId) async {
-  return sendHTTPRequest(httpLoginRequestName, {
+  return sendSamaHTTPRequest(httpLoginRequestName, {
     'device_id': deviceId,
   }, {
     HttpHeaders.cookieHeader: 'refresh_token=$refreshToken'

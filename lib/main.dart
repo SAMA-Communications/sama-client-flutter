@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'sama_firebase_options.dart';
 import 'src/api/api.dart';
+import 'src/api/connection/http_request.dart' as http;
 import 'src/db/db_service.dart';
 import 'src/db/local/attachment_local_datasource.dart';
 import 'src/db/local/conversation_local_datasource.dart';
@@ -30,6 +31,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await http.applyHTTPCert();
   await Firebase.initializeApp(
     options: await SamaFirebaseOptions.currentPlatform,
   );
