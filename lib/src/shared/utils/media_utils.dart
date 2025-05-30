@@ -12,19 +12,19 @@ import 'package:image/image.dart' as img;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:get_thumbnail_video/video_thumbnail.dart';
 
 import 'file_utils.dart';
 
-bool isImage(String path) {
-  final mimeType = lookupMimeType(path);
+bool isImage(String? path, [String? contentType]) {
+  final mimeType = contentType ?? lookupMimeType(path!);
   return mimeType?.startsWith('image/') ?? false;
 }
 
-bool isVideo(String path) {
-  final mimeType = lookupMimeType(path);
-
+bool isVideo(String? path, [String? contentType]) {
+  final mimeType = contentType ?? lookupMimeType(path!);
   return mimeType?.startsWith('video/') ?? false;
 }
 
@@ -145,10 +145,12 @@ Future<File> getVideoThumbnail(File videoFile) async {
   );
 }
 
-Future<String?> getVideoThumbnailByUrl(String url, String fileId) async {
+Future<String?> getVideoThumbnailByUrl(String url, String? fileId) async {
   final Directory cacheDir = await getTemporaryDirectory();
 
-  final String target = File('${cacheDir.path}/video/thumbnails/$fileId').path;
+  final String target = File(
+          '${cacheDir.path}/video/thumbnails/${fileId ?? const Uuid().v4().toString()}')
+      .path;
   if (File(target).existsSync()) {
     return target;
   } else {
