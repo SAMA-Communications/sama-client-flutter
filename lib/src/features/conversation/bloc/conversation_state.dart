@@ -2,6 +2,13 @@ part of 'conversation_bloc.dart';
 
 enum ConversationStatus { initial, success, failure, delete }
 
+class TypingMessageStatus {
+  final TypingState typingState;
+  final UserModel? user;
+
+  TypingMessageStatus(this.typingState, this.user);
+}
+
 final class ConversationState extends Equatable {
   const ConversationState({
     required this.conversation,
@@ -11,6 +18,7 @@ final class ConversationState extends Equatable {
     this.hasReachedMax = false,
     this.initial = false,
     this.draftMessage,
+    this.typingStatus,
   });
 
   final ConversationModel conversation;
@@ -20,6 +28,7 @@ final class ConversationState extends Equatable {
   final bool hasReachedMax;
   final bool initial;
   final MessageModel? draftMessage;
+  final TypingMessageStatus? typingStatus;
 
   ConversationState copyWith({
     ConversationModel? conversation,
@@ -29,6 +38,7 @@ final class ConversationState extends Equatable {
     bool? hasReachedMax,
     bool? initial,
     MessageModel? Function()? draftMessage,
+    TypingMessageStatus? typingStatus,
   }) {
     return ConversationState(
       conversation: conversation ?? this.conversation,
@@ -38,6 +48,7 @@ final class ConversationState extends Equatable {
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
       draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
+      typingStatus: typingStatus,
     );
   }
 
@@ -54,6 +65,7 @@ final class ConversationState extends Equatable {
         hasReachedMax,
         initial,
         participants,
-        draftMessage
+        draftMessage,
+        typingStatus
       ];
 }

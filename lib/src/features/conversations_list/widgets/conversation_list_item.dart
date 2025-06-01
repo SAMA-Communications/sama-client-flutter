@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../api/api.dart';
 import '../../../db/models/conversation_model.dart';
 import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../bloc/conversations_list_bloc.dart';
 import 'avatar_letter_icon.dart';
 import 'package:intl/intl.dart';
 
 class ConversationListItem extends StatelessWidget {
-  const ConversationListItem({required this.conversation, super.key});
+  const ConversationListItem(
+      {required this.conversation, this.typingStatus, super.key});
 
   final ConversationModel conversation;
+  final TypingChatStatus? typingStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +37,7 @@ class ConversationListItem extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: BodyWidget(conversation: conversation),
+        subtitle: BodyWidget(conversation, typingStatus),
         trailing: DateUnreadWidget(conversation: conversation),
         isThreeLine: true,
         dense: false,
@@ -48,48 +52,57 @@ class ConversationListItem extends StatelessWidget {
 }
 
 class BodyWidget extends StatelessWidget {
-  const BodyWidget({required this.conversation, super.key});
+  const BodyWidget(this.conversation, this.typingStatus, {super.key});
 
   final ConversationModel conversation;
+  final TypingChatStatus? typingStatus;
 
   @override
   Widget build(BuildContext context) {
     String? blurHash =
         conversation.lastMessage?.attachments.firstOrNull?.fileBlurHash;
-
-    return Text.rich(
-      TextSpan(
-        children: [
-          if (blurHash != null)
-            WidgetSpan(
-              child: Container(
-                width: 15.0,
-                height: 15.0,
-                margin: const EdgeInsets.only(right: 2.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(2.0),
-                  child: Image(
-                    image: BlurHashImage(blurHash),
-                    fit: BoxFit.cover,
+    print('AMBRA typingStatus= $typingStatus');
+    if (typingStatus?.typingState == TypingState.start) {
+      if((conversation.type == 'u')) {
+        return Text('typing');
+      } else {
+        return Text('${getUserName(typingStatus!.user)} is typing');
+      }
+    } else {
+      return Text.rich(
+        TextSpan(
+          children: [
+            if (blurHash != null)
+              WidgetSpan(
+                child: Container(
+                  width: 15.0,
+                  height: 15.0,
+                  margin: const EdgeInsets.only(right: 2.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(2.0),
+                    child: Image(
+                      image: BlurHashImage(blurHash),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
+            if (conversation.draftMessage != null)
+              const TextSpan(
+                text: "Draft: ",
+                style: TextStyle(
+                    fontWeight: FontWeight.w300, fontSize: 16, color: green),
+              ),
+            TextSpan(
+              text: _getMessageBodyText(conversation),
+              style: const TextStyle(fontWeight: FontWeight.w200, fontSize: 16),
             ),
-          if (conversation.draftMessage != null)
-            const TextSpan(
-              text: "Draft: ",
-              style: TextStyle(
-                  fontWeight: FontWeight.w300, fontSize: 16, color: green),
-            ),
-          TextSpan(
-            text: _getMessageBodyText(conversation),
-            style: const TextStyle(fontWeight: FontWeight.w200, fontSize: 16),
-          ),
-        ],
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
+          ],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
   }
 
   String _getMessageBodyText(ConversationModel conversation) {

@@ -5,7 +5,9 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../../../api/api.dart';
 import '../../../db/models/conversation_model.dart';
+import '../../../db/models/models.dart';
 import '../../../db/resource.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 
@@ -21,9 +23,17 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
   };
 }
 
+EventTransformer<E> typingThrottleDroppable<E>() {
+  Duration duration = const Duration(milliseconds: 5000);
+  return (events, mapper) {
+    return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
+
 class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
   final ConversationRepository _conversationRepository;
   StreamSubscription<ConversationModel>? updateConversationStreamSubscription;
+  StreamSubscription<TypingStatus>? typingSubscription;
 
   ConversationsBloc({
     required ConversationRepository conversationRepository,
@@ -37,11 +47,27 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     on<ConversationsRefreshed>(
       _onConversationsRefreshed,
     );
+    on<TypingStatusStartReceived>(
+      _onTypingStatusStartReceived,
+      transformer: typingThrottleDroppable(),
+    );
+    on<TypingStatusStopReceived>(
+      _onTypingStatusStopReceived,
+    );
 
     updateConversationStreamSubscription =
         conversationRepository.updateConversationStream.listen((chat) async {
       if (!isClosed) {
         add(ConversationsRefreshed());
+      }
+    });
+
+    typingSubscription =
+        conversationRepository.typingMessageStream.listen((typing) async {
+      if (typing.state == TypingState.start) {
+        add(TypingStatusStartReceived(typing.cid!, typing.from!));
+      } else if (typing.state == TypingState.stop) {
+        add(TypingStatusStopReceived(typing.cid!, typing.from!));
       }
     });
   }
@@ -121,9 +147,30 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     );
   }
 
+  Future<void> _onTypingStatusStartReceived(
+      TypingStatusStartReceived event, Emitter<ConversationsState> emit) async {
+    final chatAsync = _conversationRepository.getConversationById(event.cid);
+    var userAsync = _conversationRepository.getConversationUser(event.from);
+    List responses = await Future.wait([chatAsync, userAsync]);
+    return emit(state.copyWith(
+        typingStatus: TypingChatStatus(
+            TypingState.start, responses.first, responses.last)));
+  }
+
+  Future<void> _onTypingStatusStopReceived(
+      TypingStatusStopReceived event, Emitter<ConversationsState> emit) async {
+    final chatAsync = _conversationRepository.getConversationById(event.cid);
+    var userAsync = _conversationRepository.getConversationUser(event.from);
+    List responses = await Future.wait([chatAsync, userAsync]);
+    return emit(state.copyWith(
+        typingStatus: TypingChatStatus(
+            TypingState.stop, responses.first, responses.last)));
+  }
+
   @override
   Future<void> close() {
     updateConversationStreamSubscription?.cancel();
+    typingSubscription?.cancel();
     return super.close();
   }
 }

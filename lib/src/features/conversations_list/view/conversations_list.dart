@@ -70,10 +70,14 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
             }
             return ListView.separated(
                 itemBuilder: (BuildContext context, int index) {
+                  var chat = state.conversations[index];
+                  var typingStatus = state.typingStatus?.chat?.id == chat.id
+                      ? state.typingStatus
+                      : null;
                   return index >= state.conversations.length
                       ? const BottomLoader()
                       : ConversationListItem(
-                          conversation: state.conversations[index]);
+                          conversation: chat, typingStatus: typingStatus);
                 },
                 itemCount: state.conversations.length,
                 // itemCount: state.hasReachedMax

@@ -279,7 +279,7 @@ class MessagesRepository {
       _statusMessagesController.add(readStatus);
     });
 
-    typingMessageSubscription = api.MessagesManager.instance.typingStatusStream
+    typingMessageSubscription = api.TypingManager.instance.typingStatusStream
         .listen((typingStatus) async {
       _typingMessageController.add(typingStatus);
     });
@@ -291,6 +291,7 @@ class MessagesRepository {
     readMessagesSubscription?.cancel();
     typingMessageSubscription?.cancel();
     api.MessagesManager.instance.destroy();
+    api.TypingManager.instance.destroy();
   }
 
   Future<void> sendMediaMessage(cid,
@@ -312,6 +313,11 @@ class MessagesRepository {
             .add(msgModel.toChatMessage(currentUser!, true, true, true));
       },
     );
+  }
+
+  Future<void> sendTypingStatus(String cid) async {
+    var typing = api.TypingMessageStatus.fromJson({'cid': cid});
+    api.sendTypingStatus(typing);
   }
 }
 

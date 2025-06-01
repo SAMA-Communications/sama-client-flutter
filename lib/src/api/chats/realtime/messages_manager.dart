@@ -53,10 +53,11 @@ class MessagesManager {
   Stream<DeleteMessagesStatus> get deletedMessageStatusStream =>
       _deletedMessagesStatusController.stream;
 
-  final StreamController<TypingStatus> _typingStatusController =
+  final StreamController<TypingMessageStatus> _typingStatusController =
       StreamController.broadcast();
 
-  Stream<TypingStatus> get typingStatusStream => _typingStatusController.stream;
+  Stream<TypingMessageStatus> get typingStatusStream =>
+      _typingStatusController.stream;
 
   _init() {
     if (dataListener != null) return;
@@ -123,7 +124,7 @@ class MessagesManager {
   }
 
   void _processTypingPackage(Map<String, dynamic> data) {
-    var typingStatus = TypingStatus.fromJson(data);
+    var typingStatus = TypingMessageStatus.fromJson(data);
     _typingStatusController.add(typingStatus);
   }
 }
