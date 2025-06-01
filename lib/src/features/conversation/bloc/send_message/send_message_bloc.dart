@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
@@ -11,6 +13,13 @@ import '../../../../repository/messages/messages_repository.dart';
 part 'send_message_event.dart';
 
 part 'send_message_state.dart';
+
+EventTransformer<E> typingThrottleDroppable<E>() {
+  Duration duration = const Duration(seconds: 5);
+  return (events, mapper) {
+    return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
 
 class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   final ConversationModel currentConversation;
@@ -34,6 +43,8 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<SendStatusReadMessages>(
       _onSendStatusReadMessages,
     );
+    on<SendTypingChanged>(_onSendTypingChanged,
+        transformer: typingThrottleDroppable());
   }
 
   Future<void> _onSendTextMessage(
@@ -72,6 +83,13 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       if (success) {
         conversationRepository.resetUnreadMessagesCount(currentConversation.id);
       }
+    } catch (_) {}
+  }
+
+  Future<FutureOr<void>> _onSendTypingChanged(
+      SendTypingChanged event, Emitter<SendMessageState> emit) async {
+    try {
+      await messagesRepository.sendTypingStatus(currentConversation.id);
     } catch (_) {}
   }
 
