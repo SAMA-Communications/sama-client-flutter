@@ -62,12 +62,15 @@ class BodyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     String? blurHash =
         conversation.lastMessage?.attachments.firstOrNull?.fileBlurHash;
-    if (typingStatus?.typingState == TypingState.start) {
-      if ((conversation.type == 'u')) {
-        return const TypingIndicator();
-      } else {
-        return TypingIndicator(userName: getUserName(typingStatus!.user));
-      }
+    var showTyping = typingStatus?.typingState == TypingState.start;
+
+    if (showTyping) {
+      return Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: TypingIndicator(
+              userName: conversation.type == 'u'
+                  ? ''
+                  : getUserName(typingStatus!.user)));
     } else {
       return Text.rich(
         TextSpan(

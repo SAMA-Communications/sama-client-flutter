@@ -2,19 +2,19 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../ui/colors.dart';
+
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({
     super.key,
     this.userName = '',
     this.showIndicator = true,
-    this.bubbleColor = const Color(0xFF646b7f),
-    this.flashingCircleDarkColor = const Color(0xFF333333),
-    this.flashingCircleBrightColor = const Color(0xFFaec1dd),
+    this.flashingCircleDarkColor = slateBlue,
+    this.flashingCircleBrightColor = lightMallow,
   });
 
   final String userName;
   final bool showIndicator;
-  final Color bubbleColor;
   final Color flashingCircleDarkColor;
   final Color flashingCircleBrightColor;
 
@@ -26,9 +26,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
     with TickerProviderStateMixin {
   late AnimationController _appearanceController;
 
-  late Animation<double> _indicatorSpaceAnimation;
-
-  late Animation<double> _largeBubbleAnimation;
+  late Animation<double> _bubbleAnimation;
 
   late AnimationController _repeatingController;
   final List<Interval> _dotIntervals = const [
@@ -46,13 +44,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
         setState(() {});
       });
 
-    _indicatorSpaceAnimation = CurvedAnimation(
-      parent: _appearanceController,
-      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
-      reverseCurve: const Interval(0.0, 1.0, curve: Curves.easeOut),
-    ).drive(Tween<double>(begin: 0.0, end: 23.0));
-
-    _largeBubbleAnimation = CurvedAnimation(
+    _bubbleAnimation = CurvedAnimation(
       parent: _appearanceController,
       curve: const Interval(0.3, 1.0, curve: Curves.elasticOut),
       reverseCurve: const Interval(0.5, 1.0, curve: Curves.easeOut),
@@ -79,42 +71,36 @@ class _TypingIndicatorState extends State<TypingIndicator>
     _appearanceController
       ..duration = const Duration(milliseconds: 0)
       ..forward();
-    _repeatingController.repeat(); // <-- Add this
+    _repeatingController.repeat();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _indicatorSpaceAnimation,
-      builder: (context, child) {
-        return SizedBox(height: _indicatorSpaceAnimation.value, child: child);
-      },
-      child: Row(
-        spacing: 8.0,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          AnimatedBubble(
-            animation: _largeBubbleAnimation,
-            left: 0,
-            bottom: 0,
-            bubble: StatusBubble(
-              repeatingController: _repeatingController,
-              // <-- Add this
-              dotIntervals: _dotIntervals,
-              flashingCircleDarkColor: widget.flashingCircleDarkColor,
-              flashingCircleBrightColor: widget.flashingCircleBrightColor,
-              bubbleColor: widget.bubbleColor,
-            ),
-          ),
-          Expanded(
-              child: widget.userName.isNotEmpty
-                  ? Text('${widget.userName} is typing',
-                      overflow: TextOverflow.ellipsis)
-                  : const Text('typing'))
-        ],
-      ),
-    );
+    var typingStyle = const TextStyle(color: slateBlue, fontSize: 14);
+
+    return SizedBox(
+        height: 20,
+        child: Row(
+          spacing: 4.0,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AnimatedBubble(
+                animation: _bubbleAnimation,
+                bubble: Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: StatusBubble(
+                      repeatingController: _repeatingController,
+                      dotIntervals: _dotIntervals,
+                      flashingCircleDarkColor: widget.flashingCircleDarkColor,
+                      flashingCircleBrightColor:
+                          widget.flashingCircleBrightColor),
+                )),
+            Expanded(
+                child: Text('${widget.userName} typing',
+                    style: typingStyle, overflow: TextOverflow.ellipsis))
+          ],
+        ));
   }
 }
 
@@ -125,14 +111,12 @@ class StatusBubble extends StatelessWidget {
     required this.dotIntervals,
     required this.flashingCircleBrightColor,
     required this.flashingCircleDarkColor,
-    required this.bubbleColor,
   });
 
   final AnimationController repeatingController;
   final List<Interval> dotIntervals;
   final Color flashingCircleDarkColor;
   final Color flashingCircleBrightColor;
-  final Color bubbleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -216,14 +200,10 @@ class AnimatedBubble extends StatelessWidget {
   const AnimatedBubble({
     super.key,
     required this.animation,
-    required this.left,
-    required this.bottom,
     required this.bubble,
   });
 
   final Animation<double> animation;
-  final double left;
-  final double bottom;
   final Widget bubble;
 
   @override

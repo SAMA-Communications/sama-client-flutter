@@ -129,7 +129,13 @@ class ConversationPage extends StatelessWidget {
     var typing = state.typingStatus;
     String title = '';
     Color color = dullGray;
-    if (typing?.typingState == TypingState.start) return _getTyping(state);
+    var showTyping = typing?.typingState == TypingState.start;
+
+    if (showTyping) {
+      return TypingIndicator(
+          userName:
+              state.conversation.type == 'u' ? '' : getUserName(typing!.user));
+    }
     if (conversation.type == 'u') {
       if (conversation.opponent?.recentActivity != null) {
         var date = DateTime.fromMillisecondsSinceEpoch(
@@ -167,15 +173,6 @@ class ConversationPage extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       style: TextStyle(fontSize: 14.0, color: color),
     );
-  }
-
-  Widget _getTyping(ConversationState state) {
-    var typingStatus = state.typingStatus;
-    if (state.conversation.type == 'u') {
-      return const TypingIndicator();
-    } else {
-      return TypingIndicator(userName: getUserName(typingStatus!.user));
-    }
   }
 }
 

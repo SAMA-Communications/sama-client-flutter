@@ -14,8 +14,10 @@ part 'send_message_event.dart';
 
 part 'send_message_state.dart';
 
+const typingThrottleDuration = 5;
+
 EventTransformer<E> typingThrottleDroppable<E>() {
-  Duration duration = const Duration(seconds: 5);
+  Duration duration = const Duration(seconds: typingThrottleDuration);
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
   };

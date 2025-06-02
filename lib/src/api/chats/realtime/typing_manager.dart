@@ -4,6 +4,8 @@ import 'package:equatable/equatable.dart';
 
 import '../../api.dart';
 
+const stopTypingTime = 6;
+
 enum TypingState { start, stop }
 
 class TypingStatus extends Equatable {
@@ -40,7 +42,7 @@ class TypingManager {
     return _instance;
   }
 
-  Timer? clearTypingTimer;
+  Map<String, Timer> clearTypingTimers = {};
   StreamSubscription<TypingMessageStatus>? typingMessageSubscription;
 
   final StreamController<TypingStatus> _typingStatusController =
@@ -55,19 +57,20 @@ class TypingManager {
           TypingStatus(TypingState.start, typingStatus.cid, typingStatus.from);
       _typingStatusController.add(typing);
 
-      restartTypingTimer(() {
+      restartTypingTimer(typingStatus.cid ?? '', () {
         _typingStatusController.add(typing.copyWith(state: TypingState.stop));
       });
     });
   }
 
-  void restartTypingTimer(void Function() callback) {
-    clearTypingTimer?.cancel();
-    clearTypingTimer = Timer(const Duration(seconds: 6), callback);
+  void restartTypingTimer(String cid, void Function() callback) {
+    clearTypingTimers[cid]?.cancel();
+    var timer = Timer(const Duration(seconds: stopTypingTime), callback);
+    clearTypingTimers[cid] = timer;
   }
 
   destroy() {
-    clearTypingTimer?.cancel();
     typingMessageSubscription?.cancel();
+    clearTypingTimers.clear();
   }
 }

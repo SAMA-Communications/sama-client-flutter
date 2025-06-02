@@ -23,13 +23,6 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
   };
 }
 
-EventTransformer<E> typingThrottleDroppable<E>() {
-  Duration duration = const Duration(milliseconds: 5000);
-  return (events, mapper) {
-    return droppable<E>().call(events.throttle(duration), mapper);
-  };
-}
-
 class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
   final ConversationRepository _conversationRepository;
   StreamSubscription<ConversationModel>? updateConversationStreamSubscription;
@@ -49,7 +42,6 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     );
     on<TypingStatusStartReceived>(
       _onTypingStatusStartReceived,
-      transformer: typingThrottleDroppable(),
     );
     on<TypingStatusStopReceived>(
       _onTypingStatusStopReceived,
@@ -152,9 +144,10 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     final chatAsync = _conversationRepository.getConversationById(event.cid);
     var userAsync = _conversationRepository.getConversationUser(event.from);
     List responses = await Future.wait([chatAsync, userAsync]);
-    return emit(state.copyWith(
-        typingStatus: TypingChatStatus(
-            TypingState.start, responses.first, responses.last)));
+    var typingStatus = Map.of(state.typingStatuses);
+    typingStatus[event.cid] =
+        TypingChatStatus(TypingState.start, responses.first, responses.last);
+    return emit(state.copyWith(typingStatuses: typingStatus));
   }
 
   Future<void> _onTypingStatusStopReceived(
@@ -162,9 +155,10 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
     final chatAsync = _conversationRepository.getConversationById(event.cid);
     var userAsync = _conversationRepository.getConversationUser(event.from);
     List responses = await Future.wait([chatAsync, userAsync]);
-    return emit(state.copyWith(
-        typingStatus: TypingChatStatus(
-            TypingState.stop, responses.first, responses.last)));
+    var typingStatus = Map.of(state.typingStatuses);
+    typingStatus[event.cid] =
+        TypingChatStatus(TypingState.stop, responses.first, responses.last);
+    return emit(state.copyWith(typingStatuses: typingStatus));
   }
 
   @override

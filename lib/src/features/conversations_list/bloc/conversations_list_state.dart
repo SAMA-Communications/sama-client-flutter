@@ -16,28 +16,28 @@ final class ConversationsState extends Equatable {
     this.conversations = const <ConversationModel>[],
     this.hasReachedMax = false,
     this.initial = false,
-    this.typingStatus,
+    this.typingStatuses = const <String, TypingChatStatus>{},
   });
 
   final ConversationsStatus status;
   final List<ConversationModel> conversations;
   final bool hasReachedMax;
   final bool initial;
-  final TypingChatStatus? typingStatus;
+  final Map<String, TypingChatStatus> typingStatuses;
 
   ConversationsState copyWith({
     ConversationsStatus? status,
     List<ConversationModel>? conversations,
     bool? hasReachedMax,
     bool? initial,
-    TypingChatStatus? typingStatus,
+    Map<String, TypingChatStatus>? typingStatuses,
   }) {
     return ConversationsState(
       status: status ?? this.status,
       conversations: conversations ?? this.conversations,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
-      typingStatus: typingStatus,
+      typingStatuses: typingStatuses ?? this.typingStatuses,
     );
   }
 
@@ -48,5 +48,5 @@ final class ConversationsState extends Equatable {
 
   @override
   List<Object?> get props =>
-      [status, conversations, hasReachedMax, initial, typingStatus];
+      [status, conversations, hasReachedMax, initial, typingStatuses];
 }
