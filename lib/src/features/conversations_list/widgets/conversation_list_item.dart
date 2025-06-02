@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sama_client_flutter/src/shared/widget/typing_indicator.dart';
 
 import '../../../api/api.dart';
 import '../../../db/models/conversation_model.dart';
@@ -61,12 +62,11 @@ class BodyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     String? blurHash =
         conversation.lastMessage?.attachments.firstOrNull?.fileBlurHash;
-    print('AMBRA typingStatus= $typingStatus');
     if (typingStatus?.typingState == TypingState.start) {
-      if((conversation.type == 'u')) {
-        return Text('typing');
+      if ((conversation.type == 'u')) {
+        return const TypingIndicator();
       } else {
-        return Text('${getUserName(typingStatus!.user)} is typing');
+        return TypingIndicator(userName: getUserName(typingStatus!.user));
       }
     } else {
       return Text.rich(

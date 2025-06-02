@@ -18,6 +18,7 @@ import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../../../shared/widget/typing_indicator.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -169,11 +170,11 @@ class ConversationPage extends StatelessWidget {
   }
 
   Widget _getTyping(ConversationState state) {
-    var typing = state.typingStatus;
+    var typingStatus = state.typingStatus;
     if (state.conversation.type == 'u') {
-      return Text('typing');
+      return const TypingIndicator();
     } else {
-      return Text('${getUserName(typing?.user)} is typing');
+      return TypingIndicator(userName: getUserName(typingStatus!.user));
     }
   }
 }
