@@ -27,12 +27,12 @@ class LinkPreview extends Equatable {
   LinkPreview.fromJson(Map<String, dynamic>? json)
       : url = json?['url'],
         title = json?['title'],
-        siteName = json?['siteName'],
+        siteName = json?['site_name'],
         description = json?['description'],
         mediaType = json?['mediaType'],
         contentType = json?['contentType'],
         images = List.of(json?['images']).cast<String>(),
-        videos = List.of(json?['videos']).cast<String>();
+        videos = List.of(json?['videos'] ?? []).cast<String>();
 
   Map<String, dynamic> toJson() => {
         'url': url,

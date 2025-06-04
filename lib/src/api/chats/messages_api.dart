@@ -86,7 +86,7 @@ Future<LinkPreview> linkPreviewData(String url) {
   return sendHTTPRequest(linkPreviewUrl, '', {
     'url': url,
   }, {
-    'CB-Token': 'token'
+    'Session-Token': 'token'
   }).then((response) {
     return LinkPreview.fromJson(response);
   });

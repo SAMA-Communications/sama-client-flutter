@@ -83,7 +83,6 @@ class TextMessage extends StatelessWidget {
       ));
 
   List<InlineSpan> linkify(String text, [bool preview = true]) {
-    print('AMBRA linkify text= $text');
     final List<InlineSpan> list = <InlineSpan>[];
     final RegExp linkRegExp =
         RegExp('($urlPattern)|($emailPattern)|($phonePattern)');

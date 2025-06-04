@@ -28,7 +28,7 @@ Future<Map<String, dynamic>> sendHTTPRequest(
   } catch (e) {
     print('response e = ${e}');
   }
-  log('HTTP response statusCode ${response!.statusCode}, headers $headers ${response.headers}');
+  log('HTTP response statusCode ${response!.statusCode}, headers $headers ${response.headers} body ${response.body}');
 
   var completer = Completer<Map<String, dynamic>>();
   switch (response.statusCode) {
