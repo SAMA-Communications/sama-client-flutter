@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../api/api.dart';
-import '../../features/conversations_list/conversations_list.dart';
 import '../ui/colors.dart';
 
 class LinkPreviewWidget extends StatelessWidget {
@@ -27,53 +26,60 @@ class LinkPreviewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: linkPreview(),
-        builder: (BuildContext context, AsyncSnapshot<LinkPreview> snapshot) {
-          if (snapshot.hasData &&
-              (snapshot.data?.images?.isNotEmpty ?? false)) {
-            var linkPreview = snapshot.data!;
-            return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CachedNetworkImage(
-                    fadeInDuration: const Duration(milliseconds: 300),
-                    fadeOutDuration: const Duration(milliseconds: 100),
-                    maxHeightDiskCache: 600,
-                    maxWidthDiskCache: 600,
-                    placeholder: (context, url) => const Center(
-                        child: SizedBox(
-                            width: 28,
-                            height: 28,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(slateBlue),
-                            ))),
-                    errorWidget: (context, url, error) {
-                      return const Center(
-                        child: Icon(
-                          Icons.image_outlined,
-                          color: dullGray,
-                          size: 50.0,
-                        ),
-                      );
-                    },
-                    imageUrl: linkPreview.images?.firstOrNull ?? '',
-                    fit: BoxFit.fill,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    softWrap: true,
-                    textAlign: TextAlign.justify,
-                    linkPreview.description ?? '',
-                    style: const TextStyle(color: dullGray, fontSize: 12.0),
-                  ),
-                  const SizedBox(height: 10),
-                ]);
-          } else {
-            return const SizedBox.shrink();
-          }
-        });
+    return SizedBox(
+        height: 200,
+        child: FutureBuilder(
+            future: linkPreview(),
+            builder:
+                (BuildContext context, AsyncSnapshot<LinkPreview> snapshot) {
+              if (snapshot.hasData &&
+                  (snapshot.data?.images?.isNotEmpty ?? false)) {
+                var linkPreview = snapshot.data!;
+                return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                          width: double.infinity,
+                          height: 100.0,
+                          child: CachedNetworkImage(
+                            fadeInDuration: const Duration(milliseconds: 300),
+                            fadeOutDuration: const Duration(milliseconds: 100),
+                            maxHeightDiskCache: 600,
+                            maxWidthDiskCache: 600,
+                            placeholder: (context, url) => const Center(
+                                child: SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          slateBlue),
+                                    ))),
+                            errorWidget: (context, url, error) {
+                              return const Center(
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  color: dullGray,
+                                  size: 50.0,
+                                ),
+                              );
+                            },
+                            imageUrl: linkPreview.images?.firstOrNull ?? '',
+                            fit: BoxFit.cover,
+                          )),
+                      const SizedBox(height: 8),
+                      Text(
+                        softWrap: true,
+                        textAlign: TextAlign.justify,
+                        linkPreview.description ?? '',
+                        maxLines: 4,
+                        style: const TextStyle(color: dullGray, fontSize: 12.0, overflow: TextOverflow.ellipsis),
+                      ),
+                      const SizedBox(height: 10),
+                    ]);
+              } else {
+                return const SizedBox.shrink();
+              }
+            }));
   }
 }

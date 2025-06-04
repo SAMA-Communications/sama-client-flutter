@@ -37,7 +37,7 @@ class LinkPreview extends Equatable {
   Map<String, dynamic> toJson() => {
         'url': url,
         'title': title,
-        'siteName': siteName,
+        'site_name': siteName,
         'description': description,
         'mediaType': mediaType,
         'contentType': contentType,
@@ -46,11 +46,10 @@ class LinkPreview extends Equatable {
       };
 
   factory LinkPreview.fromUint8List(Uint8List list) {
-    Map<String, dynamic> json = jsonDecode(const Utf8Decoder().convert(list));
-    return LinkPreview.fromJson(json);
+    return LinkPreview.fromJson(jsonDecode(utf8.decode(list)));
   }
 
-  Uint8List toUint8List() => Uint8List.fromList(jsonEncode(toJson()).codeUnits);
+  Uint8List toUint8List() => utf8.encode(jsonEncode(toJson()));
 
   @override
   List<Object?> get props => [
