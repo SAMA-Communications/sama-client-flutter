@@ -10,6 +10,9 @@ class LinkPreview extends Equatable {
   final String? description; //description
   final String? mediaType; //mediaType
   final String? contentType; //contentType
+  final String? fileName; //file_name
+  final int? fileSize; //size
+  final List<String>? favicons; //favicons
   final List<String>? images; //images
   final List<String>? videos; //videos
 
@@ -20,6 +23,9 @@ class LinkPreview extends Equatable {
     this.description,
     this.mediaType,
     this.contentType,
+    this.fileName,
+    this.fileSize,
+    this.favicons,
     this.images,
     this.videos,
   });
@@ -31,6 +37,9 @@ class LinkPreview extends Equatable {
         description = json?['description'],
         mediaType = json?['mediaType'],
         contentType = json?['contentType'],
+        fileName = json?['file_name'],
+        fileSize = json?['size'],
+        favicons = List.of(json?['favicons']).cast<String>(),
         images = List.of(json?['images']).cast<String>(),
         videos = List.of(json?['videos'] ?? []).cast<String>();
 
@@ -41,6 +50,9 @@ class LinkPreview extends Equatable {
         'description': description,
         'mediaType': mediaType,
         'contentType': contentType,
+        'file_name': fileName,
+        'size': fileSize,
+        'favicons': favicons,
         'images': images,
         'videos': videos,
       };
@@ -59,6 +71,9 @@ class LinkPreview extends Equatable {
         description,
         mediaType,
         contentType,
+        fileName,
+        fileSize,
+        favicons,
         images,
         videos
       ];
@@ -70,6 +85,9 @@ class LinkPreview extends Equatable {
     String? description,
     String? mediaType,
     String? contentType,
+    String? fileName,
+    int? fileSize,
+    List<String>? favicons,
     List<String>? images,
     List<String>? videos,
   }) {
@@ -80,6 +98,9 @@ class LinkPreview extends Equatable {
       description: description ?? this.description,
       mediaType: mediaType ?? this.mediaType,
       contentType: contentType ?? this.contentType,
+      fileName: fileName ?? this.fileName,
+      fileSize: fileSize ?? this.fileSize,
+      favicons: favicons ?? this.favicons,
       images: images ?? this.images,
       videos: videos ?? this.videos,
     );

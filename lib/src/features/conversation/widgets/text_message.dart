@@ -42,7 +42,6 @@ class TextMessage extends StatelessWidget {
             link: linkToOpen,
             errorBody: 'No description available',
             key: Key(linkToOpen)),
-        const SizedBox(height: 10),
         buildLinkComponent(
             linkToOpen,
             Align(
