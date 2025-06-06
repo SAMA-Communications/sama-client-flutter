@@ -2,6 +2,7 @@ export 'chats/attachments_api.dart';
 export 'chats/messages_api.dart';
 export 'chats/realtime/messages_manager.dart';
 export 'chats/realtime/models/models.dart';
+export 'chats/realtime/typing_manager.dart';
 export 'connection/connection.dart';
 export 'connection/exceptions.dart';
 export 'conversations/models/models.dart';

@@ -5,6 +5,7 @@ const String messageEditRequestName = 'message_edit';
 const String messagesListRequestName = 'message_list';
 const String messagesReadRequestName = 'message_read';
 const String messagesDeleteRequestName = 'message_delete';
+const String messageTypingName = 'typing';
 
 const messageRequestTimeout = Duration(seconds: 5);
 
@@ -74,5 +75,14 @@ Future<bool> deleteMessages(DeleteMessagesStatus deleteMessagesStatus) {
       .sendRequest(messagesDeleteRequestName, deleteMessagesStatus.toJson())
       .then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+  });
+}
+
+Future<bool> sendTypingStatus(TypingMessageStatus typing) {
+  return SamaConnectionService.instance
+      .sendRequest(messageTypingName, typing.toJson(), shouldAwaiting: false)
+      .then((response) {
+    print('sendTypingStatus response $response');
+    return true;
   });
 }

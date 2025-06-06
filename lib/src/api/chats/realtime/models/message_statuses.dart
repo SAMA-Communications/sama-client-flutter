@@ -88,3 +88,18 @@ class DeleteMessagesStatus extends MessageStatus {
 }
 
 enum DeleteMessageType { myself, all }
+
+class TypingMessageStatus {
+  final String? cid; // cid
+  final String? type; // c_type
+  final String? from; // from
+  final int? t; // t
+
+  TypingMessageStatus.fromJson(Map<String, dynamic> json)
+      : cid = json['cid'],
+        type = json['c_type'],
+        from = json['from'],
+        t = json['t'];
+
+  Map<String, dynamic> toJson() => {'cid': cid};
+}

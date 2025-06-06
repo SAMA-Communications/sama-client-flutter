@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ConnectionState;
@@ -6,8 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../api/api.dart' show TypingState;
 import '../../../db/models/conversation_model.dart';
-import '../../../db/models/user_model.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
@@ -18,7 +17,8 @@ import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/utils/screen_factor.dart';
+import '../../../shared/utils/string_utils.dart';
+import '../../../shared/widget/typing_indicator.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -79,7 +79,7 @@ class ConversationPage extends StatelessWidget {
                       fontSize: 28.0, fontWeight: FontWeight.bold),
                   maxLines: 1,
                 ),
-                subtitle: _getSubtitle(state.conversation, state.participants),
+                subtitle: _getSubtitle(state),
               ),
             ),
           ),
@@ -123,12 +123,19 @@ class ConversationPage extends StatelessWidget {
     });
   }
 
-  Widget _getSubtitle(
-    ConversationModel conversation,
-    Set<UserModel> participants,
-  ) {
+  Widget _getSubtitle(ConversationState state) {
+    var conversation = state.conversation;
+    var participants = state.participants;
+    var typing = state.typingStatus;
     String title = '';
     Color color = dullGray;
+    var showTyping = typing?.typingState == TypingState.start;
+
+    if (showTyping) {
+      return TypingIndicator(
+          userName:
+              state.conversation.type == 'u' ? '' : getUserName(typing!.user));
+    }
     if (conversation.type == 'u') {
       if (conversation.opponent?.recentActivity != null) {
         var date = DateTime.fromMillisecondsSinceEpoch(

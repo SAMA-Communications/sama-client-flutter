@@ -121,16 +121,19 @@ class SamaConnectionService {
     String? retryRequestId,
     Completer<Map<String, dynamic>>? retryCompleter,
     bool shouldRetry = true,
+    bool shouldAwaiting = true,
   }) {
     var requestId = retryRequestId ??= const Uuid().v4().toString();
 
     var requestCompleter = retryCompleter ??= Completer<Map<String, dynamic>>();
 
-    awaitingRequests[requestId] = RequestInfo(
-        name: requestName,
-        data: requestData,
-        completer: requestCompleter,
-        shouldRetry: shouldRetry);
+    if (shouldAwaiting) {
+      awaitingRequests[requestId] = RequestInfo(
+          name: requestName,
+          data: requestData,
+          completer: requestCompleter,
+          shouldRetry: shouldRetry);
+    }
 
     var request = {
       'request': {
