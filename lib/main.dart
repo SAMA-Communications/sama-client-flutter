@@ -25,7 +25,6 @@ import 'src/shared/secure_storage.dart';
 import 'src/shared/sharing/bloc/sharing_intent_bloc.dart';
 import 'src/shared/ui/colors.dart';
 
-//delete if no need
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
