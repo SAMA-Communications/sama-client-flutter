@@ -6,13 +6,17 @@ import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
+import '../models/chat_message.dart';
 import 'media_sender.dart';
+import 'reply_box.dart';
 
 class MessageInput extends StatefulWidget {
   final String? sharedText;
   final MessageModel? draftMessage;
+  final ChatMessage? replyMessage;
 
-  const MessageInput({super.key, this.sharedText, this.draftMessage});
+  const MessageInput(
+      {super.key, this.sharedText, this.draftMessage, this.replyMessage});
 
   @override
   State<StatefulWidget> createState() {
@@ -24,8 +28,13 @@ class _MessageInputState extends State<MessageInput> {
   late final TextEditingController textEditingController =
       TextEditingController(text: widget.sharedText);
 
+  final FocusNode showReplyFocusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
+    var showReply = widget.replyMessage != null;
+    if (showReply) showReplyFocusNode.requestFocus();
+
     if (widget.sharedText != null) {
       BlocProvider.of<SendMessageBloc>(context)
           .add(TextMessageChanged(widget.sharedText!));
@@ -50,69 +59,74 @@ class _MessageInputState extends State<MessageInput> {
       },
       child: BlocBuilder<SendMessageBloc, SendMessageState>(
         builder: (rootContext, state) {
-          return Container(
-            constraints: const BoxConstraints(maxHeight: 120.0),
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(12.0)),
-              color: gainsborough,
-            ),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.attach_file_outlined),
-                  color: dullGray,
-                  onPressed: () {
-                    connectionChecker(
-                        context,
-                        () => showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 10.0),
-                                  actionsPadding: EdgeInsets.zero,
-                                  buttonPadding: EdgeInsets.zero,
-                                  content: SizedBox(
-                                    width: double.maxFinite,
-                                    child: MediaSender.create(
-                                        currentConversation: rootContext
-                                            .watch<SendMessageBloc>()
-                                            .currentConversation),
-                                  ),
-                                );
-                              },
-                            ));
-                  },
-                ),
-                Flexible(
-                  child: TextField(
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    style: const TextStyle(fontSize: 15.0),
-                    controller: textEditingController,
-                    decoration: const InputDecoration.collapsed(
-                      hintText: 'Type your message...',
-                      hintStyle: TextStyle(color: dullGray),
-                    ),
-                    onChanged: (text) {
-                      BlocProvider.of<SendMessageBloc>(rootContext)
-                          .add(TextMessageChanged(text));
+          return Column(mainAxisSize: MainAxisSize.min, children: [
+            if (showReply) ReplyBox(replyMessage: widget.replyMessage!),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 120.0),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                color: gainsborough,
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.attach_file_outlined),
+                    color: dullGray,
+                    onPressed: () {
+                      connectionChecker(
+                          context,
+                          () => showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 10.0),
+                                    actionsPadding: EdgeInsets.zero,
+                                    buttonPadding: EdgeInsets.zero,
+                                    content: SizedBox(
+                                      width: double.maxFinite,
+                                      child: MediaSender.create(
+                                          currentConversation: rootContext
+                                              .watch<SendMessageBloc>()
+                                              .currentConversation),
+                                    ),
+                                  );
+                                },
+                              ));
                     },
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: state.isTextEmpty
-                      ? null
-                      : () => onSendChatMessage(
-                          rootContext, textEditingController.text),
-                  color: dullGray,
-                ),
-              ],
-            ),
-          );
+                  Flexible(
+                    child: TextField(
+                      focusNode: showReplyFocusNode,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      style: const TextStyle(fontSize: 15.0),
+                      controller: textEditingController,
+                      decoration: const InputDecoration.collapsed(
+                        hintText: 'Type your message...',
+                        hintStyle: TextStyle(color: dullGray),
+                      ),
+                      onChanged: (text) {
+                        BlocProvider.of<SendMessageBloc>(rootContext)
+                            .add(TextMessageChanged(text));
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: state.isTextEmpty
+                        ? null
+                        : () => onSendChatMessage(
+                            rootContext, textEditingController.text),
+                    color: dullGray,
+                  ),
+                ],
+              ),
+            )
+          ]);
         },
       ),
     );
@@ -124,5 +138,11 @@ class _MessageInputState extends State<MessageInput> {
       BlocProvider.of<ConversationBloc>(context)
           .add(const RemoveDraftMessage());
     }
+  }
+
+  @override
+  void dispose() {
+    showReplyFocusNode.dispose();
+    super.dispose();
   }
 }

@@ -100,4 +100,8 @@ extension ChatMessageExtension on MessageModel {
         extension: extension)
       ..attachments.addAll(attachments);
   }
+
+  bool isServiceMessage() {
+    return extension?['type'] != null;
+  }
 }

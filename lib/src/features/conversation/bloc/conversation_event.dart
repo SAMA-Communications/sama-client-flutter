@@ -71,3 +71,13 @@ final class _ConversationUpdated extends ConversationEvent {
 final class ConversationDeleted extends ConversationEvent {
   const ConversationDeleted();
 }
+
+final class ConversationReply extends ConversationEvent {
+  final ChatMessage message;
+
+  const ConversationReply(this.message);
+}
+
+final class RemoveConversationReply extends ConversationEvent {
+  const RemoveConversationReply();
+}

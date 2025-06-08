@@ -13,3 +13,5 @@ final double heightScreen =
 double keyboardHeight(BuildContext ctx) => MediaQuery.of(ctx).viewInsets.bottom;
 
 bool keyboardIsOpen(BuildContext ctx) => keyboardHeight(ctx) != 0;
+
+void hideKeyboard() => FocusManager.instance.primaryFocus?.unfocus();

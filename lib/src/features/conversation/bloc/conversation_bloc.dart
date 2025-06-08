@@ -87,6 +87,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ConversationDeleted>(
       _onConversationDeleted,
     );
+    on<ConversationReply>(
+      _onConversationReply,
+    );
+    on<RemoveConversationReply>(
+      _onRemoveConversationReply,
+    );
 
     add(const ParticipantsReceived());
 
@@ -268,6 +274,16 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         ? emit(state.copyWith(
             draftMessage: () => null, status: ConversationStatus.delete))
         : emit(state.copyWith(status: ConversationStatus.failure));
+  }
+
+  Future<void> _onConversationReply(
+      ConversationReply event, Emitter<ConversationState> emit) async {
+    emit(state.copyWith(replyMessage: () => event.message));
+  }
+
+  Future<void> _onRemoveConversationReply(
+      RemoveConversationReply event, Emitter<ConversationState> emit) async {
+    emit(state.copyWith(replyMessage: () => null));
   }
 
   FutureOr<void> _onMessageReceived(
