@@ -1,4 +1,7 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../api.dart';
+import '../connection/http_request.dart';
 
 const String messageRequestName = 'message';
 const String messageEditRequestName = 'message_edit';
@@ -6,6 +9,8 @@ const String messagesListRequestName = 'message_list';
 const String messagesReadRequestName = 'message_read';
 const String messagesDeleteRequestName = 'message_delete';
 const String messageTypingName = 'typing';
+
+String linkPreviewUrl = dotenv.env['LINK_PREVIEW_URL'] ?? '';
 
 const messageRequestTimeout = Duration(seconds: 5);
 
@@ -75,6 +80,16 @@ Future<bool> deleteMessages(DeleteMessagesStatus deleteMessagesStatus) {
       .sendRequest(messagesDeleteRequestName, deleteMessagesStatus.toJson())
       .then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+  });
+}
+
+Future<LinkPreview> linkPreviewData(String url) {
+  return sendHTTPRequest(linkPreviewUrl, '', {
+    'url': url,
+  }, {
+    'Session-Token': 'token'
+  }).then((response) {
+    return LinkPreview.fromJson(response);
   });
 }
 

@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/regexp_utils.dart';
+import '../../../shared/widget/link_preview_widget.dart';
 
 class TextMessage extends StatelessWidget {
   final String body;
@@ -34,20 +35,53 @@ class TextMessage extends StatelessWidget {
     );
   }
 
-  WidgetSpan buildLinkComponent(String text, String linkToOpen) => WidgetSpan(
-      child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            splashColor: lightMallow,
-            borderRadius: BorderRadius.circular(6.0),
-            child: Text(
-              text,
-              style: linkStyle,
-            ),
-            onTap: () => openUrl(Uri.parse(linkToOpen)),
+  WidgetSpan buildLinkPreviewComponent(String text, String linkToOpen) =>
+      WidgetSpan(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        LinkPreviewWidget(
+            link: linkToOpen,
+            errorBody: 'No description available',
+            key: Key(linkToOpen)),
+        buildLinkComponent(
+            linkToOpen,
+            Align(
+                alignment: Alignment.centerLeft,
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      const WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Icon(Icons.public_outlined,
+                            color: dullGray, size: 25),
+                      ),
+                      const WidgetSpan(
+                        child: SizedBox(width: 4),
+                      ),
+                      TextSpan(text: text, style: linkStyle)
+                    ],
+                  ),
+                ))),
+        const SizedBox(height: 4),
+      ]));
+
+  WidgetSpan buildTextComponent(String text, String linkToOpen) => WidgetSpan(
+      child: buildLinkComponent(
+          linkToOpen,
+          Text(
+            text,
+            style: linkStyle,
           )));
 
-  List<InlineSpan> linkify(String text) {
+  Widget buildLinkComponent(String linkToOpen, Widget widget) => Material(
+      color: Colors.transparent,
+      child: InkWell(
+        splashColor: lightMallow,
+        borderRadius: BorderRadius.circular(6.0),
+        child: widget,
+        onTap: () => openUrl(Uri.parse(linkToOpen)),
+      ));
+
+  List<InlineSpan> linkify(String text, [bool preview = true]) {
     final List<InlineSpan> list = <InlineSpan>[];
     final RegExp linkRegExp =
         RegExp('($urlPattern)|($emailPattern)|($phonePattern)');
@@ -64,15 +98,21 @@ class TextMessage extends StatelessWidget {
 
     final String linkText = match.group(0)!;
     if (linkText.contains(RegExp(urlPattern))) {
-      list.add(buildLinkComponent(linkText, linkText));
+      if (preview) {
+        preview = false;
+        list.add(buildLinkPreviewComponent(linkText, linkText));
+      } else {
+        list.add(buildTextComponent(linkText, linkText));
+      }
     } else if (linkText.contains(RegExp(emailPattern))) {
-      list.add(buildLinkComponent(linkText, 'mailto:$linkText'));
+      list.add(buildTextComponent(linkText, 'mailto:$linkText'));
     } else if (linkText.contains(RegExp(phonePattern))) {
-      list.add(buildLinkComponent(linkText, 'tel:$linkText'));
+      list.add(buildTextComponent(linkText, 'tel:$linkText'));
     } else {
       throw 'Unexpected match: $linkText';
     }
-    list.addAll(linkify(text.substring(match.start + linkText.length)));
+    list.addAll(
+        linkify(text.substring(match.start + linkText.length), preview));
 
     return list;
   }
