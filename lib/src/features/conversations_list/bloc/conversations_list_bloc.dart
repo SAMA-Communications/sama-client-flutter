@@ -51,6 +51,10 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
         conversationRepository.updateConversationStream.listen((chat) async {
       if (!isClosed) {
         add(ConversationsRefreshed());
+
+        if (state.typingStatuses.containsKey(chat.id)) {
+          add(TypingStatusStopReceived(chat.id, chat.lastMessage!.from!));
+        }
       }
     });
 
