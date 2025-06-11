@@ -8,6 +8,7 @@ const String messageEditRequestName = 'message_edit';
 const String messagesListRequestName = 'message_list';
 const String messagesReadRequestName = 'message_read';
 const String messagesDeleteRequestName = 'message_delete';
+const String messageTypingName = 'typing';
 
 String linkPreviewUrl = dotenv.env['LINK_PREVIEW_URL'] ?? '';
 
@@ -89,5 +90,14 @@ Future<LinkPreview> linkPreviewData(String url) {
     'Session-Token': 'token'
   }).then((response) {
     return LinkPreview.fromJson(response);
+  });
+}
+
+Future<bool> sendTypingStatus(TypingMessageStatus typing) {
+  return SamaConnectionService.instance
+      .sendRequest(messageTypingName, typing.toJson(), shouldAwaiting: false)
+      .then((response) {
+    print('sendTypingStatus response $response');
+    return true;
   });
 }

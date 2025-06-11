@@ -27,3 +27,7 @@ final class TextMessageClear extends SendMessageEvent {
 final class SendStatusReadMessages extends SendMessageEvent {
   const SendStatusReadMessages();
 }
+
+final class SendTypingChanged extends SendMessageEvent {
+  const SendTypingChanged();
+}
