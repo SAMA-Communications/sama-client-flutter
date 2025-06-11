@@ -35,14 +35,20 @@ class ConversationRepository {
   }
 
   StreamSubscription<api.SystemMessage>? incomingSystemMessagesSubscription;
+  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
+  StreamSubscription<TypingStatus>? typingMessageSubscription;
 
   final StreamController<ConversationModel> _conversationsController =
       StreamController.broadcast();
 
-  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
-
   Stream<ConversationModel> get updateConversationStream =>
       _conversationsController.stream;
+
+  final StreamController<api.TypingStatus> _typingMessageController =
+      StreamController.broadcast();
+
+  Stream<api.TypingStatus> get typingMessageStream =>
+      _typingMessageController.stream;
 
   bool _chatsFilter(ConversationModel c) =>
       c.type == 'u' && c.lastMessage == null || (c.isEncrypted ?? false);
@@ -97,7 +103,8 @@ class ConversationRepository {
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
           await localDatasource.getConversationLocal(message.cid!);
-      var shouldUpdate = message.status.index > 1 || !message.isOwn;//TODO RP redundant checking message.status.index > 1
+      var shouldUpdate = message.status.index > 1 ||
+          !message.isOwn; //TODO RP redundant checking message.status.index > 1
       if (conversation != null && shouldUpdate) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {
@@ -126,6 +133,11 @@ class ConversationRepository {
                 .lastMessage?.attachments.firstOrNull?.fileId));
       }
     });
+
+    typingMessageSubscription = api.TypingManager.instance.typingStatusStream
+        .listen((typingStatus) async {
+      _typingMessageController.add(typingStatus);
+    });
   }
 
   void dispose() {
@@ -133,7 +145,10 @@ class ConversationRepository {
     incomingSystemMessagesSubscription = null;
     incomingMessagesSubscription?.cancel();
     incomingMessagesSubscription = null;
+    typingMessageSubscription?.cancel();
+    typingMessageSubscription = null;
     api.MessagesManager.instance.destroy();
+    api.TypingManager.instance.destroy();
   }
 
   Future<void> resetUnreadMessagesCount(String conversationId) async {
@@ -276,6 +291,10 @@ class ConversationRepository {
         conversation, usersMap, participantsModels, currentUser);
     localDatasource.updateConversationLocal(conversationModel);
     return conversationModel;
+  }
+
+  Future<UserModel?> getConversationUser(String id) {
+    return userRepository.getUserById(id);
   }
 
   Future<ConversationModel> createConversation(
