@@ -104,4 +104,8 @@ extension ChatMessageExtension on MessageModel {
   bool isServiceMessage() {
     return extension?['type'] != null;
   }
+
+  bool isHasAttachments() {
+    return attachments.isNotEmpty;
+  }
 }

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../api/api.dart';
 import '../../../db/models/models.dart';
-import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
 import '../widgets/media_attachment.dart';
+import '../widgets/reply_message_widget.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
 import '../widgets/unsupported_message.dart';
@@ -138,7 +137,9 @@ class MessageItem extends StatelessWidget {
                     switch (item) {
                       case MessageMenuItem.reply:
                         print('reply message= ${message.body}');
-                        context.read<ConversationBloc>().add(ConversationReply(message));
+                        context
+                            .read<ConversationBloc>()
+                            .add(ConversationReply(message));
                         break;
                       case MessageMenuItem.edit:
                         print('edit message= ${message.body}');
@@ -152,7 +153,15 @@ class MessageItem extends StatelessWidget {
                     }
                   }).show(details.globalPosition);
             },
-            child: buildMessageListItem(message, context)));
+            child: Column(
+                crossAxisAlignment: message.isOwn
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                children: [
+                  if (!message.isOwn /*replyMessage.isNotEmpty*/)
+                    ReplyMessageWidget(message: message, onTap: () => {}),
+                  buildMessageListItem(message, context),
+                ])));
   }
 
   Widget buildMessageListItem(ChatMessage message, BuildContext context) {
