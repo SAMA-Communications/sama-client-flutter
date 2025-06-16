@@ -6,6 +6,7 @@ class Message extends Equatable {
   final String? id; //_id
   final String? from; //from
   final String? cid; //cid
+  final String? repliedMessageId; //replied_message_id
   final String? rawStatus; //status
   final String? body; //body
   final List<Attachment>? attachments; //attachments
@@ -17,6 +18,7 @@ class Message extends Equatable {
     this.id,
     this.from,
     this.cid,
+    this.repliedMessageId,
     this.rawStatus,
     this.body,
     this.attachments,
@@ -29,6 +31,7 @@ class Message extends Equatable {
       : id = json['_id'],
         from = json['from'],
         cid = json['cid'],
+        repliedMessageId = json['replied_message_id'],
         rawStatus = json['status'],
         body = json['body'],
         attachments = json['attachments'] == null
@@ -53,6 +56,7 @@ class Message extends Equatable {
     String? id,
     String? from,
     String? cid,
+    String? repliedMessageId,
     String? rawStatus,
     String? body,
     List<Attachment>? attachments,
@@ -64,6 +68,7 @@ class Message extends Equatable {
       id: id ?? this.id,
       from: from ?? this.from,
       cid: cid ?? this.cid,
+      repliedMessageId: repliedMessageId ?? this.repliedMessageId,
       rawStatus: rawStatus ?? this.rawStatus,
       body: body ?? this.body,
       attachments: attachments ?? this.attachments,

@@ -9,8 +9,9 @@ class SendMessageEvent extends Equatable {
 
 final class SendTextMessage extends SendMessageEvent {
   final String message;
+  final ChatMessage? replyMessage;
 
-  const SendTextMessage(this.message);
+  const SendTextMessage(this.message, this.replyMessage);
 }
 
 final class TextMessageChanged extends SendMessageEvent {

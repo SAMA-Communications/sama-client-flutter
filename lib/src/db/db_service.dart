@@ -303,12 +303,24 @@ class DatabaseService {
     query.close();
 
     var messagesInDbMap = {for (var v in messagesInDb) v.id: v};
-    for (var message in items) {
+
+    Map<String, MessageModel> messagesMap = {};
+
+    for (var message in items.reversed) {
       final messageInDb = messagesInDbMap[message.id];
       if (messageInDb != null) {
         assignMessage(message, messageInDb);
       }
+      messagesMap[message.id!] = message;
+
+      if(message.repliedMessageId != null && message.replyMessage == null) {
+        var replyMessage = messagesMap[message.repliedMessageId];
+        if(replyMessage != null) {
+          message.replyMessage = replyMessage;
+        }
+      }
     }
+
     try {
       await store!.box<MessageModel>().putManyAsync(items, mode: PutMode.put);
     } on UniqueViolationException catch (e) {
@@ -387,6 +399,7 @@ class DatabaseService {
 
   Future<void> assignMessage(MessageModel msg, MessageModel msgInDb) async {
     msg.bid = msgInDb.bid;
+    msg.replyMessage = msgInDb.replyMessage;
     if (msg.attachments.isNotEmpty) {
       msg.attachments.clear();
     }

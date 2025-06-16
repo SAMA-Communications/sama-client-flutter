@@ -11,6 +11,7 @@ import '../../../../db/models/conversation_model.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../../../shared/utils/media_utils.dart';
+import '../../models/chat_message.dart';
 
 part 'media_sender_event.dart';
 
@@ -157,7 +158,9 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
       if (state.status == MediaSelectorStatus.canceled) return;
 
       await messagesRepository.sendMediaMessage(currentConversation.id,
-          body: body, attachments: attachments);
+          body: body,
+          attachments: attachments,
+          repliedMessageId: event.replyMessage?.id);
       emit(state.copyWith(status: MediaSelectorStatus.processingFinished));
     } catch (e) {
       emit(state.copyWith(

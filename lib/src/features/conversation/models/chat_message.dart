@@ -20,6 +20,7 @@ class ChatMessage extends MessageModel {
     super.id,
     super.from,
     super.cid,
+    super.repliedMessageId,
     super.rawStatus,
     super.body,
     super.createdAt,
@@ -38,12 +39,14 @@ class ChatMessage extends MessageModel {
     String? id,
     String? from,
     String? cid,
+    String? repliedMessageId,
     String? rawStatus,
     String? body,
     int? t,
     DateTime? createdAt,
     Map<String, dynamic>? extension,
     List<AttachmentModel>? attachments,
+    MessageModel? replyMessage,
   }) {
     return ChatMessage(
         sender: sender ?? this.sender,
@@ -55,11 +58,13 @@ class ChatMessage extends MessageModel {
         id: id ?? this.id,
         from: from ?? this.from,
         cid: cid ?? this.cid,
+        repliedMessageId: repliedMessageId ?? this.repliedMessageId,
         body: body ?? this.body,
         rawStatus: rawStatus ?? status?.name ?? this.rawStatus,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         extension: extension ?? this.extension)
+      ..replyMessage = replyMessage ?? this.replyMessage
       ..attachments.addAll(attachments ?? this.attachments);
   }
 
@@ -69,14 +74,20 @@ class ChatMessage extends MessageModel {
   }
 
   @override
-  List<Object?> get props =>
-      [...super.props, isLastUserMessage, isFirstUserMessage, status];
+  List<Object?> get props => [
+        ...super.props,
+        isLastUserMessage,
+        isFirstUserMessage,
+        status,
+        replyMessage
+      ];
 }
 
 extension ChatMessageExtension on MessageModel {
   ChatMessage toChatMessage(UserModel sender, bool isOwn,
       bool isLastUserMessage, bool isFirstUserMessage,
-      [ChatMessageStatus status = ChatMessageStatus.none]) {
+      [ChatMessageStatus status = ChatMessageStatus.none,
+      ChatMessage? replyMessage]) {
     return ChatMessage(
         bid: bid,
         sender: sender,
@@ -93,11 +104,13 @@ extension ChatMessageExtension on MessageModel {
         id: id,
         from: from,
         cid: cid,
+        repliedMessageId: repliedMessageId,
         rawStatus: rawStatus,
         body: body,
         createdAt: createdAt,
         t: t,
         extension: extension)
+      ..replyMessage = replyMessage ?? this.replyMessage
       ..attachments.addAll(attachments);
   }
 

@@ -127,6 +127,11 @@ class MessageItem extends StatelessWidget {
     final GlobalKey key = GlobalKey(debugLabel: 'key_${message.id!}');
     final shouldAbsorb = message.isServiceMessage();
 
+    if (message.repliedMessageId != null && message.replyMessage == null) {
+      context
+          .read<ConversationBloc>()
+          .add(ReplyMessageRequired(message.id!, message.repliedMessageId!));
+    }
     return AbsorbPointer(
         absorbing: shouldAbsorb,
         child: GestureDetector(
@@ -139,7 +144,7 @@ class MessageItem extends StatelessWidget {
                         print('reply message= ${message.body}');
                         context
                             .read<ConversationBloc>()
-                            .add(ConversationReply(message));
+                            .add(ReplyMessage(message));
                         break;
                       case MessageMenuItem.edit:
                         print('edit message= ${message.body}');
@@ -158,8 +163,12 @@ class MessageItem extends StatelessWidget {
                     ? CrossAxisAlignment.end
                     : CrossAxisAlignment.start,
                 children: [
-                  if (!message.isOwn /*replyMessage.isNotEmpty*/)
-                    ReplyMessageWidget(message: message, onTap: () => {}),
+                  if (message.repliedMessageId != null)
+                    ReplyMessageWidget(
+                        chat:
+                            context.read<ConversationBloc>().state.conversation,
+                        message: message,
+                        onTap: () => {}),
                   buildMessageListItem(message, context),
                 ])));
   }

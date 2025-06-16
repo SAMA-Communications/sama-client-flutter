@@ -53,7 +53,7 @@ class ReplyBox extends StatelessWidget {
                 ),
                 onPressed: () {
                   BlocProvider.of<ConversationBloc>(context)
-                      .add(const RemoveConversationReply());
+                      .add(const RemoveReplyMessage());
                 },
               ),
             ],

@@ -15,6 +15,7 @@ class MessageModel extends Equatable {
   final String? id;
   final String? from;
   final String? cid;
+  final String? repliedMessageId;
   final String? rawStatus;
   final String? body;
   final int? t;
@@ -36,6 +37,7 @@ class MessageModel extends Equatable {
     this.id,
     this.from,
     this.cid,
+    this.repliedMessageId,
     this.rawStatus,
     this.body,
     this.createdAt,
@@ -44,29 +46,39 @@ class MessageModel extends Equatable {
   });
 
   final attachments = ToMany<AttachmentModel>();
+  final replyMessageBind = ToOne<MessageModel>();
+
+  @Transient()
+  MessageModel? get replyMessage => replyMessageBind.target;
+
+  set replyMessage(MessageModel? item) => replyMessageBind.target = item;
 
   MessageModel copyWith({
     int? bid,
     String? id,
     String? from,
     String? cid,
+    String? repliedMessageId,
     String? rawStatus,
     String? body,
     DateTime? createdAt,
     int? t,
     Map<String, dynamic>? extension,
     List<AttachmentModel>? attachments,
+    MessageModel? replyMessage,
   }) {
     return MessageModel(
         bid: bid ?? this.bid,
         id: id ?? this.id,
         from: from ?? this.from,
         cid: cid ?? this.cid,
+        repliedMessageId: repliedMessageId ?? this.repliedMessageId,
         rawStatus: rawStatus ?? this.rawStatus,
         body: body ?? this.body,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         extension: extension ?? this.extension)
+      ..replyMessage = replyMessage ?? this.replyMessage
       ..attachments.addAll(attachments ?? this.attachments);
   }
 
@@ -91,6 +103,7 @@ extension MessageModelExtension on Message {
       id: id,
       from: from,
       cid: cid,
+      repliedMessageId: repliedMessageId,
       rawStatus: isOwn ?? false ? rawStatus ?? 'sent' : null,
       body: body,
       createdAt: createdAt,

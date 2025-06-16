@@ -72,12 +72,19 @@ final class ConversationDeleted extends ConversationEvent {
   const ConversationDeleted();
 }
 
-final class ConversationReply extends ConversationEvent {
+final class ReplyMessage extends ConversationEvent {
   final ChatMessage message;
 
-  const ConversationReply(this.message);
+  const ReplyMessage(this.message);
 }
 
-final class RemoveConversationReply extends ConversationEvent {
-  const RemoveConversationReply();
+final class RemoveReplyMessage extends ConversationEvent {
+  const RemoveReplyMessage();
+}
+
+final class ReplyMessageRequired extends ConversationEvent {
+  final String msgId;
+  final String replyMsgId;
+
+  const ReplyMessageRequired(this.msgId, this.replyMsgId);
 }

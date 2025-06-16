@@ -1,6 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
+import '../../../db/models/conversation_model.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/string_utils.dart';
 import '../models/chat_message.dart';
 
 const double horizontalPadding = 8;
@@ -10,102 +13,111 @@ const double replyBorderRadius2 = 18;
 class ReplyMessageWidget extends StatelessWidget {
   const ReplyMessageWidget({
     super.key,
+    required this.chat,
     required this.message,
     this.onTap,
   });
 
-  /// Provides message instance of chat.
+  final ConversationModel chat;
   final ChatMessage message;
 
-  /// Provides call back when user taps on replied message.
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final replyBySender = message.isOwn;
-    final textTheme = Theme
-        .of(context)
-        .textTheme;
-    final replyMessage = message;
-    final replyBy = 'replyByNAME';
+    final textTheme = Theme.of(context).textTheme;
+    final replyMessage = message.replyMessage;
+    final isReplyBySender = message.isOwn;
+    var replySender =
+        chat.participants.firstWhereOrNull((m) => m.id == replyMessage?.from);
+    final replyTo = replyMessage?.from == null
+        ? ''
+        : message.sender.id == replyMessage?.from
+            ? 'by self'
+            : getUserName(replySender);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.fromLTRB(
             horizontalPadding, 8, horizontalPadding, 4),
-        // constraints:
-        // const BoxConstraints(maxWidth: 280),
+        constraints: const BoxConstraints(maxWidth: 280),
         child: Column(
-      crossAxisAlignment:
-      replyBySender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Replied by $replyBy',
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            style: const TextStyle(fontSize: 14, letterSpacing: 0.3),
-          ),
-          const SizedBox(height: 6),
-          IntrinsicHeight(
-            child: Row(
-              mainAxisAlignment: replyBySender
-                  ? MainAxisAlignment.end
-                  : MainAxisAlignment.start,
-              children: [
-                if (!replyBySender)
-                  const ReplyLine(
-                    rightPadding: 4,
-                  ),
-                Flexible(
-                  child: Opacity(
-                    opacity: 0.8,
-                    child: message.isHasAttachments()
-                        ? Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(
-                              replyMessage.attachments.first.url ?? ''),
-                          fit: BoxFit.fill,
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    )
-                        : Container(
-                      // constraints: BoxConstraints(
-                      //   maxWidth: 280,
-                      // ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: _borderRadius(
-                          replyMessage: replyMessage.body!,
-                          replyBySender: replyBySender,
-                        ),
-                        color: message.isOwn ? lightMallow : smokyBorough,
-                      ),
-                      child: Text(replyMessage.body!,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: textTheme.bodyMedium!.copyWith(
-                            color: Colors.black),
-                      ),
+          crossAxisAlignment: isReplyBySender
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Replied to $replyTo',
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: const TextStyle(fontSize: 14, letterSpacing: 0.3),
+            ),
+            const SizedBox(height: 6),
+            IntrinsicHeight(
+              child: Row(
+                mainAxisAlignment: isReplyBySender
+                    ? MainAxisAlignment.end
+                    : MainAxisAlignment.start,
+                children: [
+                  if (!isReplyBySender)
+                    const ReplyLine(
+                      rightPadding: 4,
+                    ),
+                  Flexible(
+                    child: Opacity(
+                      opacity: 0.8,
+                      child: replyMessage?.isHasAttachments() ?? false
+                          ? Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                      replyMessage?.attachments.first.url ??
+                                          ''),
+                                  fit: BoxFit.fill,
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            )
+                          : Container(
+                              // constraints: BoxConstraints(
+                              //   maxWidth: 280,
+                              // ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: _borderRadius(
+                                  replyMessage: replyMessage?.body ?? '',
+                                  replyBySender: isReplyBySender,
+                                ),
+                                color:
+                                    message.isOwn ? lightMallow : smokyBorough,
+                              ),
+                              child: Text(
+                                replyMessage?.body ?? '',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                style: textTheme.bodyMedium!
+                                    .copyWith(color: Colors.black),
+                              ),
+                            ),
                     ),
                   ),
-                ),
-                if (replyBySender)
-                  ReplyLine(
-                    leftPadding: 4,
-                  ),
-              ],
+                  if (isReplyBySender)
+                    ReplyLine(
+                      leftPadding: 4,
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),);
+    );
   }
 
   BorderRadiusGeometry _borderRadius({
@@ -113,14 +125,12 @@ class ReplyMessageWidget extends StatelessWidget {
     required bool replyBySender,
   }) =>
       replyBySender
-          ?
-      (replyMessage.length < 37
-          ? BorderRadius.circular(replyBorderRadius1)
-          : BorderRadius.circular(replyBorderRadius2))
-          :
-      (replyMessage.length < 29
-          ? BorderRadius.circular(replyBorderRadius1)
-          : BorderRadius.circular(replyBorderRadius2));
+          ? (replyMessage.length < 37
+              ? BorderRadius.circular(replyBorderRadius1)
+              : BorderRadius.circular(replyBorderRadius2))
+          : (replyMessage.length < 29
+              ? BorderRadius.circular(replyBorderRadius1)
+              : BorderRadius.circular(replyBorderRadius2));
 }
 
 class ReplyLine extends StatelessWidget {

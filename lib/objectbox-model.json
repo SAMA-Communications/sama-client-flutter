@@ -92,7 +92,7 @@
     },
     {
       "id": "11:6168919874786736956",
-      "lastPropertyId": "9:1875750503242122079",
+      "lastPropertyId": "11:8502424052705749036",
       "name": "MessageModel",
       "properties": [
         {
@@ -142,6 +142,19 @@
           "id": "9:1875750503242122079",
           "name": "dbExtension",
           "type": 9
+        },
+        {
+          "id": "10:6395861719839579723",
+          "name": "repliedMessageId",
+          "type": 9
+        },
+        {
+          "id": "11:8502424052705749036",
+          "name": "replyMessageBindId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "39:2280023974172957156",
+          "relationTarget": "MessageModel"
         }
       ],
       "relations": [
@@ -330,7 +343,7 @@
     }
   ],
   "lastEntityId": "13:9106374520578572502",
-  "lastIndexId": "38:1718185030575189588",
+  "lastIndexId": "39:2280023974172957156",
   "lastRelationId": "5:7785256265115248397",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

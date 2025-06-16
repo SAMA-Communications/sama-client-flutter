@@ -87,11 +87,14 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ConversationDeleted>(
       _onConversationDeleted,
     );
-    on<ConversationReply>(
+    on<ReplyMessage>(
       _onConversationReply,
     );
-    on<RemoveConversationReply>(
+    on<RemoveReplyMessage>(
       _onRemoveConversationReply,
+    );
+    on<ReplyMessageRequired>(
+      _onReplyMessageRequired,
     );
 
     add(const ParticipantsReceived());
@@ -277,13 +280,27 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   Future<void> _onConversationReply(
-      ConversationReply event, Emitter<ConversationState> emit) async {
+      ReplyMessage event, Emitter<ConversationState> emit) async {
     emit(state.copyWith(replyMessage: () => event.message));
   }
 
   Future<void> _onRemoveConversationReply(
-      RemoveConversationReply event, Emitter<ConversationState> emit) async {
+      RemoveReplyMessage event, Emitter<ConversationState> emit) async {
     emit(state.copyWith(replyMessage: () => null));
+  }
+
+  Future<void> _onReplyMessageRequired(
+      ReplyMessageRequired event, Emitter<ConversationState> emit) async {
+    print('AMBRA _onReplyMessageRequired replyMsgId= ${event.replyMsgId}');
+    var replyMsg = await messagesRepository.getMessageById(
+        currentConversation, event.replyMsgId);
+    print('AMBRA _onReplyMessageRequired replyMsg= ${replyMsg}');
+    if (replyMsg == null) return;
+    var messages = [...state.messages];
+    var msg = messages.firstWhere((m) => m.id == event.msgId);
+    var msgUpdated = msg.copyWith(replyMessage: replyMsg);
+    messages[messages.indexOf(msg)] = msgUpdated;
+    emit(state.copyWith(messages: messages));
   }
 
   FutureOr<void> _onMessageReceived(
