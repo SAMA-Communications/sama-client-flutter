@@ -13,12 +13,10 @@ const double replyBorderRadius2 = 18;
 class ReplyMessageWidget extends StatelessWidget {
   const ReplyMessageWidget({
     super.key,
-    required this.chat,
     required this.message,
     this.onTap,
   });
 
-  final ConversationModel chat;
   final ChatMessage message;
 
   final VoidCallback? onTap;
@@ -28,13 +26,11 @@ class ReplyMessageWidget extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final replyMessage = message.replyMessage;
     final isReplyBySender = message.isOwn;
-    var replySender =
-        chat.participants.firstWhereOrNull((m) => m.id == replyMessage?.from);
     final replyTo = replyMessage?.from == null
         ? ''
         : message.sender.id == replyMessage?.from
             ? 'by self'
-            : getUserName(replySender);
+            : getUserName(replyMessage?.sender);
 
     return GestureDetector(
       onTap: onTap,

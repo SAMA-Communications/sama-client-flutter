@@ -164,11 +164,7 @@ class MessageItem extends StatelessWidget {
                     : CrossAxisAlignment.start,
                 children: [
                   if (message.repliedMessageId != null)
-                    ReplyMessageWidget(
-                        chat:
-                            context.read<ConversationBloc>().state.conversation,
-                        message: message,
-                        onTap: () => {}),
+                    ReplyMessageWidget(message: message, onTap: () => {}),
                   buildMessageListItem(message, context),
                 ])));
   }

@@ -160,7 +160,7 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
       await messagesRepository.sendMediaMessage(currentConversation.id,
           body: body,
           attachments: attachments,
-          repliedMessageId: event.replyMessage?.id);
+          replyMessage: event.replyMessage);
       emit(state.copyWith(status: MediaSelectorStatus.processingFinished));
     } catch (e) {
       emit(state.copyWith(

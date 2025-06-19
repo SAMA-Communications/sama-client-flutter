@@ -4,22 +4,19 @@ enum ChatMessageStatus { none, pending, draft, sent, read }
 
 // ignore: must_be_immutable
 class ChatMessage extends MessageModel {
-  final UserModel sender;
-  final bool isOwn;
   final bool isFirstUserMessage;
   final bool isLastUserMessage;
   final ChatMessageStatus status;
 
   ChatMessage({
-    required this.sender,
-    required this.isOwn,
     required this.isFirstUserMessage,
     required this.isLastUserMessage,
+    required super.isOwn,
+    required super.id,
+    required super.from,
+    required super.cid,
     this.status = ChatMessageStatus.none,
     super.bid,
-    super.id,
-    super.from,
-    super.cid,
     super.repliedMessageId,
     super.rawStatus,
     super.body,
@@ -30,8 +27,6 @@ class ChatMessage extends MessageModel {
 
   @override
   ChatMessage copyWith({
-    UserModel? sender,
-    bool? isOwn,
     bool? isFirstUserMessage,
     bool? isLastUserMessage,
     ChatMessageStatus? status,
@@ -42,15 +37,15 @@ class ChatMessage extends MessageModel {
     String? repliedMessageId,
     String? rawStatus,
     String? body,
+    bool? isOwn,
     int? t,
     DateTime? createdAt,
     Map<String, dynamic>? extension,
     List<AttachmentModel>? attachments,
     MessageModel? replyMessage,
+    UserModel? sender,
   }) {
     return ChatMessage(
-        sender: sender ?? this.sender,
-        isOwn: isOwn ?? this.isOwn,
         isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
         isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
         status: status ?? this.status,
@@ -60,10 +55,12 @@ class ChatMessage extends MessageModel {
         cid: cid ?? this.cid,
         repliedMessageId: repliedMessageId ?? this.repliedMessageId,
         body: body ?? this.body,
+        isOwn: isOwn ?? this.isOwn,
         rawStatus: rawStatus ?? status?.name ?? this.rawStatus,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         extension: extension ?? this.extension)
+      ..sender = sender ?? this.sender
       ..replyMessage = replyMessage ?? this.replyMessage
       ..attachments.addAll(attachments ?? this.attachments);
   }
@@ -84,33 +81,29 @@ class ChatMessage extends MessageModel {
 }
 
 extension ChatMessageExtension on MessageModel {
-  ChatMessage toChatMessage(UserModel sender, bool isOwn,
-      bool isLastUserMessage, bool isFirstUserMessage,
-      [ChatMessageStatus status = ChatMessageStatus.none,
-      ChatMessage? replyMessage]) {
+  ChatMessage toChatMessage(bool isLastUserMessage, bool isFirstUserMessage) {
     return ChatMessage(
         bid: bid,
-        sender: sender,
-        isOwn: isOwn,
         isLastUserMessage: isLastUserMessage,
         isFirstUserMessage: isFirstUserMessage,
-        status: rawStatus == ChatMessageStatus.read.name
-            ? ChatMessageStatus.read
-            : rawStatus == ChatMessageStatus.pending.name
-                ? ChatMessageStatus.pending
-                : rawStatus == ChatMessageStatus.draft.name
-                    ? ChatMessageStatus.draft
-                    : status,
+        //consider move ChatMessageStatus enum to model base
+        status: rawStatus != null
+            ? ChatMessageStatus.values.byName(rawStatus!)
+            : isOwn
+                ? ChatMessageStatus.sent
+                : ChatMessageStatus.none,
         id: id,
         from: from,
         cid: cid,
         repliedMessageId: repliedMessageId,
         rawStatus: rawStatus,
         body: body,
+        isOwn: isOwn,
         createdAt: createdAt,
         t: t,
         extension: extension)
-      ..replyMessage = replyMessage ?? this.replyMessage
+      ..sender = sender
+      ..replyMessage = replyMessage
       ..attachments.addAll(attachments);
   }
 

@@ -291,10 +291,10 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Future<void> _onReplyMessageRequired(
       ReplyMessageRequired event, Emitter<ConversationState> emit) async {
-    print('AMBRA _onReplyMessageRequired replyMsgId= ${event.replyMsgId}');
+    print('_onReplyMessageRequired replyMsgId= ${event.replyMsgId}');
     var replyMsg = await messagesRepository.getMessageById(
         currentConversation, event.replyMsgId);
-    print('AMBRA _onReplyMessageRequired replyMsg= ${replyMsg}');
+    print('_onReplyMessageRequired replyMsg= ${replyMsg}');
     if (replyMsg == null) return;
     var messages = [...state.messages];
     var msg = messages.firstWhere((m) => m.id == event.msgId);
@@ -353,8 +353,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
     var msgUpdated = msg.copyWith(
         id: event.status.serverMessageId, status: ChatMessageStatus.sent);
-    messages[messages.indexOf(msg)] = msgUpdated;
+
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
+
+    messages[messages.indexOf(msg)] = msgLocal.toChatMessage(
+        msgUpdated.isLastUserMessage, msgUpdated.isFirstUserMessage);
 
     var chatLocal = await conversationRepository
         .getConversationById(currentConversation.id);

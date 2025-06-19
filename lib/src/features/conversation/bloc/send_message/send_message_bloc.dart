@@ -43,7 +43,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       emit(state.copyWith(
           isTextEmpty: true, status: SendMessageStatus.processing));
       await messagesRepository.sendTextMessage(
-          event.message, currentConversation.id, event.replyMessage?.id);
+          event.message, currentConversation.id, event.replyMessage);
       emit(state.copyWith(
           isTextEmpty: true, text: '', status: SendMessageStatus.success));
     } on ResponseException catch (ex) {

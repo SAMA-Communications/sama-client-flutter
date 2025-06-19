@@ -313,9 +313,9 @@ class DatabaseService {
       }
       messagesMap[message.id!] = message;
 
-      if(message.repliedMessageId != null && message.replyMessage == null) {
+      if (message.repliedMessageId != null && message.replyMessage == null) {
         var replyMessage = messagesMap[message.repliedMessageId];
-        if(replyMessage != null) {
+        if (replyMessage != null) {
           message.replyMessage = replyMessage;
         }
       }
@@ -391,7 +391,19 @@ class DatabaseService {
       if (msgInDb != null) {
         assignMessage(item, msgInDb);
       }
+      // TODO delete after check replyMessage functionality
+      // if (item.replyMessage != null && item.replyMessage!.bid == null) {
+      //   final query = store!
+      //       .box<MessageModel>()
+      //       .query(MessageModel_.id.equals(item.replyMessage!.id))
+      //       .build();
+      //   final replyMsgInDb = await query.findFirstAsync();
+      //   query.close();
+      //   print('updateMessageLocal replyMsgInDb= $replyMsgInDb');
+      //   item.replyMessage = replyMsgInDb?.replyMessage;
+      // }
     }
+
     return await store!
         .box<MessageModel>()
         .putAndGetAsync(item, mode: PutMode.put);

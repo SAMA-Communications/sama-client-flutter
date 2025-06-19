@@ -97,7 +97,8 @@ class ConversationRepository {
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
           await localDatasource.getConversationLocal(message.cid!);
-      var shouldUpdate = message.status.index > 1 || !message.isOwn;//TODO RP redundant checking message.status.index > 1
+      var shouldUpdate = message.status.index > 1 ||
+          !message.isOwn; //TODO RP redundant checking message.status.index > 1
       if (conversation != null && shouldUpdate) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {
@@ -297,7 +298,7 @@ class ConversationRepository {
 
     var currentUser = await userRepository.getCurrentUser();
     final opponent = participantsMap[conversation.opponentId];
-    final owner = currentUser;
+    final owner = currentUser!;
     var result = ConversationModel(
         id: conversation.id!,
         createdAt: conversation.createdAt!,
@@ -307,7 +308,7 @@ class ConversationRepository {
         unreadMessagesCount: conversation.unreadMessagesCount)
       ..opponent = getConversationOpponent(owner, opponent, currentUser)
       ..owner = owner
-      ..lastMessage = conversation.lastMessage?.toMessageModel()
+      ..lastMessage = conversation.lastMessage?.toMessageModel(true, owner)
       ..avatar =
           getConversationAvatar(conversation, owner, opponent, currentUser);
 
@@ -372,6 +373,7 @@ class ConversationRepository {
     //can be null if user deleted
     final owner = users[conversation.ownerId];
     var isOwn = currentUser?.id == conversation.lastMessage?.from;
+    var sender = users[conversation.lastMessage?.from];
 
     return ConversationModel(
         id: conversation.id!,
@@ -385,7 +387,9 @@ class ConversationRepository {
       ..opponent = getConversationOpponent(owner, opponent, currentUser)
       ..owner = owner
       ..lastMessage = conversation.lastMessage
-          ?.toMessageModel(isOwn: isOwn) // maybe set cid from chat
+          ?.copyWith(cid: conversation.id)
+          .toMessageModel(isOwn,
+              sender ?? UserModel()) // set cid from chat manually cause it null
       ..avatar =
           getConversationAvatar(conversation, owner, opponent, currentUser)
       ..participants.addAll(participants);

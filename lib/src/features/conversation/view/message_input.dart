@@ -91,7 +91,8 @@ class _MessageInputState extends State<MessageInput> {
                                       child: MediaSender.create(
                                           currentConversation: rootContext
                                               .watch<SendMessageBloc>()
-                                              .currentConversation),
+                                              .currentConversation,
+                                          replyMessage: widget.replyMessage),
                                     ),
                                   );
                                 },
@@ -119,8 +120,8 @@ class _MessageInputState extends State<MessageInput> {
                     icon: const Icon(Icons.send),
                     onPressed: state.isTextEmpty
                         ? null
-                        : () => onSendChatMessage(
-                            rootContext, textEditingController.text),
+                        : () => onSendChatMessage(rootContext,
+                            textEditingController.text, widget.replyMessage),
                     color: dullGray,
                   ),
                 ],
@@ -132,11 +133,17 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
-  void onSendChatMessage(BuildContext context, String text) {
-    BlocProvider.of<SendMessageBloc>(context).add(SendTextMessage(text));
+  void onSendChatMessage(
+      BuildContext context, String text, ChatMessage? replyMessage) {
+    BlocProvider.of<SendMessageBloc>(context)
+        .add(SendTextMessage(text, replyMessage));
     if (widget.draftMessage != null) {
       BlocProvider.of<ConversationBloc>(context)
           .add(const RemoveDraftMessage());
+    }
+    if (widget.replyMessage != null) {
+      BlocProvider.of<ConversationBloc>(context)
+          .add(const RemoveReplyMessage());
     }
   }
 

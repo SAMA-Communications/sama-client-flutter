@@ -92,7 +92,7 @@
     },
     {
       "id": "11:6168919874786736956",
-      "lastPropertyId": "11:8502424052705749036",
+      "lastPropertyId": "13:5213655976270008005",
       "name": "MessageModel",
       "properties": [
         {
@@ -155,6 +155,19 @@
           "flags": 520,
           "indexId": "39:2280023974172957156",
           "relationTarget": "MessageModel"
+        },
+        {
+          "id": "12:6401592278627748216",
+          "name": "senderBindId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "40:5803255922961343502",
+          "relationTarget": "UserModel"
+        },
+        {
+          "id": "13:5213655976270008005",
+          "name": "isOwn",
+          "type": 1
         }
       ],
       "relations": [
@@ -343,7 +356,7 @@
     }
   ],
   "lastEntityId": "13:9106374520578572502",
-  "lastIndexId": "39:2280023974172957156",
+  "lastIndexId": "40:5803255922961343502",
   "lastRelationId": "5:7785256265115248397",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
