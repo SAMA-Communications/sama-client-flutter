@@ -275,17 +275,19 @@ class DatabaseService {
   /// ///////////////////////////
 
   Future<List<MessageModel>> getAllMessagesLocal(
-      String cid, DateTime? ltDate) async {
+      String cid, DateTime? ltDate, int? limit) async {
     final query = store!
         .box<MessageModel>()
         .query(MessageModel_.cid
             .equals(cid)
             .and(MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now()))
+            .and(MessageModel_.isTempReplied.isNull())
             .and(MessageModel_.rawStatus
                 .notEquals(ChatMessageStatus.draft.name) //hide draft messages
                 .or(MessageModel_.rawStatus.isNull())))
         .order(MessageModel_.createdAt, flags: Order.descending)
-        .build();
+        .build()
+      ..limit = limit ?? 0;
     final results = await query.findAsync();
     query.close();
     return results;
@@ -295,8 +297,8 @@ class DatabaseService {
       [int violationId = 0]) async {
     final query = store!
         .box<MessageModel>()
-        .query(MessageModel_.id
-            .oneOf(items.map((element) => element.id!).toList()))
+        .query(
+            MessageModel_.id.oneOf(items.map((element) => element.id).toList()))
         .build();
 
     final messagesInDb = await query.findAsync();
@@ -311,7 +313,7 @@ class DatabaseService {
       if (messageInDb != null) {
         assignMessage(message, messageInDb);
       }
-      messagesMap[message.id!] = message;
+      messagesMap[message.id] = message;
 
       if (message.repliedMessageId != null && message.replyMessage == null) {
         var replyMessage = messagesMap[message.repliedMessageId];

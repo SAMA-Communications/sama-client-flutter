@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../api/api.dart';
 import '../../../db/models/models.dart';
+import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -20,13 +23,8 @@ class MessagesList extends StatefulWidget {
 }
 
 class _MessagesListState extends State<MessagesList> {
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
+  final _scrollController = ItemScrollController();
+  final itemPositionsListener = ItemPositionsListener.create();
 
   @override
   Widget build(BuildContext context) {
@@ -63,19 +61,51 @@ class _MessagesListState extends State<MessagesList> {
                     );
             }
             markAsReadIfNeed();
-            return ListView.separated(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              reverse: true,
-              itemBuilder: (BuildContext context, int index) {
-                return MessageItem(message: state.messages[index]);
-              },
-              itemCount: state.messages.length,
-              controller: _scrollController,
-              padding: EdgeInsets.zero,
-              separatorBuilder: (context, index) => const SizedBox(
-                height: 5,
-              ),
-            );
+            scrollToReplyIfNeed(state);
+            return NotificationListener(
+                onNotification: (notification) {
+                  if (notification is ScrollUpdateNotification &&
+                      notification.dragDetails != null) {
+                    final keyboardTop = screenHeight - keyboardHeight();
+                    var shouldClose = keyboardTop <
+                        notification.dragDetails!.globalPosition.dy;
+                    if (notification.scrollDelta! > 0 && shouldClose) {
+                      hideKeyboard();
+                    }
+                  } else if (notification is ScrollEndNotification) {
+                    _onScroll(notification.metrics.pixels,
+                        notification.metrics.maxScrollExtent);
+                  }
+                  return false;
+                },
+                child: ScrollablePositionedList.separated(
+                  reverse: true,
+                  itemBuilder: (BuildContext context, int index) {
+                    var msg = state.messages[index];
+                    return MessageItem(
+                        message: msg,
+                        onTap: () {
+                          var replyIndex = state.messages.indexWhere(
+                              (item) => item.id == msg.repliedMessageId);
+                          if (replyIndex == -1) {
+                            if (!state.hasReachedMax) {
+                              context.read<ConversationBloc>().add(
+                                  MessagesMoreForReply(msg.repliedMessageId!));
+                              showProgress();
+                            }
+                            return;
+                          }
+                          scrollTo(replyIndex);
+                        });
+                  },
+                  itemCount: state.messages.length,
+                  itemScrollController: _scrollController,
+                  itemPositionsListener: itemPositionsListener,
+                  padding: EdgeInsets.zero,
+                  separatorBuilder: (context, index) => const SizedBox(
+                    height: 5,
+                  ),
+                ));
           case ConversationStatus.initial:
             return const Center(child: CircularProgressIndicator());
           case ConversationStatus.delete:
@@ -88,12 +118,45 @@ class _MessagesListState extends State<MessagesList> {
     );
   }
 
-  @override
-  void dispose() {
-    _scrollController
-      ..removeListener(_onScroll)
-      ..dispose();
-    super.dispose();
+  void scrollToReplyIfNeed(ConversationState state) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (state.replyIdToScroll.isNotEmpty) {
+        context
+            .read<ConversationBloc>()
+            .add(const RemoveMessagesMoreForReply());
+        hideProgress();
+        int replyIndex = state.messages
+            .indexWhere((item) => item.id == state.replyIdToScroll);
+        scrollTo(replyIndex);
+      }
+    });
+  }
+
+  void scrollTo(int replyIndex) {
+    _scrollController.scrollTo(
+        index: replyIndex,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOutCubic);
+  }
+
+  showProgress() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+            duration: scrollToReplyTimeout,
+            content: Row(children: <Widget>[
+              CircularProgressIndicator(
+                  strokeWidth: 2.0,
+                  padding: EdgeInsets.only(right: 20),
+                  valueColor: AlwaysStoppedAnimation<Color>(slateBlue)),
+              Text("Loading...")
+            ])),
+      );
+  }
+
+  hideProgress() {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   void markAsReadIfNeed() {
@@ -103,34 +166,28 @@ class _MessagesListState extends State<MessagesList> {
     }
   }
 
-  void _onScroll() {
-    if (_isTop) {
+  void _onScroll(var currentScroll, var maxScroll) {
+    var isTop = currentScroll >= (maxScroll * 0.8);
+    if (isTop) {
       context.read<ConversationBloc>().add(const MessagesMoreRequested());
     }
-  }
-
-  bool get _isTop {
-    if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
   }
 }
 
 class MessageItem extends StatelessWidget {
   final ChatMessage message;
+  final VoidCallback? onTap;
 
-  const MessageItem({required this.message, super.key});
+  const MessageItem({required this.message, this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey key = GlobalKey(debugLabel: 'key_${message.id!}');
     final shouldAbsorb = message.isServiceMessage();
 
     if (message.repliedMessageId != null && message.replyMessage == null) {
       context
           .read<ConversationBloc>()
-          .add(ReplyMessageRequired(message.id!, message.repliedMessageId!));
+          .add(ReplyMessageRequired(message.id, message.repliedMessageId!));
     }
     return AbsorbPointer(
         absorbing: shouldAbsorb,
@@ -164,13 +221,13 @@ class MessageItem extends StatelessWidget {
                     : CrossAxisAlignment.start,
                 children: [
                   if (message.repliedMessageId != null)
-                    ReplyMessageWidget(message: message, onTap: () => {}),
+                    ReplyMessageWidget(message: message, onTap: onTap),
                   buildMessageListItem(message, context),
                 ])));
   }
 
   Widget buildMessageListItem(ChatMessage message, BuildContext context) {
-    if (message.attachments.isNotEmpty) {
+    if (message.hasAttachments()) {
       try {
         return MediaAttachment.create(
           message: message,

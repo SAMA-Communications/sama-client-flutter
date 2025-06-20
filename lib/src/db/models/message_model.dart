@@ -20,6 +20,7 @@ class MessageModel extends Equatable {
   final String? body;
   final bool isOwn;
   final int? t;
+  final bool? isTempReplied;
   @Property(type: PropertyType.date)
   final DateTime? createdAt;
   @Transient()
@@ -44,6 +45,7 @@ class MessageModel extends Equatable {
     this.body,
     this.createdAt,
     this.t,
+    this.isTempReplied,
     this.extension,
   });
 
@@ -72,6 +74,7 @@ class MessageModel extends Equatable {
     bool? isOwn,
     DateTime? createdAt,
     int? t,
+    bool? isTempReplied,
     Map<String, dynamic>? extension,
     List<AttachmentModel>? attachments,
     MessageModel? replyMessage,
@@ -88,6 +91,7 @@ class MessageModel extends Equatable {
         isOwn: isOwn ?? this.isOwn,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
+        isTempReplied: isTempReplied ?? this.isTempReplied,
         extension: extension ?? this.extension)
       ..sender = sender ?? this.sender
       ..replyMessage = replyMessage ?? this.replyMessage
@@ -100,13 +104,7 @@ class MessageModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        id,
-        from,
-        rawStatus,
-        body,
-        t,
-      ];
+  List<Object?> get props => [id, from, rawStatus, body, t];
 }
 
 extension MessageModelExtension on Message {

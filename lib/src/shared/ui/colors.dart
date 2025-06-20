@@ -4,7 +4,6 @@ const Color white = Color(0xFFFFFFFF);
 const Color lightWhite = Color(0xFFF9F9F9);
 const Color smokyWhite = Color(0xFFF6F6F6);
 const Color smokyBorough = Color(0xFFF3F2F2);
-const Color smokyBorough2 = Color(0xFFEFEEEE);
 const Color gainsborough = Color(0xFFE7E7E7);
 const Color semiBlack = Color(0x42000000);
 const Color whiteAluminum = Color(0xFFB0B0B0);

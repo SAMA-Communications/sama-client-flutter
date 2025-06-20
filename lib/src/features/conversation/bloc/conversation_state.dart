@@ -12,6 +12,7 @@ final class ConversationState extends Equatable {
     this.initial = false,
     this.draftMessage,
     this.replyMessage,
+    this.replyIdToScroll = '',
   });
 
   final ConversationModel conversation;
@@ -22,6 +23,7 @@ final class ConversationState extends Equatable {
   final bool initial;
   final MessageModel? draftMessage;
   final ChatMessage? replyMessage;
+  final String replyIdToScroll;
 
   ConversationState copyWith({
     ConversationModel? conversation,
@@ -30,6 +32,7 @@ final class ConversationState extends Equatable {
     Set<UserModel>? participants,
     bool? hasReachedMax,
     bool? initial,
+    String? replyIdToScroll,
     MessageModel? Function()? draftMessage,
     ChatMessage? Function()? replyMessage,
   }) {
@@ -40,6 +43,7 @@ final class ConversationState extends Equatable {
       participants: participants ?? this.participants,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
+      replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
       draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
       replyMessage: replyMessage != null ? replyMessage() : this.replyMessage,
     );
@@ -57,6 +61,7 @@ final class ConversationState extends Equatable {
         messages,
         hasReachedMax,
         initial,
+        replyIdToScroll,
         participants,
         draftMessage,
         replyMessage

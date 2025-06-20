@@ -111,7 +111,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(11, 6168919874786736956),
       name: 'MessageModel',
-      lastPropertyId: const obx_int.IdUid(13, 5213655976270008005),
+      lastPropertyId: const obx_int.IdUid(14, 1893283248997063821),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -182,6 +182,11 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelProperty(
             id: const obx_int.IdUid(13, 5213655976270008005),
             name: 'isOwn',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(14, 1893283248997063821),
+            name: 'isTempReplied',
             type: 1,
             flags: 0)
       ],
@@ -653,7 +658,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final repliedMessageIdOffset = object.repliedMessageId == null
               ? null
               : fbb.writeString(object.repliedMessageId!);
-          fbb.startTable(14);
+          fbb.startTable(15);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addOffset(2, fromOffset);
@@ -667,6 +672,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(10, object.replyMessageBind.targetId);
           fbb.addInt64(11, object.senderBind.targetId);
           fbb.addBool(12, object.isOwn);
+          fbb.addBool(13, object.isTempReplied);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -697,6 +703,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
           final tParam =
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 16);
+          final isTempRepliedParam =
+              const fb.BoolReader().vTableGetNullable(buffer, rootOffset, 30);
           final object = MessageModel(
               bid: bidParam,
               id: idParam,
@@ -707,7 +715,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               rawStatus: rawStatusParam,
               body: bodyParam,
               createdAt: createdAtParam,
-              t: tParam)
+              t: tParam,
+              isTempReplied: isTempRepliedParam)
             ..dbExtension = const fb.StringReader(asciiOptimization: true)
                 .vTableGetNullable(buffer, rootOffset, 20);
           object.replyMessageBind.targetId =
@@ -1024,6 +1033,10 @@ class MessageModel_ {
   /// See [MessageModel.isOwn].
   static final isOwn =
       obx.QueryBooleanProperty<MessageModel>(_entities[2].properties[12]);
+
+  /// See [MessageModel.isTempReplied].
+  static final isTempReplied =
+      obx.QueryBooleanProperty<MessageModel>(_entities[2].properties[13]);
 
   /// see [MessageModel.attachments]
   static final attachments =

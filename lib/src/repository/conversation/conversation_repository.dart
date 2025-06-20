@@ -96,9 +96,8 @@ class ConversationRepository {
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
       final conversation =
-          await localDatasource.getConversationLocal(message.cid!);
-      var shouldUpdate = message.status.index > 1 ||
-          !message.isOwn; //TODO RP redundant checking message.status.index > 1
+          await localDatasource.getConversationLocal(message.cid);
+      var shouldUpdate = message.status.index > 1 || !message.isOwn;
       if (conversation != null && shouldUpdate) {
         int? unreadMsgCountUpdated;
         if (!message.isOwn) {

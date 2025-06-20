@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ConnectionState;
@@ -18,7 +17,6 @@ import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/utils/screen_factor.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -91,7 +89,7 @@ class ConversationPage extends StatelessWidget {
                 listener: (context, state) {
                   if (state.status == ConnectionStatus.connected) {
                     BlocProvider.of<ConversationBloc>(context)
-                        .add(const MessagesRequested(force: true));
+                        .add(const MessagesRequested(refresh: true));
                   }
                 },
                 child: const Flexible(child: MessagesList())),
@@ -116,7 +114,9 @@ class ConversationPage extends StatelessWidget {
                                     .firstOrNull
                                     ?.path)),
                       )
-                    : MessageInput(draftMessage: state.draftMessage, replyMessage: state.replyMessage))
+                    : MessageInput(
+                        draftMessage: state.draftMessage,
+                        replyMessage: state.replyMessage))
           ],
         ),
       );

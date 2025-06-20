@@ -22,6 +22,7 @@ class ChatMessage extends MessageModel {
     super.body,
     super.createdAt,
     super.t,
+    super.isTempReplied,
     super.extension,
   });
 
@@ -39,6 +40,7 @@ class ChatMessage extends MessageModel {
     String? body,
     bool? isOwn,
     int? t,
+    bool? isTempReplied,
     DateTime? createdAt,
     Map<String, dynamic>? extension,
     List<AttachmentModel>? attachments,
@@ -59,6 +61,7 @@ class ChatMessage extends MessageModel {
         rawStatus: rawStatus ?? status?.name ?? this.rawStatus,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
+        isTempReplied: isTempReplied ?? this.isTempReplied,
         extension: extension ?? this.extension)
       ..sender = sender ?? this.sender
       ..replyMessage = replyMessage ?? this.replyMessage
@@ -111,7 +114,7 @@ extension ChatMessageExtension on MessageModel {
     return extension?['type'] != null;
   }
 
-  bool isHasAttachments() {
+  bool hasAttachments() {
     return attachments.isNotEmpty;
   }
 }

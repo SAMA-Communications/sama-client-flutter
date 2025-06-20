@@ -48,7 +48,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
 
   Future<void> _onConversationsFetched(event, emit) async {
     try {
-      if (state.status == ConversationsStatus.initial && !event.force) {
+      if (state.status == ConversationsStatus.initial && !event.refresh) {
         final conversations =
             await _conversationRepository.getStoredConversations();
         return emit(
@@ -59,7 +59,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
               initial: true),
         );
       }
-      await _getAllConversations(emit, force: event.force);
+      await _getAllConversations(emit, refresh: event.refresh);
     } catch (err) {
       print("_onConversationFetched err= $err");
       if (state.conversations.isEmpty) {
@@ -82,7 +82,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
   }
 
   _getAllConversations(Emitter<ConversationsState> emit,
-      {bool force = false, DateTime? ltDate}) async {
+      {bool refresh = false, DateTime? ltDate}) async {
     var resource =
         await _conversationRepository.getAllConversations(ltDate: ltDate);
     switch (resource.status) {
@@ -93,7 +93,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
             : emit(
                 state.copyWith(
                   status: ConversationsStatus.success,
-                  conversations: state.initial || force
+                  conversations: state.initial || refresh
                       ? List.of(conversations)
                       : (List.of(state.conversations)..addAll(conversations)),
                   hasReachedMax: false,

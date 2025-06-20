@@ -8,9 +8,9 @@ sealed class ConversationEvent extends Equatable {
 }
 
 final class MessagesRequested extends ConversationEvent {
-  final bool force;
+  final bool refresh;
 
-  const MessagesRequested({this.force = false});
+  const MessagesRequested({this.refresh = false});
 }
 
 final class MessagesMoreRequested extends ConversationEvent {
@@ -87,4 +87,14 @@ final class ReplyMessageRequired extends ConversationEvent {
   final String replyMsgId;
 
   const ReplyMessageRequired(this.msgId, this.replyMsgId);
+}
+
+final class MessagesMoreForReply extends ConversationEvent {
+  final String replyMsgId;
+
+  const MessagesMoreForReply(this.replyMsgId);
+}
+
+final class RemoveMessagesMoreForReply extends ConversationEvent {
+  const RemoveMessagesMoreForReply();
 }

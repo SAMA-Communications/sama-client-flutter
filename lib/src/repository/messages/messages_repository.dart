@@ -90,10 +90,12 @@ class MessagesRepository {
     return buildChatMessageModels(chat, messages);
   }
 
-  Future<ChatMessage?> getMessageById(ConversationModel chat, String id) async {
+  Future<ChatMessage?> getReplyMessageById(
+      ConversationModel chat, String id) async {
     var message = await localDatasource.getMessageLocalById(id);
     if (message == null) {
       message = (await _fetchMessagesByIds(chat, [id])).firstOrNull;
+      message = message?.copyWith(isTempReplied: true);
       if (message != null) message = await saveMessageLocal(message);
     }
 
@@ -103,8 +105,10 @@ class MessagesRepository {
     return null;
   }
 
-  Future<List<ChatMessage>> getStoredMessages(ConversationModel chat) async {
-    var messages = await localDatasource.getAllMessagesLocal(chat.id);
+  Future<List<ChatMessage>> getStoredMessages(ConversationModel chat,
+      {int? limit}) async {
+    var messages =
+        await localDatasource.getAllMessagesLocal(chat.id, limit: limit);
     return buildChatMessageModels(chat, messages);
   }
 

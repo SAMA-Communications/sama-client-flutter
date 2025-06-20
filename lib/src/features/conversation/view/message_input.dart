@@ -8,7 +8,7 @@ import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/chat_message.dart';
 import 'media_sender.dart';
-import 'reply_box.dart';
+import '../widgets/reply_box.dart';
 
 class MessageInput extends StatefulWidget {
   final String? sharedText;

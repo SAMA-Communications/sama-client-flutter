@@ -1,8 +1,11 @@
-import 'package:collection/collection.dart';
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../db/models/conversation_model.dart';
+import '../../../db/models/attachment_model.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/media_utils.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../models/chat_message.dart';
 
@@ -63,24 +66,10 @@ class ReplyMessageWidget extends StatelessWidget {
                   Flexible(
                     child: Opacity(
                       opacity: 0.8,
-                      child: replyMessage?.isHasAttachments() ?? false
-                          ? Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                      replyMessage?.attachments.first.url ??
-                                          ''),
-                                  fit: BoxFit.fill,
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            )
+                      child: replyMessage?.hasAttachments() ?? false
+                          ? _buildAttachmentWidget(
+                              replyMessage!.attachments.first)
                           : Container(
-                              // constraints: BoxConstraints(
-                              //   maxWidth: 280,
-                              // ),
                               padding: const EdgeInsets.symmetric(
                                 vertical: 8,
                                 horizontal: 12,
@@ -104,7 +93,7 @@ class ReplyMessageWidget extends StatelessWidget {
                     ),
                   ),
                   if (isReplyBySender)
-                    ReplyLine(
+                    const ReplyLine(
                       leftPadding: 4,
                     ),
                 ],
@@ -114,6 +103,37 @@ class ReplyMessageWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildAttachmentWidget(AttachmentModel attachment) {
+    var isImageType = isImage(attachment.fileName, attachment.contentType);
+
+    return FutureBuilder(
+        future: isImageType
+            ? Future.value(attachment.url ?? '')
+            : getVideoThumbnailByUrl(attachment.url!, attachment.fileId),
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const SizedBox(height: 40, width: 40);
+          }
+          return Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: isImageType
+                    ? CachedNetworkImageProvider(
+                        snapshot.data!,
+                        maxHeight: 50,
+                        maxWidth: 50,
+                      )
+                    : FileImage(File(snapshot.data!)) as ImageProvider,
+                fit: BoxFit.fill,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          );
+        });
   }
 
   BorderRadiusGeometry _borderRadius({

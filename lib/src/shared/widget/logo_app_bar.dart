@@ -49,5 +49,5 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(min((heightScreen / 4) + 20, 220));
+  Size get preferredSize => Size.fromHeight(min((screenHeight / 4) + 20, 220));
 }
