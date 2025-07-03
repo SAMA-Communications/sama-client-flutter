@@ -53,6 +53,12 @@ class MessagesManager {
   Stream<DeleteMessagesStatus> get deletedMessageStatusStream =>
       _deletedMessagesStatusController.stream;
 
+  final StreamController<TypingMessageStatus> _typingStatusController =
+      StreamController.broadcast();
+
+  Stream<TypingMessageStatus> get typingStatusStream =>
+      _typingStatusController.stream;
+
   _init() {
     if (dataListener != null) return;
 
@@ -69,6 +75,8 @@ class MessagesManager {
         _processDeleteMessagePackage(data['message_delete']);
       } else if (data['system_message'] != null) {
         _processSystemMessagePackage(data['system_message']);
+      } else if (data['typing'] != null) {
+        _processTypingPackage(data['typing']);
       }
     });
   }
@@ -113,5 +121,10 @@ class MessagesManager {
       var systemMessage = SystemChatMessage.fromJson(data);
       _systemChatMessagesController.add(systemMessage);
     }
+  }
+
+  void _processTypingPackage(Map<String, dynamic> data) {
+    var typingStatus = TypingMessageStatus.fromJson(data);
+    _typingStatusController.add(typingStatus);
   }
 }

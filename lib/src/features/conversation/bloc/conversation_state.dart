@@ -2,6 +2,13 @@ part of 'conversation_bloc.dart';
 
 enum ConversationStatus { initial, success, failure, delete }
 
+class TypingMessageStatus {
+  final TypingState typingState;
+  final UserModel? user;
+
+  TypingMessageStatus(this.typingState, this.user);
+}
+
 final class ConversationState extends Equatable {
   const ConversationState({
     required this.conversation,
@@ -12,6 +19,7 @@ final class ConversationState extends Equatable {
     this.initial = false,
     this.draftMessage,
     this.replyMessage,
+    this.typingStatus,
     this.replyIdToScroll = '',
   });
 
@@ -23,6 +31,7 @@ final class ConversationState extends Equatable {
   final bool initial;
   final MessageModel? draftMessage;
   final ChatMessage? replyMessage;
+  final TypingMessageStatus? typingStatus;
   final String replyIdToScroll;
 
   ConversationState copyWith({
@@ -35,6 +44,7 @@ final class ConversationState extends Equatable {
     String? replyIdToScroll,
     MessageModel? Function()? draftMessage,
     ChatMessage? Function()? replyMessage,
+    TypingMessageStatus? typingStatus,
   }) {
     return ConversationState(
       conversation: conversation ?? this.conversation,
@@ -43,6 +53,7 @@ final class ConversationState extends Equatable {
       participants: participants ?? this.participants,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
+      typingStatus: typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
       draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
       replyMessage: replyMessage != null ? replyMessage() : this.replyMessage,
@@ -63,6 +74,7 @@ final class ConversationState extends Equatable {
         initial,
         replyIdToScroll,
         participants,
+        typingStatus,
         draftMessage,
         replyMessage
       ];

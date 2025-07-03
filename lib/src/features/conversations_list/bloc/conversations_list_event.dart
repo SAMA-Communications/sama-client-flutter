@@ -16,3 +16,17 @@ final class ConversationsFetched extends ConversationsEvent {
 final class ConversationsMoreFetched extends ConversationsEvent {}
 
 final class ConversationsRefreshed extends ConversationsEvent {}
+
+final class TypingStatusStartReceived extends ConversationsEvent {
+  final String cid;
+  final String from;
+
+  const TypingStatusStartReceived(this.cid, this.from);
+}
+
+final class TypingStatusStopReceived extends ConversationsEvent {
+  final String cid;
+  final String from;
+
+  const TypingStatusStopReceived(this.cid, this.from);
+}

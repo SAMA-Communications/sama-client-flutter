@@ -27,7 +27,14 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
   };
 }
 
-EventTransformer<Event> debounce<Event>({
+EventTransformer<E> typingThrottleDroppable<E>() {
+  Duration duration = const Duration(milliseconds: 5000);
+  return (events, mapper) {
+    return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
+
+EventTransformer<Event> readDebounce<Event>({
   Duration duration = const Duration(milliseconds: 500),
 }) {
   return (events, mapper) => events.debounce(duration).switchMap(mapper);
@@ -41,6 +48,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
+  StreamSubscription<TypingStatus>? typingMessageSubscription;
   StreamSubscription<Map<String, dynamic>>? lastActivitySubscription;
   StreamSubscription<ConversationModel?>? conversationWatcher;
 
@@ -77,7 +85,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<_ReadStatusReceived>(
       _onReadStatusReceived,
-      transformer: debounce(),
+      transformer: readDebounce(),
     );
     on<_FailedStatusReceived>(
       _onFailedStatusReceived,
@@ -87,6 +95,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<ConversationDeleted>(
       _onConversationDeleted,
+    );
+    on<TypingStatusStartReceived>(
+      _onTypingStatusStartReceived,
+      transformer: typingThrottleDroppable(),
+    );
+    on<TypingStatusStopReceived>(
+      _onTypingStatusStopReceived,
     );
     on<ReplyMessage>(
       _onConversationReply,
@@ -139,6 +154,17 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         case FailedMessagesStatus():
           add(_FailedStatusReceived(status));
           break;
+      }
+    });
+
+    typingMessageSubscription =
+        messagesRepository.typingMessageStream.listen((typing) async {
+      if (typing.cid == currentConversation.id) {
+        if (typing.state == TypingState.start) {
+          add(TypingStatusStartReceived(typing.from!));
+        } else if (typing.state == TypingState.stop) {
+          add(TypingStatusStopReceived(typing.from!));
+        }
       }
     });
 
@@ -284,6 +310,20 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         ? emit(state.copyWith(
             draftMessage: () => null, status: ConversationStatus.delete))
         : emit(state.copyWith(status: ConversationStatus.failure));
+  }
+
+  Future<void> _onTypingStatusStartReceived(
+      TypingStatusStartReceived event, Emitter<ConversationState> emit) async {
+    var user = await userRepository.getUserById(event.from);
+    emit(state.copyWith(
+        typingStatus: TypingMessageStatus(TypingState.start, user)));
+  }
+
+  Future<void> _onTypingStatusStopReceived(
+      TypingStatusStopReceived event, Emitter<ConversationState> emit) async {
+    var user = await userRepository.getUserById(event.from);
+    emit(state.copyWith(
+        typingStatus: TypingMessageStatus(TypingState.stop, user)));
   }
 
   Future<void> _onConversationReply(
@@ -437,6 +477,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     unsubscribeOpponentLastActivity();
     incomingMessagesSubscription?.cancel();
     statusMessagesSubscription?.cancel();
+    typingMessageSubscription?.cancel();
     lastActivitySubscription?.cancel();
     conversationWatcher?.cancel();
     return super.close();

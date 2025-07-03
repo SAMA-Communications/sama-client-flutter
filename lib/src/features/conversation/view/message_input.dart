@@ -113,7 +113,8 @@ class _MessageInputState extends State<MessageInput> {
                       onChanged: (text) {
                         BlocProvider.of<SendMessageBloc>(rootContext)
                             .add(TextMessageChanged(text));
-                      },
+                      BlocProvider.of<SendMessageBloc>(rootContext)
+                          .add(const SendTypingChanged());},
                     ),
                   ),
                   IconButton(
