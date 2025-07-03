@@ -8,9 +8,9 @@ sealed class ConversationsEvent extends Equatable {
 }
 
 final class ConversationsFetched extends ConversationsEvent {
-  final bool force;
+  final bool refresh;
 
-  const ConversationsFetched({this.force = false});
+  const ConversationsFetched({this.refresh = false});
 }
 
 final class ConversationsMoreFetched extends ConversationsEvent {}

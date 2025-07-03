@@ -19,8 +19,10 @@ class NetworkBoundResources<ResultType, RequestType> {
 
     return Resource.asFuture<ResultType>(() async {
       var value = await loadFromDb();
-      var slice = createCallSlice != null ? await createCallSlice() : null;
-      if (shouldFetch(value, slice)) {
+      var mustFetch = value is List ? value.isEmpty : false;
+      if (mustFetch ||
+          shouldFetch(value,
+              createCallSlice != null ? await createCallSlice() : null)) {
         await _fetchFromNetwork(createCall, saveCallResult, value);
         value = await loadFromDb();
       }

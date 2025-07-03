@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
             ..add(const ConversationsFetched());
           if (context.read<ConnectionBloc>().state.status ==
               ConnectionStatus.connected) {
-            bloc.add(const ConversationsFetched(force: true));
+            bloc.add(const ConversationsFetched(refresh: true));
           }
           return bloc;
         },
@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
             listener: (context, state) {
               if (state.status == ConnectionStatus.connected) {
                 BlocProvider.of<ConversationsBloc>(context)
-                    .add(const ConversationsFetched(force: true));
+                    .add(const ConversationsFetched(refresh: true));
               }
             },
             child: const ConversationsList(),

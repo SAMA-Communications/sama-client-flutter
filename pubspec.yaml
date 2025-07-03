@@ -47,6 +47,7 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent
       ref: 2cea396843cd3ab1b5ec4334be4233864637874e
+  scrollable_positioned_list: ^0.3.8
   shared_preferences: ^2.5.2
   sqflite: ^2.3.3+1
   stream_transform: ^2.1.0

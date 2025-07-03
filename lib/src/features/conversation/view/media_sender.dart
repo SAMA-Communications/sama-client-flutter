@@ -12,13 +12,17 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
 import '../bloc/media_sender/media_sender_bloc.dart';
+import '../models/chat_message.dart';
 
 class MediaSender extends StatelessWidget {
-  const MediaSender({super.key});
+  final ChatMessage? replyMessage;
+
+  const MediaSender(this.replyMessage, {super.key});
 
   static Widget create({
     Key? key,
     required ConversationModel currentConversation,
+    required ChatMessage? replyMessage,
   }) {
     return BlocProvider<MediaSenderBloc>(
       create: (context) => MediaSenderBloc(
@@ -26,6 +30,7 @@ class MediaSender extends StatelessWidget {
           messagesRepository:
               RepositoryProvider.of<MessagesRepository>(context)),
       child: MediaSender(
+        replyMessage,
         key: key,
       ),
     );
@@ -148,7 +153,7 @@ class MediaSender extends StatelessWidget {
                                 state.status !=
                                     MediaSelectorStatus.processing) {
                               BlocProvider.of<MediaSenderBloc>(context)
-                                  .add(const SendMessage());
+                                  .add(SendMessage(replyMessage));
                             }
                           },
                           child: Text(

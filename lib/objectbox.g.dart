@@ -111,7 +111,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(11, 6168919874786736956),
       name: 'MessageModel',
-      lastPropertyId: const obx_int.IdUid(9, 1875750503242122079),
+      lastPropertyId: const obx_int.IdUid(14, 1893283248997063821),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -159,6 +159,35 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(9, 1875750503242122079),
             name: 'dbExtension',
             type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(10, 6395861719839579723),
+            name: 'repliedMessageId',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(11, 8502424052705749036),
+            name: 'replyMessageBindId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(39, 2280023974172957156),
+            relationTarget: 'MessageModel'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(12, 6401592278627748216),
+            name: 'senderBindId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(40, 5803255922961343502),
+            relationTarget: 'UserModel'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(13, 5213655976270008005),
+            name: 'isOwn',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(14, 1893283248997063821),
+            name: 'isTempReplied',
+            type: 1,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[
@@ -373,7 +402,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
       lastEntityId: const obx_int.IdUid(13, 9106374520578572502),
-      lastIndexId: const obx_int.IdUid(38, 1718185030575189588),
+      lastIndexId: const obx_int.IdUid(40, 5803255922961343502),
       lastRelationId: const obx_int.IdUid(5, 7785256265115248397),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
@@ -604,7 +633,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         }),
     MessageModel: obx_int.EntityDefinition<MessageModel>(
         model: _entities[2],
-        toOneRelations: (MessageModel object) => [],
+        toOneRelations: (MessageModel object) =>
+            [object.replyMessageBind, object.senderBind],
         toManyRelations: (MessageModel object) => {
               obx_int.RelInfo<MessageModel>.toMany(2, object.bid!):
                   object.attachments
@@ -614,12 +644,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.bid = id;
         },
         objectToFB: (MessageModel object, fb.Builder fbb) {
-          final idOffset =
-              object.id == null ? null : fbb.writeString(object.id!);
-          final fromOffset =
-              object.from == null ? null : fbb.writeString(object.from!);
-          final cidOffset =
-              object.cid == null ? null : fbb.writeString(object.cid!);
+          final idOffset = fbb.writeString(object.id);
+          final fromOffset = fbb.writeString(object.from);
+          final cidOffset = fbb.writeString(object.cid);
           final rawStatusOffset = object.rawStatus == null
               ? null
               : fbb.writeString(object.rawStatus!);
@@ -628,7 +655,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final dbExtensionOffset = object.dbExtension == null
               ? null
               : fbb.writeString(object.dbExtension!);
-          fbb.startTable(10);
+          final repliedMessageIdOffset = object.repliedMessageId == null
+              ? null
+              : fbb.writeString(object.repliedMessageId!);
+          fbb.startTable(15);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addOffset(2, fromOffset);
@@ -638,6 +668,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(6, object.t);
           fbb.addInt64(7, object.createdAt?.millisecondsSinceEpoch);
           fbb.addOffset(8, dbExtensionOffset);
+          fbb.addOffset(9, repliedMessageIdOffset);
+          fbb.addInt64(10, object.replyMessageBind.targetId);
+          fbb.addInt64(11, object.senderBind.targetId);
+          fbb.addBool(12, object.isOwn);
+          fbb.addBool(13, object.isTempReplied);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -649,11 +684,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final bidParam =
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 4);
           final idParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 6);
+              .vTableGet(buffer, rootOffset, 6, '');
           final fromParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 8);
+              .vTableGet(buffer, rootOffset, 8, '');
           final cidParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 10);
+              .vTableGet(buffer, rootOffset, 10, '');
+          final isOwnParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 28, false);
+          final repliedMessageIdParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 22);
           final rawStatusParam = const fb.StringReader(asciiOptimization: true)
               .vTableGetNullable(buffer, rootOffset, 12);
           final bodyParam = const fb.StringReader(asciiOptimization: true)
@@ -663,17 +703,28 @@ obx_int.ModelDefinition getObjectBoxModel() {
               : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
           final tParam =
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 16);
+          final isTempRepliedParam =
+              const fb.BoolReader().vTableGetNullable(buffer, rootOffset, 30);
           final object = MessageModel(
               bid: bidParam,
               id: idParam,
               from: fromParam,
               cid: cidParam,
+              isOwn: isOwnParam,
+              repliedMessageId: repliedMessageIdParam,
               rawStatus: rawStatusParam,
               body: bodyParam,
               createdAt: createdAtParam,
-              t: tParam)
+              t: tParam,
+              isTempReplied: isTempRepliedParam)
             ..dbExtension = const fb.StringReader(asciiOptimization: true)
                 .vTableGetNullable(buffer, rootOffset, 20);
+          object.replyMessageBind.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0);
+          object.replyMessageBind.attach(store);
+          object.senderBind.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0);
+          object.senderBind.attach(store);
           obx_int.InternalToManyAccess.setRelInfo<MessageModel>(
               object.attachments,
               store,
@@ -965,6 +1016,27 @@ class MessageModel_ {
   /// See [MessageModel.dbExtension].
   static final dbExtension =
       obx.QueryStringProperty<MessageModel>(_entities[2].properties[8]);
+
+  /// See [MessageModel.repliedMessageId].
+  static final repliedMessageId =
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[9]);
+
+  /// See [MessageModel.replyMessageBind].
+  static final replyMessageBind =
+      obx.QueryRelationToOne<MessageModel, MessageModel>(
+          _entities[2].properties[10]);
+
+  /// See [MessageModel.senderBind].
+  static final senderBind = obx.QueryRelationToOne<MessageModel, UserModel>(
+      _entities[2].properties[11]);
+
+  /// See [MessageModel.isOwn].
+  static final isOwn =
+      obx.QueryBooleanProperty<MessageModel>(_entities[2].properties[12]);
+
+  /// See [MessageModel.isTempReplied].
+  static final isTempReplied =
+      obx.QueryBooleanProperty<MessageModel>(_entities[2].properties[13]);
 
   /// see [MessageModel.attachments]
   static final attachments =

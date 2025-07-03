@@ -9,6 +9,7 @@ import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
 import '../../../../repository/conversation/conversation_repository.dart';
 import '../../../../repository/messages/messages_repository.dart';
+import '../../models/chat_message.dart';
 
 part 'send_message_event.dart';
 
@@ -55,7 +56,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       emit(state.copyWith(
           isTextEmpty: true, status: SendMessageStatus.processing));
       await messagesRepository.sendTextMessage(
-          event.message, currentConversation.id);
+          event.message, currentConversation.id, event.replyMessage);
       emit(state.copyWith(
           isTextEmpty: true, text: '', status: SendMessageStatus.success));
     } on ResponseException catch (ex) {

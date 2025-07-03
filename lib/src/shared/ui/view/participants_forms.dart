@@ -35,7 +35,7 @@ class ParticipantsForm extends StatelessWidget {
         ),
       ),
       LimitedBox(
-        maxHeight: heightScreen / 5.5,
+        maxHeight: screenHeight / 5.5,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: ParticipantsList(

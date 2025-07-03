@@ -92,8 +92,9 @@ class LinkPreviewWidget extends StatelessWidget {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
         data.favicons?.firstOrNull != null
             ? Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Image.network(data.favicons!.first, fit: BoxFit.fill))
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Image.network(data.favicons!.first,
+                    fit: BoxFit.fill, height: 50))
             : const Icon(
                 Icons.description_outlined,
                 color: dullGray,
