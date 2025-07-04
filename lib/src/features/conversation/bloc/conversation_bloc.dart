@@ -118,6 +118,15 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<RemoveMessagesMoreForReply>(
       onRemoveMessagesMoreForReply,
     );
+    on<ChooseMessages>(
+      onChooseMessages,
+    );
+    on<SelectedChatsAdded>(
+      onSelectedChatsAdded,
+    );
+    on<SelectedChatsRemoved>(
+      onSelectedChatsRemoved,
+    );
 
     add(const ParticipantsReceived());
 
@@ -379,6 +388,28 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(replyIdToScroll: ''));
   }
 
+  Future<void> onChooseMessages(
+      ChooseMessages event, Emitter<ConversationState> emit) async {
+    var selectedMessages = <ChatMessage>[];
+    if (event.choose) selectedMessages.add(event.message!);
+    emit(state.copyWith(
+        selectedMessages: selectedMessages, choose: event.choose));
+  }
+
+  Future<void> onSelectedChatsAdded(
+      SelectedChatsAdded event, Emitter<ConversationState> emit) async {
+    var selectedMessages = [...state.selectedMessages];
+    selectedMessages.add(event.message);
+    emit(state.copyWith(selectedMessages: selectedMessages));
+  }
+
+  Future<void> onSelectedChatsRemoved(
+      SelectedChatsRemoved event, Emitter<ConversationState> emit) async {
+    var selectedMessages = [...state.selectedMessages];
+    selectedMessages.remove(event.message);
+    emit(state.copyWith(selectedMessages: selectedMessages));
+  }
+
   FutureOr<void> _onMessageReceived(
       _MessageReceived event, Emitter<ConversationState> emit) {
     var messages = [...state.messages];
@@ -426,7 +457,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       _SentStatusReceived event, Emitter<ConversationState> emit) async {
     var messages = [...state.messages];
 
-    var msg = messages.firstWhere((o) => o.id == event.status.messageId);
+    var msg = messages.firstWhereOrNull((o) => o.id == event.status.messageId);
+    if (msg == null) return;
     var msgUpdated = msg.copyWith(
         id: event.status.serverMessageId, status: ChatMessageStatus.sent);
 

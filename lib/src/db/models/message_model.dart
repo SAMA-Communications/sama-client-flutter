@@ -16,6 +16,7 @@ class MessageModel extends Equatable {
   final String from;
   final String cid;
   final String? repliedMessageId;
+  final String? forwardedMessageId;
   final String? rawStatus;
   final String? body;
   final bool isOwn;
@@ -41,6 +42,7 @@ class MessageModel extends Equatable {
     required this.cid,
     required this.isOwn,
     this.repliedMessageId,
+    this.forwardedMessageId,
     this.rawStatus,
     this.body,
     this.createdAt,
@@ -69,6 +71,7 @@ class MessageModel extends Equatable {
     String? from,
     String? cid,
     String? repliedMessageId,
+    String? forwardedMessageId,
     String? rawStatus,
     String? body,
     bool? isOwn,
@@ -86,6 +89,7 @@ class MessageModel extends Equatable {
         from: from ?? this.from,
         cid: cid ?? this.cid,
         repliedMessageId: repliedMessageId ?? this.repliedMessageId,
+        forwardedMessageId: forwardedMessageId ?? this.forwardedMessageId,
         rawStatus: rawStatus ?? this.rawStatus,
         body: body ?? this.body,
         isOwn: isOwn ?? this.isOwn,
@@ -114,6 +118,7 @@ extension MessageModelExtension on Message {
       from: from!,
       cid: cid!,
       repliedMessageId: repliedMessageId,
+      forwardedMessageId: forwardedMessageId,
       rawStatus: isOwn ? rawStatus ?? 'sent' : null,
       body: body,
       isOwn: isOwn,

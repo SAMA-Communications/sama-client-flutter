@@ -14,7 +14,7 @@ String linkPreviewUrl = dotenv.env['LINK_PREVIEW_URL'] ?? '';
 
 const messageRequestTimeout = Duration(seconds: 5);
 
-Future<(bool, Message?)> sendMessage({
+Future<(String?, Message?)> sendMessage({
   required Message message,
 }) {
   var dataToSend = {
@@ -23,13 +23,15 @@ Future<(bool, Message?)> sendMessage({
     if (message.body?.isNotEmpty ?? false) 'body': message.body,
     if (message.repliedMessageId?.isNotEmpty ?? false)
       'replied_message_id': message.repliedMessageId,
+    if (message.forwardedMessageId?.isNotEmpty ?? false)
+      'forwarded_message_id': message.forwardedMessageId,
     if (message.extension != null) 'x': message.extension,
     if (message.attachments != null) 'attachments': message.attachments,
   };
 
   if (SamaConnectionService.instance.connectionState !=
       ConnectionState.connected) {
-    return Future.value((false, null));
+    return Future.value((null, null));
   }
 
   return SamaConnectionService.instance
@@ -37,17 +39,18 @@ Future<(bool, Message?)> sendMessage({
           retryRequestId: message.id, shouldRetry: false)
       .timeout(messageRequestTimeout)
       .then((response) {
+    String serverMid = response['server_mid'];
     if (message.id == response['mid']) {
       if (response['bot_message'] != null) {
-        return (true, Message.fromJson(response['bot_message']));
+        return (serverMid, Message.fromJson(response['bot_message']));
       } else if (response['modified'] != null) {
         var msg = message.copyWith(
             body: response['modified']['body'], extension: {'modified': true});
-        return (true, msg);
+        return (serverMid, msg);
       }
-      return (true, null);
+      return (serverMid, null);
     }
-    return (false, null);
+    return (null, null);
   });
 }
 

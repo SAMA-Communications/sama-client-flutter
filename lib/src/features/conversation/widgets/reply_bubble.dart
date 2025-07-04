@@ -13,8 +13,8 @@ const double horizontalPadding = 8;
 const double replyBorderRadius1 = 30;
 const double replyBorderRadius2 = 18;
 
-class ReplyMessageWidget extends StatelessWidget {
-  const ReplyMessageWidget({
+class ReplyBubble extends StatelessWidget {
+  const ReplyBubble({
     super.key,
     required this.message,
     this.onTap,

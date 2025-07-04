@@ -9,8 +9,10 @@ import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
+import '../widgets/forward_messages/forward_bubble.dart';
+import '../widgets/forward_messages/forward_messages_widget.dart';
 import '../widgets/media_attachment.dart';
-import '../widgets/reply_message_widget.dart';
+import '../widgets/reply_bubble.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
 import '../widgets/unsupported_message.dart';
@@ -82,21 +84,43 @@ class _MessagesListState extends State<MessagesList> {
                   reverse: true,
                   itemBuilder: (BuildContext context, int index) {
                     var msg = state.messages[index];
-                    return MessageItem(
-                        message: msg,
-                        onTap: () {
-                          var replyIndex = state.messages.indexWhere(
-                              (item) => item.id == msg.repliedMessageId);
-                          if (replyIndex == -1) {
-                            if (!state.hasReachedMax) {
-                              context.read<ConversationBloc>().add(
-                                  MessagesMoreForReply(msg.repliedMessageId!));
-                              showProgress();
-                            }
-                            return;
-                          }
-                          scrollTo(replyIndex);
-                        });
+                    var selected = state.selectedMessages.contains(msg);
+                    return ListTile(
+                        horizontalTitleGap: 0.0,
+                        contentPadding: EdgeInsets.zero,
+                        leading: state.choose
+                            ? Checkbox(
+                                shape: const CircleBorder(),
+                                value: selected,
+                                onChanged: (checked) {
+                                  if (checked ?? false) {
+                                    context
+                                        .read<ConversationBloc>()
+                                        .add(SelectedChatsAdded(msg));
+                                  } else {
+                                    context
+                                        .read<ConversationBloc>()
+                                        .add(SelectedChatsRemoved(msg));
+                                  }
+                                })
+                            : null,
+                        title: MessageItem(
+                            message: msg,
+                            onTapReply: () {
+                              var replyIndex = state.messages.indexWhere(
+                                  (item) => item.id == msg.repliedMessageId);
+                              if (replyIndex == -1) {
+                                if (!state.hasReachedMax) {
+                                  context.read<ConversationBloc>().add(
+                                      MessagesMoreForReply(
+                                          msg.repliedMessageId!));
+                                  showProgress();
+                                }
+                                return;
+                              }
+                              scrollTo(replyIndex);
+                            },
+                            onTapForward: () => print('onTapForward')));
                   },
                   itemCount: state.messages.length,
                   itemScrollController: _scrollController,
@@ -176,9 +200,11 @@ class _MessagesListState extends State<MessagesList> {
 
 class MessageItem extends StatelessWidget {
   final ChatMessage message;
-  final VoidCallback? onTap;
+  final VoidCallback? onTapReply;
+  final VoidCallback? onTapForward;
 
-  const MessageItem({required this.message, this.onTap, super.key});
+  const MessageItem(
+      {required this.message, this.onTapReply, this.onTapForward, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +237,30 @@ class MessageItem extends StatelessWidget {
                         break;
                       case MessageMenuItem.forward:
                         print('forward message= ${message.body}');
+
+                        showModalBottomSheet<dynamic>(
+                            isScrollControlled: true,
+                            useSafeArea: false,
+                            context: context,
+                            builder: (BuildContext bc) {
+                              return Container(
+                                  margin: EdgeInsets.only(
+                                      top: MediaQueryData.fromView(
+                                              View.of(context))
+                                          .padding
+                                          .top),
+                                  child: BlocProvider.value(
+                                    value: BlocProvider.of<ConversationBloc>(
+                                        context),
+                                    child: ForwardMessagesWidget([message]),
+                                  ));
+                            });
+                        break;
+                      case MessageMenuItem.choose:
+                        print('choose messages');
+                        context
+                            .read<ConversationBloc>()
+                            .add(ChooseMessages(true, message: message));
                         break;
                     }
                   }).show(details.globalPosition);
@@ -220,8 +270,10 @@ class MessageItem extends StatelessWidget {
                     ? CrossAxisAlignment.end
                     : CrossAxisAlignment.start,
                 children: [
-                  if (message.repliedMessageId != null)
-                    ReplyMessageWidget(message: message, onTap: onTap),
+                  if (message.forwardedMessageId != null)
+                    ForwardBubble(message: message, onTap: onTapForward)
+                  else if (message.repliedMessageId != null)
+                    ReplyBubble(message: message, onTap: onTapReply),
                   buildMessageListItem(message, context),
                 ])));
   }
@@ -301,7 +353,7 @@ class MessageItem extends StatelessWidget {
   }
 }
 
-enum MessageMenuItem { reply, edit, delete, forward }
+enum MessageMenuItem { reply, edit, delete, forward, choose }
 
 typedef MenuClickCallback = void Function(MessageMenuItem item);
 
@@ -322,35 +374,53 @@ class PopupMessageMenu {
         MediaQuery.of(context).size.width - offset.dx,
         MediaQuery.of(context).size.height - offset.dy,
       ),
-      items: [
+      items: <PopupMenuEntry<MessageMenuItem>>[
         const PopupMenuItem<MessageMenuItem>(
-          padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
           value: MessageMenuItem.reply,
           child: ListTile(
+            horizontalTitleGap: 16,
+            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+            minVerticalPadding: 0,
             leading: Icon(Icons.replay_outlined),
-            title: Text('Reply'),
+            title: Text('Replay'),
           ),
         ),
         const PopupMenuItem<MessageMenuItem>(
-            padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
             value: MessageMenuItem.edit,
             child: ListTile(
+              horizontalTitleGap: 16,
+              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+              minVerticalPadding: 0,
               leading: Icon(Icons.edit_outlined),
               title: Text('Edit'),
             )),
         const PopupMenuItem<MessageMenuItem>(
-            padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
             value: MessageMenuItem.delete,
             child: ListTile(
+              horizontalTitleGap: 16,
+              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+              minVerticalPadding: 0,
               leading: Icon(Icons.delete_forever_outlined),
               title: Text('Delete'),
             )),
         const PopupMenuItem<MessageMenuItem>(
-            padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
             value: MessageMenuItem.forward,
             child: ListTile(
+              horizontalTitleGap: 16,
+              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+              minVerticalPadding: 0,
               leading: Icon(Icons.forward_outlined),
               title: Text('Forward'),
+            )),
+        const PopupMenuDivider(height: 0),
+        const PopupMenuItem<MessageMenuItem>(
+            value: MessageMenuItem.choose,
+            child: ListTile(
+              horizontalTitleGap: 16,
+              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+              minVerticalPadding: 0,
+              leading: Icon(Icons.check_circle_outline),
+              title: Text('Choose'),
             )),
       ],
       context: context,

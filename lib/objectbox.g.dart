@@ -111,7 +111,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(11, 6168919874786736956),
       name: 'MessageModel',
-      lastPropertyId: const obx_int.IdUid(14, 1893283248997063821),
+      lastPropertyId: const obx_int.IdUid(15, 4095866355783119704),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -188,6 +188,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(14, 1893283248997063821),
             name: 'isTempReplied',
             type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(15, 4095866355783119704),
+            name: 'forwardedMessageId',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[
@@ -658,7 +663,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final repliedMessageIdOffset = object.repliedMessageId == null
               ? null
               : fbb.writeString(object.repliedMessageId!);
-          fbb.startTable(15);
+          final forwardedMessageIdOffset = object.forwardedMessageId == null
+              ? null
+              : fbb.writeString(object.forwardedMessageId!);
+          fbb.startTable(16);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addOffset(2, fromOffset);
@@ -673,6 +681,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(11, object.senderBind.targetId);
           fbb.addBool(12, object.isOwn);
           fbb.addBool(13, object.isTempReplied);
+          fbb.addOffset(14, forwardedMessageIdOffset);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -694,6 +703,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final repliedMessageIdParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 22);
+          final forwardedMessageIdParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 32);
           final rawStatusParam = const fb.StringReader(asciiOptimization: true)
               .vTableGetNullable(buffer, rootOffset, 12);
           final bodyParam = const fb.StringReader(asciiOptimization: true)
@@ -712,6 +724,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
               cid: cidParam,
               isOwn: isOwnParam,
               repliedMessageId: repliedMessageIdParam,
+              forwardedMessageId: forwardedMessageIdParam,
               rawStatus: rawStatusParam,
               body: bodyParam,
               createdAt: createdAtParam,
@@ -1037,6 +1050,10 @@ class MessageModel_ {
   /// See [MessageModel.isTempReplied].
   static final isTempReplied =
       obx.QueryBooleanProperty<MessageModel>(_entities[2].properties[13]);
+
+  /// See [MessageModel.forwardedMessageId].
+  static final forwardedMessageId =
+      obx.QueryStringProperty<MessageModel>(_entities[2].properties[14]);
 
   /// see [MessageModel.attachments]
   static final attachments =

@@ -15,10 +15,11 @@ import 'package:intl/intl.dart';
 
 class ConversationListItem extends StatelessWidget {
   const ConversationListItem(
-      {required this.conversation, this.typingStatus, super.key});
+      {required this.conversation, this.typingStatus, this.onTap, super.key});
 
   final ConversationModel conversation;
   final TypingChatStatus? typingStatus;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +44,12 @@ class ConversationListItem extends StatelessWidget {
         isThreeLine: true,
         dense: false,
         contentPadding: const EdgeInsets.fromLTRB(18.0, 0, 18.0, 4.0),
-        onTap: () {
-          context.go('$conversationListScreenPath/$conversationScreenSubPath',
-              extra: conversation);
-        },
+        onTap: onTap ??
+            () {
+              context.go(
+                  '$conversationListScreenPath/$conversationScreenSubPath',
+                  extra: conversation);
+            },
       ),
     );
   }

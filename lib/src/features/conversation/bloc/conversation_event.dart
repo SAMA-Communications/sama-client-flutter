@@ -110,3 +110,28 @@ final class MessagesMoreForReply extends ConversationEvent {
 final class RemoveMessagesMoreForReply extends ConversationEvent {
   const RemoveMessagesMoreForReply();
 }
+
+final class ChooseMessages extends ConversationEvent {
+  final bool choose;
+  final ChatMessage? message;
+
+  const ChooseMessages(this.choose, {this.message});
+}
+
+final class SelectedChatsAdded extends ConversationEvent {
+  final ChatMessage message;
+
+  const SelectedChatsAdded(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+final class SelectedChatsRemoved extends ConversationEvent {
+  final ChatMessage message;
+
+  const SelectedChatsRemoved(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

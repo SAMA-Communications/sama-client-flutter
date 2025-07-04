@@ -7,7 +7,8 @@ import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_event.dart';
 
 class GlobalSearchBar extends StatefulWidget implements PreferredSizeWidget {
-  const GlobalSearchBar({super.key});
+  final bool withBack;
+  const GlobalSearchBar({this.withBack = true, super.key});
 
   @override
   State<GlobalSearchBar> createState() => _GlobalSearchBarState();
@@ -36,8 +37,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: black,
-      // titleSpacing: 0,
-      leading: const BackButton(color: Colors.white),
+      leading: widget.withBack? const BackButton(color: Colors.white) : null,
+      automaticallyImplyLeading: widget.withBack,
       title: SizedBox(
         height: kToolbarHeight - 18,
         child: TextField(
@@ -66,7 +67,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
           ),
         ),
       ),
-      centerTitle: false,
+      centerTitle: !widget.withBack,
     );
   }
 

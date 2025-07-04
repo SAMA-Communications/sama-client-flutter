@@ -22,6 +22,7 @@ import '../../../shared/widget/typing_indicator.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
+import '../widgets/forward_messages/forward_input.dart';
 import 'message_input.dart';
 import 'messages_list.dart';
 
@@ -61,67 +62,76 @@ class ConversationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ConversationBloc, ConversationState>(
         builder: (BuildContext context, state) {
-      return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 64,
-          centerTitle: false,
-          titleSpacing: 0.0,
-          title: ConnectionTitle(
-            color: black,
-            title: Padding(
-              padding: const EdgeInsets.only(top: 0.0),
-              child: ListTile(
-                onTap: () => _infoAction(context),
-                title: Text(
-                  overflow: TextOverflow.ellipsis,
-                  state.conversation.name,
-                  style: const TextStyle(
-                      fontSize: 28.0, fontWeight: FontWeight.bold),
-                  maxLines: 1,
+      return PopScope(
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            context.read<ConversationBloc>().add(const ChooseMessages(false));
+          },
+          canPop: !state.choose,
+          child: Scaffold(
+            appBar: AppBar(
+              toolbarHeight: 64,
+              centerTitle: false,
+              titleSpacing: 0.0,
+              title: ConnectionTitle(
+                color: black,
+                title: Padding(
+                  padding: const EdgeInsets.only(top: 0.0),
+                  child: ListTile(
+                    onTap: () => _infoAction(context),
+                    title: Text(
+                      overflow: TextOverflow.ellipsis,
+                      state.conversation.name,
+                      style: const TextStyle(
+                          fontSize: 28.0, fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                    ),
+                    subtitle: _getSubtitle(state),
+                  ),
                 ),
-                subtitle: _getSubtitle(state),
               ),
+              actions: [_PopupMenuButton()],
             ),
-          ),
-          actions: [_PopupMenuButton()],
-        ),
-        body: Column(
-          children: [
-            BlocListener<ConnectionBloc, ConnectionState>(
-                listener: (context, state) {
-                  if (state.status == ConnectionStatus.connected) {
-                    BlocProvider.of<ConversationBloc>(context)
-                        .add(const MessagesRequested(refresh: true));
-                  }
-                },
-                child: const Flexible(child: MessagesList())),
-            SafeArea(
-                child: context.read<SharingIntentBloc>().state.status ==
-                        SharingIntentStatus.processing
-                    ? BlocListener<SendMessageBloc, SendMessageState>(
-                        listener: (context, sendState) {
-                          if (sendState.status == SendMessageStatus.success ||
-                              sendState.status == SendMessageStatus.failure) {
-                            context
-                                .read<SharingIntentBloc>()
-                                .add(SharingIntentCompleted());
-                          }
-                        },
-                        child: ConnectionChecker(
-                            child: MessageInput(
-                                sharedText: context
+            body: Column(
+              children: [
+                BlocListener<ConnectionBloc, ConnectionState>(
+                    listener: (context, state) {
+                      if (state.status == ConnectionStatus.connected) {
+                        BlocProvider.of<ConversationBloc>(context)
+                            .add(const MessagesRequested(refresh: true));
+                      }
+                    },
+                    child: const Flexible(child: MessagesList())),
+                SafeArea(
+                    child: !state.choose ? context.read<SharingIntentBloc>().state.status ==
+                            SharingIntentStatus.processing
+                        ? BlocListener<SendMessageBloc, SendMessageState>(
+                            listener: (context, sendState) {
+                              if (sendState.status ==
+                                      SendMessageStatus.success ||
+                                  sendState.status ==
+                                      SendMessageStatus.failure) {
+                                context
                                     .read<SharingIntentBloc>()
-                                    .state
-                                    .sharedFiles
-                                    .firstOrNull
-                                    ?.path)),
-                      )
-                    : MessageInput(
-                        draftMessage: state.draftMessage,
-                        replyMessage: state.replyMessage))
-          ],
-        ),
-      );
+                                    .add(SharingIntentCompleted());
+                              }
+                            },
+                            child: ConnectionChecker(
+                                child: MessageInput(
+                                    sharedText: context
+                                        .read<SharingIntentBloc>()
+                                        .state
+                                        .sharedFiles
+                                        .firstOrNull
+                                        ?.path)),
+                          )
+                        : MessageInput(
+                            draftMessage: state.draftMessage,
+                            replyMessage: state.replyMessage) :
+                const ForwardInput())
+              ],
+            ),
+          ));
     });
   }
 

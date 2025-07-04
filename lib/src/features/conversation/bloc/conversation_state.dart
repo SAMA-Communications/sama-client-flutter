@@ -14,6 +14,7 @@ final class ConversationState extends Equatable {
     required this.conversation,
     this.status = ConversationStatus.initial,
     this.messages = const <ChatMessage>[],
+    this.selectedMessages = const <ChatMessage>[],
     this.participants = const <UserModel>{},
     this.hasReachedMax = false,
     this.initial = false,
@@ -21,14 +22,17 @@ final class ConversationState extends Equatable {
     this.replyMessage,
     this.typingStatus,
     this.replyIdToScroll = '',
+    this.choose = false,
   });
 
   final ConversationModel conversation;
   final ConversationStatus status;
   final List<ChatMessage> messages;
+  final List<ChatMessage> selectedMessages;
   final Set<UserModel> participants;
   final bool hasReachedMax;
   final bool initial;
+  final bool choose;
   final MessageModel? draftMessage;
   final ChatMessage? replyMessage;
   final TypingMessageStatus? typingStatus;
@@ -38,9 +42,11 @@ final class ConversationState extends Equatable {
     ConversationModel? conversation,
     ConversationStatus? status,
     List<ChatMessage>? messages,
+    List<ChatMessage>? selectedMessages,
     Set<UserModel>? participants,
     bool? hasReachedMax,
     bool? initial,
+    bool? choose,
     String? replyIdToScroll,
     MessageModel? Function()? draftMessage,
     ChatMessage? Function()? replyMessage,
@@ -50,9 +56,11 @@ final class ConversationState extends Equatable {
       conversation: conversation ?? this.conversation,
       status: status ?? this.status,
       messages: messages ?? this.messages,
+      selectedMessages: selectedMessages ?? this.selectedMessages,
       participants: participants ?? this.participants,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
+      choose: choose ?? this.choose,
       typingStatus: typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
       draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
@@ -70,8 +78,10 @@ final class ConversationState extends Equatable {
         conversation,
         status,
         messages,
+        selectedMessages,
         hasReachedMax,
         initial,
+        choose,
         replyIdToScroll,
         participants,
         typingStatus,
