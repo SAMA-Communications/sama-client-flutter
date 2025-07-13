@@ -32,7 +32,7 @@ class ReplyMessageWidget extends StatelessWidget {
     final replyTo = replyMessage?.from == null
         ? ''
         : message.sender.id == replyMessage?.from
-            ? 'by self'
+            ? 'yourself'
             : getUserName(replyMessage?.sender);
 
     return GestureDetector(

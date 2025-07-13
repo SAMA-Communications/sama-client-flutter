@@ -30,81 +30,77 @@ class MediaAttachment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (message.attachments.first.url == null) {
+      context
+          .read<MediaAttachmentBloc>()
+          .add(AttachmentsUrlsRequested(message));
+    }
     return MessageBubble(
-      sender: message.sender,
-      isFirst: message.isFirstUserMessage,
-      isLast: message.isLastUserMessage,
-      isOwn: message.isOwn,
-      child: BlocBuilder<MediaAttachmentBloc, MediaAttachmentState>(
-        builder: (context, state) {
-          if (message.attachments.first.url == null) {
-            context
-                .read<MediaAttachmentBloc>()
-                .add(AttachmentsUrlsRequested(message));
-          }
-          return Stack(alignment: Alignment.bottomRight, children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMediaGrid(message.attachments),
-                if (message.body?.isNotEmpty ?? false) ...[
-                  Text(
-                    message.body ?? '',
-                    style: TextStyle(
-                        color: message.isOwn ? white : black, fontSize: 16.0),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Wrap(
-                        spacing: 4.0,
-                        alignment: WrapAlignment.end,
-                        crossAxisAlignment: WrapCrossAlignment.end,
-                        children: [
-                          Text(
-                            dateToTime(DateTime.fromMillisecondsSinceEpoch(
-                                message.t! * 1000)),
-                            style: TextStyle(
-                                color: message.isOwn ? white : dullGray,
-                                fontSize: 12.0),
-                          ),
-                          MessageStatusWidget(status: message.status),
-                        ]),
-                  ),
-                ]
-              ],
-            ),
-            if (message.body?.isEmpty ?? true)
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    color: black.withAlpha(150),
-                    child: Wrap(
-                        spacing: 4.0,
-                        alignment: WrapAlignment.end,
-                        crossAxisAlignment: WrapCrossAlignment.end,
-                        children: [
-                          Text(
-                            dateToTime(DateTime.fromMillisecondsSinceEpoch(
-                                message.t! * 1000)),
-                            style: const TextStyle(color: white),
-                          ),
-                          MessageStatusWidget(status: message.status),
-                        ]),
-                  ),
+        sender: message.sender,
+        isFirst: message.isFirstUserMessage,
+        isLast: message.isLastUserMessage,
+        isOwn: message.isOwn,
+        child: Stack(alignment: Alignment.bottomRight, children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMediaGrid(message.attachments),
+              if (message.body?.isNotEmpty ?? false) ...[
+                Text(
+                  message.body ?? '',
+                  style: TextStyle(
+                      color: message.isOwn ? white : black, fontSize: 16.0),
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Wrap(
+                      spacing: 4.0,
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.end,
+                      children: [
+                        Text(
+                          dateToTime(DateTime.fromMillisecondsSinceEpoch(
+                              message.t! * 1000)),
+                          style: TextStyle(
+                              color: message.isOwn ? white : dullGray,
+                              fontSize: 12.0),
+                        ),
+                        MessageStatusWidget(status: message.status),
+                      ]),
+                ),
+              ]
+            ],
+          ),
+          if (message.body?.isEmpty ?? true)
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  color: black.withAlpha(150),
+                  child: Wrap(
+                      spacing: 4.0,
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.end,
+                      children: [
+                        Text(
+                          dateToTime(DateTime.fromMillisecondsSinceEpoch(
+                              message.t! * 1000)),
+                          style: const TextStyle(color: white),
+                        ),
+                        MessageStatusWidget(status: message.status),
+                      ]),
                 ),
               ),
-          ]);
-        },
-      ),
-    );
+            ),
+        ]));
   }
 }
 
 Widget _buildMediaGrid(List<AttachmentModel> attachments) {
   return GridView.custom(
+    padding: EdgeInsets.zero,
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     gridDelegate: SliverQuiltedGridDelegate(

@@ -28,7 +28,12 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConversationBloc, ConversationState>(
+    return BlocListener<SendMessageBloc, SendMessageState>(
+        listener: (context, sendState) {
+      if (sendState.status == SendMessageStatus.success) {
+        scrollTo(0);
+      }
+    }, child: BlocBuilder<ConversationBloc, ConversationState>(
       builder: (context, state) {
         switch (state.status) {
           case ConversationStatus.failure:
@@ -115,7 +120,7 @@ class _MessagesListState extends State<MessagesList> {
             return const SizedBox.shrink();
         }
       },
-    );
+    ));
   }
 
   void scrollToReplyIfNeed(ConversationState state) {
@@ -132,9 +137,9 @@ class _MessagesListState extends State<MessagesList> {
     });
   }
 
-  void scrollTo(int replyIndex) {
+  void scrollTo(int msgIndex) {
     _scrollController.scrollTo(
-        index: replyIndex,
+        index: msgIndex,
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOutCubic);
   }
