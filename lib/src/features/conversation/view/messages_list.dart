@@ -84,7 +84,7 @@ class _MessagesListState extends State<MessagesList> {
                   reverse: true,
                   itemBuilder: (BuildContext context, int index) {
                     var msg = state.messages[index];
-                    var selected = state.selectedMessages.contains(msg);
+                    var selected = state.selectedMessages.value.contains(msg);
                     return ListTile(
                         horizontalTitleGap: 0.0,
                         contentPadding: EdgeInsets.zero,
@@ -252,7 +252,7 @@ class MessageItem extends StatelessWidget {
                                   child: BlocProvider.value(
                                     value: BlocProvider.of<ConversationBloc>(
                                         context),
-                                    child: ForwardMessagesWidget([message]),
+                                    child: ForwardMessagesWidget({message}),
                                   ));
                             });
                         break;

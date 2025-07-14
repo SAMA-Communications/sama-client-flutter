@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../shared/utils/string_utils.dart';
-import '../../../../shared/widget/vertical_line_widget.dart';
 import '../../models/chat_message.dart';
 
 const double horizontalPadding = 8;

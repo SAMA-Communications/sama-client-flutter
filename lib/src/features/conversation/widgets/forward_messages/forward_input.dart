@@ -30,18 +30,18 @@ class _ForwardInputState extends State<ForwardInput> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.delete_forever_outlined),
-                  onPressed: state.selectedMessages.isEmpty
+                  onPressed: state.selectedMessages.value.isEmpty
                       ? null
                       : () => print('delete messages'),
                   color: dullGray,
                 ),
                 Text(
-                    '${state.selectedMessages.length} of $maxChatsForwardTo selected',
+                    '${state.selectedMessages.value.length} of $maxChatsForwardTo selected',
                     style: const TextStyle(fontSize: 15)),
                 IconButton(
                   icon: const Icon(Icons.forward_outlined),
                   color: dullGray,
-                  onPressed: state.selectedMessages.isEmpty
+                  onPressed: state.selectedMessages.value.isEmpty
                       ? null
                       : () {
                           connectionChecker(
@@ -62,7 +62,7 @@ class _ForwardInputState extends State<ForwardInput> {
                                               BlocProvider.of<ConversationBloc>(
                                                   context),
                                           child: ForwardMessagesWidget(
-                                              state.selectedMessages),
+                                              state.selectedMessages.value),
                                         ));
                                   }));
                         },

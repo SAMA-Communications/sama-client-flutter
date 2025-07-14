@@ -10,7 +10,7 @@ import '../../models/chat_message.dart';
 import 'forward_search_form.dart';
 
 class ForwardMessagesWidget extends StatelessWidget {
-  final List<ChatMessage> forwardMessages;
+  final Set<ChatMessage> forwardMessages;
 
   const ForwardMessagesWidget(this.forwardMessages, {super.key});
 
@@ -21,15 +21,15 @@ class ForwardMessagesWidget extends StatelessWidget {
         BlocProvider<GlobalSearchBloc>(
           create: (context) => GlobalSearchBloc(
             globalSearchRepository:
-            RepositoryProvider.of<GlobalSearchRepository>(context),
+                RepositoryProvider.of<GlobalSearchRepository>(context),
           ),
         ),
         BlocProvider<ForwardMessagesBloc>(
           create: (context) => ForwardMessagesBloc(
             conversationRepository:
-            RepositoryProvider.of<ConversationRepository>(context),
+                RepositoryProvider.of<ConversationRepository>(context),
             messagesRepository:
-            RepositoryProvider.of<MessagesRepository>(context),
+                RepositoryProvider.of<MessagesRepository>(context),
           ),
         ),
       ],
@@ -37,8 +37,3 @@ class ForwardMessagesWidget extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

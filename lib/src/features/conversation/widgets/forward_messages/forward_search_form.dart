@@ -12,7 +12,7 @@ import '../../bloc/forward_message/forward_messages_bloc.dart';
 import '../../models/chat_message.dart';
 
 class ForwardSearchForm extends StatelessWidget {
-  final List<ChatMessage> forwardMessages;
+  final Set<ChatMessage> forwardMessages;
 
   const ForwardSearchForm(
     this.forwardMessages, {
@@ -31,7 +31,7 @@ class ForwardSearchForm extends StatelessWidget {
 }
 
 class _SearchBody extends StatelessWidget {
-  final List<ChatMessage> forwardMessages;
+  final Set<ChatMessage> forwardMessages;
 
   const _SearchBody(this.forwardMessages);
 
@@ -50,16 +50,20 @@ class _SearchBody extends StatelessWidget {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
-                const SnackBar(content: Text('Forwarded successfully')),
+                const SnackBar(
+                    duration: Duration(seconds: 2),
+                    content: Text('Forwarded successfully')),
               );
           case ForwardMessagesStatus.failure:
-            context.read<ConversationBloc>().add(const ChooseMessages(false));
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(content: Text(state.errorMessage ?? '')),
-              );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                      duration: const Duration(seconds: 2),
+                      content: Text(state.errorMessage ?? '')),
+                );
+            });
         }
       },
       child: BlocBuilder<GlobalSearchBloc, GlobalSearchState>(
@@ -91,7 +95,7 @@ class _SearchBody extends StatelessWidget {
 
 class _SearchResults extends StatelessWidget {
   final List<ConversationModel> chats;
-  final List<ChatMessage> forwardMessages;
+  final Set<ChatMessage> forwardMessages;
 
   const _SearchResults(this.chats, this.forwardMessages);
 
@@ -137,7 +141,6 @@ class _SearchResults extends StatelessWidget {
               return ConversationListItem(
                 conversation: conversation,
                 onTap: () {
-                  print('onTap');
                   context
                       .read<ForwardMessagesBloc>()
                       .add(SendForwardMessage([conversation], forwardMessages));

@@ -45,17 +45,15 @@ class ForwardMessagesBloc
 
   Future<void> _onSendForwardMessage(
       SendForwardMessage event, Emitter<ForwardMessagesState> emit) async {
-    try {
-      var chatTo = event.forwardChatsTo;
-      var forwardMessages = event.forwardMessages;
-      await messagesRepository.sendForwardMessages(
-          chatTo.first, forwardMessages);
-
-      emit(state.copyWith(status: ForwardMessagesStatus.success));
-    } catch (_) {
+    var chatTo = event.forwardChatsTo;
+    var forwardMessages = event.forwardMessages;
+    await messagesRepository
+        .sendForwardMessages(chatTo.first, forwardMessages)
+        .catchError((e) {
       emit(state.copyWith(
           status: ForwardMessagesStatus.failure,
           errorMessage: 'Forward failed'));
-    }
+    });
+    emit(state.copyWith(status: ForwardMessagesStatus.success));
   }
 }

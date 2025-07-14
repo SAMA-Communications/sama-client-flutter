@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:formz/formz.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../api/api.dart';
@@ -390,24 +391,29 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Future<void> onChooseMessages(
       ChooseMessages event, Emitter<ConversationState> emit) async {
-    var selectedMessages = <ChatMessage>[];
+    final selectedMessages = Set.of(state.selectedMessages.value);
     if (event.choose) selectedMessages.add(event.message!);
+    final allSelectedMessages = SelectedMessages.dirty(selectedMessages);
     emit(state.copyWith(
-        selectedMessages: selectedMessages, choose: event.choose));
+        selectedMessages: allSelectedMessages, choose: event.choose));
   }
 
   Future<void> onSelectedChatsAdded(
       SelectedChatsAdded event, Emitter<ConversationState> emit) async {
-    var selectedMessages = [...state.selectedMessages];
+    var selectedMessages = Set.of(state.selectedMessages.value);
     selectedMessages.add(event.message);
-    emit(state.copyWith(selectedMessages: selectedMessages));
+    final allSelectedMessages = SelectedMessages.dirty(selectedMessages);
+    if (Formz.validate([allSelectedMessages])) {
+      emit(state.copyWith(selectedMessages: allSelectedMessages));
+    }
   }
 
   Future<void> onSelectedChatsRemoved(
       SelectedChatsRemoved event, Emitter<ConversationState> emit) async {
-    var selectedMessages = [...state.selectedMessages];
+    final selectedMessages = Set.of(state.selectedMessages.value);
     selectedMessages.remove(event.message);
-    emit(state.copyWith(selectedMessages: selectedMessages));
+    final allSelectedMessages = SelectedMessages.dirty(selectedMessages);
+    emit(state.copyWith(selectedMessages: allSelectedMessages));
   }
 
   FutureOr<void> _onMessageReceived(

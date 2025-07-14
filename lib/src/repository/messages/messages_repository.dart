@@ -198,7 +198,7 @@ class MessagesRepository {
   }
 
   Future<void> sendForwardMessages(
-      ConversationModel chat, List<MessageModel> message) async {
+      ConversationModel chat, Set<MessageModel> message) async {
     for (var msg in message) {
       await _sendForwardMessage(chat.id,
           body: msg.body,

@@ -14,7 +14,7 @@ final class ConversationState extends Equatable {
     required this.conversation,
     this.status = ConversationStatus.initial,
     this.messages = const <ChatMessage>[],
-    this.selectedMessages = const <ChatMessage>[],
+    this.selectedMessages = const SelectedMessages.pure(),
     this.participants = const <UserModel>{},
     this.hasReachedMax = false,
     this.initial = false,
@@ -28,7 +28,7 @@ final class ConversationState extends Equatable {
   final ConversationModel conversation;
   final ConversationStatus status;
   final List<ChatMessage> messages;
-  final List<ChatMessage> selectedMessages;
+  final SelectedMessages selectedMessages;
   final Set<UserModel> participants;
   final bool hasReachedMax;
   final bool initial;
@@ -42,7 +42,7 @@ final class ConversationState extends Equatable {
     ConversationModel? conversation,
     ConversationStatus? status,
     List<ChatMessage>? messages,
-    List<ChatMessage>? selectedMessages,
+    SelectedMessages? selectedMessages,
     Set<UserModel>? participants,
     bool? hasReachedMax,
     bool? initial,

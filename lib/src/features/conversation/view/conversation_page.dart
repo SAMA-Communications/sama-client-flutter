@@ -103,32 +103,33 @@ class ConversationPage extends StatelessWidget {
                     },
                     child: const Flexible(child: MessagesList())),
                 SafeArea(
-                    child: !state.choose ? context.read<SharingIntentBloc>().state.status ==
-                            SharingIntentStatus.processing
-                        ? BlocListener<SendMessageBloc, SendMessageState>(
-                            listener: (context, sendState) {
-                              if (sendState.status ==
-                                      SendMessageStatus.success ||
-                                  sendState.status ==
-                                      SendMessageStatus.failure) {
-                                context
-                                    .read<SharingIntentBloc>()
-                                    .add(SharingIntentCompleted());
-                              }
-                            },
-                            child: ConnectionChecker(
-                                child: MessageInput(
-                                    sharedText: context
+                    child: !state.choose
+                        ? context.read<SharingIntentBloc>().state.status ==
+                                SharingIntentStatus.processing
+                            ? BlocListener<SendMessageBloc, SendMessageState>(
+                                listener: (context, sendState) {
+                                  if (sendState.status ==
+                                          SendMessageStatus.success ||
+                                      sendState.status ==
+                                          SendMessageStatus.failure) {
+                                    context
                                         .read<SharingIntentBloc>()
-                                        .state
-                                        .sharedFiles
-                                        .firstOrNull
-                                        ?.path)),
-                          )
-                        : MessageInput(
-                            draftMessage: state.draftMessage,
-                            replyMessage: state.replyMessage) :
-                const ForwardInput())
+                                        .add(SharingIntentCompleted());
+                                  }
+                                },
+                                child: ConnectionChecker(
+                                    child: MessageInput(
+                                        sharedText: context
+                                            .read<SharingIntentBloc>()
+                                            .state
+                                            .sharedFiles
+                                            .firstOrNull
+                                            ?.path)),
+                              )
+                            : MessageInput(
+                                draftMessage: state.draftMessage,
+                                replyMessage: state.replyMessage)
+                        : const ForwardInput())
               ],
             ),
           ));

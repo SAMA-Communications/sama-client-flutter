@@ -13,7 +13,7 @@ final class ChatsToForward extends ForwardMessagesEvent {
 
 final class SendForwardMessage extends ForwardMessagesEvent {
   final List<ConversationModel> forwardChatsTo;
-  final List<ChatMessage> forwardMessages;
+  final Set<ChatMessage> forwardMessages;
 
   const SendForwardMessage(this.forwardChatsTo, this.forwardMessages);
 }
