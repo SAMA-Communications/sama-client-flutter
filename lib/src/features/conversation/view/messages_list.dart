@@ -9,6 +9,7 @@ import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
+import '../widgets/focused_popup_menu.dart';
 import '../widgets/media_attachment.dart';
 import '../widgets/reply_message_widget.dart';
 import '../widgets/service_message_bubble.dart';
@@ -198,27 +199,35 @@ class MessageItem extends StatelessWidget {
         absorbing: shouldAbsorb,
         child: GestureDetector(
             onLongPressStart: (details) {
-              PopupMessageMenu(
-                  context: context,
-                  onClickMenu: (MessageMenuItem item) {
-                    switch (item) {
-                      case MessageMenuItem.reply:
-                        print('reply message= ${message.body}');
-                        context
-                            .read<ConversationBloc>()
-                            .add(ReplyMessage(message));
-                        break;
-                      case MessageMenuItem.edit:
-                        print('edit message= ${message.body}');
-                        break;
-                      case MessageMenuItem.delete:
-                        print('delete message= ${message.body}');
-                        break;
-                      case MessageMenuItem.forward:
-                        print('forward message= ${message.body}');
-                        break;
-                    }
-                  }).show(details.globalPosition);
+              FocusedPopupMenu(menuItems: <FocusedPopupMenuItem>[
+                FocusedPopupMenuItem(
+                    leadingIcon: const Icon(Icons.replay_outlined),
+                    title: const Text('Reply'),
+                    onPressed: () {
+                      context
+                          .read<ConversationBloc>()
+                          .add(ReplyMessage(message));
+                    }),
+                FocusedPopupMenuItem(
+                    leadingIcon: const Icon(Icons.edit_outlined),
+                    title: const Text('Edit'),
+                    onPressed: () {
+                      print('edit message= ${message.body}');
+                    }),
+                FocusedPopupMenuItem(
+                    leadingIcon: const Icon(Icons.delete_forever_outlined),
+                    title: const Text('Delete'),
+                    onPressed: () {
+                      print('delete message= ${message.body}');
+                    }),
+                FocusedPopupMenuItem(
+                    leadingIcon: const Icon(Icons.forward_outlined),
+                    title: const Text('Forward'),
+                    onPressed: () {
+                      print('forward message= ${message.body}');
+                    }),
+              ], context: context, child: this, stickToRight: message.isOwn)
+                  .show();
             },
             child: Column(
                 crossAxisAlignment: message.isOwn
@@ -306,6 +315,7 @@ class MessageItem extends StatelessWidget {
   }
 }
 
+//delete or move to shared after merge with forward
 enum MessageMenuItem { reply, edit, delete, forward }
 
 typedef MenuClickCallback = void Function(MessageMenuItem item);
@@ -319,7 +329,7 @@ class PopupMessageMenu {
 
   PopupMessageMenu({required this.context, this.onClickMenu});
 
-  void show(Offset offset) {
+  Future<void> show(Offset offset) async {
     showMenu(
       position: RelativeRect.fromLTRB(
         offset.dx,
@@ -358,6 +368,7 @@ class PopupMessageMenu {
               title: Text('Forward'),
             )),
       ],
+      requestFocus: false,
       context: context,
     ).then((selected) {
       if (selected != null) onClickMenu?.call(selected);
