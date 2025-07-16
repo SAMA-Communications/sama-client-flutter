@@ -7,6 +7,7 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
 import '../widgets/focused_popup_menu.dart';
@@ -199,34 +200,40 @@ class MessageItem extends StatelessWidget {
         absorbing: shouldAbsorb,
         child: GestureDetector(
             onLongPressStart: (details) {
-              FocusedPopupMenu(menuItems: <FocusedPopupMenuItem>[
-                FocusedPopupMenuItem(
-                    leadingIcon: const Icon(Icons.replay_outlined),
-                    title: const Text('Reply'),
-                    onPressed: () {
-                      context
-                          .read<ConversationBloc>()
-                          .add(ReplyMessage(message));
-                    }),
-                FocusedPopupMenuItem(
-                    leadingIcon: const Icon(Icons.edit_outlined),
-                    title: const Text('Edit'),
-                    onPressed: () {
-                      print('edit message= ${message.body}');
-                    }),
-                FocusedPopupMenuItem(
-                    leadingIcon: const Icon(Icons.delete_forever_outlined),
-                    title: const Text('Delete'),
-                    onPressed: () {
-                      print('delete message= ${message.body}');
-                    }),
-                FocusedPopupMenuItem(
-                    leadingIcon: const Icon(Icons.forward_outlined),
-                    title: const Text('Forward'),
-                    onPressed: () {
-                      print('forward message= ${message.body}');
-                    }),
-              ], context: context, child: this, stickToRight: message.isOwn)
+              FocusedPopupMenu(
+                      menuItems: <FocusedPopupMenuItem>[
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.replay_outlined),
+                        title: const Text('Reply'),
+                        onPressed: () {
+                          context
+                              .read<ConversationBloc>()
+                              .add(ReplyMessage(message));
+                        }),
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.edit_outlined),
+                        title: const Text('Edit'),
+                        onPressed: () {
+                          print('edit message= ${message.body}');
+                        }),
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.delete_forever_outlined),
+                        title: const Text('Delete'),
+                        onPressed: () {
+                          print('delete message= ${message.body}');
+                        }),
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.forward_outlined),
+                        title: const Text('Forward'),
+                        onPressed: () {
+                          print('forward message= ${message.body}');
+                        }),
+                  ],
+                      context: context,
+                      child: BlocProvider.value(
+                          value: BlocProvider.of<MediaAttachmentBloc>(context),
+                          child: this),
+                      stickToRight: message.isOwn)
                   .show();
             },
             child: Column(
@@ -235,7 +242,7 @@ class MessageItem extends StatelessWidget {
                     : CrossAxisAlignment.start,
                 children: [
                   if (message.repliedMessageId != null)
-                    ReplyMessageWidget(message: message, onTap: onTap),
+                    ReplyMessageWidget(message, onTap),
                   buildMessageListItem(message, context),
                 ])));
   }

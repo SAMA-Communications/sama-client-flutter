@@ -8,7 +8,7 @@ class MediaAttachmentEvent extends Equatable {
 }
 
 final class AttachmentsUrlsRequested extends MediaAttachmentEvent {
-  final ChatMessage message;
+  final MessageModel message;
 
   const AttachmentsUrlsRequested(this.message);
 }
