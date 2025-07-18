@@ -32,98 +32,131 @@ class _MessagesListState extends State<MessagesList> {
   Widget build(BuildContext context) {
     return BlocListener<SendMessageBloc, SendMessageState>(
         listener: (context, sendState) {
-      if (sendState.status == SendMessageStatus.success) {
-        scrollTo(0);
-      }
-    }, child: BlocBuilder<ConversationBloc, ConversationState>(
-      builder: (context, state) {
-        switch (state.status) {
-          case ConversationStatus.failure:
-            WidgetsBinding.instance
-                .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'The chat update is unavailable. Please check your Internet connection.')),
-                  ));
-            continue success;
-          success:
-          case ConversationStatus.success:
-            if (state.messages.isEmpty) {
-              return state.initial
-                  ? const Center(child: CircularProgressIndicator())
-                  : Center(
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.all(24),
-                        child: const Text(
-                          'Write the first message...',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    );
-            }
-            markAsReadIfNeed();
-            scrollToReplyIfNeed(state);
-            return NotificationListener(
-                onNotification: (notification) {
-                  if (notification is ScrollUpdateNotification &&
-                      notification.dragDetails != null) {
-                    final keyboardTop = screenHeight - keyboardHeight();
-                    var shouldClose = keyboardTop <
-                        notification.dragDetails!.globalPosition.dy;
-                    if (notification.scrollDelta! > 0 && shouldClose) {
-                      hideKeyboard();
-                    }
-                  } else if (notification is ScrollEndNotification) {
-                    _onScroll(notification.metrics.pixels,
-                        notification.metrics.maxScrollExtent);
+          if (sendState.status == SendMessageStatus.success) {
+            scrollTo(0);
+          }
+        },
+        child: Stack(children: [
+          BlocBuilder<ConversationBloc, ConversationState>(
+            builder: (context, state) {
+              switch (state.status) {
+                case ConversationStatus.failure:
+                  WidgetsBinding.instance
+                      .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'The chat update is unavailable. Please check your Internet connection.')),
+                        ));
+                  continue success;
+                success:
+                case ConversationStatus.success:
+                  if (state.messages.isEmpty) {
+                    return state.initial
+                        ? const Center(child: CircularProgressIndicator())
+                        : Center(
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(24),
+                              child: const Text(
+                                'Write the first message...',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          );
                   }
-                  return false;
-                },
-                child: ScrollablePositionedList.separated(
-                  reverse: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    var msg = state.messages[index];
-                    return MessageItem(
-                        message: msg,
-                        onTap: () {
-                          var replyIndex = state.messages.indexWhere(
-                              (item) => item.id == msg.repliedMessageId);
-                          if (replyIndex == -1) {
-                            if (!state.hasReachedMax) {
-                              context.read<ConversationBloc>().add(
-                                  MessagesMoreForReply(msg.repliedMessageId!));
-                              showProgress();
-                            }
-                            return;
+                  markAsReadIfNeed();
+                  scrollToReplyIfNeed(state);
+                  return NotificationListener(
+                      onNotification: (notification) {
+                        if (notification is ScrollUpdateNotification &&
+                            notification.dragDetails != null) {
+                          final keyboardTop = screenHeight - keyboardHeight();
+                          var shouldClose = keyboardTop <
+                              notification.dragDetails!.globalPosition.dy;
+                          if (notification.scrollDelta! > 0 && shouldClose) {
+                            hideKeyboard();
                           }
-                          scrollTo(replyIndex);
-                        });
-                  },
-                  itemCount: state.messages.length,
-                  itemScrollController: _scrollController,
-                  itemPositionsListener: itemPositionsListener,
-                  padding: EdgeInsets.zero,
-                  separatorBuilder: (context, index) => const SizedBox(
-                    height: 5,
-                  ),
-                ));
-          case ConversationStatus.initial:
-            return const Center(child: CircularProgressIndicator());
-          case ConversationStatus.delete:
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            });
-            return const SizedBox.shrink();
-        }
-      },
-    ));
+                        } else if (notification is ScrollEndNotification) {
+                          _onScroll(notification.metrics.pixels,
+                              notification.metrics.maxScrollExtent);
+                        }
+                        return false;
+                      },
+                      child: ScrollablePositionedList.separated(
+                        reverse: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          var msg = state.messages[index];
+                          return MessageItem(
+                              message: msg,
+                              onTap: () {
+                                var replyIndex = state.messages.indexWhere(
+                                    (item) => item.id == msg.repliedMessageId);
+                                if (replyIndex == -1) {
+                                  if (!state.hasReachedMax) {
+                                    context.read<ConversationBloc>().add(
+                                        MessagesMoreForReply(
+                                            msg.repliedMessageId!));
+                                    showProgress();
+                                  }
+                                  return;
+                                }
+                                scrollTo(replyIndex);
+                              });
+                        },
+                        itemCount: state.messages.length,
+                        itemScrollController: _scrollController,
+                        itemPositionsListener: itemPositionsListener,
+                        padding: EdgeInsets.zero,
+                        separatorBuilder: (context, index) => const SizedBox(
+                          height: 5,
+                        ),
+                      ));
+                case ConversationStatus.initial:
+                  return const Center(child: CircularProgressIndicator());
+                case ConversationStatus.delete:
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  });
+                  return const SizedBox.shrink();
+              }
+            },
+          ),
+          scrollFAB,
+        ]));
   }
+
+  Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
+      valueListenable: itemPositionsListener.itemPositions,
+      builder: (context, positions, child) {
+        bool showScrollFAB = false;
+        if (positions.isNotEmpty) {
+          if (positions.first.index > 0) {
+            showScrollFAB = true;
+          }
+        }
+        return Positioned(
+            bottom: 16,
+            right: 16,
+            child: Visibility(
+              visible: showScrollFAB,
+              child: FloatingActionButton(
+                backgroundColor: semiBlack,
+                tooltip: 'Scroll',
+                mini: true,
+                shape: const CircleBorder(),
+                onPressed: () {
+                  scrollTo(0);
+                },
+                child: const Icon(Icons.arrow_downward_outlined,
+                    color: lightMallow, size: 28),
+              ),
+            ));
+      });
 
   void scrollToReplyIfNeed(ConversationState state) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
