@@ -8,10 +8,10 @@ import 'package:path/path.dart';
 
 import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
+import '../../../../db/models/message_model.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../../../shared/utils/media_utils.dart';
-import '../../models/chat_message.dart';
 
 part 'media_sender_event.dart';
 

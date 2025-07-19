@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../db/models/message_model.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
-import '../bloc/conversation_bloc.dart';
-import '../models/chat_message.dart';
+import '../bloc/send_message/send_message_bloc.dart';
 
 class ReplyBox extends StatelessWidget {
-  final ChatMessage replyMessage;
+  final MessageModel replyMessage;
 
   const ReplyBox({super.key, required this.replyMessage});
 
@@ -52,7 +52,7 @@ class ReplyBox extends StatelessWidget {
                   size: 20,
                 ),
                 onPressed: () {
-                  BlocProvider.of<ConversationBloc>(context)
+                  BlocProvider.of<SendMessageBloc>(context)
                       .add(const RemoveReplyMessage());
                 },
               ),
@@ -73,7 +73,7 @@ class ReplyBox extends StatelessWidget {
 class ReplyMessageView extends StatelessWidget {
   const ReplyMessageView({super.key, required this.message});
 
-  final ChatMessage message;
+  final MessageModel message;
 
   @override
   Widget build(BuildContext context) {

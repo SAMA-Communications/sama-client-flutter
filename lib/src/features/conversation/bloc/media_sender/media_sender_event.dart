@@ -35,7 +35,7 @@ final class _CleanError extends MediaSenderEvent {
 }
 
 final class SendMessage extends MediaSenderEvent {
-  final ChatMessage? replyMessage;
+  final MessageModel? replyMessage;
 
   const SendMessage(this.replyMessage);
 }

@@ -240,8 +240,8 @@ class MessageItem extends StatelessWidget {
                         title: const Text('Reply'),
                         onPressed: () {
                           context
-                              .read<ConversationBloc>()
-                              .add(ReplyMessage(message));
+                              .read<SendMessageBloc>()
+                              .add(AddReplyMessage(message));
                         }),
                     FocusedPopupMenuItem(
                         leadingIcon: const Icon(Icons.edit_outlined),

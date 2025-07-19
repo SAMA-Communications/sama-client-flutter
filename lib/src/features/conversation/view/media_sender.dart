@@ -7,22 +7,22 @@ import 'package:go_router/go_router.dart';
 import 'package:path/path.dart';
 
 import '../../../db/models/conversation_model.dart';
+import '../../../db/models/message_model.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
 import '../bloc/media_sender/media_sender_bloc.dart';
-import '../models/chat_message.dart';
 
 class MediaSender extends StatelessWidget {
-  final ChatMessage? replyMessage;
+  final MessageModel? replyMessage;
 
   const MediaSender(this.replyMessage, {super.key});
 
   static Widget create({
     Key? key,
     required ConversationModel currentConversation,
-    required ChatMessage? replyMessage,
+    required MessageModel? replyMessage,
   }) {
     return BlocProvider<MediaSenderBloc>(
       create: (context) => MediaSenderBloc(

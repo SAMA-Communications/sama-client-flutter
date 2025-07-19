@@ -54,14 +54,6 @@ final class ParticipantsReceived extends ConversationEvent {
   const ParticipantsReceived();
 }
 
-final class _DraftMessageReceived extends ConversationEvent {
-  const _DraftMessageReceived();
-}
-
-final class RemoveDraftMessage extends ConversationEvent {
-  const RemoveDraftMessage();
-}
-
 final class _ConversationUpdated extends ConversationEvent {
   final ConversationModel conversation;
 
@@ -82,16 +74,6 @@ final class TypingStatusStopReceived extends ConversationEvent {
   final String from;
 
   const TypingStatusStopReceived(this.from);
-}
-
-final class ReplyMessage extends ConversationEvent {
-  final ChatMessage message;
-
-  const ReplyMessage(this.message);
-}
-
-final class RemoveReplyMessage extends ConversationEvent {
-  const RemoveReplyMessage();
 }
 
 final class ReplyMessageRequired extends ConversationEvent {

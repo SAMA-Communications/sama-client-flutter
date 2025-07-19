@@ -68,12 +68,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ParticipantsReceived>(
       _onParticipantsReceived,
     );
-    on<_DraftMessageReceived>(
-      _onDraftMessageReceived,
-    );
-    on<RemoveDraftMessage>(
-      _onRemoveDraftMessage,
-    );
     on<_MessageReceived>(
       _onMessageReceived,
     );
@@ -103,12 +97,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<TypingStatusStopReceived>(
       _onTypingStatusStopReceived,
     );
-    on<ReplyMessage>(
-      _onConversationReply,
-    );
-    on<RemoveReplyMessage>(
-      _onRemoveConversationReply,
-    );
     on<ReplyMessageRequired>(
       _onReplyMessageRequired,
     );
@@ -122,8 +110,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     add(const ParticipantsReceived());
 
     subscribeOpponentLastActivity();
-
-    add(const _DraftMessageReceived());
 
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
@@ -285,21 +271,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(participants: Set.of(participants)));
   }
 
-  Future<void> _onDraftMessageReceived(
-      _DraftMessageReceived event, Emitter<ConversationState> emit) async {
-    var draftMsg = await messagesRepository.getMessageLocalByStatus(
-        currentConversation.id, ChatMessageStatus.draft.name);
-    if (draftMsg != null) {
-      emit(state.copyWith(draftMessage: () => draftMsg));
-      messagesRepository.deleteMessageLocal(draftMsg.id);
-    }
-  }
-
-  Future<void> _onRemoveDraftMessage(
-      RemoveDraftMessage event, Emitter<ConversationState> emit) async {
-    emit(state.copyWith(draftMessage: () => null));
-  }
-
   Future<void> _onConversationUpdated(event, emit) async {
     emit(state.copyWith(conversation: event.conversation));
   }
@@ -307,8 +278,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   Future<void> _onConversationDeleted(
       ConversationDeleted event, Emitter<ConversationState> emit) async {
     await conversationRepository.deleteConversation(state.conversation)
-        ? emit(state.copyWith(
-            draftMessage: () => null, status: ConversationStatus.delete))
+        ? emit(state.copyWith(status: ConversationStatus.delete))
         : emit(state.copyWith(status: ConversationStatus.failure));
   }
 
@@ -324,16 +294,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var user = await userRepository.getUserById(event.from);
     emit(state.copyWith(
         typingStatus: TypingMessageStatus(TypingState.stop, user)));
-  }
-
-  Future<void> _onConversationReply(
-      ReplyMessage event, Emitter<ConversationState> emit) async {
-    emit(state.copyWith(replyMessage: () => event.message));
-  }
-
-  Future<void> _onRemoveConversationReply(
-      RemoveReplyMessage event, Emitter<ConversationState> emit) async {
-    emit(state.copyWith(replyMessage: () => null));
   }
 
   Future<void> _onReplyMessageRequired(

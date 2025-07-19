@@ -116,9 +116,7 @@ class ConversationPage extends StatelessWidget {
                                     .firstOrNull
                                     ?.path)),
                       )
-                    : MessageInput(
-                        draftMessage: state.draftMessage,
-                        replyMessage: state.replyMessage))
+                    : const MessageInput())
           ],
         ),
       );
