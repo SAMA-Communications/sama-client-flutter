@@ -17,8 +17,8 @@ final class ConversationState extends Equatable {
     this.participants = const <UserModel>{},
     this.hasReachedMax = false,
     this.initial = false,
-    this.draftMessage,
     this.typingStatus,
+    this.replyIdToScroll = '',
   });
 
   final ConversationModel conversation;
@@ -27,8 +27,8 @@ final class ConversationState extends Equatable {
   final Set<UserModel> participants;
   final bool hasReachedMax;
   final bool initial;
-  final MessageModel? draftMessage;
   final TypingMessageStatus? typingStatus;
+  final String replyIdToScroll;
 
   ConversationState copyWith({
     ConversationModel? conversation,
@@ -37,7 +37,7 @@ final class ConversationState extends Equatable {
     Set<UserModel>? participants,
     bool? hasReachedMax,
     bool? initial,
-    MessageModel? Function()? draftMessage,
+    String? replyIdToScroll,
     TypingMessageStatus? typingStatus,
   }) {
     return ConversationState(
@@ -47,14 +47,14 @@ final class ConversationState extends Equatable {
       participants: participants ?? this.participants,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
-      draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
       typingStatus: typingStatus,
+      replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
     );
   }
 
   @override
   String toString() {
-    return 'ConversationState { status: $status, hasReachedMax: $hasReachedMax, initial: $initial, messages: ${messages.length}, participants: ${participants.length}, draftMessage: $draftMessage';
+    return 'ConversationState { status: $status, hasReachedMax: $hasReachedMax, initial: $initial, messages: ${messages.length}, participants: ${participants.length}';
   }
 
   @override
@@ -64,8 +64,8 @@ final class ConversationState extends Equatable {
         messages,
         hasReachedMax,
         initial,
+        replyIdToScroll,
         participants,
-        draftMessage,
         typingStatus
       ];
 }

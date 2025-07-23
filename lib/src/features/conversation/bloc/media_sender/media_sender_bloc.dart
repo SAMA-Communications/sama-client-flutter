@@ -8,6 +8,7 @@ import 'package:path/path.dart';
 
 import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
+import '../../../../db/models/message_model.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../../../shared/utils/media_utils.dart';
@@ -157,7 +158,9 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
       if (state.status == MediaSelectorStatus.canceled) return;
 
       await messagesRepository.sendMediaMessage(currentConversation.id,
-          body: body, attachments: attachments);
+          body: body,
+          attachments: attachments,
+          replyMessage: event.replyMessage);
       emit(state.copyWith(status: MediaSelectorStatus.processingFinished));
     } catch (e) {
       emit(state.copyWith(

@@ -92,7 +92,7 @@
     },
     {
       "id": "11:6168919874786736956",
-      "lastPropertyId": "9:1875750503242122079",
+      "lastPropertyId": "14:1893283248997063821",
       "name": "MessageModel",
       "properties": [
         {
@@ -142,6 +142,37 @@
           "id": "9:1875750503242122079",
           "name": "dbExtension",
           "type": 9
+        },
+        {
+          "id": "10:6395861719839579723",
+          "name": "repliedMessageId",
+          "type": 9
+        },
+        {
+          "id": "11:8502424052705749036",
+          "name": "replyMessageBindId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "39:2280023974172957156",
+          "relationTarget": "MessageModel"
+        },
+        {
+          "id": "12:6401592278627748216",
+          "name": "senderBindId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "40:5803255922961343502",
+          "relationTarget": "UserModel"
+        },
+        {
+          "id": "13:5213655976270008005",
+          "name": "isOwn",
+          "type": 1
+        },
+        {
+          "id": "14:1893283248997063821",
+          "name": "isTempReplied",
+          "type": 1
         }
       ],
       "relations": [
@@ -330,7 +361,7 @@
     }
   ],
   "lastEntityId": "13:9106374520578572502",
-  "lastIndexId": "38:1718185030575189588",
+  "lastIndexId": "40:5803255922961343502",
   "lastRelationId": "5:7785256265115248397",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

@@ -19,6 +19,7 @@ part 'conversation_event.dart';
 part 'conversation_state.dart';
 
 const throttleDuration = Duration(milliseconds: 100);
+const scrollToReplyTimeout = Duration(seconds: 7);
 
 EventTransformer<E> throttleDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -67,12 +68,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<ParticipantsReceived>(
       _onParticipantsReceived,
     );
-    on<_DraftMessageReceived>(
-      _onDraftMessageReceived,
-    );
-    on<RemoveDraftMessage>(
-      _onRemoveDraftMessage,
-    );
     on<_MessageReceived>(
       _onMessageReceived,
     );
@@ -102,12 +97,19 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<TypingStatusStopReceived>(
       _onTypingStatusStopReceived,
     );
+    on<ReplyMessageRequired>(
+      _onReplyMessageRequired,
+    );
+    on<MessagesMoreForReply>(
+      onMessagesMoreForReply,
+    );
+    on<RemoveMessagesMoreForReply>(
+      onRemoveMessagesMoreForReply,
+    );
 
     add(const ParticipantsReceived());
 
     subscribeOpponentLastActivity();
-
-    add(const _DraftMessageReceived());
 
     incomingMessagesSubscription =
         messagesRepository.incomingMessagesStream.listen((message) async {
@@ -209,7 +211,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         add(const MessagesRequested());
         return;
       }
-      await _getAllMessages(emit, force: event.force);
+      await _getAllMessages(emit, refresh: event.refresh);
     } catch (e) {
       log('[ConversationBloc]', stringData: e.toString());
       emit(state.copyWith(status: ConversationStatus.failure));
@@ -230,7 +232,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   _getAllMessages(Emitter<ConversationState> emit,
-      {bool force = false, DateTime? ltDate, DateTime? gtTime}) async {
+      {bool refresh = false, DateTime? ltDate, DateTime? gtTime}) async {
     var resource = await messagesRepository.getAllMessages(currentConversation,
         ltDate: ltDate, gtTime: gtTime);
     switch (resource.status) {
@@ -241,7 +243,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
             : emit(
                 state.copyWith(
                   status: ConversationStatus.success,
-                  messages: state.initial || force
+                  messages: state.initial || refresh
                       ? List.of(messages)
                       : (List.of(state.messages)..addAll(messages)),
                   hasReachedMax: false,
@@ -269,21 +271,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(participants: Set.of(participants)));
   }
 
-  Future<void> _onDraftMessageReceived(
-      _DraftMessageReceived event, Emitter<ConversationState> emit) async {
-    var draftMsg = await messagesRepository.getMessageLocalByStatus(
-        currentConversation.id, ChatMessageStatus.draft.name);
-    if (draftMsg != null) {
-      emit(state.copyWith(draftMessage: () => draftMsg));
-      messagesRepository.deleteMessageLocal(draftMsg.id!);
-    }
-  }
-
-  Future<void> _onRemoveDraftMessage(
-      RemoveDraftMessage event, Emitter<ConversationState> emit) async {
-    emit(state.copyWith(draftMessage: () => null));
-  }
-
   Future<void> _onConversationUpdated(event, emit) async {
     emit(state.copyWith(conversation: event.conversation));
   }
@@ -291,8 +278,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   Future<void> _onConversationDeleted(
       ConversationDeleted event, Emitter<ConversationState> emit) async {
     await conversationRepository.deleteConversation(state.conversation)
-        ? emit(state.copyWith(
-            draftMessage: () => null, status: ConversationStatus.delete))
+        ? emit(state.copyWith(status: ConversationStatus.delete))
         : emit(state.copyWith(status: ConversationStatus.failure));
   }
 
@@ -308,6 +294,49 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var user = await userRepository.getUserById(event.from);
     emit(state.copyWith(
         typingStatus: TypingMessageStatus(TypingState.stop, user)));
+  }
+
+  Future<void> _onReplyMessageRequired(
+      ReplyMessageRequired event, Emitter<ConversationState> emit) async {
+    var replyMsg = await messagesRepository.getReplyMessageById(
+        currentConversation, event.replyMsgId);
+    if (replyMsg == null) return;
+    var messages = [...state.messages];
+    var msg = messages.firstWhere((m) => m.id == event.msgId);
+    var msgUpdated = msg.copyWith(replyMessage: replyMsg);
+    await messagesRepository.updateMessageLocal(msgUpdated);
+    messages[messages.indexOf(msg)] = msgUpdated;
+    emit(state.copyWith(messages: messages));
+  }
+
+  Future<void> onMessagesMoreForReply(
+      MessagesMoreForReply event, Emitter<ConversationState> emit) async {
+    emit(state.copyWith(replyIdToScroll: ''));
+
+    Future<bool> getMessagesToScroll() async {
+      var canScroll = false;
+      do {
+        await _getAllMessages(emit,
+            ltDate: state.messages.lastOrNull?.createdAt);
+        canScroll =
+            state.messages.firstWhereOrNull((m) => m.id == event.replyMsgId) !=
+                null;
+      } while (!state.hasReachedMax && !canScroll);
+      return canScroll;
+    }
+
+    try {
+      var result = await getMessagesToScroll().timeout(scrollToReplyTimeout);
+      if (result) emit(state.copyWith(replyIdToScroll: event.replyMsgId));
+    } catch (e) {
+      log('[ConversationBloc][onMessagesMoreForReply]',
+          stringData: e.toString());
+    }
+  }
+
+  Future<void> onRemoveMessagesMoreForReply(
+      RemoveMessagesMoreForReply event, Emitter<ConversationState> emit) async {
+    emit(state.copyWith(replyIdToScroll: ''));
   }
 
   FutureOr<void> _onMessageReceived(
@@ -360,8 +389,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
     var msgUpdated = msg.copyWith(
         id: event.status.serverMessageId, status: ChatMessageStatus.sent);
-    messages[messages.indexOf(msg)] = msgUpdated;
+
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
+
+    messages[messages.indexOf(msg)] = msgLocal.toChatMessage(
+        msgUpdated.isLastUserMessage, msgUpdated.isFirstUserMessage);
 
     var chatLocal = await conversationRepository
         .getConversationById(currentConversation.id);
