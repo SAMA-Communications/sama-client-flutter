@@ -4,8 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../db/models/attachment_model.dart';
+import '../../../../db/models/message_model.dart';
 import '../../../../repository/attachments/attachments_repository.dart';
-import '../../models/models.dart';
 
 part 'media_attachment_event.dart';
 
@@ -36,7 +36,7 @@ class MediaAttachmentBloc
     emit(state.copyWith(urls: urls));
   }
 
-  void _requestAttachmentsUrls(ChatMessage message) {
+  void _requestAttachmentsUrls(MessageModel message) {
     if (message.attachments.isNotEmpty) {
       Set<String> ids =
           message.attachments.map((attachment) => attachment.fileId!).toSet();
@@ -50,12 +50,11 @@ class MediaAttachmentBloc
 
           attachments.add(attachment);
         });
+
         message.attachments.clear();
-        message.attachments.applyToDb();
         message.attachments.addAll(attachments);
 
         await attachmentsRepository.updateAttachmentsLocal(attachments);
-
         add(_AttachmentsUrlsReceived(Map.from(urls)));
       });
     }

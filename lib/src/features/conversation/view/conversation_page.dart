@@ -91,7 +91,7 @@ class ConversationPage extends StatelessWidget {
                 listener: (context, state) {
                   if (state.status == ConnectionStatus.connected) {
                     BlocProvider.of<ConversationBloc>(context)
-                        .add(const MessagesRequested(force: true));
+                        .add(const MessagesRequested(refresh: true));
                   }
                 },
                 child: const Flexible(child: MessagesList())),
@@ -116,7 +116,7 @@ class ConversationPage extends StatelessWidget {
                                     .firstOrNull
                                     ?.path)),
                       )
-                    : MessageInput(draftMessage: state.draftMessage))
+                    : const MessageInput())
           ],
         ),
       );

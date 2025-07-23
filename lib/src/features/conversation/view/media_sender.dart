@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:path/path.dart';
 
 import '../../../db/models/conversation_model.dart';
+import '../../../db/models/message_model.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
@@ -14,11 +15,14 @@ import '../../../shared/utils/media_utils.dart';
 import '../bloc/media_sender/media_sender_bloc.dart';
 
 class MediaSender extends StatelessWidget {
-  const MediaSender({super.key});
+  final MessageModel? replyMessage;
+
+  const MediaSender(this.replyMessage, {super.key});
 
   static Widget create({
     Key? key,
     required ConversationModel currentConversation,
+    required MessageModel? replyMessage,
   }) {
     return BlocProvider<MediaSenderBloc>(
       create: (context) => MediaSenderBloc(
@@ -26,6 +30,7 @@ class MediaSender extends StatelessWidget {
           messagesRepository:
               RepositoryProvider.of<MessagesRepository>(context)),
       child: MediaSender(
+        replyMessage,
         key: key,
       ),
     );
@@ -148,7 +153,7 @@ class MediaSender extends StatelessWidget {
                                 state.status !=
                                     MediaSelectorStatus.processing) {
                               BlocProvider.of<MediaSenderBloc>(context)
-                                  .add(const SendMessage());
+                                  .add(SendMessage(replyMessage));
                             }
                           },
                           child: Text(
