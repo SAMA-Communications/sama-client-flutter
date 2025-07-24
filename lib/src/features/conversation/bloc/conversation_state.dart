@@ -18,8 +18,6 @@ final class ConversationState extends Equatable {
     this.participants = const <UserModel>{},
     this.hasReachedMax = false,
     this.initial = false,
-    this.draftMessage,
-    this.replyMessage,
     this.typingStatus,
     this.replyIdToScroll = '',
     this.choose = false,
@@ -33,8 +31,6 @@ final class ConversationState extends Equatable {
   final bool hasReachedMax;
   final bool initial;
   final bool choose;
-  final MessageModel? draftMessage;
-  final ChatMessage? replyMessage;
   final TypingMessageStatus? typingStatus;
   final String replyIdToScroll;
 
@@ -48,8 +44,6 @@ final class ConversationState extends Equatable {
     bool? initial,
     bool? choose,
     String? replyIdToScroll,
-    MessageModel? Function()? draftMessage,
-    ChatMessage? Function()? replyMessage,
     TypingMessageStatus? typingStatus,
   }) {
     return ConversationState(
@@ -63,14 +57,12 @@ final class ConversationState extends Equatable {
       choose: choose ?? this.choose,
       typingStatus: typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
-      draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
-      replyMessage: replyMessage != null ? replyMessage() : this.replyMessage,
     );
   }
 
   @override
   String toString() {
-    return 'ConversationState { status: $status, hasReachedMax: $hasReachedMax, initial: $initial, messages: ${messages.length}, participants: ${participants.length}, draftMessage: $draftMessage';
+    return 'ConversationState { status: $status, hasReachedMax: $hasReachedMax, initial: $initial, messages: ${messages.length}, participants: ${participants.length}';
   }
 
   @override
@@ -83,9 +75,8 @@ final class ConversationState extends Equatable {
         initial,
         choose,
         replyIdToScroll,
+        replyIdToScroll,
         participants,
-        typingStatus,
-        draftMessage,
-        replyMessage
+        typingStatus
       ];
 }

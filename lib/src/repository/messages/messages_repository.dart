@@ -242,7 +242,8 @@ class MessagesRepository {
     return await localDatasource.saveMessageLocal(message);
   }
 
-  Future<void> saveDraftMessage(String body, String cid) async {
+  Future<void> saveDraftMessage(
+      String body, String cid, MessageModel? replyMessage) async {
     var currentUser = await userRepository.getCurrentUser();
     var message = MessageModel(
         body: body.trim(),
@@ -253,7 +254,8 @@ class MessagesRepository {
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now(),
         rawStatus: ChatMessageStatus.draft.name)
-      ..sender = currentUser;
+      ..sender = currentUser
+      ..replyMessage = replyMessage;
 
     var msg = await saveMessageLocal(message);
     _incomingMessagesController.add(msg.toChatMessage(true, true));

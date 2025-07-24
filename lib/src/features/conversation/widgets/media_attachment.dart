@@ -105,6 +105,7 @@ class MediaAttachment extends StatelessWidget {
 
 Widget _buildMediaGrid(List<AttachmentModel> attachments) {
   return GridView.custom(
+    padding: EdgeInsets.zero,
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
     gridDelegate: SliverQuiltedGridDelegate(

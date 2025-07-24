@@ -7,8 +7,10 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
+import '../widgets/focused_popup_menu.dart';
 import '../widgets/forward_messages/forward_bubble.dart';
 import '../widgets/forward_messages/forward_messages_widget.dart';
 import '../widgets/media_attachment.dart';
@@ -30,117 +32,159 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConversationBloc, ConversationState>(
-      builder: (context, state) {
-        switch (state.status) {
-          case ConversationStatus.failure:
-            WidgetsBinding.instance
-                .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'The chat update is unavailable. Please check your Internet connection.')),
-                  ));
-            continue success;
-          success:
-          case ConversationStatus.success:
-            if (state.messages.isEmpty) {
-              return state.initial
-                  ? const Center(child: CircularProgressIndicator())
-                  : Center(
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.all(24),
-                        child: const Text(
-                          'Write the first message...',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    );
-            }
-            markAsReadIfNeed();
-            scrollToReplyIfNeed(state);
-            return NotificationListener(
-                onNotification: (notification) {
-                  if (notification is ScrollUpdateNotification &&
-                      notification.dragDetails != null) {
-                    final keyboardTop = screenHeight - keyboardHeight();
-                    var shouldClose = keyboardTop <
-                        notification.dragDetails!.globalPosition.dy;
-                    if (notification.scrollDelta! > 0 && shouldClose) {
-                      hideKeyboard();
-                    }
-                  } else if (notification is ScrollEndNotification) {
-                    _onScroll(notification.metrics.pixels,
-                        notification.metrics.maxScrollExtent);
+    return BlocListener<SendMessageBloc, SendMessageState>(
+        listener: (context, sendState) {
+          if (sendState.status == SendMessageStatus.success) {
+            scrollTo(0);
+          }
+        },
+        child: Stack(children: [
+          BlocBuilder<ConversationBloc, ConversationState>(
+            builder: (context, state) {
+              switch (state.status) {
+                case ConversationStatus.failure:
+                  WidgetsBinding.instance
+                      .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'The chat update is unavailable. Please check your Internet connection.')),
+                        ));
+                  continue success;
+                success:
+                case ConversationStatus.success:
+                  if (state.messages.isEmpty) {
+                    return state.initial
+                        ? const Center(child: CircularProgressIndicator())
+                        : Center(
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(24),
+                              child: const Text(
+                                'Write the first message...',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          );
                   }
-                  return false;
-                },
-                child: ScrollablePositionedList.separated(
-                  reverse: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    var msg = state.messages[index];
-                    var selected = state.selectedMessages.value.contains(msg);
-                    return ListTile(
-                        horizontalTitleGap: 0.0,
-                        contentPadding: EdgeInsets.zero,
-                        leading: state.choose
-                            ? Checkbox(
-                                shape: const CircleBorder(),
-                                value: selected,
-                                onChanged: (checked) {
-                                  if (checked ?? false) {
-                                    context
-                                        .read<ConversationBloc>()
-                                        .add(SelectedChatsAdded(msg));
-                                  } else {
-                                    context
-                                        .read<ConversationBloc>()
-                                        .add(SelectedChatsRemoved(msg));
-                                  }
-                                })
-                            : null,
-                        title: MessageItem(
-                            message: msg,
-                            onTapReply: () {
-                              var replyIndex = state.messages.indexWhere(
-                                  (item) => item.id == msg.repliedMessageId);
-                              if (replyIndex == -1) {
-                                if (!state.hasReachedMax) {
-                                  context.read<ConversationBloc>().add(
-                                      MessagesMoreForReply(
-                                          msg.repliedMessageId!));
-                                  showProgress();
-                                }
-                                return;
-                              }
-                              scrollTo(replyIndex);
-                            },
-                            onTapForward: () => print('onTapForward')));
-                  },
-                  itemCount: state.messages.length,
-                  itemScrollController: _scrollController,
-                  itemPositionsListener: itemPositionsListener,
-                  padding: EdgeInsets.zero,
-                  separatorBuilder: (context, index) => const SizedBox(
-                    height: 5,
-                  ),
-                ));
-          case ConversationStatus.initial:
-            return const Center(child: CircularProgressIndicator());
-          case ConversationStatus.delete:
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            });
-            return const SizedBox.shrink();
-        }
-      },
-    );
+                  markAsReadIfNeed();
+                  scrollToReplyIfNeed(state);
+                  return NotificationListener(
+                      onNotification: (notification) {
+                        if (notification is ScrollUpdateNotification &&
+                            notification.dragDetails != null) {
+                          final keyboardTop = screenHeight - keyboardHeight();
+                          var shouldClose = keyboardTop <
+                              notification.dragDetails!.globalPosition.dy;
+                          if (notification.scrollDelta! > 0 && shouldClose) {
+                            hideKeyboard();
+                          }
+                        } else if (notification is ScrollEndNotification) {
+                          _onScroll(notification.metrics.pixels,
+                              notification.metrics.maxScrollExtent);
+                        }
+                        return false;
+                      },
+                      child: ScrollablePositionedList.separated(
+                        reverse: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          var msg = state.messages[index];
+                          var selected =
+                              state.selectedMessages.value.contains(msg);
+                          return ListTile(
+                              dense: true,
+                              horizontalTitleGap: 0.0,
+                              contentPadding: EdgeInsets.zero,
+                              visualDensity: VisualDensity.compact,
+                              minVerticalPadding: 0.0,
+                              leading: state.choose
+                                  ? Checkbox(
+                                      shape: const CircleBorder(),
+                                      value: selected,
+                                      onChanged: (checked) {
+                                        if (checked ?? false) {
+                                          context
+                                              .read<ConversationBloc>()
+                                              .add(SelectedChatsAdded(msg));
+                                        } else {
+                                          context
+                                              .read<ConversationBloc>()
+                                              .add(SelectedChatsRemoved(msg));
+                                        }
+                                      })
+                                  : null,
+                              title: MessageItem(
+                                  message: msg,
+                                  onTapReply: () {
+                                    var replyIndex = state.messages.indexWhere(
+                                        (item) =>
+                                            item.id == msg.repliedMessageId);
+                                    if (replyIndex == -1) {
+                                      if (!state.hasReachedMax) {
+                                        context.read<ConversationBloc>().add(
+                                            MessagesMoreForReply(
+                                                msg.repliedMessageId!));
+                                        showProgress();
+                                      }
+                                      return;
+                                    }
+                                    scrollTo(replyIndex);
+                                  },
+                                  onTapForward: () => print('onTapForward')));
+                        },
+                        itemCount: state.messages.length,
+                        itemScrollController: _scrollController,
+                        itemPositionsListener: itemPositionsListener,
+                        padding: EdgeInsets.zero,
+                        separatorBuilder: (context, index) => const SizedBox(
+                          height: 5,
+                        ),
+                      ));
+                case ConversationStatus.initial:
+                  return const Center(child: CircularProgressIndicator());
+                case ConversationStatus.delete:
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  });
+                  return const SizedBox.shrink();
+              }
+            },
+          ),
+          scrollFAB,
+        ]));
   }
+
+  Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
+      valueListenable: itemPositionsListener.itemPositions,
+      builder: (context, positions, child) {
+        bool showScrollFAB = false;
+        if (positions.isNotEmpty) {
+          if (positions.first.index > 0) {
+            showScrollFAB = true;
+          }
+        }
+        return Positioned(
+            bottom: 16,
+            right: 16,
+            child: Visibility(
+              visible: showScrollFAB,
+              child: FloatingActionButton(
+                backgroundColor: semiBlack,
+                tooltip: 'Scroll',
+                mini: true,
+                shape: const CircleBorder(),
+                onPressed: () {
+                  scrollTo(0);
+                },
+                child: const Icon(Icons.arrow_downward_outlined,
+                    color: lightMallow, size: 28),
+              ),
+            ));
+      });
 
   void scrollToReplyIfNeed(ConversationState state) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -156,9 +200,9 @@ class _MessagesListState extends State<MessagesList> {
     });
   }
 
-  void scrollTo(int replyIndex) {
+  void scrollTo(int msgIndex) {
     _scrollController.scrollTo(
-        index: replyIndex,
+        index: msgIndex,
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOutCubic);
   }
@@ -219,51 +263,70 @@ class MessageItem extends StatelessWidget {
         absorbing: shouldAbsorb,
         child: GestureDetector(
             onLongPressStart: (details) {
-              PopupMessageMenu(
-                  context: context,
-                  onClickMenu: (MessageMenuItem item) {
-                    switch (item) {
-                      case MessageMenuItem.reply:
-                        print('reply message= ${message.body}');
-                        context
-                            .read<ConversationBloc>()
-                            .add(ReplyMessage(message));
-                        break;
-                      case MessageMenuItem.edit:
-                        print('edit message= ${message.body}');
-                        break;
-                      case MessageMenuItem.delete:
-                        print('delete message= ${message.body}');
-                        break;
-                      case MessageMenuItem.forward:
-                        print('forward message= ${message.body}');
-
-                        showModalBottomSheet<dynamic>(
-                            isScrollControlled: true,
-                            useSafeArea: false,
-                            context: context,
-                            builder: (BuildContext bc) {
-                              return Container(
-                                  margin: EdgeInsets.only(
-                                      top: MediaQueryData.fromView(
-                                              View.of(context))
-                                          .padding
-                                          .top),
-                                  child: BlocProvider.value(
-                                    value: BlocProvider.of<ConversationBloc>(
-                                        context),
-                                    child: ForwardMessagesWidget({message}),
-                                  ));
-                            });
-                        break;
-                      case MessageMenuItem.choose:
-                        print('choose messages');
-                        context
-                            .read<ConversationBloc>()
-                            .add(ChooseMessages(true, message: message));
-                        break;
-                    }
-                  }).show(details.globalPosition);
+              FocusedPopupMenu(
+                      menuItems: <FocusedPopupMenuItem>[
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.replay_outlined),
+                        title: const Text('Reply'),
+                        onPressed: () {
+                          context
+                              .read<SendMessageBloc>()
+                              .add(AddReplyMessage(message));
+                        }),
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.edit_outlined),
+                        title: const Text('Edit'),
+                        onPressed: () {
+                          print('edit message= ${message.body}');
+                        }),
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.delete_forever_outlined),
+                        title: const Text('Delete'),
+                        onPressed: () {
+                          print('delete message= ${message.body}');
+                        }),
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.forward_outlined),
+                        title: const Text('Forward'),
+                        onPressed: () {
+                          print('forward message= ${message.body}');
+                          showModalBottomSheet<dynamic>(
+                              isScrollControlled: true,
+                              useSafeArea: false,
+                              context: context,
+                              builder: (BuildContext bc) {
+                                return Container(
+                                    margin: EdgeInsets.only(
+                                        top: MediaQueryData.fromView(
+                                                View.of(context))
+                                            .padding
+                                            .top),
+                                    child: BlocProvider.value(
+                                      value: BlocProvider.of<ConversationBloc>(
+                                          context),
+                                      child: ForwardMessagesWidget({message}),
+                                    ));
+                              });
+                        }),
+                    FocusedPopupMenuItem(
+                        leadingIcon: const Icon(Icons.delete_forever_outlined),
+                        title: const Text('Choose'),
+                        onPressed: () {
+                          context
+                              .read<ConversationBloc>()
+                              .add(ChooseMessages(true, message: message));
+                        }),
+                  ],
+                      context: context,
+                      child: MultiBlocProvider(providers: [
+                        BlocProvider.value(
+                            value:
+                                BlocProvider.of<MediaAttachmentBloc>(context)),
+                        BlocProvider.value(
+                            value: BlocProvider.of<ConversationBloc>(context)),
+                      ], child: this),
+                      stickToRight: message.isOwn)
+                  .show();
             },
             child: Column(
                 crossAxisAlignment: message.isOwn
@@ -350,82 +413,5 @@ class MessageItem extends StatelessWidget {
     }
 
     return TextMessageItem(message: message);
-  }
-}
-
-enum MessageMenuItem { reply, edit, delete, forward, choose }
-
-typedef MenuClickCallback = void Function(MessageMenuItem item);
-
-class PopupMessageMenu {
-  List<PopupMenuEntry<MessageMenuItem>>? items;
-
-  final MenuClickCallback? onClickMenu;
-
-  BuildContext context;
-
-  PopupMessageMenu({required this.context, this.onClickMenu});
-
-  void show(Offset offset) {
-    showMenu(
-      position: RelativeRect.fromLTRB(
-        offset.dx,
-        offset.dy,
-        MediaQuery.of(context).size.width - offset.dx,
-        MediaQuery.of(context).size.height - offset.dy,
-      ),
-      items: <PopupMenuEntry<MessageMenuItem>>[
-        const PopupMenuItem<MessageMenuItem>(
-          value: MessageMenuItem.reply,
-          child: ListTile(
-            horizontalTitleGap: 16,
-            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-            minVerticalPadding: 0,
-            leading: Icon(Icons.replay_outlined),
-            title: Text('Replay'),
-          ),
-        ),
-        const PopupMenuItem<MessageMenuItem>(
-            value: MessageMenuItem.edit,
-            child: ListTile(
-              horizontalTitleGap: 16,
-              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-              minVerticalPadding: 0,
-              leading: Icon(Icons.edit_outlined),
-              title: Text('Edit'),
-            )),
-        const PopupMenuItem<MessageMenuItem>(
-            value: MessageMenuItem.delete,
-            child: ListTile(
-              horizontalTitleGap: 16,
-              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-              minVerticalPadding: 0,
-              leading: Icon(Icons.delete_forever_outlined),
-              title: Text('Delete'),
-            )),
-        const PopupMenuItem<MessageMenuItem>(
-            value: MessageMenuItem.forward,
-            child: ListTile(
-              horizontalTitleGap: 16,
-              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-              minVerticalPadding: 0,
-              leading: Icon(Icons.forward_outlined),
-              title: Text('Forward'),
-            )),
-        const PopupMenuDivider(height: 0),
-        const PopupMenuItem<MessageMenuItem>(
-            value: MessageMenuItem.choose,
-            child: ListTile(
-              horizontalTitleGap: 16,
-              visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-              minVerticalPadding: 0,
-              leading: Icon(Icons.check_circle_outline),
-              title: Text('Choose'),
-            )),
-      ],
-      context: context,
-    ).then((selected) {
-      if (selected != null) onClickMenu?.call(selected);
-    });
   }
 }

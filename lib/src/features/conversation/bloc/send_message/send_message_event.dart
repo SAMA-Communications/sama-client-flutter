@@ -9,7 +9,7 @@ class SendMessageEvent extends Equatable {
 
 final class SendTextMessage extends SendMessageEvent {
   final String message;
-  final ChatMessage? replyMessage;
+  final MessageModel? replyMessage;
 
   const SendTextMessage(this.message, this.replyMessage);
 }
@@ -22,6 +22,24 @@ final class TextMessageChanged extends SendMessageEvent {
 
 final class TextMessageClear extends SendMessageEvent {
   const TextMessageClear();
+}
+
+final class _DraftMessageReceived extends SendMessageEvent {
+  const _DraftMessageReceived();
+}
+
+final class RemoveDraftMessage extends SendMessageEvent {
+  const RemoveDraftMessage();
+}
+
+final class AddReplyMessage extends SendMessageEvent {
+  final ChatMessage message;
+
+  const AddReplyMessage(this.message);
+}
+
+final class RemoveReplyMessage extends SendMessageEvent {
+  const RemoveReplyMessage();
 }
 
 // TODO RP maybe later move to separate bloc along with editMessage and deleteMessages

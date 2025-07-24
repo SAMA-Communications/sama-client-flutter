@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.12.0
+
+### Features
+- Implemented Typing status
+- Implemented Link preview for message
+- Implemented message Reply functionality
+
+### Improvements
+- Minor bug fixes and improvements
+
 ## 0.11.2
 
 ### Features:

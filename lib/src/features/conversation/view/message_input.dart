@@ -4,19 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../db/models/message_model.dart';
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
-import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
-import '../models/chat_message.dart';
 import 'media_sender.dart';
 import '../widgets/reply_box.dart';
 
 class MessageInput extends StatefulWidget {
   final String? sharedText;
-  final MessageModel? draftMessage;
-  final ChatMessage? replyMessage;
 
-  const MessageInput(
-      {super.key, this.sharedText, this.draftMessage, this.replyMessage});
+  const MessageInput({super.key, this.sharedText});
 
   @override
   State<StatefulWidget> createState() {
@@ -32,35 +27,47 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    var showReply = widget.replyMessage != null;
-    if (showReply) showReplyFocusNode.requestFocus();
-
+    var showReply = false;
     if (widget.sharedText != null) {
       BlocProvider.of<SendMessageBloc>(context)
           .add(TextMessageChanged(widget.sharedText!));
-    } else if (widget.draftMessage != null) {
-      textEditingController.text = widget.draftMessage!.body!;
-      BlocProvider.of<SendMessageBloc>(context)
-          .add(TextMessageChanged(widget.draftMessage!.body!));
     }
-    return BlocListener<SendMessageBloc, SendMessageState>(
-      listener: (context, state) {
-        if (state.status == SendMessageStatus.processing) {
-          textEditingController.clear();
-        } else if (state.status == SendMessageStatus.failure) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                  content: Text(state.errorMessage ??
-                      'Can\'t send message due to some error(s)')),
-            );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SendMessageBloc, SendMessageState>(
+          listener: (context, state) {
+            if (state.status == SendMessageStatus.processing) {
+              textEditingController.clear();
+            } else if (state.status == SendMessageStatus.failure) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                      content: Text(state.errorMessage ??
+                          'Can\'t send message due to some error(s)')),
+                );
+            }
+          },
+        ),
+        BlocListener<SendMessageBloc, SendMessageState>(
+          listenWhen: (previous, current) {
+            return (previous.draftMessage != current.draftMessage ||
+                    previous.replyMessage != current.replyMessage) &&
+                widget.sharedText == null;
+          },
+          listener: (context, state) {
+            showReply = state.replyMessage != null;
+            if (showReply) showReplyFocusNode.requestFocus();
+            if (state.draftMessage != null) {
+              textEditingController.text = state.draftMessage!.body!;
+            }
+          },
+        )
+      ],
       child: BlocBuilder<SendMessageBloc, SendMessageState>(
         builder: (rootContext, state) {
           return Column(mainAxisSize: MainAxisSize.min, children: [
-            if (showReply) ReplyBox(replyMessage: widget.replyMessage!),
+            if (showReply) ReplyBox(replyMessage: state.replyMessage!),
             Container(
               constraints: const BoxConstraints(maxHeight: 120.0),
               margin:
@@ -92,7 +99,7 @@ class _MessageInputState extends State<MessageInput> {
                                           currentConversation: rootContext
                                               .watch<SendMessageBloc>()
                                               .currentConversation,
-                                          replyMessage: widget.replyMessage),
+                                          replyMessage: state.replyMessage),
                                     ),
                                   );
                                 },
@@ -113,8 +120,9 @@ class _MessageInputState extends State<MessageInput> {
                       onChanged: (text) {
                         BlocProvider.of<SendMessageBloc>(rootContext)
                             .add(TextMessageChanged(text));
-                      BlocProvider.of<SendMessageBloc>(rootContext)
-                          .add(const SendTypingChanged());},
+                        BlocProvider.of<SendMessageBloc>(rootContext)
+                            .add(const SendTypingChanged());
+                      },
                     ),
                   ),
                   IconButton(
@@ -122,7 +130,7 @@ class _MessageInputState extends State<MessageInput> {
                     onPressed: state.isTextEmpty
                         ? null
                         : () => onSendChatMessage(rootContext,
-                            textEditingController.text, widget.replyMessage),
+                            textEditingController.text, state.replyMessage),
                     color: dullGray,
                   ),
                 ],
@@ -135,16 +143,14 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void onSendChatMessage(
-      BuildContext context, String text, ChatMessage? replyMessage) {
+      BuildContext context, String text, MessageModel? replyMessage) {
     BlocProvider.of<SendMessageBloc>(context)
         .add(SendTextMessage(text, replyMessage));
-    if (widget.draftMessage != null) {
-      BlocProvider.of<ConversationBloc>(context)
-          .add(const RemoveDraftMessage());
+    if (context.read<SendMessageBloc>().state.draftMessage != null) {
+      BlocProvider.of<SendMessageBloc>(context).add(const RemoveDraftMessage());
     }
-    if (widget.replyMessage != null) {
-      BlocProvider.of<ConversationBloc>(context)
-          .add(const RemoveReplyMessage());
+    if (context.read<SendMessageBloc>().state.replyMessage != null) {
+      BlocProvider.of<SendMessageBloc>(context).add(const RemoveReplyMessage());
     }
   }
 

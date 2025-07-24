@@ -7,6 +7,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
+import '../../../../db/models/message_model.dart';
 import '../../../../repository/conversation/conversation_repository.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../models/chat_message.dart';
@@ -43,11 +44,25 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<SendTextMessage>(
       _onSendTextMessage,
     );
+    on<_DraftMessageReceived>(
+      _onDraftMessageReceived,
+    );
+    on<RemoveDraftMessage>(
+      _onRemoveDraftMessage,
+    );
+    on<AddReplyMessage>(
+      _onAddSendReply,
+    );
+    on<RemoveReplyMessage>(
+      _onRemoveSendReply,
+    );
     on<SendStatusReadMessages>(
       _onSendStatusReadMessages,
     );
     on<SendTypingChanged>(_onSendTypingChanged,
         transformer: typingThrottleDroppable());
+
+    add(const _DraftMessageReceived());
   }
 
   Future<void> _onSendTextMessage(
@@ -78,6 +93,35 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     emit(state.copyWith(isTextEmpty: true, text: ''));
   }
 
+  Future<void> _onDraftMessageReceived(
+      _DraftMessageReceived event, Emitter<SendMessageState> emit) async {
+    var draftMsg = await messagesRepository.getMessageLocalByStatus(
+        currentConversation.id, ChatMessageStatus.draft.name);
+    if (draftMsg != null) {
+      emit(state.copyWith(
+          draftMessage: () => draftMsg,
+          isTextEmpty: draftMsg.body?.trim().isEmpty,
+          text: draftMsg.body,
+          replyMessage: () => draftMsg.replyMessage));
+      messagesRepository.deleteMessageLocal(draftMsg.id);
+    }
+  }
+
+  Future<void> _onRemoveDraftMessage(
+      RemoveDraftMessage event, Emitter<SendMessageState> emit) async {
+    emit(state.copyWith(draftMessage: () => null));
+  }
+
+  Future<void> _onAddSendReply(
+      AddReplyMessage event, Emitter<SendMessageState> emit) async {
+    emit(state.copyWith(replyMessage: () => event.message));
+  }
+
+  Future<void> _onRemoveSendReply(
+      RemoveReplyMessage event, Emitter<SendMessageState> emit) async {
+    emit(state.copyWith(replyMessage: () => null));
+  }
+
   Future<FutureOr<void>> _onSendStatusReadMessages(
       SendStatusReadMessages event, Emitter<SendMessageState> emit) async {
     try {
@@ -98,7 +142,8 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
 
   saveDraftIfExist() {
     if (state.text.isNotEmpty) {
-      messagesRepository.saveDraftMessage(state.text, currentConversation.id);
+      messagesRepository.saveDraftMessage(
+          state.text, currentConversation.id, state.replyMessage);
     }
   }
 
