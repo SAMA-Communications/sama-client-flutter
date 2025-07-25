@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../shared/ui/colors.dart';
 
@@ -31,6 +32,7 @@ class FocusedPopupMenu {
     Offset offset = renderBox.localToGlobal(Offset.zero);
     var childOffset = Offset(offset.dx, offset.dy);
 
+    HapticFeedback.vibrate();
     await Navigator.push(
         context,
         PageRouteBuilder(
