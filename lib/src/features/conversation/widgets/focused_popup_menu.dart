@@ -63,6 +63,7 @@ class FocusedMenuDetails extends StatelessWidget {
   final menuItemHeight = 45.0;
   final maxMenuWidth = 140.0;
   final topMenuPadding = 8;
+  final leftMenuPadding = 6;
   final horizontalMenuPadding = 50;
 
   const FocusedMenuDetails(
@@ -83,7 +84,7 @@ class FocusedMenuDetails extends StatelessWidget {
             maxMenuWidth +
             childSize.width -
             horizontalMenuPadding
-        : childOffset.dx + horizontalMenuPadding;
+        : childOffset.dx + horizontalMenuPadding + leftMenuPadding;
     final topOffset =
         (childOffset.dy + menuHeight + childSize.height) < size.height
             ? childOffset.dy + childSize.height + topMenuPadding
