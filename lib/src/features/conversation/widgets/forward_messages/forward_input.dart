@@ -50,8 +50,10 @@ class _ForwardInputState extends State<ForwardInput> {
                                   isScrollControlled: true,
                                   useSafeArea: false,
                                   context: context,
+                                  backgroundColor: black,
                                   builder: (BuildContext bc) {
                                     return Container(
+                                        color: lightWhite,
                                         margin: EdgeInsets.only(
                                             top: MediaQueryData.fromView(
                                                     View.of(context))
