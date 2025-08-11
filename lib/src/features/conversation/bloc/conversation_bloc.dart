@@ -271,8 +271,10 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Future<void> _onParticipantsReceived(
       ParticipantsReceived event, Emitter<ConversationState> emit) async {
-    var participants = await conversationRepository
-        .updateParticipants(currentConversation.copyWith());
+    var participants =
+        await conversationRepository.updateParticipants(currentConversation.id);
+    await conversationRepository.updateConversationLocal(
+        currentConversation.copyWith(participants: participants));
     if (currentConversation.opponent?.recentActivity == 0) {
       var index = participants
           .indexWhere((i) => i.id == currentConversation.opponent?.id);
