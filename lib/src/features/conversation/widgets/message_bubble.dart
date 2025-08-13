@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../db/models/user_model.dart';
@@ -6,6 +7,7 @@ import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
+import '../bloc/conversation_bloc.dart';
 
 class MessageBubble extends StatelessWidget {
   final UserModel sender;
@@ -25,6 +27,7 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var state = context.read<ConversationBloc>().state;
     return Container(
       margin: const EdgeInsets.only(left: 8.0, right: 8.0),
       child: Row(
@@ -36,14 +39,14 @@ class MessageBubble extends StatelessWidget {
           if (isLast && !isOwn)
             GestureDetector(
                 onTap: () => context.push(userInfoPath, extra: sender),
-                child:AvatarLetterIcon(
-              name: getUserName(sender),
-              lastName: sender.lastName,
-              size: const Size(40.0, 40.0),
-              backgroundColor: isOwn ? slateBlue : gainsborough,
-              avatar: sender.avatar,
-              isDeleted: isDeletedUser(sender),
-            )),
+                child: AvatarLetterIcon(
+                  name: getUserName(sender),
+                  lastName: sender.lastName,
+                  size: const Size(40.0, 40.0),
+                  backgroundColor: isOwn ? slateBlue : gainsborough,
+                  avatar: sender.avatar,
+                  isDeleted: isDeletedUser(sender),
+                )),
           if (!isLast && !isOwn)
             const SizedBox(
               width: 40,
@@ -54,7 +57,7 @@ class MessageBubble extends StatelessWidget {
                 isOwn: isOwn,
                 withTail: isLast),
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 300.0),
+              constraints: BoxConstraints(maxWidth: state.choose ? 250 : 300.0),
               margin: const EdgeInsets.symmetric(vertical: 4.0),
               padding: EdgeInsets.only(
                   left: isOwn ? 4.0 : 20.0,

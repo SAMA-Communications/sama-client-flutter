@@ -151,13 +151,12 @@ class FocusedMenuDetails extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 8.0, horizontal: 14),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    spacing: 25,
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     children: <Widget>[
-                                      item.title,
-                                      if (item.leadingIcon != null) ...[
-                                        item.leadingIcon!
-                                      ]
+                                      if (item.leadingIcon != null)
+                                        item.leadingIcon!,
+                                      item.title
                                     ],
                                   ),
                                 ))));

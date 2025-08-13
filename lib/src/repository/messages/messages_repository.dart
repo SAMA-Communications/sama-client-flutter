@@ -163,8 +163,8 @@ class MessagesRepository {
     _incomingMessagesController.add(msgModel.toChatMessage(true, true));
 
     return api.sendMessage(message: message).then((response) async {
-      var (result, msg) = response;
-      if (!result) {
+      var (serverMid, msg) = response;
+      if (serverMid == null) {
         var msgUpdated =
             msgModel.copyWith(rawStatus: ChatMessageStatus.pending.name);
         saveMessageLocal(msgUpdated);
@@ -195,6 +195,47 @@ class MessagesRepository {
 
   Future<bool> sendStatusReadMessages(String cid) {
     return api.readMessages(api.ReadMessagesStatus.fromJson({'cid': cid}));
+  }
+
+  Future<void> sendForwardMessages(
+      ConversationModel chat, Set<MessageModel> message) async {
+    for (var msg in message) {
+      await _sendForwardMessage(chat.id,
+          body: msg.body,
+          attachments: msg.attachments.map((a) => a.toAttachment()).toList(),
+          replyMessage: msg.replyMessage,
+          forwardedMessageId: msg.id);
+    }
+  }
+
+  Future<void> _sendForwardMessage(cid,
+      {String? body,
+      List<api.Attachment> attachments = const [],
+      MessageModel? replyMessage,
+      String? forwardedMessageId}) async {
+    var currentUser = await userRepository.getCurrentUser();
+    var message = api.Message(
+        cid: cid,
+        body: body?.trim(),
+        attachments: attachments.isNotEmpty ? attachments : null,
+        repliedMessageId: replyMessage?.id,
+        forwardedMessageId: forwardedMessageId,
+        from: currentUser?.id,
+        id: const Uuid().v1(),
+        rawStatus: ChatMessageStatus.none.name,
+        t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        createdAt: DateTime.now());
+
+    return api.sendMessage(message: message).then(
+      (response) {
+        var (serverMid, msg) = response;
+        var msgModel = message.toMessageModel(true, currentUser!).copyWith(
+            id: serverMid,
+            replyMessage: replyMessage,
+            rawStatus: ChatMessageStatus.sent.name);
+        _incomingMessagesController.add(msgModel.toChatMessage(true, true));
+      },
+    );
   }
 
   Future<MessageModel> saveMessageLocal(MessageModel message) async {

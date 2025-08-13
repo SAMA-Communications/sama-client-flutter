@@ -281,7 +281,7 @@ class DatabaseService {
         .query(MessageModel_.cid
             .equals(cid)
             .and(MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now()))
-            .and(MessageModel_.isTempReplied.isNull())
+            .and(MessageModel_.isTempReplied.isNull()) //hide Replied messages, that's not loaded by pagination
             .and(MessageModel_.rawStatus
                 .notEquals(ChatMessageStatus.draft.name) //hide draft messages
                 .or(MessageModel_.rawStatus.isNull())))

@@ -92,7 +92,7 @@
     },
     {
       "id": "11:6168919874786736956",
-      "lastPropertyId": "14:1893283248997063821",
+      "lastPropertyId": "15:4095866355783119704",
       "name": "MessageModel",
       "properties": [
         {
@@ -173,6 +173,11 @@
           "id": "14:1893283248997063821",
           "name": "isTempReplied",
           "type": 1
+        },
+        {
+          "id": "15:4095866355783119704",
+          "name": "forwardedMessageId",
+          "type": 9
         }
       ],
       "relations": [
