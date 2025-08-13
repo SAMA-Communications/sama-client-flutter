@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../db/models/user_model.dart';
@@ -7,7 +6,6 @@ import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
-import '../bloc/conversation_bloc.dart';
 
 class MessageBubble extends StatelessWidget {
   final UserModel sender;
@@ -27,7 +25,6 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.read<ConversationBloc>().state;
     return Container(
       margin: const EdgeInsets.only(left: 8.0, right: 8.0),
       child: Row(
@@ -51,34 +48,36 @@ class MessageBubble extends StatelessWidget {
             const SizedBox(
               width: 40,
             ),
-          CustomPaint(
-            painter: CustomChatBubble(
-                color: isOwn ? slateBlue : gainsborough,
-                isOwn: isOwn,
-                withTail: isLast),
-            child: Container(
-              constraints: BoxConstraints(maxWidth: state.choose ? 250 : 300.0),
-              margin: const EdgeInsets.symmetric(vertical: 4.0),
-              padding: EdgeInsets.only(
-                  left: isOwn ? 4.0 : 20.0,
-                  right: isOwn ? 15.0 : 4.0,
-                  top: 4.0,
-                  bottom: 4.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (isFirst && !isOwn)
-                    Text(
-                      getUserName(sender),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isOwn ? gainsborough : slateBlue,
+          Flexible(
+            child: CustomPaint(
+              painter: CustomChatBubble(
+                  color: isOwn ? slateBlue : gainsborough,
+                  isOwn: isOwn,
+                  withTail: isLast),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 300.0),
+                margin: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: EdgeInsets.only(
+                    left: isOwn ? 4.0 : 20.0,
+                    right: isOwn ? 15.0 : 4.0,
+                    top: 4.0,
+                    bottom: 4.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isFirst && !isOwn)
+                      Text(
+                        getUserName(sender),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isOwn ? gainsborough : slateBlue,
+                        ),
                       ),
-                    ),
-                  child,
-                ],
+                    child,
+                  ],
+                ),
               ),
             ),
           ),

@@ -33,26 +33,45 @@ class LinkPreviewWidget extends StatelessWidget {
             builder:
                 (BuildContext context, AsyncSnapshot<LinkPreview> snapshot) {
               if (snapshot.hasData) {
-                return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                          width: double.infinity,
-                          height: 100.0,
-                          child: getPreviewWidget(snapshot.data!)),
-                      const SizedBox(height: 10),
-                      Text(
-                        softWrap: true,
-                        textAlign: TextAlign.justify,
-                        snapshot.data!.description ?? '',
-                        maxLines: 4,
-                        style: const TextStyle(
-                            color: dullGray,
-                            fontSize: 12.0,
-                            overflow: TextOverflow.ellipsis),
-                      ),
-                      const SizedBox(height: 10),
-                    ]);
+                return Card(
+                  color: lightMallow,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.only(
+                                left: 4, top: 4, right: 4),
+                            child: Text(
+                              softWrap: true,
+                              textAlign: TextAlign.justify,
+                              snapshot.data!.title ?? '',
+                              maxLines: 1,
+                              style: const TextStyle(
+                                  color: dullGray,
+                                  fontSize: 15.0,
+                                  overflow: TextOverflow.ellipsis),
+                            )),
+                        SizedBox(
+                            width: double.infinity,
+                            height: 120.0,
+                            child: getPreviewWidget(snapshot.data!)),
+                        Padding(
+                            padding: const EdgeInsets.only(
+                                left: 4, bottom: 4, right: 4),
+                            child: Text(
+                              softWrap: true,
+                              textAlign: TextAlign.justify,
+                              snapshot.data!.description ?? '',
+                              maxLines: 2,
+                              style: const TextStyle(
+                                  color: dullGray,
+                                  fontSize: 12.0,
+                                  overflow: TextOverflow.ellipsis),
+                            )),
+                      ]),
+                );
               } else {
                 return const SizedBox.shrink();
               }
@@ -100,14 +119,6 @@ class LinkPreviewWidget extends StatelessWidget {
                 color: dullGray,
                 size: 60.0,
               ),
-        Text(
-          softWrap: true,
-          textAlign: TextAlign.justify,
-          data.title ?? '',
-          maxLines: 1,
-          style: const TextStyle(
-              color: dullGray, fontSize: 15.0, overflow: TextOverflow.ellipsis),
-        ),
         if (data.fileSize != null)
           Text(
             formatBytes(data.fileSize!),
