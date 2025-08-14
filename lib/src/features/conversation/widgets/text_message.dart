@@ -38,10 +38,6 @@ class TextMessage extends StatelessWidget {
   WidgetSpan buildLinkPreviewComponent(String text, String linkToOpen) =>
       WidgetSpan(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        LinkPreviewWidget(
-            link: linkToOpen,
-            errorBody: 'No description available',
-            key: Key(linkToOpen)),
         buildLinkComponent(
             linkToOpen,
             Align(
@@ -61,6 +57,10 @@ class TextMessage extends StatelessWidget {
                     ],
                   ),
                 ))),
+        LinkPreviewWidget(
+            link: linkToOpen,
+            errorBody: 'No description available',
+            key: Key(linkToOpen)),
         const SizedBox(height: 4),
       ]));
 

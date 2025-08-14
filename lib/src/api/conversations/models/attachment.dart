@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../db/models/attachment_model.dart';
+
 class Attachment extends Equatable {
   final String? fileId; //file_id
   final String? fileName; //file_name
@@ -50,4 +52,17 @@ class Attachment extends Equatable {
       ];
 
   static const empty = Attachment();
+}
+
+extension AttachmentExtension on AttachmentModel {
+  Attachment toAttachment() {
+    return Attachment(
+        fileId: fileId,
+        fileName: fileName,
+        fileBlurHash: fileBlurHash,
+        // fileUrl: url, // not available on server
+        fileContentType: contentType,
+        fileHeight: fileHeight,
+        fileWidth: fileWidth);
+  }
 }

@@ -36,46 +36,48 @@ class MessageBubble extends StatelessWidget {
           if (isLast && !isOwn)
             GestureDetector(
                 onTap: () => context.push(userInfoPath, extra: sender),
-                child:AvatarLetterIcon(
-              name: getUserName(sender),
-              lastName: sender.lastName,
-              size: const Size(40.0, 40.0),
-              backgroundColor: isOwn ? slateBlue : gainsborough,
-              avatar: sender.avatar,
-              isDeleted: isDeletedUser(sender),
-            )),
+                child: AvatarLetterIcon(
+                  name: getUserName(sender),
+                  lastName: sender.lastName,
+                  size: const Size(40.0, 40.0),
+                  backgroundColor: isOwn ? slateBlue : gainsborough,
+                  avatar: sender.avatar,
+                  isDeleted: isDeletedUser(sender),
+                )),
           if (!isLast && !isOwn)
             const SizedBox(
               width: 40,
             ),
-          CustomPaint(
-            painter: CustomChatBubble(
-                color: isOwn ? slateBlue : gainsborough,
-                isOwn: isOwn,
-                withTail: isLast),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 300.0),
-              margin: const EdgeInsets.symmetric(vertical: 4.0),
-              padding: EdgeInsets.only(
-                  left: isOwn ? 4.0 : 20.0,
-                  right: isOwn ? 15.0 : 4.0,
-                  top: 4.0,
-                  bottom: 4.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (isFirst && !isOwn)
-                    Text(
-                      getUserName(sender),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isOwn ? gainsborough : slateBlue,
+          Flexible(
+            child: CustomPaint(
+              painter: CustomChatBubble(
+                  color: isOwn ? slateBlue : gainsborough,
+                  isOwn: isOwn,
+                  withTail: isLast),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 300.0),
+                margin: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: EdgeInsets.only(
+                    left: isOwn ? 4.0 : 20.0,
+                    right: isOwn ? 15.0 : 4.0,
+                    top: 4.0,
+                    bottom: 4.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isFirst && !isOwn)
+                      Text(
+                        getUserName(sender),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isOwn ? gainsborough : slateBlue,
+                        ),
                       ),
-                    ),
-                  child,
-                ],
+                    child,
+                  ],
+                ),
               ),
             ),
           ),

@@ -14,19 +14,23 @@ final class ConversationState extends Equatable {
     required this.conversation,
     this.status = ConversationStatus.initial,
     this.messages = const <ChatMessage>[],
+    this.selectedMessages = const SelectedMessages.pure(),
     this.participants = const <UserModel>{},
     this.hasReachedMax = false,
     this.initial = false,
     this.typingStatus,
     this.replyIdToScroll = '',
+    this.choose = false,
   });
 
   final ConversationModel conversation;
   final ConversationStatus status;
   final List<ChatMessage> messages;
+  final SelectedMessages selectedMessages;
   final Set<UserModel> participants;
   final bool hasReachedMax;
   final bool initial;
+  final bool choose;
   final TypingMessageStatus? typingStatus;
   final String replyIdToScroll;
 
@@ -34,9 +38,11 @@ final class ConversationState extends Equatable {
     ConversationModel? conversation,
     ConversationStatus? status,
     List<ChatMessage>? messages,
+    SelectedMessages? selectedMessages,
     Set<UserModel>? participants,
     bool? hasReachedMax,
     bool? initial,
+    bool? choose,
     String? replyIdToScroll,
     TypingMessageStatus? typingStatus,
   }) {
@@ -44,9 +50,11 @@ final class ConversationState extends Equatable {
       conversation: conversation ?? this.conversation,
       status: status ?? this.status,
       messages: messages ?? this.messages,
+      selectedMessages: selectedMessages ?? this.selectedMessages,
       participants: participants ?? this.participants,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
+      choose: choose ?? this.choose,
       typingStatus: typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
     );
@@ -62,8 +70,11 @@ final class ConversationState extends Equatable {
         conversation,
         status,
         messages,
+        selectedMessages,
         hasReachedMax,
         initial,
+        choose,
+        replyIdToScroll,
         replyIdToScroll,
         participants,
         typingStatus

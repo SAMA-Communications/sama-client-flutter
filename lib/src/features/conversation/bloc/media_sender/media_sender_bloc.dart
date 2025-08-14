@@ -12,6 +12,7 @@ import '../../../../db/models/message_model.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../../../shared/utils/media_utils.dart';
+import '../../models/chat_message.dart';
 
 part 'media_sender_event.dart';
 

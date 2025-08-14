@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../shared/ui/colors.dart';
 
@@ -31,6 +32,7 @@ class FocusedPopupMenu {
     Offset offset = renderBox.localToGlobal(Offset.zero);
     var childOffset = Offset(offset.dx, offset.dy);
 
+    HapticFeedback.vibrate();
     await Navigator.push(
         context,
         PageRouteBuilder(
@@ -61,6 +63,7 @@ class FocusedMenuDetails extends StatelessWidget {
   final menuItemHeight = 45.0;
   final maxMenuWidth = 140.0;
   final topMenuPadding = 8;
+  final leftMenuPadding = 6;
   final horizontalMenuPadding = 50;
 
   const FocusedMenuDetails(
@@ -81,7 +84,7 @@ class FocusedMenuDetails extends StatelessWidget {
             maxMenuWidth +
             childSize.width -
             horizontalMenuPadding
-        : childOffset.dx + horizontalMenuPadding;
+        : childOffset.dx + horizontalMenuPadding + leftMenuPadding;
     final topOffset =
         (childOffset.dy + menuHeight + childSize.height) < size.height
             ? childOffset.dy + childSize.height + topMenuPadding
@@ -151,13 +154,12 @@ class FocusedMenuDetails extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 8.0, horizontal: 14),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    spacing: 25,
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     children: <Widget>[
-                                      item.title,
-                                      if (item.leadingIcon != null) ...[
-                                        item.leadingIcon!
-                                      ]
+                                      if (item.leadingIcon != null)
+                                        item.leadingIcon!,
+                                      item.title
                                     ],
                                   ),
                                 ))));

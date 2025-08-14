@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sama_client_flutter/src/shared/widget/typing_indicator.dart';
 
 import '../../../api/api.dart';
 import '../../../db/models/conversation_model.dart';
@@ -9,16 +8,18 @@ import '../../../features/conversations_list/widgets/avatar_group_icon.dart';
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../../../shared/widget/typing_indicator.dart';
 import '../bloc/conversations_list_bloc.dart';
 import 'avatar_letter_icon.dart';
 import 'package:intl/intl.dart';
 
 class ConversationListItem extends StatelessWidget {
   const ConversationListItem(
-      {required this.conversation, this.typingStatus, super.key});
+      {required this.conversation, this.typingStatus, this.onTap, super.key});
 
   final ConversationModel conversation;
   final TypingChatStatus? typingStatus;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +44,12 @@ class ConversationListItem extends StatelessWidget {
         isThreeLine: true,
         dense: false,
         contentPadding: const EdgeInsets.fromLTRB(18.0, 0, 18.0, 4.0),
-        onTap: () {
-          context.go('$conversationListScreenPath/$conversationScreenSubPath',
-              extra: conversation);
-        },
+        onTap: onTap ??
+            () {
+              context.go(
+                  '$conversationListScreenPath/$conversationScreenSubPath',
+                  extra: conversation);
+            },
       ),
     );
   }

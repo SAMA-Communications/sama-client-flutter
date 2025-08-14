@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0
+
+### Features
+- Implemented Forward messages feature
+- Improved Link preview functionality
+
 ## 0.12.0
 
 ### Features
