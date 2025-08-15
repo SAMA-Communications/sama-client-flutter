@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../db/models/message_model.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/utils/string_utils.dart';
-import '../bloc/send_message/send_message_bloc.dart';
 
-class ReplyBox extends StatelessWidget {
-  final MessageModel replyMessage;
+class HeaderInputBox extends StatelessWidget {
+  final MessageModel message;
+  final String title;
+  final VoidCallback? onTap;
 
-  const ReplyBox({super.key, required this.replyMessage});
+  const HeaderInputBox(
+      {super.key,
+      required this.message,
+      required this.title,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,7 @@ class ReplyBox extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Reply to ${replyMessage.isOwn ? 'you' : getUserName(replyMessage.sender)}',
+                  title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -51,17 +54,14 @@ class ReplyBox extends StatelessWidget {
                   color: black,
                   size: 20,
                 ),
-                onPressed: () {
-                  BlocProvider.of<SendMessageBloc>(context)
-                      .add(const RemoveReplyMessage());
-                },
+                onPressed: onTap,
               ),
             ],
           ),
           Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 6),
-            child: ReplyMessageView(
-              message: replyMessage,
+            child: MessageView(
+              message: message,
             ),
           ),
         ],
@@ -70,8 +70,8 @@ class ReplyBox extends StatelessWidget {
   }
 }
 
-class ReplyMessageView extends StatelessWidget {
-  const ReplyMessageView({super.key, required this.message});
+class MessageView extends StatelessWidget {
+  const MessageView({super.key, required this.message});
 
   final MessageModel message;
 

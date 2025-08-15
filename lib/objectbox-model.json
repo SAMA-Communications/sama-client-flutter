@@ -92,7 +92,7 @@
     },
     {
       "id": "11:6168919874786736956",
-      "lastPropertyId": "15:4095866355783119704",
+      "lastPropertyId": "16:1698414372814552795",
       "name": "MessageModel",
       "properties": [
         {
@@ -178,6 +178,11 @@
           "id": "15:4095866355783119704",
           "name": "forwardedMessageId",
           "type": 9
+        },
+        {
+          "id": "16:1698414372814552795",
+          "name": "isEdited",
+          "type": 1
         }
       ],
       "relations": [

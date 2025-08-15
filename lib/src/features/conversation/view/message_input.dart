@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../db/models/message_model.dart';
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/string_utils.dart';
 import '../bloc/send_message/send_message_bloc.dart';
+import '../widgets/header_input_box.dart';
 import 'media_sender.dart';
-import '../widgets/reply_box.dart';
 
 class MessageInput extends StatefulWidget {
   final String? sharedText;
@@ -23,11 +23,12 @@ class _MessageInputState extends State<MessageInput> {
   late final TextEditingController textEditingController =
       TextEditingController(text: widget.sharedText);
 
-  final FocusNode showReplyFocusNode = FocusNode();
+  final FocusNode showFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     var showReply = false;
+    var showEdit = false;
     if (widget.sharedText != null) {
       BlocProvider.of<SendMessageBloc>(context)
           .add(TextMessageChanged(widget.sharedText!));
@@ -52,12 +53,20 @@ class _MessageInputState extends State<MessageInput> {
         BlocListener<SendMessageBloc, SendMessageState>(
           listenWhen: (previous, current) {
             return (previous.draftMessage != current.draftMessage ||
-                    previous.replyMessage != current.replyMessage) &&
+                    previous.replyMessage != current.replyMessage ||
+                    previous.editMessage != current.editMessage) &&
                 widget.sharedText == null;
           },
           listener: (context, state) {
             showReply = state.replyMessage != null;
-            if (showReply) showReplyFocusNode.requestFocus();
+            if (showReply) showFocusNode.requestFocus();
+
+            showEdit = state.editMessage != null;
+            if (showEdit) {
+              showFocusNode.requestFocus();
+              textEditingController.text = state.editMessage!.body!;
+            }
+
             if (state.draftMessage != null) {
               textEditingController.text = state.draftMessage!.body!;
             }
@@ -67,7 +76,25 @@ class _MessageInputState extends State<MessageInput> {
       child: BlocBuilder<SendMessageBloc, SendMessageState>(
         builder: (rootContext, state) {
           return Column(mainAxisSize: MainAxisSize.min, children: [
-            if (showReply) ReplyBox(replyMessage: state.replyMessage!),
+            if (showReply)
+              HeaderInputBox(
+                  message: state.replyMessage!,
+                  title:
+                      'Reply to ${state.replyMessage!.isOwn ? 'you' : getUserName(state.replyMessage!.sender)}',
+                  onTap: () {
+                    BlocProvider.of<SendMessageBloc>(context)
+                        .add(const RemoveReplyMessage());
+                  }),
+            if (showEdit)
+              HeaderInputBox(
+                message: state.editMessage!,
+                title: 'Editing',
+                onTap: () {
+                  textEditingController.clear();
+                  BlocProvider.of<SendMessageBloc>(context)
+                      .add(const RemoveEditMessage());
+                },
+              ),
             Container(
               constraints: const BoxConstraints(maxHeight: 120.0),
               margin:
@@ -108,7 +135,7 @@ class _MessageInputState extends State<MessageInput> {
                   ),
                   Flexible(
                     child: TextField(
-                      focusNode: showReplyFocusNode,
+                      focusNode: showFocusNode,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       style: const TextStyle(fontSize: 15.0),
@@ -129,8 +156,8 @@ class _MessageInputState extends State<MessageInput> {
                     icon: const Icon(Icons.send),
                     onPressed: state.isTextEmpty
                         ? null
-                        : () => onSendChatMessage(rootContext,
-                            textEditingController.text, state.replyMessage),
+                        : () => onSendChatMessage(
+                            rootContext, textEditingController.text),
                     color: dullGray,
                   ),
                 ],
@@ -142,21 +169,22 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
-  void onSendChatMessage(
-      BuildContext context, String text, MessageModel? replyMessage) {
-    BlocProvider.of<SendMessageBloc>(context)
-        .add(SendTextMessage(text, replyMessage));
+  void onSendChatMessage(BuildContext context, String text) {
+    BlocProvider.of<SendMessageBloc>(context).add(SendTextMessage(text));
     if (context.read<SendMessageBloc>().state.draftMessage != null) {
       BlocProvider.of<SendMessageBloc>(context).add(const RemoveDraftMessage());
     }
     if (context.read<SendMessageBloc>().state.replyMessage != null) {
       BlocProvider.of<SendMessageBloc>(context).add(const RemoveReplyMessage());
     }
+    if (context.read<SendMessageBloc>().state.editMessage != null) {
+      BlocProvider.of<SendMessageBloc>(context).add(const RemoveEditMessage());
+    }
   }
 
   @override
   void dispose() {
-    showReplyFocusNode.dispose();
+    showFocusNode.dispose();
     super.dispose();
   }
 }

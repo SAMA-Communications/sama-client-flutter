@@ -23,6 +23,7 @@ class MessagesRepository {
   StreamSubscription<api.Message>? incomingMessagesSubscription;
   StreamSubscription<api.MessageSendStatus>? sentMessageSubscription;
   StreamSubscription<api.MessageSendStatus>? readMessagesSubscription;
+  StreamSubscription<api.MessageSendStatus>? editMessageSubscription;
   StreamSubscription<api.TypingStatus>? typingMessageSubscription;
 
   final StreamController<ChatMessage> _incomingMessagesController =
@@ -193,6 +194,23 @@ class MessagesRepository {
     });
   }
 
+  Future<void> editMessage(String body, MessageModel? editMessage) async {
+    var editMessageStatus =
+        api.EditMessageStatus(editMessage!.id, body, editMessage.from);
+
+    return api.editMessage(editMessage.id, body).then((response) async {
+      if (response) {
+        var msgUpdated = editMessage.copyWith(body: body, isEdited: true);
+        saveMessageLocal(msgUpdated);
+        _statusMessagesController.add(editMessageStatus);
+      }
+    }).catchError((onError) {
+      if (onError is api.ResponseException) {
+        throw onError;
+      }
+    });
+  }
+
   Future<bool> sendStatusReadMessages(String cid) {
     return api.readMessages(api.ReadMessagesStatus.fromJson({'cid': cid}));
   }
@@ -304,6 +322,18 @@ class MessagesRepository {
       _statusMessagesController.add(readStatus);
     });
 
+    editMessageSubscription = api
+        .MessagesManager.instance.editMessageStatusStream
+        .listen((editStatus) async {
+      var message = await getMessageLocalById(editStatus.messageId);
+      if (message != null) {
+        await updateMessageLocal(
+            message.copyWith(body: editStatus.newBody, isEdited: true));
+      }
+
+      _statusMessagesController.add(editStatus);
+    });
+
     typingMessageSubscription = api.TypingManager.instance.typingStatusStream
         .listen((typingStatus) async {
       _typingMessageController.add(typingStatus);
@@ -314,6 +344,7 @@ class MessagesRepository {
     incomingMessagesSubscription?.cancel();
     sentMessageSubscription?.cancel();
     readMessagesSubscription?.cancel();
+    editMessageSubscription?.cancel();
     typingMessageSubscription?.cancel();
     api.MessagesManager.instance.destroy();
     api.TypingManager.instance.destroy();

@@ -13,6 +13,7 @@ class Message extends Equatable {
   final List<Attachment>? attachments; //attachments
   final int? t; //t
   final DateTime? createdAt; //created_at
+  final DateTime? updatedAt; //updated_at
   final Map<String, dynamic>? extension; //x
 
   const Message({
@@ -25,6 +26,7 @@ class Message extends Equatable {
     this.body,
     this.attachments,
     this.createdAt,
+    this.updatedAt,
     this.t,
     this.extension,
   });
@@ -43,6 +45,7 @@ class Message extends Equatable {
                 .map((element) => Attachment.fromJson(element))
                 .toList(),
         createdAt = DateTime.tryParse(json['created_at'].toString()),
+        updatedAt = DateTime.tryParse(json['updated_at'].toString()),
         t = json['t'],
         extension = json['x'];
 
@@ -66,6 +69,7 @@ class Message extends Equatable {
     List<Attachment>? attachments,
     int? t,
     DateTime? createdAt,
+    DateTime? updatedAt,
     Map<String, dynamic>? extension,
   }) {
     return Message(
@@ -79,6 +83,7 @@ class Message extends Equatable {
       attachments: attachments ?? this.attachments,
       t: t ?? this.t,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       extension: extension ?? this.extension,
     );
   }

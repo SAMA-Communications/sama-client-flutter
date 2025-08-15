@@ -111,7 +111,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(11, 6168919874786736956),
       name: 'MessageModel',
-      lastPropertyId: const obx_int.IdUid(15, 4095866355783119704),
+      lastPropertyId: const obx_int.IdUid(16, 1698414372814552795),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -193,6 +193,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(15, 4095866355783119704),
             name: 'forwardedMessageId',
             type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(16, 1698414372814552795),
+            name: 'isEdited',
+            type: 1,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[
@@ -666,7 +671,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final forwardedMessageIdOffset = object.forwardedMessageId == null
               ? null
               : fbb.writeString(object.forwardedMessageId!);
-          fbb.startTable(16);
+          fbb.startTable(17);
           fbb.addInt64(0, object.bid ?? 0);
           fbb.addOffset(1, idOffset);
           fbb.addOffset(2, fromOffset);
@@ -682,6 +687,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addBool(12, object.isOwn);
           fbb.addBool(13, object.isTempReplied);
           fbb.addOffset(14, forwardedMessageIdOffset);
+          fbb.addBool(15, object.isEdited);
           fbb.finish(fbb.endTable());
           return object.bid ?? 0;
         },
@@ -717,6 +723,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 16);
           final isTempRepliedParam =
               const fb.BoolReader().vTableGetNullable(buffer, rootOffset, 30);
+          final isEditedParam =
+              const fb.BoolReader().vTableGetNullable(buffer, rootOffset, 34);
           final object = MessageModel(
               bid: bidParam,
               id: idParam,
@@ -729,7 +737,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               body: bodyParam,
               createdAt: createdAtParam,
               t: tParam,
-              isTempReplied: isTempRepliedParam)
+              isTempReplied: isTempRepliedParam,
+              isEdited: isEditedParam)
             ..dbExtension = const fb.StringReader(asciiOptimization: true)
                 .vTableGetNullable(buffer, rootOffset, 20);
           object.replyMessageBind.targetId =
@@ -1054,6 +1063,10 @@ class MessageModel_ {
   /// See [MessageModel.forwardedMessageId].
   static final forwardedMessageId =
       obx.QueryStringProperty<MessageModel>(_entities[2].properties[14]);
+
+  /// See [MessageModel.isEdited].
+  static final isEdited =
+      obx.QueryBooleanProperty<MessageModel>(_entities[2].properties[15]);
 
   /// see [MessageModel.attachments]
   static final attachments =

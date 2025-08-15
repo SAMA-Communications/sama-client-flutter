@@ -52,10 +52,10 @@ class FailedMessagesStatus implements MessageSendStatus {
       : messageId = json['mid'];
 }
 
-class EditMessageStatus {
+class EditMessageStatus implements MessageSendStatus {
   final String messageId; // id
   final String newBody; // body
-  final String? from;
+  final String from; // body
 
   EditMessageStatus(this.messageId, this.newBody, this.from);
 
@@ -64,11 +64,8 @@ class EditMessageStatus {
         newBody = json['body'],
         from = json['from'];
 
-  Map<String, dynamic> toJson() => {
-        'id': messageId,
-        'body': newBody,
-        if (from != null) 'from': from,
-      };
+  Map<String, dynamic> toJson() =>
+      {'id': messageId, 'body': newBody, 'from': from};
 }
 
 class DeleteMessagesStatus extends MessageStatus {
