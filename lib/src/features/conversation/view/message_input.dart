@@ -84,7 +84,8 @@ class _MessageInputState extends State<MessageInput> {
                   onTap: () {
                     BlocProvider.of<SendMessageBloc>(context)
                         .add(const RemoveReplyMessage());
-                  }),
+                  },
+                  icon: const Icon(Icons.replay_outlined)),
             if (showEdit)
               HeaderInputBox(
                 message: state.editMessage!,
@@ -94,6 +95,7 @@ class _MessageInputState extends State<MessageInput> {
                   BlocProvider.of<SendMessageBloc>(context)
                       .add(const RemoveEditMessage());
                 },
+                icon: const Icon(Icons.edit_outlined),
               ),
             Container(
               constraints: const BoxConstraints(maxHeight: 120.0),

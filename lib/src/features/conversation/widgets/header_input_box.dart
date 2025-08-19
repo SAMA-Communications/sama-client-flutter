@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../../../db/models/message_model.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/widget/vertical_line.dart';
 
 class HeaderInputBox extends StatelessWidget {
   final MessageModel message;
   final String title;
   final VoidCallback? onTap;
+  final Widget icon;
 
   const HeaderInputBox(
       {super.key,
       required this.message,
       required this.title,
-      required this.onTap});
+      required this.onTap,
+      required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -23,49 +26,63 @@ class HeaderInputBox extends StatelessWidget {
         color: gainsborough,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      child: IntrinsicHeight(
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: slateBlue,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.25,
+          icon,
+          const VerticalLine(
+            rightPadding: 10,
+            leftPadding: 10,
+            verticalBarColor: slateBlue,
+          ),
+          Expanded(
+            // add this
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: slateBlue,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.25,
+                      ),
+                    ),
+                    IconButton(
+                      style: TextButton.styleFrom(
+                          minimumSize: Size.zero,
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      alignment: Alignment.topRight,
+                      // padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                      icon: const Icon(
+                        Icons.close,
+                        color: black,
+                        size: 20,
+                      ),
+                      onPressed: onTap,
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, bottom: 4),
+                  child: MessageView(
+                    message: message,
                   ),
                 ),
-              ),
-              IconButton(
-                style: TextButton.styleFrom(
-                    minimumSize: Size.zero,
-                    padding: EdgeInsets.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                alignment: Alignment.topRight,
-                // padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                icon: const Icon(
-                  Icons.close,
-                  color: black,
-                  size: 20,
-                ),
-                onPressed: onTap,
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10, bottom: 6),
-            child: MessageView(
-              message: message,
+              ],
             ),
-          ),
+          )
         ],
-      ),
+      )),
     );
   }
 }
