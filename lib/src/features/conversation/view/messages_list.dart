@@ -268,7 +268,7 @@ class MessageItem extends StatelessWidget {
                                   .read<SendMessageBloc>()
                                   .add(AddReplyMessage(message));
                             }),
-                        if (message.isOwn)
+                        if (message.isOwn && !message.hasAttachments())
                           FocusedPopupMenuItem(
                               leadingIcon: const Icon(Icons.edit_outlined),
                               title: const Text('Edit'),

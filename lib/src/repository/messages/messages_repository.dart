@@ -245,13 +245,14 @@ class MessagesRepository {
         createdAt: DateTime.now());
 
     return api.sendMessage(message: message).then(
-      (response) {
+      (response) async {
         var (serverMid, msg) = response;
         var msgModel = message.toMessageModel(true, currentUser!).copyWith(
             id: serverMid,
             replyMessage: replyMessage,
             rawStatus: ChatMessageStatus.sent.name);
-        _incomingMessagesController.add(msgModel.toChatMessage(true, true));
+        var msgUpdated = await saveMessageLocal(msgModel);
+        _incomingMessagesController.add(msgUpdated.toChatMessage(true, true));
       },
     );
   }
