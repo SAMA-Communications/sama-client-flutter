@@ -78,6 +78,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<_EditStatusReceived>(
       _onEditStatusReceived,
     );
+    on<_DeleteStatusReceived>(
+      _onDeleteStatusReceived,
+    );
     on<_SentStatusReceived>(
       _onSentStatusReceived,
     );
@@ -119,6 +122,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<SelectedChatsRemoved>(
       onSelectedChatsRemoved,
     );
+    on<DeleteMessages>(
+      _onDeleteMessages,
+    );
 
     add(const ParticipantsReceived());
 
@@ -146,6 +152,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
           break;
         case EditMessageStatus():
           add(_EditStatusReceived(status));
+          break;
+        case DeleteMessagesStatus():
+          add(_DeleteStatusReceived(status));
           break;
         case SentMessageStatus():
           add(_SentStatusReceived(status));
@@ -437,6 +446,16 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(messages: messages));
   }
 
+  Future<void> _onDeleteStatusReceived(
+      _DeleteStatusReceived event, Emitter<ConversationState> emit) async {
+    var messages = [...state.messages];
+    var messagesMap = {}..addEntries(messages.map((m) => MapEntry(m.id, m)));
+    event.status.msgIds?.forEach((id) {
+      messages.remove(messagesMap[id]);
+    });
+    emit(state.copyWith(messages: messages));
+  }
+
   FutureOr<void> _onSentStatusReceived(
       _SentStatusReceived event, Emitter<ConversationState> emit) async {
     var messages = [...state.messages];
@@ -474,6 +493,16 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     });
     await messagesRepository.updateMessagesLocal(msgListUpdated);
     emit(state.copyWith(messages: messages.values.toList()));
+  }
+
+  FutureOr<void> _onDeleteMessages(
+      DeleteMessages event, Emitter<ConversationState> emit) async {
+    var messages = [...state.messages];
+    var msgIdsToDelete = event.messages.map((m) => m.id).toList();
+    messagesRepository
+        .deleteMessage(currentConversation.id, msgIdsToDelete, event.type);
+
+    // emit(state.copyWith(messages: messages));
   }
 
   Future<void> _onFailedStatusReceived(

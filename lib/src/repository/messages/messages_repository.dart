@@ -24,6 +24,7 @@ class MessagesRepository {
   StreamSubscription<api.MessageSendStatus>? sentMessageSubscription;
   StreamSubscription<api.MessageSendStatus>? readMessagesSubscription;
   StreamSubscription<api.MessageSendStatus>? editMessageSubscription;
+  StreamSubscription<api.MessageSendStatus>? deletedMessageSubscription;
   StreamSubscription<api.TypingStatus>? typingMessageSubscription;
 
   final StreamController<ChatMessage> _incomingMessagesController =
@@ -60,7 +61,7 @@ class MessagesRepository {
       createCall: () => _fetchMessages(chat, ltDate: ltDate, gtTime: gtTime),
       saveCallResult: localDatasource.saveMessagesLocal,
       processResponse: (data) async {
-        return buildChatMessageModels(chat, data);
+        return buildChatMessageModels(data);
       },
     );
   }
@@ -92,10 +93,9 @@ class MessagesRepository {
     return buildMessageModels(chat, messages);
   }
 
-  Future<List<ChatMessage>> getStoredMessagesByIds(
-      ConversationModel chat, List<String> ids) async {
+  Future<List<ChatMessage>> getStoredMessagesByIds(List<String> ids) async {
     var messages = await localDatasource.getMessagesLocal(ids);
-    return buildChatMessageModels(chat, messages);
+    return buildChatMessageModels(messages);
   }
 
   Future<ChatMessage?> getReplyMessageById(
@@ -108,7 +108,7 @@ class MessagesRepository {
     }
 
     if (message != null) {
-      return (await buildChatMessageModels(chat, [message])).firstOrNull;
+      return (await buildChatMessageModels([message])).firstOrNull;
     }
     return null;
   }
@@ -117,7 +117,7 @@ class MessagesRepository {
       {int? limit}) async {
     var messages =
         await localDatasource.getAllMessagesLocal(chat.id, limit: limit);
-    return buildChatMessageModels(chat, messages);
+    return buildChatMessageModels(messages);
   }
 
   Future<MessageModel?> getMessageLocalById(String id) {
@@ -245,15 +245,36 @@ class MessagesRepository {
         createdAt: DateTime.now());
 
     return api.sendMessage(message: message).then(
-      (response) {
+      (response) async {
         var (serverMid, msg) = response;
         var msgModel = message.toMessageModel(true, currentUser!).copyWith(
             id: serverMid,
             replyMessage: replyMessage,
             rawStatus: ChatMessageStatus.sent.name);
-        _incomingMessagesController.add(msgModel.toChatMessage(true, true));
+        var msgUpdated = await saveMessageLocal(msgModel);
+        _incomingMessagesController.add(msgUpdated.toChatMessage(true, true));
       },
     );
+  }
+
+  Future<void> deleteMessage(
+      String cid, List<String> ids, api.DeleteMessageType type) async {
+    var deleteMessageStatus = api.DeleteMessagesStatus.fromJson(
+        {'cid': cid, 'ids': ids, 'type': type.name});
+    return api
+        .deleteMessages(deleteMessageStatus)
+        .then(
+          (response) async {
+        if (response) {
+          await localDatasource.removeMessagesLocal(ids);
+          _statusMessagesController.add(deleteMessageStatus);
+        }
+      },
+    ).catchError((onError) {
+      if (onError is api.ResponseException) {
+        throw onError;
+      }
+    });
   }
 
   Future<MessageModel> saveMessageLocal(MessageModel message) async {
@@ -289,6 +310,10 @@ class MessagesRepository {
 
   Future<void> deleteMessageLocal(String id) async {
     await localDatasource.removeMessageLocal(id);
+  }
+
+  Future<void> deleteMessagesLocal(List<String> ids) async {
+    await localDatasource.removeMessagesLocal(ids);
   }
 
   void initChatListeners() {
@@ -334,6 +359,14 @@ class MessagesRepository {
       _statusMessagesController.add(editStatus);
     });
 
+    deletedMessageSubscription = api
+        .MessagesManager.instance.deletedMessageStatusStream
+        .listen((deletedStatus) async {
+       await deleteMessagesLocal(deletedStatus.msgIds!);
+
+      _statusMessagesController.add(deletedStatus);
+    });
+
     typingMessageSubscription = api.TypingManager.instance.typingStatusStream
         .listen((typingStatus) async {
       _typingMessageController.add(typingStatus);
@@ -345,6 +378,7 @@ class MessagesRepository {
     sentMessageSubscription?.cancel();
     readMessagesSubscription?.cancel();
     editMessageSubscription?.cancel();
+    deletedMessageSubscription?.cancel();
     typingMessageSubscription?.cancel();
     api.MessagesManager.instance.destroy();
     api.TypingManager.instance.destroy();
@@ -400,7 +434,7 @@ class MessagesRepository {
   }
 
   Future<List<ChatMessage>> buildChatMessageModels(
-      ConversationModel chat, List<MessageModel> messages) async {
+      List<MessageModel> messages) async {
     var result = <ChatMessage>[];
 
     for (int i = 0; i < messages.length; i++) {

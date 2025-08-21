@@ -427,6 +427,14 @@ class DatabaseService {
     return true;
   }
 
+  Future<bool> removeMessagesLocal(List<String> ids) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.oneOf(ids)).build();
+    var result = await query.removeAsync();
+    query.close();
+    return true;
+  }
+
   Future<bool> removeMessagesLocalByCid(String cid) async {
     final query =
         store!.box<MessageModel>().query(MessageModel_.cid.equals(cid)).build();

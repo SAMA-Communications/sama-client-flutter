@@ -129,7 +129,7 @@ extension MessageModelExtension on Message {
       createdAt: createdAt,
       t: t,
       extension: extension,
-      isEdited: createdAt != updatedAt,
+      isEdited: (createdAt?.millisecond ?? 0) < (updatedAt?.millisecond ?? 0),
     )..sender = sender;
 
     if (attachments != null) {

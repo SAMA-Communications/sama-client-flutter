@@ -10,8 +10,9 @@ class MessageEditWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
-      Text("Edited",
-          style: TextStyle(color: isOwn ? white : dullGray, fontSize: 12.0)),
+      Text("edited",
+          style: TextStyle(
+              color: isOwn ? gainsborough : dullGray, fontSize: 11.0)),
       const Padding(
         padding: EdgeInsets.only(
           left: 4,

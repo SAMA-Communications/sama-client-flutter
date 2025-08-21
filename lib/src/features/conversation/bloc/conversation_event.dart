@@ -38,6 +38,12 @@ final class _EditStatusReceived extends ConversationEvent {
   const _EditStatusReceived(this.status);
 }
 
+final class _DeleteStatusReceived extends ConversationEvent {
+  final DeleteMessagesStatus status;
+
+  const _DeleteStatusReceived(this.status);
+}
+
 final class _SentStatusReceived extends ConversationEvent {
   final SentMessageStatus status;
 
@@ -122,4 +128,11 @@ final class SelectedChatsRemoved extends ConversationEvent {
 
   @override
   List<Object> get props => [message];
+}
+
+final class DeleteMessages extends ConversationEvent {
+  final Set<ChatMessage> messages;
+  final DeleteMessageType type;
+
+  const DeleteMessages(this.messages, this.type);
 }

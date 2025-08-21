@@ -268,7 +268,7 @@ class MessageItem extends StatelessWidget {
                                   .read<SendMessageBloc>()
                                   .add(AddReplyMessage(message));
                             }),
-                        if (message.isOwn)
+                        if (message.isOwn && !message.hasAttachments())
                           FocusedPopupMenuItem(
                               leadingIcon: const Icon(Icons.edit_outlined),
                               title: const Text('Edit'),
@@ -284,6 +284,31 @@ class MessageItem extends StatelessWidget {
                             title: const Text('Delete'),
                             onPressed: () {
                               print('delete message= ${message.body}');
+                              FocusedPopupMenu(
+                                      menuItems: <FocusedPopupMenuItem>[
+                                    FocusedPopupMenuItem(
+                                        title: const Text('Delete for All'),
+                                        onPressed: () {
+                                          context.read<ConversationBloc>().add(
+                                              DeleteMessages({message},
+                                                  DeleteMessageType.all));
+                                        }),
+                                    FocusedPopupMenuItem(
+                                        title: const Text('Delete for Me'),
+                                        onPressed: () {
+                                          context.read<ConversationBloc>().add(
+                                              DeleteMessages({message},
+                                                  DeleteMessageType.myself));
+                                        }),
+                                  ],
+                                      context: context,
+                                      child: BlocProvider.value(
+                                          value:
+                                              BlocProvider.of<ConversationBloc>(
+                                                  context),
+                                          child: this),
+                                      stickToRight: message.isOwn)
+                                  .show();
                             }),
                         FocusedPopupMenuItem(
                             leadingIcon: const Icon(Icons.forward_outlined),
