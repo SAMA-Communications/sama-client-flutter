@@ -47,6 +47,7 @@ class ForwardMessagesBloc
       SendForwardMessage event, Emitter<ForwardMessagesState> emit) async {
     var chatsTo = event.forwardChatsTo;
     var forwardMessages = event.forwardMessages;
+    emit(state.copyWith(status: ForwardMessagesStatus.processing));
     await messagesRepository
         .sendForwardMessages(chatsTo.first, forwardMessages)
         .catchError((e) {
@@ -54,6 +55,7 @@ class ForwardMessagesBloc
           status: ForwardMessagesStatus.failure,
           errorMessage: 'Forward failed'));
     });
+
     emit(state.copyWith(
         chatsTo: chatsTo, status: ForwardMessagesStatus.success));
   }

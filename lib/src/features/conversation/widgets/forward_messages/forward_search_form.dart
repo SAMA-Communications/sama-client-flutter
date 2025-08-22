@@ -51,6 +51,13 @@ class _SearchBody extends StatelessWidget {
             case ForwardMessagesStatus.initial:
               break;
             case ForwardMessagesStatus.processing:
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return const Center(child: CircularProgressIndicator());
+                },
+              );
               break;
             case ForwardMessagesStatus.success:
               context.read<ConversationBloc>().add(const ChooseMessages(false));

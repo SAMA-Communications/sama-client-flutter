@@ -268,12 +268,16 @@ class MessageItem extends StatelessWidget {
                                   .read<SendMessageBloc>()
                                   .add(AddReplyMessage(message));
                             }),
-                        FocusedPopupMenuItem(
-                            leadingIcon: const Icon(Icons.edit_outlined),
-                            title: const Text('Edit'),
-                            onPressed: () {
-                              print('edit message= ${message.body}');
-                            }),
+                        if (message.isOwn && !message.hasAttachments())
+                          FocusedPopupMenuItem(
+                              leadingIcon: const Icon(Icons.edit_outlined),
+                              title: const Text('Edit'),
+                              onPressed: () {
+                                print('edit message= ${message.body}');
+                                context
+                                    .read<SendMessageBloc>()
+                                    .add(AddEditMessage(message));
+                              }),
                         FocusedPopupMenuItem(
                             leadingIcon:
                                 const Icon(Icons.delete_forever_outlined),

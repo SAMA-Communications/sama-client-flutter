@@ -10,6 +10,7 @@ final class SendMessageState extends Equatable {
     this.errorMessage,
     this.draftMessage,
     this.replyMessage,
+    this.editMessage,
   });
 
   final SendMessageStatus status;
@@ -18,6 +19,7 @@ final class SendMessageState extends Equatable {
   final String? errorMessage;
   final MessageModel? draftMessage;
   final MessageModel? replyMessage;
+  final MessageModel? editMessage;
 
   SendMessageState copyWith({
     SendMessageStatus? status,
@@ -26,6 +28,7 @@ final class SendMessageState extends Equatable {
     String? errorMessage,
     MessageModel? Function()? draftMessage,
     MessageModel? Function()? replyMessage,
+    MessageModel? Function()? editMessage,
   }) {
     return SendMessageState(
       status: status ?? this.status,
@@ -34,6 +37,7 @@ final class SendMessageState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
       draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
       replyMessage: replyMessage != null ? replyMessage() : this.replyMessage,
+      editMessage: editMessage != null ? editMessage() : this.editMessage,
     );
   }
 
@@ -43,6 +47,13 @@ final class SendMessageState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, isTextEmpty, text, errorMessage, draftMessage, replyMessage];
+  List<Object?> get props => [
+        status,
+        isTextEmpty,
+        text,
+        errorMessage,
+        draftMessage,
+        replyMessage,
+        editMessage
+      ];
 }

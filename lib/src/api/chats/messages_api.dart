@@ -54,10 +54,9 @@ Future<(String?, Message?)> sendMessage({
   });
 }
 
-Future<bool> editMessage(EditMessageStatus editMessageStatus) {
-  return SamaConnectionService.instance
-      .sendRequest(messageEditRequestName, editMessageStatus.toJson())
-      .then((response) {
+Future<bool> editMessage(String messageId, String body) {
+  return SamaConnectionService.instance.sendRequest(
+      messageEditRequestName, {'id': messageId, 'body': body}).then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
