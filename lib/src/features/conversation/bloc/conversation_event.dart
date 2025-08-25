@@ -129,10 +129,3 @@ final class SelectedChatsRemoved extends ConversationEvent {
   @override
   List<Object> get props => [message];
 }
-
-final class DeleteMessages extends ConversationEvent {
-  final Set<ChatMessage> messages;
-  final DeleteMessageType type;
-
-  const DeleteMessages(this.messages, this.type);
-}

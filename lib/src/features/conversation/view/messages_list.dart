@@ -7,6 +7,7 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/delete_messages/delete_messages_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
@@ -289,15 +290,17 @@ class MessageItem extends StatelessWidget {
                                     FocusedPopupMenuItem(
                                         title: const Text('Delete for All'),
                                         onPressed: () {
-                                          context.read<ConversationBloc>().add(
-                                              DeleteMessages({message},
+                                          context
+                                              .read<DeleteMessagesBloc>()
+                                              .add(DeleteMessages({message},
                                                   DeleteMessageType.all));
                                         }),
                                     FocusedPopupMenuItem(
                                         title: const Text('Delete for Me'),
                                         onPressed: () {
-                                          context.read<ConversationBloc>().add(
-                                              DeleteMessages({message},
+                                          context
+                                              .read<DeleteMessagesBloc>()
+                                              .add(DeleteMessages({message},
                                                   DeleteMessageType.myself));
                                         }),
                                   ],

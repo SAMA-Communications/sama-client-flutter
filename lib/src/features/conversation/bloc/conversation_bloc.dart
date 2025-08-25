@@ -122,9 +122,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<SelectedChatsRemoved>(
       onSelectedChatsRemoved,
     );
-    on<DeleteMessages>(
-      _onDeleteMessages,
-    );
 
     add(const ParticipantsReceived());
 
@@ -493,16 +490,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     });
     await messagesRepository.updateMessagesLocal(msgListUpdated);
     emit(state.copyWith(messages: messages.values.toList()));
-  }
-
-  FutureOr<void> _onDeleteMessages(
-      DeleteMessages event, Emitter<ConversationState> emit) async {
-    var messages = [...state.messages];
-    var msgIdsToDelete = event.messages.map((m) => m.id).toList();
-    messagesRepository
-        .deleteMessage(currentConversation.id, msgIdsToDelete, event.type);
-
-    // emit(state.copyWith(messages: messages));
   }
 
   Future<void> _onFailedStatusReceived(

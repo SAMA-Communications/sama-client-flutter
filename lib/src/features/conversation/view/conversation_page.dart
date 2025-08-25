@@ -20,6 +20,7 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/typing_indicator.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/delete_messages/delete_messages_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../widgets/forward_messages/forward_input.dart';
@@ -47,6 +48,12 @@ class ConversationPage extends StatelessWidget {
           currentConversation: currentConversation,
           conversationRepository:
               RepositoryProvider.of<ConversationRepository>(context),
+          messagesRepository:
+              RepositoryProvider.of<MessagesRepository>(context),
+        ),
+      ),
+      BlocProvider(
+        create: (context) => DeleteMessagesBloc(
           messagesRepository:
               RepositoryProvider.of<MessagesRepository>(context),
         ),
