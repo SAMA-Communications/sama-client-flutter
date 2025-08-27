@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import '../../../api/api.dart';
+import '../../../api/api.dart' hide DeleteMessagesStatus;
 import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';
@@ -33,12 +33,38 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SendMessageBloc, SendMessageState>(
-        listener: (context, sendState) {
-          if (sendState.status == SendMessageStatus.success) {
-            scrollTo(0);
-          }
-        },
+    return MultiBlocListener(
+        listeners: [
+          BlocListener<SendMessageBloc, SendMessageState>(
+            listener: (context, sendState) {
+              if (sendState.status == SendMessageStatus.success) {
+                scrollTo(0);
+              }
+            },
+          ),
+          BlocListener<DeleteMessagesBloc, DeleteMessagesState>(
+              listener: (context, state) {
+            switch (state.status) {
+              case DeleteMessagesStatus.initial:
+              case DeleteMessagesStatus.processing:
+                break;
+              case DeleteMessagesStatus.success:
+                context
+                    .read<ConversationBloc>()
+                    .add(const SelectMessagesMode(false));
+              case DeleteMessagesStatus.failure:
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(
+                          duration: const Duration(seconds: 2),
+                          content: Text(state.errorMessage ?? '')),
+                    );
+                });
+            }
+          })
+        ],
         child: Stack(children: [
           BlocBuilder<ConversationBloc, ConversationState>(
             builder: (context, state) {
@@ -347,7 +373,7 @@ class MessageItem extends StatelessWidget {
                               print('select message= ${message.body}');
                               context
                                   .read<ConversationBloc>()
-                                  .add(ChooseMessages(true, message: message));
+                                  .add(SelectMessagesMode(true, message: message));
                             }),
                       ],
                           context: context,

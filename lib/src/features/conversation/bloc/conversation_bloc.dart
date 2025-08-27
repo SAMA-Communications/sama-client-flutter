@@ -113,8 +113,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<RemoveMessagesMoreForReply>(
       onRemoveMessagesMoreForReply,
     );
-    on<ChooseMessages>(
-      onChooseMessages,
+    on<SelectMessagesMode>(
+      onSelectMessagesMode,
     );
     on<SelectedChatsAdded>(
       onSelectedChatsAdded,
@@ -363,10 +363,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(replyIdToScroll: ''));
   }
 
-  Future<void> onChooseMessages(
-      ChooseMessages event, Emitter<ConversationState> emit) async {
+  Future<void> onSelectMessagesMode(
+      SelectMessagesMode event, Emitter<ConversationState> emit) async {
     final selectedMessages = Set.of(state.selectedMessages.value);
-    if (event.choose) selectedMessages.add(event.message!);
+    event.choose
+        ? selectedMessages.add(event.message!)
+        : selectedMessages.clear();
+
     final allSelectedMessages = SelectedMessages.dirty(selectedMessages);
     emit(state.copyWith(
         selectedMessages: allSelectedMessages, choose: event.choose));

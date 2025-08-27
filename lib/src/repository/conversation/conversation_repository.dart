@@ -231,22 +231,12 @@ class ConversationRepository {
       createCallSlice: () => _fetchConversationsWithParticipants(
           ltDate: ltDate ?? DateTime.now(), limit: 10),
       createCall: () => _fetchConversationsWithParticipants(ltDate: ltDate),
-      saveCallResult: localDatasource.saveConversationsLocal,
+      saveCallResult: (newData, oldData) {
+        return localDatasource.saveConversationsLocal(newData);
+      },
       processResponse: (data) async {
         return data.whereNot((c) => _chatsFilter(c)).toList();
       },
-    );
-  }
-
-  Future<Resource<ConversationModel?>> getConversation(String id) async {
-    return NetworkBoundResources<ConversationModel?, ConversationModel?>()
-        .asFuture(
-      loadFromDb: () => localDatasource.getConversationLocal(id),
-      shouldFetch: (data, slice) => data == null,
-      createCall: () => getConversationById(id),
-      saveCallResult: (data) => data != null
-          ? localDatasource.saveConversationLocal(data)
-          : Future.value(false),
     );
   }
 

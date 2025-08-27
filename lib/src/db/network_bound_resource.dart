@@ -9,7 +9,8 @@ class NetworkBoundResources<ResultType, RequestType> {
     Future<RequestType> Function()? createCallSlice,
     required Future<RequestType> Function() createCall,
     Future<ResultType> Function(RequestType result)? processResponse,
-    required Future Function(RequestType item)? saveCallResult,
+    required Future Function(RequestType item, RequestType oldData)?
+        saveCallResult,
   }) {
     assert(
       RequestType == ResultType ||
@@ -40,7 +41,8 @@ class NetworkBoundResources<ResultType, RequestType> {
     required bool Function(ResultType? data) shouldFetch,
     required Future<RequestType> Function() createCall,
     ResultType Function(ResultType result)? processResponse,
-    required Future Function(RequestType item)? saveCallResult,
+    required Future Function(RequestType item, RequestType? oldData)?
+        saveCallResult,
   }) {
     _result = StreamController<Resource<ResultType>>();
 
@@ -77,11 +79,12 @@ class NetworkBoundResources<ResultType, RequestType> {
 
   Future<void> _fetchFromNetwork(
       Future<RequestType> Function() createCall,
-      Future Function(RequestType item)? saveCallResult,
-      RequestType? unconfirmedResult) async {
+      Future Function(RequestType item, RequestType slice)? saveCallResult,
+      RequestType unconfirmedResult) async {
     return await createCall().then((value) async {
       if (value != unconfirmedResult) {
-        if (saveCallResult != null) await saveCallResult(value);
+        if (saveCallResult != null)
+          await saveCallResult(value, unconfirmedResult);
       }
     });
   }

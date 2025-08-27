@@ -105,11 +105,11 @@ final class RemoveMessagesMoreForReply extends ConversationEvent {
   const RemoveMessagesMoreForReply();
 }
 
-final class ChooseMessages extends ConversationEvent {
+final class SelectMessagesMode extends ConversationEvent {
   final bool choose;
   final ChatMessage? message;
 
-  const ChooseMessages(this.choose, {this.message});
+  const SelectMessagesMode(this.choose, {this.message});
 }
 
 final class SelectedChatsAdded extends ConversationEvent {

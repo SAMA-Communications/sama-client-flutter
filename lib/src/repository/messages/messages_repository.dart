@@ -47,23 +47,33 @@ class MessagesRepository {
 
   Future<Resource<List<ChatMessage>>> getAllMessages(ConversationModel chat,
       {DateTime? ltDate, DateTime? gtTime}) async {
+    var limit = 30;
     return NetworkBoundResources<List<ChatMessage>, List<MessageModel>>()
         .asFuture(
-      loadFromDb: () =>
-          localDatasource.getAllMessagesLocal(chat.id, ltDate: ltDate),
-      shouldFetch: (data, slice) {
-        var oldData = data?.take(10).toList();
-        var result = data != null && !listEquals(oldData, slice);
+      loadFromDb: () => localDatasource.getAllMessagesLocal(chat.id,
+          ltDate: ltDate, limit: limit),
+      shouldFetch: (oldData, slice) {
+        var result = oldData != null && !listEquals(oldData, slice);
         return result;
       },
       createCallSlice: () =>
-          _fetchMessages(chat, ltDate: ltDate ?? DateTime.now(), limit: 10),
-      createCall: () => _fetchMessages(chat, ltDate: ltDate, gtTime: gtTime),
-      saveCallResult: localDatasource.saveMessagesLocal,
-      processResponse: (data) async {
-        return buildChatMessageModels(data);
+          _fetchMessages(chat, ltDate: ltDate ?? DateTime.now(), limit: limit),
+      createCall: () =>
+          _fetchMessages(chat, ltDate: ltDate, gtTime: gtTime, limit: limit),
+      saveCallResult: (newData, oldData) {
+        List<String> idsToDelete = detectGapMessageIds(newData, oldData);
+        localDatasource.removeMessagesLocal(idsToDelete);
+        return localDatasource.saveMessagesLocal(newData);
       },
+      processResponse: buildChatMessageModels,
     );
+  }
+
+  List<String> detectGapMessageIds(
+      List<MessageModel> newData, List<MessageModel> oldData) {
+    var difference = oldData
+        .where((element) => !newData.map((m) => m.id).contains(element.id));
+    return difference.map((m) => m.id).toList();
   }
 
   Future<List<MessageModel>> _fetchMessages(ConversationModel chat,
@@ -261,10 +271,8 @@ class MessagesRepository {
       String cid, List<String> ids, api.DeleteMessageType type) async {
     var deleteMessageStatus = api.DeleteMessagesStatus.fromJson(
         {'cid': cid, 'ids': ids, 'type': type.name});
-    return api
-        .deleteMessages(deleteMessageStatus)
-        .then(
-          (response) async {
+    return api.deleteMessages(deleteMessageStatus).then(
+      (response) async {
         if (response) {
           await localDatasource.removeMessagesLocal(ids);
           _statusMessagesController.add(deleteMessageStatus);
@@ -362,7 +370,7 @@ class MessagesRepository {
     deletedMessageSubscription = api
         .MessagesManager.instance.deletedMessageStatusStream
         .listen((deletedStatus) async {
-       await deleteMessagesLocal(deletedStatus.msgIds!);
+      await deleteMessagesLocal(deletedStatus.msgIds!);
 
       _statusMessagesController.add(deletedStatus);
     });
