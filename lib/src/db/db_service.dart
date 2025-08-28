@@ -276,15 +276,20 @@ class DatabaseService {
 
   Future<List<MessageModel>> getAllMessagesLocal(
       String cid, DateTime? ltDate, int? limit) async {
+    var condition = MessageModel_.cid
+        .equals(cid)
+        .and(MessageModel_.isTempReplied
+            .isNull()) //hide Replied messages, that's not loaded by pagination
+        .and(MessageModel_.rawStatus
+            .notEquals(ChatMessageStatus.draft.name) //hide draft messages
+            .or(MessageModel_.rawStatus.isNull()));
+    if (ltDate != null) {
+      condition.and(MessageModel_.createdAt.lessThanDate(ltDate));
+    }
+
     final query = store!
         .box<MessageModel>()
-        .query(MessageModel_.cid
-            .equals(cid)
-            .and(MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now()))
-            .and(MessageModel_.isTempReplied.isNull()) //hide Replied messages, that's not loaded by pagination
-            .and(MessageModel_.rawStatus
-                .notEquals(ChatMessageStatus.draft.name) //hide draft messages
-                .or(MessageModel_.rawStatus.isNull())))
+        .query(condition)
         .order(MessageModel_.createdAt, flags: Order.descending)
         .build()
       ..limit = limit ?? 0;
