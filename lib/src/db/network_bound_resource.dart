@@ -7,7 +7,7 @@ class NetworkBoundResources<ResultType, RequestType> {
     required Future<RequestType> Function() loadFromDb,
     required bool Function(RequestType? data, RequestType? slice) shouldFetch,
     Future<RequestType> Function()? createCallSlice,
-    required Future<RequestType> Function() createCall,
+    Future<RequestType> Function()? createCall,
     Future<ResultType> Function(RequestType result)? processResponse,
     required Future Function(RequestType item, RequestType oldData)?
         saveCallResult,
@@ -21,10 +21,9 @@ class NetworkBoundResources<ResultType, RequestType> {
     return Resource.asFuture<ResultType>(() async {
       var value = await loadFromDb();
       var mustFetch = value is List ? value.isEmpty : false;
-      if (mustFetch ||
-          shouldFetch(value,
-              createCallSlice != null ? await createCallSlice() : null)) {
-        await _fetchFromNetwork(createCall, saveCallResult, value);
+      var callSlice = createCallSlice != null ? await createCallSlice() : null;
+      if (mustFetch || shouldFetch(value, callSlice)) {
+        await _fetchFromNetwork(createCall, saveCallResult, value, callSlice);
         value = await loadFromDb();
       }
 
@@ -59,8 +58,8 @@ class NetworkBoundResources<ResultType, RequestType> {
         sink.add(Resource.loading(data: event));
 
         try {
-          await _fetchFromNetwork(
-              createCall, saveCallResult, event as RequestType);
+          await _fetchFromNetwork(createCall, saveCallResult,
+              event as RequestType, event as RequestType);
           print("Fetching success");
           var value = await loadFromDb();
           sink.add(Resource.success(data: value));
@@ -78,14 +77,16 @@ class NetworkBoundResources<ResultType, RequestType> {
   }
 
   Future<void> _fetchFromNetwork(
-      Future<RequestType> Function() createCall,
+      Future<RequestType> Function()? createCall,
       Future Function(RequestType item, RequestType slice)? saveCallResult,
-      RequestType unconfirmedResult) async {
-    return await createCall().then((value) async {
-      if (value != unconfirmedResult) {
-        if (saveCallResult != null)
-          await saveCallResult(value, unconfirmedResult);
+      RequestType unconfirmedResult,
+      RequestType? callSlice) async {
+    var result = createCall != null ? await createCall() : callSlice;
+    if (result != unconfirmedResult) {
+      if (saveCallResult != null) {
+        return await saveCallResult(
+            result ?? unconfirmedResult, unconfirmedResult);
       }
-    });
+    }
   }
 }

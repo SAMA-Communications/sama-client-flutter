@@ -284,7 +284,7 @@ class DatabaseService {
             .notEquals(ChatMessageStatus.draft.name) //hide draft messages
             .or(MessageModel_.rawStatus.isNull()));
     if (ltDate != null) {
-      condition.and(MessageModel_.createdAt.lessThanDate(ltDate));
+      condition = condition.and(MessageModel_.createdAt.lessThanDate(ltDate));
     }
 
     final query = store!

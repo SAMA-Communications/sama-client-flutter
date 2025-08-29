@@ -14,6 +14,7 @@ import '../user/user_repository.dart';
 class MessagesRepository {
   final MessageLocalDatasource localDatasource;
   final UserRepository userRepository;
+  final limitMessages = 30;
 
   MessagesRepository(
       {required this.localDatasource, required this.userRepository}) {
@@ -47,19 +48,16 @@ class MessagesRepository {
 
   Future<Resource<List<ChatMessage>>> getAllMessages(ConversationModel chat,
       {DateTime? ltDate, DateTime? gtTime}) async {
-    var limit = 30;
     return NetworkBoundResources<List<ChatMessage>, List<MessageModel>>()
         .asFuture(
       loadFromDb: () => localDatasource.getAllMessagesLocal(chat.id,
-          ltDate: ltDate, limit: limit),
+          ltDate: ltDate, limit: limitMessages),
       shouldFetch: (oldData, slice) {
         var result = oldData != null && !listEquals(oldData, slice);
         return result;
       },
       createCallSlice: () =>
-          _fetchMessages(chat, ltDate: ltDate ?? DateTime.now(), limit: limit),
-      createCall: () =>
-          _fetchMessages(chat, ltDate: ltDate, gtTime: gtTime, limit: limit),
+          _fetchMessages(chat, ltDate: ltDate, limit: limitMessages),
       saveCallResult: (newData, oldData) {
         List<String> idsToDelete = detectGapMessageIds(newData, oldData);
         localDatasource.removeMessagesLocal(idsToDelete);
@@ -125,8 +123,8 @@ class MessagesRepository {
 
   Future<List<ChatMessage>> getStoredMessages(ConversationModel chat,
       {int? limit}) async {
-    var messages =
-        await localDatasource.getAllMessagesLocal(chat.id, limit: limit);
+    var messages = await localDatasource.getAllMessagesLocal(chat.id,
+        limit: limit ?? limitMessages);
     return buildChatMessageModels(messages);
   }
 
