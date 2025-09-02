@@ -32,6 +32,12 @@ final class _PendingStatusReceived extends ConversationEvent {
   const _PendingStatusReceived(this.status);
 }
 
+final class _EditStatusReceived extends ConversationEvent {
+  final EditMessageStatus status;
+
+  const _EditStatusReceived(this.status);
+}
+
 final class _SentStatusReceived extends ConversationEvent {
   final SentMessageStatus status;
 

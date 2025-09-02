@@ -36,6 +36,7 @@ class ConversationRepository {
 
   StreamSubscription<api.SystemMessage>? incomingSystemMessagesSubscription;
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
+  StreamSubscription<api.MessageSendStatus>? statusMessagesSubscription;
   StreamSubscription<TypingStatus>? typingMessageSubscription;
 
   final StreamController<ConversationModel> _conversationsController =
@@ -133,6 +134,18 @@ class ConversationRepository {
       }
     });
 
+    statusMessagesSubscription =
+        messagesRepository.statusMessagesStream.listen((status) async {
+      if (status is EditMessageStatus) {
+        final conversationStored =
+            await localDatasource.getConversationLocalByMsgId(status.messageId);
+        if (conversationStored != null &&
+            conversationStored.lastMessage?.id == status.messageId) {
+          _conversationsController.add(conversationStored);
+        }
+      }
+    });
+
     typingMessageSubscription = api.TypingManager.instance.typingStatusStream
         .listen((typingStatus) async {
       _typingMessageController.add(typingStatus);
@@ -144,6 +157,8 @@ class ConversationRepository {
     incomingSystemMessagesSubscription = null;
     incomingMessagesSubscription?.cancel();
     incomingMessagesSubscription = null;
+    statusMessagesSubscription?.cancel();
+    statusMessagesSubscription = null;
     typingMessageSubscription?.cancel();
     typingMessageSubscription = null;
     api.MessagesManager.instance.destroy();

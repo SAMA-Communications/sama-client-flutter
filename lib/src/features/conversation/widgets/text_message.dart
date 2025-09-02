@@ -11,6 +11,7 @@ class TextMessage extends StatelessWidget {
   final TextStyle? linkStyle;
   final Widget time;
   final Widget? status;
+  final Widget? edited;
 
   const TextMessage({
     super.key,
@@ -19,6 +20,7 @@ class TextMessage extends StatelessWidget {
     required this.time,
     this.linkStyle,
     this.status,
+    this.edited,
   });
 
   @override
@@ -29,6 +31,7 @@ class TextMessage extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.end,
       children: [
         Text.rich(TextSpan(children: linkify(body)), style: style),
+        if (edited != null) edited!,
         time,
         if (status != null) status!,
       ],

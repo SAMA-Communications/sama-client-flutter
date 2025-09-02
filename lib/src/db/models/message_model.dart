@@ -22,6 +22,7 @@ class MessageModel extends Equatable {
   final bool isOwn;
   final int? t;
   final bool? isTempReplied;
+  final bool? isEdited;
   @Property(type: PropertyType.date)
   final DateTime? createdAt;
   @Transient()
@@ -48,6 +49,7 @@ class MessageModel extends Equatable {
     this.createdAt,
     this.t,
     this.isTempReplied,
+    this.isEdited,
     this.extension,
   });
 
@@ -78,6 +80,7 @@ class MessageModel extends Equatable {
     DateTime? createdAt,
     int? t,
     bool? isTempReplied,
+    bool? isEdited,
     Map<String, dynamic>? extension,
     List<AttachmentModel>? attachments,
     MessageModel? replyMessage,
@@ -96,6 +99,7 @@ class MessageModel extends Equatable {
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         isTempReplied: isTempReplied ?? this.isTempReplied,
+        isEdited: isEdited ?? this.isEdited,
         extension: extension ?? this.extension)
       ..sender = sender ?? this.sender
       ..replyMessage = replyMessage ?? this.replyMessage
@@ -125,6 +129,7 @@ extension MessageModelExtension on Message {
       createdAt: createdAt,
       t: t,
       extension: extension,
+      isEdited: (createdAt?.millisecond ?? 0) < (updatedAt?.millisecond ?? 0),
     )..sender = sender;
 
     if (attachments != null) {
