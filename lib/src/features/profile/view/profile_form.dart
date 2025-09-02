@@ -623,6 +623,7 @@ class _ChangePasswordInput extends StatelessWidget {
                           )
                         ],
                       ),
+                      errorMaxLines: 2,
                       errorText: state.userPassword.value.isNotEmpty &&
                               state.userPassword.displayError ==
                                   UserPasswordValidationError.outOfRange

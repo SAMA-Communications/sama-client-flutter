@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
 
 import '../../../repository/authentication/authentication_repository.dart';
+import '../../../shared/models/email.dart';
 import '../models/models.dart';
 
 part 'login_event.dart';
@@ -16,6 +17,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         super(const LoginState()) {
     on<LoginUsernameChanged>(_onUsernameChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
+    on<LoginEmailChanged>(_onEmailChanged);
     on<LoginSubmitted>(_onSubmitted);
   }
 
@@ -30,7 +32,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       state.copyWith(
         status: FormzSubmissionStatus.initial,
         username: username,
-        isValid: Formz.validate([state.password, username]),
+        isValidLogin: Formz.validate([state.password, username]),
+        isValidSignup: Formz.validate([state.password, state.email, username]),
       ),
     );
   }
@@ -45,7 +48,23 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       state.copyWith(
         status: FormzSubmissionStatus.initial,
         password: password,
-        isValid: Formz.validate([password, state.username]),
+        isValidLogin: Formz.validate([password, state.username]),
+        isValidSignup: Formz.validate([password, state.email, state.username]),
+      ),
+    );
+  }
+
+  void _onEmailChanged(
+    LoginEmailChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    final email = Email.dirty(event.email);
+
+    emit(
+      state.copyWith(
+        status: FormzSubmissionStatus.initial,
+        email: email,
+        isValidSignup: Formz.validate([state.password, email, state.username]),
       ),
     );
   }
@@ -54,7 +73,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     LoginSubmitted event,
     Emitter<LoginState> emit,
   ) async {
-    if (state.isValid) {
+    if (state.isValidLogin && !event.isSignup ||
+        state.isValidSignup && event.isSignup) {
       emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
       try {
         Future<void> requiredMethod;
@@ -62,6 +82,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           requiredMethod = _authenticationRepository.signUp(
               username: state.username.value.trim(),
               password: state.password.value.trim(),
+              email: state.email.value.trim(),
               signInWithCreatedUser: event.isSighupWithLogin);
         } else {
           requiredMethod = _authenticationRepository.login(

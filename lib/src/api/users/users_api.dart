@@ -19,24 +19,26 @@ const String userConnectRequestName = 'connect';
 const String usersGetByIdsRequestName = 'get_users_by_ids';
 const String userLastActivitySubscribe = 'user_last_activity_subscribe';
 const String userLastActivityUnsubscribe = 'user_last_activity_unsubscribe';
+const String userSendOtp = 'user_send_otp';
+const String userResetPassword = 'user_reset_password';
 
 const String httpLoginRequestName = 'login';
 
 Future<User> createUser({
   required String login,
   required String password,
+  required String email,
   required String deviceId,
   String? firstName,
   String? lastName,
-  String? email,
   String? phone,
 }) async {
   return SamaConnectionService.instance.sendRequest(userCreateRequestName, {
     'login': login,
     'password': password,
+    'email': email,
     'device_id': deviceId,
     'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
-    if (email != null) 'email': email,
     if (phone != null) 'phone': phone,
     if (firstName != null) 'first_name': firstName,
     if (lastName != null) 'last_name': lastName,
@@ -126,6 +128,29 @@ Future<bool> logout() {
 Future<bool> signOut() {
   return SamaConnectionService.instance
       .sendRequest(userDeleteRequestName, {}).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+  });
+}
+
+Future<bool> sendOtpEmail(String email) async {
+  return SamaConnectionService.instance.sendRequest(userSendOtp, {
+    'email': email,
+    'device_id': await AppSetId().getIdentifier(),
+    'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
+  }).then((response) {
+    return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
+  });
+}
+
+Future<bool> sendResetPassword(
+    String email, int token, String newPassword) async {
+  return SamaConnectionService.instance.sendRequest(userDeleteRequestName, {
+    'email': email,
+    'token': token,
+    'new_password': newPassword,
+    'device_id': await AppSetId().getIdentifier(),
+    'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
+  }).then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }

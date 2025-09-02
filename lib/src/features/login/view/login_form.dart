@@ -2,11 +2,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../bloc/login_bloc.dart';
-import '../models/password.dart';
-import '../models/username.dart';
+import '../models/models.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -71,49 +72,64 @@ class LoginFormState extends State<LoginForm> {
                   isSelected: loginSignupSelection,
                   children: <Widget>[
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 6.0),
+                      padding: const EdgeInsets.only(
+                          left: 6.0, right: 6.0, bottom: 4),
                       child: Text(
                         'Login',
                         style: TextStyle(
+                            height: 1.0,
                             color: isSignupSelected ? gainsborough : black,
-                            fontSize: 54),
+                            fontSize: 48),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 6.0),
+                      padding: const EdgeInsets.only(
+                          left: 6.0, right: 6.0, bottom: 4),
                       child: Text(
                         'SignUp',
                         style: TextStyle(
+                            height: 1.0,
                             color: isSignupSelected ? black : gainsborough,
-                            fontSize: 54),
+                            fontSize: 48),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+            const Padding(padding: EdgeInsets.all(8)),
             _UsernameInput(),
-            const Padding(padding: EdgeInsets.all(12)),
+            const Padding(padding: EdgeInsets.all(8)),
             _PasswordInput(),
-            const Padding(padding: EdgeInsets.all(4)),
-            Visibility(
-                visible: isSignupSelected,
-                child: Row(
-                  children: [
-                    Checkbox(
-                        checkColor: white,
-                        activeColor: whiteAluminum,
-                        value: loginWithNewUser,
-                        onChanged: (checked) {
-                          setState(() {
-                            loginWithNewUser = checked ?? true;
-                          });
-                        }),
-                    const Text('* Sign in automatically')
-                  ],
-                )),
+            if (isSignupSelected) ...[
+              const Padding(padding: EdgeInsets.all(8)),
+              _EmailInput(),
+              const Padding(padding: EdgeInsets.all(4)),
+              Row(
+                children: [
+                  Checkbox(
+                      checkColor: white,
+                      activeColor: whiteAluminum,
+                      value: loginWithNewUser,
+                      onChanged: (checked) {
+                        setState(() {
+                          loginWithNewUser = checked ?? true;
+                        });
+                      }),
+                  const Text('* Sign in automatically')
+                ],
+              ),
+            ] else ...[
+              const Padding(padding: EdgeInsets.all(4)),
+              Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    child: const Text("Forgot password",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: slateBlue)),
+                    onPressed: () => context.push(resetPasswordPath),
+                  )),
+            ],
             const Padding(padding: EdgeInsets.all(4)),
             _LoginButton(
               isSignup: isSignupSelected,
@@ -155,7 +171,7 @@ class _UsernameInput extends StatelessWidget {
       buildWhen: (previous, current) => previous.username != current.username,
       builder: (context, state) {
         return Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(4),
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             color: gainsborough,
@@ -209,7 +225,7 @@ class _PasswordInputState extends State<_PasswordInput> {
       buildWhen: (previous, current) => previous.password != current.password,
       builder: (context, state) {
         return Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(4),
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(
               Radius.circular(12),
@@ -244,9 +260,12 @@ class _PasswordInputState extends State<_PasswordInput> {
                   ? state.password.displayError == PasswordValidationError.short
                       ? 'Password is too short'
                       : state.password.displayError ==
-                              PasswordValidationError.unavailableSymbols
-                          ? 'Password contains not allowed symbols'
-                          : null
+                              PasswordValidationError.long
+                          ? 'Password is too long'
+                          : state.password.displayError ==
+                                  PasswordValidationError.unavailableSymbols
+                              ? 'Password contains not allowed symbols'
+                              : null
                   : null,
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -272,17 +291,69 @@ class _PasswordInputState extends State<_PasswordInput> {
   }
 }
 
+class _EmailInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LoginBloc, LoginState>(
+      buildWhen: (previous, current) => previous.email != current.email,
+      builder: (context, state) {
+        return Container(
+          padding: const EdgeInsets.all(4),
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+            color: gainsborough,
+          ),
+          child: TextField(
+            keyboardType: TextInputType.emailAddress,
+            onChanged: (email) =>
+                context.read<LoginBloc>().add(LoginEmailChanged(email)),
+            enableSuggestions: false,
+            autocorrect: false,
+            decoration: InputDecoration(
+                border: InputBorder.none,
+                label: const Row(
+                  children: [
+                    Icon(
+                      Icons.email_outlined,
+                      size: 16,
+                      color: dullGray,
+                    ),
+                    Padding(padding: EdgeInsets.all(4)),
+                    Text(
+                      'Email',
+                      style: TextStyle(color: dullGray, fontSize: 16),
+                    )
+                  ],
+                ),
+                errorText: state.email.displayError != null
+                    ? state.email.displayError == EmailValidationError.empty
+                        ? 'Email is too short'
+                        : state.email.displayError ==
+                                EmailValidationError.incorrect
+                            ? 'The format of the email address is incorrect'
+                            : null
+                    : null),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _LoginButton extends StatelessWidget {
   final bool isSignup;
   final bool isSighupWithLogin;
 
-  const _LoginButton(
-      {super.key, required this.isSignup, required this.isSighupWithLogin});
+  const _LoginButton({required this.isSignup, required this.isSighupWithLogin});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LoginBloc, LoginState>(
       builder: (context, state) {
+        var isSignInValid = state.isValidLogin && !isSignup;
+        var isSignUpValid = state.isValidSignup && isSignup;
         return state.status.isInProgress
             ? const CircularProgressIndicator()
             : Container(
@@ -296,9 +367,11 @@ class _LoginButton extends StatelessWidget {
                 child: FilledButton(
                   style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(
-                        state.isValid ? slateBlue : whiteAluminum),
+                        isSignInValid || isSignUpValid
+                            ? slateBlue
+                            : whiteAluminum),
                     foregroundColor: WidgetStatePropertyAll(
-                        state.isValid ? white : gainsborough),
+                        isSignInValid || isSignUpValid ? white : gainsborough),
                     shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
@@ -306,7 +379,7 @@ class _LoginButton extends StatelessWidget {
                     ),
                   ),
                   key: const Key('loginForm_continue_raisedButton'),
-                  onPressed: state.isValid
+                  onPressed: isSignInValid || isSignUpValid
                       ? () {
                           context.read<LoginBloc>().add(
                                 LoginSubmitted(isSignup, isSighupWithLogin),
