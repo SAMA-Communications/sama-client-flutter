@@ -40,7 +40,7 @@ class _SelectInputState extends State<SelectInput> {
                                 context: context,
                                 builder: (BuildContext bc) {
                                   return SizedBox(
-                                    height: 100,
+                                    height: 85,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.stretch,
@@ -66,29 +66,34 @@ class _SelectInputState extends State<SelectInput> {
                                               child:
                                                   const Text('Delete for All'),
                                             )),
-                                        const Divider(height: 1),
                                         BlocProvider.value(
-                                            value: BlocProvider.of<
-                                                DeleteMessagesBloc>(context),
-                                            child: TextButton(
-                                              style: const ButtonStyle(
-                                                tapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                              ),
-                                              onPressed: () {
-                                                context
-                                                    .read<DeleteMessagesBloc>()
-                                                    .add(DeleteMessages(
-                                                        state.selectedMessages
-                                                            .value,
-                                                        DeleteMessageType
-                                                            .myself));
-                                                Navigator.pop(context);
-                                              },
-                                              child:
-                                                  const Text('Delete for Me'),
-                                            )),
+                                          value: BlocProvider.of<
+                                              DeleteMessagesBloc>(context),
+                                          child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 5),
+                                              // Adds padding only at the bottom
+                                              child: TextButton(
+                                                style: const ButtonStyle(
+                                                  tapTargetSize:
+                                                      MaterialTapTargetSize
+                                                          .shrinkWrap,
+                                                ),
+                                                onPressed: () {
+                                                  context
+                                                      .read<
+                                                          DeleteMessagesBloc>()
+                                                      .add(DeleteMessages(
+                                                          state.selectedMessages
+                                                              .value,
+                                                          DeleteMessageType
+                                                              .myself));
+                                                  Navigator.pop(context);
+                                                },
+                                                child:
+                                                    const Text('Delete for Me'),
+                                              )),
+                                        )
                                       ],
                                     ),
                                   );
