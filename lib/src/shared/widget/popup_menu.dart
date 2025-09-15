@@ -26,25 +26,12 @@ class PopupMessageMenu {
         const PopupMenuItem<MessageMenuItem>(
           padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
           value: MessageMenuItem.one,
-          child: ListTile(
-            leading: Icon(Icons.replay_outlined),
-            title: Text('one'),
-          ),
+          child: Text('Get summary'),
         ),
         const PopupMenuItem<MessageMenuItem>(
             padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
             value: MessageMenuItem.two,
-            child: ListTile(
-              leading: Icon(Icons.edit_outlined),
-              title: Text('two'),
-            )),
-        const PopupMenuItem<MessageMenuItem>(
-            padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-            value: MessageMenuItem.etc,
-            child: ListTile(
-              leading: Icon(Icons.delete_forever_outlined),
-              title: Text('etc.'),
-            )),
+            child: Text('Change message tone')),
       ],
       requestFocus: false,
       context: context,
@@ -52,6 +39,31 @@ class PopupMessageMenu {
       if (selected != null) onClickMenu?.call(selected);
     });
   }
+
+//
+  // Future<void> show(RelativeRect position) async {
+  //   showMenu(popUpAnimationStyle: AnimationStyle(
+  //     curve: Curves.easeOutCubic, // Custom curve for the animation
+  //     duration: const Duration(milliseconds: 500), // Custom duration
+  //   ),
+  //     position: position,
+  //     items: [
+  //       const PopupMenuItem<MessageMenuItem>(
+  //         padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+  //         value: MessageMenuItem.one,
+  //         child: Text('Get summary'),
+  //       ),
+  //       const PopupMenuItem<MessageMenuItem>(
+  //           padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+  //           value: MessageMenuItem.two,
+  //           child: Text('Change message tone'),),
+  //     ],
+  //     requestFocus: false,
+  //     context: context,
+  //   ).then((selected) {
+  //     if (selected != null) onClickMenu?.call(selected);
+  //   });
+  // }
 }
 
 /*

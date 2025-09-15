@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_client_flutter/src/shared/utils/screen_factor.dart';
+import 'package:sama_client_flutter/src/shared/widget/popup_menu.dart';
 
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../../../shared/widget/keyboard_listener.dart';
 import '../bloc/send_message/send_message_bloc.dart';
+import '../widgets/focused_popup_menu.dart';
 import '../widgets/header_input_box.dart';
 import 'media_sender.dart';
 
@@ -162,6 +166,7 @@ class _MessageInputState extends State<MessageInput> {
                             rootContext, textEditingController.text),
                     color: dullGray,
                   ),
+                  const _MagicMenuButton()
                 ],
               ),
             )
@@ -188,5 +193,137 @@ class _MessageInputState extends State<MessageInput> {
   void dispose() {
     showFocusNode.dispose();
     super.dispose();
+  }
+}
+
+enum AIMainMenuItem { mainSummary, messageTone }
+
+enum AISubMenuItem {
+  subUnread,
+  subLastDay,
+  subLast7days,
+}
+
+class _MagicMenuButton extends StatefulWidget {
+  const _MagicMenuButton();
+
+  @override
+  State<_MagicMenuButton> createState() => _MagicMenuButtonState();
+}
+
+class _MagicMenuButtonState extends State<_MagicMenuButton> {
+  IconData iconData = Icons.arrow_drop_up_outlined;
+  var mainMenuIsOpen = false;
+  var submenuIsOpen = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyboardVisibilityListener(
+        listener: (isKeyboardVisible) {
+          if (!isKeyboardVisible) {
+            // FocusManager.instance.primaryFocus?.unfocus();
+            if (submenuIsOpen) Navigator.pop(context);
+            if (mainMenuIsOpen) Navigator.pop(context);
+          }
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Material(
+            color: Colors.transparent,
+            child: PopupMenuButton<AIMainMenuItem>(
+                popUpAnimationStyle: AnimationStyle.noAnimation,
+                requestFocus: false,
+                offset: Offset(2.0, -estimatedMenuHeight(2)),
+                tooltip: "",
+                onOpened: () {
+                  mainMenuIsOpen = true;
+                },
+                onCanceled: () {
+                  mainMenuIsOpen = false;
+                },
+                onSelected: (value) {
+                  switch (value) {
+                    case AIMainMenuItem.mainSummary:
+                      break;
+                    case AIMainMenuItem.messageTone:
+                      break;
+                  }
+                  mainMenuIsOpen = false;
+                },
+                itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry<AIMainMenuItem>>[
+                      PopupMenuItem<AIMainMenuItem>(
+                        value: AIMainMenuItem.mainSummary,
+                        child: StatefulBuilder(builder:
+                            (BuildContext context, StateSetter setState) {
+                          return PopupMenuButton<AISubMenuItem>(
+                            popUpAnimationStyle: AnimationStyle.noAnimation,
+                            requestFocus: false,
+                            offset: Offset(12.0, -estimatedMenuHeight(3)),
+                            tooltip: "",
+                            onOpened: () {
+                              submenuIsOpen = true;
+                              setState(() =>
+                                  iconData = Icons.arrow_drop_down_outlined);
+                            },
+                            onCanceled: () {
+                              submenuIsOpen = false;
+                              setState(() =>
+                                  iconData = Icons.arrow_drop_up_outlined);
+                            },
+                            onSelected: (subValue) {
+                              switch (subValue) {
+                                case AISubMenuItem.subUnread:
+                                  break;
+                                case AISubMenuItem.subLastDay:
+                                  break;
+                                case AISubMenuItem.subLast7days:
+                                  break;
+                              }
+                              submenuIsOpen = false;
+                              Navigator.pop(context); //close main menu
+                            },
+                            itemBuilder: (BuildContext context) =>
+                                <PopupMenuEntry<AISubMenuItem>>[
+                              const PopupMenuItem<AISubMenuItem>(
+                                value: AISubMenuItem.subUnread,
+                                child: Text('unreads'),
+                              ),
+                              const PopupMenuItem<AISubMenuItem>(
+                                value: AISubMenuItem.subLastDay,
+                                child: Text('last day'),
+                              ),
+                              const PopupMenuItem<AISubMenuItem>(
+                                value: AISubMenuItem.subLast7days,
+                                child: Text('last 7 days'),
+                              ),
+                            ],
+                            child: ListTile(
+                              visualDensity: const VisualDensity(
+                                  horizontal: 0, vertical: -4),
+                              title: const Text('Get summary'),
+                              trailing: Icon(iconData),
+                            ),
+                          );
+                        }),
+                      ),
+                      const PopupMenuItem<AIMainMenuItem>(
+                        value: AIMainMenuItem.messageTone,
+                        child: Text('Change message tone'),
+                      ),
+                    ],
+                child: const Padding(
+                    padding: EdgeInsets.fromLTRB(2, 2, 4, 2),
+                    child: Icon(Icons.auto_awesome_outlined, color: dullGray))),
+          ),
+        ));
+  }
+
+  double estimatedMenuHeight(int itemsLength) {
+    // From MenuAnchor source: minimum height is 48.0
+    const double itemHeight = 48.0;
+    // From MenuAnchor source: menu vertical padding is 16.0
+    const double menuPadding = 16.0;
+    return itemsLength * itemHeight + menuPadding + 10;
   }
 }
