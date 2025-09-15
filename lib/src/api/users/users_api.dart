@@ -144,7 +144,7 @@ Future<bool> sendOtpEmail(String email) async {
 
 Future<bool> sendResetPassword(
     String email, int token, String newPassword) async {
-  return SamaConnectionService.instance.sendRequest(userDeleteRequestName, {
+  return SamaConnectionService.instance.sendRequest(userResetPassword, {
     'email': email,
     'token': token,
     'new_password': newPassword,

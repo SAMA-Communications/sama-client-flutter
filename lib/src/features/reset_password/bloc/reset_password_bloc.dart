@@ -117,10 +117,11 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     if (state.isOTPValid) {
       emit(state.copyWith(
           status: FormzSubmissionStatus.initial, currentForm: 2));
+    } else {
+      emit(state.copyWith(
+          status: FormzSubmissionStatus.failure,
+          errorMessage: 'OTP is not valid'));
     }
-    emit(state.copyWith(
-        status: FormzSubmissionStatus.failure,
-        errorMessage: 'Otp is not valid'));
   }
 
   Future<void> _onPasswordSubmitted(
