@@ -154,6 +154,9 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     Emitter<ResetPasswordState> emit,
   ) async {
     var backForm = state.currentForm - 1;
-    if (backForm >= 0) emit(state.copyWith(currentForm: backForm));
+    if (backForm >= 0) {
+      emit(state.copyWith(
+          status: FormzSubmissionStatus.initial, currentForm: backForm));
+    }
   }
 }

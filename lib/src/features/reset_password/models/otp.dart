@@ -2,10 +2,10 @@ import 'package:formz/formz.dart';
 
 enum OtpValidationError { empty, wrongLength, unavailableSymbols }
 
-const int otpLength = 4;
+const int otpLength = 6;
 
 class Otp extends FormzInput<String, OtpValidationError> {
-  const Otp.pure() : super.pure('xxxx');
+  const Otp.pure() : super.pure('xxxxxx');
 
   const Otp.dirty([super.value = '']) : super.dirty();
 

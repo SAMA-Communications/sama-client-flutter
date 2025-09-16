@@ -114,9 +114,9 @@ class OtpInput extends StatefulWidget {
 
 class OtpInputState extends State<OtpInput> {
   final List<TextEditingController> _controllers =
-      List.generate(4, (_) => TextEditingController());
+      List.generate(6, (_) => TextEditingController());
 
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
   Widget build(BuildContext context) {
@@ -128,15 +128,15 @@ class OtpInputState extends State<OtpInput> {
         const Padding(
           padding: EdgeInsets.all(8.0),
           child: Text(
-            "Enter the 4 digit OTP sent to your email",
+            "Enter the 6 digit OTP sent to your email",
             textAlign: TextAlign.center,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(4, (index) {
+            children: List.generate(6, (index) {
               return digitField(index);
             }),
           ),
@@ -147,8 +147,8 @@ class OtpInputState extends State<OtpInput> {
 
   Widget digitField(int index) {
     return SizedBox(
-      width: 50,
-      height: 50,
+      width: 45,
+      height: 45,
       child: TextField(
         style: const TextStyle(fontSize: 22),
         controller: _controllers[index],
@@ -157,7 +157,7 @@ class OtpInputState extends State<OtpInput> {
         textAlign: TextAlign.center,
         maxLength: 1,
         onChanged: (value) {
-          if (value.isNotEmpty && index < 3) {
+          if (value.isNotEmpty && index < 5) {
             FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
           } else if (value.isEmpty && index > 0) {
             FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
