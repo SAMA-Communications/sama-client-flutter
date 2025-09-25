@@ -18,7 +18,9 @@ import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../../../shared/widget/loaders.dart';
 import '../../../shared/widget/typing_indicator.dart';
+import '../bloc/ai_message/ai_message_bloc.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
@@ -55,6 +57,11 @@ class ConversationPage extends StatelessWidget {
           create: (context) => MediaAttachmentBloc(
               attachmentsRepository:
                   RepositoryProvider.of<AttachmentsRepository>(context))),
+      BlocProvider(
+          create: (context) => AiMessageBloc(
+              currentConversation: currentConversation,
+              messagesRepository:
+                  RepositoryProvider.of<MessagesRepository>(context))),
     ], child: const ConversationPage());
   }
 
@@ -73,23 +80,29 @@ class ConversationPage extends StatelessWidget {
               toolbarHeight: 64,
               centerTitle: false,
               titleSpacing: 0.0,
-              title: ConnectionTitle(
-                color: black,
-                title: Padding(
-                  padding: const EdgeInsets.only(top: 0.0),
-                  child: ListTile(
-                    onTap: () => _infoAction(context),
-                    title: Text(
-                      overflow: TextOverflow.ellipsis,
-                      state.conversation.name,
-                      style: const TextStyle(
-                          fontSize: 28.0, fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                    ),
-                    subtitle: _getSubtitle(state),
-                  ),
-                ),
-              ),
+              title: BlocBuilder<AiMessageBloc, AiMessageState>(
+                  builder: (BuildContext context, aiState) {
+                return aiState.status == AiMessageStatus.processing
+                    ? const TitleLoader(black, Text('AI processing',
+                        style: TextStyle(color: black, fontSize: 20.0)))
+                    : ConnectionTitle(
+                        color: black,
+                        title: Padding(
+                          padding: const EdgeInsets.only(top: 0.0),
+                          child: ListTile(
+                            onTap: () => _infoAction(context),
+                            title: Text(
+                              overflow: TextOverflow.ellipsis,
+                              state.conversation.name,
+                              style: const TextStyle(
+                                  fontSize: 28.0, fontWeight: FontWeight.bold),
+                              maxLines: 1,
+                            ),
+                            subtitle: _getSubtitle(state),
+                          ),
+                        ),
+                      );
+              }),
               actions: [_PopupMenuButton()],
             ),
             body: Column(

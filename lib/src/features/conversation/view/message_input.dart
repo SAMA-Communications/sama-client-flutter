@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sama_client_flutter/src/shared/utils/screen_factor.dart';
-import 'package:sama_client_flutter/src/shared/widget/popup_menu.dart';
 
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/keyboard_listener.dart';
+import '../bloc/ai_message/ai_message_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
-import '../widgets/focused_popup_menu.dart';
 import '../widgets/header_input_box.dart';
 import 'media_sender.dart';
 
@@ -250,7 +248,7 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                   }
                   mainMenuIsOpen = false;
                 },
-                itemBuilder: (BuildContext context) =>
+                itemBuilder: (BuildContext rootContext) =>
                     <PopupMenuEntry<AIMainMenuItem>>[
                       PopupMenuItem<AIMainMenuItem>(
                         value: AIMainMenuItem.mainSummary,
@@ -274,10 +272,18 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                             onSelected: (subValue) {
                               switch (subValue) {
                                 case AISubMenuItem.subUnread:
+                                  BlocProvider.of<AiMessageBloc>(rootContext)
+                                      .add(const GetMessagesSummary('unreads'));
                                   break;
                                 case AISubMenuItem.subLastDay:
+                                  BlocProvider.of<AiMessageBloc>(rootContext)
+                                      .add(
+                                          const GetMessagesSummary('last-day'));
                                   break;
                                 case AISubMenuItem.subLast7days:
+                                  BlocProvider.of<AiMessageBloc>(rootContext)
+                                      .add(const GetMessagesSummary(
+                                          'last-7-days'));
                                   break;
                               }
                               submenuIsOpen = false;
