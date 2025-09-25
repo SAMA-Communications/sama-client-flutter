@@ -33,7 +33,7 @@ class AiMessageBloc extends Bloc<AiMessageEvent, AiMessageState> {
       emit(state.copyWith(status: AiMessageStatus.processing));
       await messagesRepository.getMessagesSummary(
           currentConversation.id, event.filter);
-      emit(state.copyWith(text: '', status: AiMessageStatus.success));
+      emit(state.copyWith(status: AiMessageStatus.success));
     } on ResponseException catch (ex) {
       emit(state.copyWith(
           errorMessage: ex.message, status: AiMessageStatus.failure));
@@ -43,8 +43,10 @@ class AiMessageBloc extends Bloc<AiMessageEvent, AiMessageState> {
   Future<FutureOr<void>> _onGetMessageTone(
       GetMessageTone event, Emitter<AiMessageState> emit) async {
     try {
-      var message = await messagesRepository.getMessagesSummary(
+      emit(state.copyWith(status: AiMessageStatus.processing));
+      var message = await messagesRepository.changeMessageTone(
           currentConversation.id, event.filter);
+      emit(state.copyWith(text: message, status: AiMessageStatus.success));
     } catch (_) {}
   }
 }

@@ -111,6 +111,13 @@ class MessagesRepository {
     _incomingMessagesController.add(messageModel.toChatMessage(true, true));
   }
 
+  Future<String> changeMessageTone(String body, String tone) async {
+    return await api.changeMessageTone({
+      'body': body,
+      'tone': tone,
+    });
+  }
+
   Future<List<ChatMessage>> getStoredMessagesByIds(
       ConversationModel chat, List<String> ids) async {
     var messages = await localDatasource.getMessagesLocal(ids);
