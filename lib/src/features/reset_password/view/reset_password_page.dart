@@ -5,6 +5,8 @@ import '../../../repository/authentication/authentication_repository.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/widget/logo_app_bar.dart';
 import '../bloc/reset_password_bloc.dart';
+import '../bloc/timer_bloc/timer_bloc.dart';
+import '../ticker.dart';
 import 'send_email_form.dart';
 import 'send_otp_form.dart';
 import 'send_reset_password_form.dart';
@@ -12,14 +14,20 @@ import 'send_reset_password_form.dart';
 class ResetPasswordPage extends StatelessWidget {
   const ResetPasswordPage({super.key});
 
-  static BlocProvider route() {
-    return BlocProvider<ResetPasswordBloc>(
-        create: (context) {
-          return ResetPasswordBloc(
+  static MultiBlocProvider route() {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ResetPasswordBloc>(
+          create: (context) => ResetPasswordBloc(
               authenticationRepository:
-                  RepositoryProvider.of<AuthenticationRepository>(context));
-        },
-        child: const ResetPasswordPage());
+                  RepositoryProvider.of<AuthenticationRepository>(context)),
+        ),
+        BlocProvider<TimerBloc>(
+          create: (context) => TimerBloc(ticker: const Ticker()),
+        ),
+      ],
+      child: const ResetPasswordPage(),
+    );
   }
 
   static const List<Widget> forms = <Widget>[
@@ -32,6 +40,11 @@ class ResetPasswordPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
         builder: (BuildContext context, state) {
+      if (state.startTimer) {
+        context.read<TimerBloc>().add(const TimerStarted());
+      } else if (state.stopTimer) {
+        context.read<TimerBloc>().add(const TimerReset());
+      }
       return Scaffold(
           backgroundColor: white,
           appBar: LogoAppBar(onPressed: () {

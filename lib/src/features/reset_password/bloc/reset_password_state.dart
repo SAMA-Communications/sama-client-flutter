@@ -12,6 +12,8 @@ final class ResetPasswordState extends Equatable {
     this.isPasswordValid = false,
     this.errorMessage,
     this.informationMessage,
+    this.startTimer = false,
+    this.stopTimer = false,
     this.currentForm = 0,
   });
 
@@ -25,6 +27,8 @@ final class ResetPasswordState extends Equatable {
   final bool isPasswordValid;
   final String? errorMessage;
   final String? informationMessage;
+  final bool startTimer;
+  final bool stopTimer;
   final int currentForm;
 
   ResetPasswordState copyWith({
@@ -38,6 +42,8 @@ final class ResetPasswordState extends Equatable {
     bool? isPasswordValid,
     String? errorMessage,
     String? informationMessage,
+    bool? startTimer,
+    bool? stopTimer,
     int? currentForm,
   }) {
     return ResetPasswordState(
@@ -51,11 +57,21 @@ final class ResetPasswordState extends Equatable {
       isPasswordValid: isPasswordValid ?? this.isPasswordValid,
       errorMessage: errorMessage ?? this.errorMessage,
       informationMessage: informationMessage ?? this.informationMessage,
+      startTimer: startTimer ?? this.startTimer,
+      stopTimer: stopTimer ?? this.stopTimer,
       currentForm: currentForm ?? this.currentForm,
     );
   }
 
   @override
-  List<Object> get props =>
-      [status, email, password, confirmPassword, otp, currentForm];
+  List<Object> get props => [
+        status,
+        email,
+        password,
+        confirmPassword,
+        otp,
+        startTimer,
+        stopTimer,
+        currentForm
+      ];
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import '../bloc/timer_bloc/timer_bloc.dart';
 import '../models/models.dart';
 import '../../../shared/ui/colors.dart';
 
@@ -24,7 +25,9 @@ class SendResetPasswordForm extends StatelessWidget {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              SnackBar(content: Text(state.informationMessage ?? '')),
+              SnackBar(
+                  content: Text(state.informationMessage ?? '',
+                      textAlign: TextAlign.center)),
             );
           Navigator.popUntil(context, (route) => route.isFirst);
         }

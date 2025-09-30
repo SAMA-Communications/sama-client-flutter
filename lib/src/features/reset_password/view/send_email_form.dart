@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import '../../../shared/utils/date_utils.dart';
+import '../bloc/timer_bloc/timer_bloc.dart';
 import '../models/models.dart';
 import '../../../shared/ui/colors.dart';
 
@@ -94,9 +96,14 @@ class _EmailInput extends StatelessWidget {
 }
 
 class _ContinueButton extends StatelessWidget {
+  final ValueNotifier<String> snackBarText = ValueNotifier<String>('');
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+    return BlocListener<TimerBloc, TimerState>(listener: (context, state) {
+      snackBarText.value =
+          'Can continue in ${formatSecondsToTime(state.duration)}';
+    }, child: BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
       builder: (context, state) {
         return state.status.isInProgress
             ? const CircularProgressIndicator()
@@ -123,15 +130,31 @@ class _ContinueButton extends StatelessWidget {
                   onPressed: state.isEmailValid
                       ? () {
                           hideKeyboard();
-                          context
-                              .read<ResetPasswordBloc>()
-                              .add(const EmailSubmitted());
+                          var time = context.read<TimerBloc>().state.duration;
+                          if (time != 0) {
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                SnackBar(
+                                  content: ValueListenableBuilder<String>(
+                                    valueListenable: snackBarText,
+                                    builder: (context, currentText, child) {
+                                      return Text(currentText,
+                                          textAlign: TextAlign.center);
+                                    },
+                                  ),
+                                ),
+                              );
+                          } else {
+                            context
+                                .read<ResetPasswordBloc>()
+                                .add(const EmailSubmitted());
+                          }
                         }
                       : null,
                   child: const Text('Continue'),
-                ),
-              );
+                ));
       },
-    );
+    ));
   }
 }

@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import '../../../shared/ui/colors.dart';
 
+import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../bloc/reset_password_bloc.dart';
+import '../bloc/timer_bloc/timer_bloc.dart';
 
 class SendOtpForm extends StatelessWidget {
   const SendOtpForm({super.key});
@@ -21,14 +23,14 @@ class SendOtpForm extends StatelessWidget {
             SnackBar(content: Text(state.errorMessage ?? '')),
           );
       }
-    }, child: BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
-            builder: (context, state) {
+    }, child: BlocBuilder<TimerBloc, TimerState>(builder: (context, state) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text('Reset password'),
           const Padding(padding: EdgeInsets.all(8)),
-          Text('We have sent a verification code to ${state.email.value}',
+          Text(
+              'We have sent a verification code to ${context.read<ResetPasswordBloc>().state.email.value}',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 12,
@@ -38,21 +40,30 @@ class SendOtpForm extends StatelessWidget {
           const Padding(padding: EdgeInsets.all(8)),
           _ContinueButton(),
           const Padding(padding: EdgeInsets.all(8)),
+          const Text('Didn\'t receive the email?'),
+          const Padding(padding: EdgeInsets.all(8)),
           RichText(
+            textHeightBehavior: const TextHeightBehavior(
+              applyHeightToFirstAscent: false,
+            ),
             text: TextSpan(
-              text: 'Didn\'t receive the email?',
-              style: DefaultTextStyle.of(context).style,
+              text: 'Click to resend',
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  if (state.duration == 0) {
+                    context
+                        .read<ResetPasswordBloc>()
+                        .add(const EmailSubmitted());
+                  }
+                },
+              style: TextStyle(
+                  color: state.duration == 0 ? slateBlue : dullGray,
+                  fontWeight: FontWeight.bold),
               children: <TextSpan>[
-                TextSpan(
-                    text: ' Click to resend',
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        context
-                            .read<ResetPasswordBloc>()
-                            .add(const EmailSubmitted());
-                      },
-                    style: const TextStyle(
-                        color: slateBlue, fontWeight: FontWeight.bold)),
+                if (state.duration != 0)
+                  TextSpan(
+                      text: ' in ${formatSecondsToTime(state.duration)}',
+                      style: DefaultTextStyle.of(context).style),
               ],
             ),
           ),

@@ -51,6 +51,7 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     emit(
       state.copyWith(
         status: FormzSubmissionStatus.initial,
+        startTimer: false,
         otp: otp,
         isOTPValid: Formz.validate([otp]),
       ),
@@ -64,11 +65,7 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     final password = Password.dirty(event.password);
 
     emit(
-      state.copyWith(
-        status: FormzSubmissionStatus.initial,
-        password: password,
-        isEmailValid: Formz.validate([password]),
-      ),
+      state.copyWith(status: FormzSubmissionStatus.initial, password: password),
     );
   }
 
@@ -101,7 +98,9 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
       )
           .then((_) {
         emit(state.copyWith(
-            status: FormzSubmissionStatus.initial, currentForm: 1));
+            status: FormzSubmissionStatus.initial,
+            startTimer: true,
+            currentForm: 1));
       }).catchError((onError) {
         emit(state.copyWith(
             status: FormzSubmissionStatus.failure,
@@ -140,6 +139,8 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
           .then((_) {
         emit(state.copyWith(
             status: FormzSubmissionStatus.success,
+            startTimer: false,
+            stopTimer: true,
             informationMessage: 'All done! Please login'));
       }).catchError((onError) {
         emit(state.copyWith(
@@ -156,7 +157,12 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     var backForm = state.currentForm - 1;
     if (backForm >= 0) {
       emit(state.copyWith(
-          status: FormzSubmissionStatus.initial, currentForm: backForm));
+          status: FormzSubmissionStatus.initial,
+          startTimer: false,
+          isEmailValid: false,
+          isOTPValid: false,
+          otp: const Otp.pure(),
+          currentForm: backForm));
     }
   }
 }
