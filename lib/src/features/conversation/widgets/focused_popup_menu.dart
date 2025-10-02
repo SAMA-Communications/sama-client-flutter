@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -34,7 +35,12 @@ class FocusedPopupMenu {
     Offset offset = renderBox.localToGlobal(Offset.zero);
     var childOffset = Offset(offset.dx, offset.dy);
 
-    HapticFeedback.vibrate();
+    if (Platform.isIOS) {
+      HapticFeedback.heavyImpact();
+    } else if (Platform.isAndroid) {
+      HapticFeedback.vibrate();
+    }
+
     await Navigator.push(
         context,
         PageRouteBuilder(
