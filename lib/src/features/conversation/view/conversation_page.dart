@@ -20,9 +20,10 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/typing_indicator.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/delete_messages/delete_messages_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
-import '../widgets/forward_messages/forward_input.dart';
+import '../widgets/select_input.dart';
 import 'message_input.dart';
 import 'messages_list.dart';
 
@@ -52,6 +53,12 @@ class ConversationPage extends StatelessWidget {
         ),
       ),
       BlocProvider(
+        create: (context) => DeleteMessagesBloc(
+          messagesRepository:
+              RepositoryProvider.of<MessagesRepository>(context),
+        ),
+      ),
+      BlocProvider(
           create: (context) => MediaAttachmentBloc(
               attachmentsRepository:
                   RepositoryProvider.of<AttachmentsRepository>(context))),
@@ -65,7 +72,9 @@ class ConversationPage extends StatelessWidget {
       return PopScope(
           onPopInvokedWithResult: (didPop, result) {
             if (didPop) return;
-            context.read<ConversationBloc>().add(const ChooseMessages(false));
+            context
+                .read<ConversationBloc>()
+                .add(const SelectMessagesMode(false));
           },
           canPop: !state.choose,
           child: Scaffold(
@@ -127,7 +136,7 @@ class ConversationPage extends StatelessWidget {
                                             ?.path)),
                               )
                             : const MessageInput()
-                        : const ForwardInput())
+                        : const SelectInput())
               ],
             ),
           ));

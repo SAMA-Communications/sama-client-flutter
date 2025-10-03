@@ -19,12 +19,14 @@ class FocusedPopupMenu {
   final List<FocusedPopupMenuItem> menuItems;
   final BuildContext context;
   final bool stickToRight;
+  final bool showDivider;
 
   FocusedPopupMenu(
       {required this.child,
       required this.menuItems,
       required this.context,
-      required this.stickToRight});
+      required this.stickToRight,
+      this.showDivider = true});
 
   Future<void> show() async {
     RenderBox renderBox = context.findRenderObject()! as RenderBox;
@@ -46,6 +48,7 @@ class FocusedPopupMenu {
                     childOffset: childOffset,
                     childSize: childSize,
                     stickToRight: stickToRight,
+                    showDivider: showDivider,
                     child: child,
                   ));
             },
@@ -60,6 +63,7 @@ class FocusedMenuDetails extends StatelessWidget {
   final List<FocusedPopupMenuItem> menuItems;
   final Widget child;
   final bool stickToRight;
+  final bool showDivider;
   final menuItemHeight = 45.0;
   final maxMenuWidth = 140.0;
   final topMenuPadding = 8;
@@ -71,6 +75,7 @@ class FocusedMenuDetails extends StatelessWidget {
       required this.childOffset,
       required this.childSize,
       required this.stickToRight,
+      required this.showDivider,
       required this.child,
       super.key});
 
@@ -132,7 +137,7 @@ class FocusedMenuDetails extends StatelessWidget {
                     ]),
                 child: ListView.separated(
                   separatorBuilder: (context, index) =>
-                      index == menuItems.length - 2
+                      index == menuItems.length - 2 && showDivider
                           ? const Divider(height: 1)
                           : const SizedBox.shrink(),
                   itemCount: menuItems.length,

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import '../../../api/api.dart';
+import '../../../api/api.dart' hide DeleteMessagesStatus;
 import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
+import '../bloc/delete_messages/delete_messages_bloc.dart';
 import '../bloc/media_attachment/media_attachment_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../models/models.dart';
@@ -32,12 +33,38 @@ class _MessagesListState extends State<MessagesList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SendMessageBloc, SendMessageState>(
-        listener: (context, sendState) {
-          if (sendState.status == SendMessageStatus.success) {
-            scrollTo(0);
-          }
-        },
+    return MultiBlocListener(
+        listeners: [
+          BlocListener<SendMessageBloc, SendMessageState>(
+            listener: (context, sendState) {
+              if (sendState.status == SendMessageStatus.success) {
+                scrollTo(0);
+              }
+            },
+          ),
+          BlocListener<DeleteMessagesBloc, DeleteMessagesState>(
+              listener: (context, state) {
+            switch (state.status) {
+              case DeleteMessagesStatus.initial:
+              case DeleteMessagesStatus.processing:
+                break;
+              case DeleteMessagesStatus.success:
+                context
+                    .read<ConversationBloc>()
+                    .add(const SelectMessagesMode(false));
+              case DeleteMessagesStatus.failure:
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(
+                          duration: const Duration(seconds: 2),
+                          content: Text(state.errorMessage ?? '')),
+                    );
+                });
+            }
+          })
+        ],
         child: Stack(children: [
           BlocBuilder<ConversationBloc, ConversationState>(
             builder: (context, state) {
@@ -284,6 +311,33 @@ class MessageItem extends StatelessWidget {
                             title: const Text('Delete'),
                             onPressed: () {
                               print('delete message= ${message.body}');
+                              FocusedPopupMenu(
+                                      menuItems: <FocusedPopupMenuItem>[
+                                    FocusedPopupMenuItem(
+                                        title: const Text('Delete for All'),
+                                        onPressed: () {
+                                          context
+                                              .read<DeleteMessagesBloc>()
+                                              .add(DeleteMessages({message},
+                                                  DeleteMessageType.all));
+                                        }),
+                                    FocusedPopupMenuItem(
+                                        title: const Text('Delete for Me'),
+                                        onPressed: () {
+                                          context
+                                              .read<DeleteMessagesBloc>()
+                                              .add(DeleteMessages({message},
+                                                  DeleteMessageType.myself));
+                                        }),
+                                  ],
+                                      context: context,
+                                      child: BlocProvider.value(
+                                          value:
+                                              BlocProvider.of<ConversationBloc>(
+                                                  context),
+                                          child: this),
+                                      stickToRight: message.isOwn)
+                                  .show();
                             }),
                         FocusedPopupMenuItem(
                             leadingIcon: const Icon(Icons.forward_outlined),
@@ -319,7 +373,7 @@ class MessageItem extends StatelessWidget {
                               print('select message= ${message.body}');
                               context
                                   .read<ConversationBloc>()
-                                  .add(ChooseMessages(true, message: message));
+                                  .add(SelectMessagesMode(true, message: message));
                             }),
                       ],
                           context: context,

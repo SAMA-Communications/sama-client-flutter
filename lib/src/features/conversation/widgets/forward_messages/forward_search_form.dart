@@ -60,7 +60,9 @@ class _SearchBody extends StatelessWidget {
               );
               break;
             case ForwardMessagesStatus.success:
-              context.read<ConversationBloc>().add(const ChooseMessages(false));
+              context
+                  .read<ConversationBloc>()
+                  .add(const SelectMessagesMode(false));
               Navigator.popUntil(context, (route) => route.isFirst);
               if (state.chatsTo.length == 1) {
                 ConversationModel conversation = state.chatsTo.first;
