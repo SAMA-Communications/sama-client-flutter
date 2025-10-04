@@ -258,12 +258,6 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                   mainMenuIsOpen = false;
                 },
                 onSelected: (value) {
-                  switch (value) {
-                    case AIMainMenuItem.mainSummary:
-                      break;
-                    case AIMainMenuItem.messageTone:
-                      break;
-                  }
                   mainMenuIsOpen = false;
                 },
                 itemBuilder: (BuildContext rootContext) =>
@@ -326,19 +320,24 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                               ),
                             ],
                             child: ListTile(
-                              visualDensity: const VisualDensity(
-                                  horizontal: 0, vertical: -4),
-                              title: const Text('Get summary'),
+                              horizontalTitleGap: 0,
+                              title: const Align(
+                                alignment: Alignment(0.5, 0),
+                                child: Text('Get summary'),
+                              ),
                               trailing: Icon(iconData),
                             ),
                           );
                         }),
                       ),
                       PopupMenuItem<AIMainMenuItem>(
+                        enabled: widget.textEditingController.text.isNotEmpty,
                         value: AIMainMenuItem.messageTone,
                         child: StatefulBuilder(builder:
                             (BuildContext context, StateSetter setState) {
                           return PopupMenuButton<AISubToneMenuItem>(
+                            enabled:
+                                widget.textEditingController.text.isNotEmpty,
                             popUpAnimationStyle: AnimationStyle.noAnimation,
                             requestFocus: false,
                             offset: Offset(12.0, -estimatedMenuHeight(3)),
@@ -397,9 +396,12 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                               ),
                             ],
                             child: ListTile(
-                              visualDensity: const VisualDensity(
-                                  horizontal: 0, vertical: -4),
-                              title: const Text('Change tone'),
+                              enabled:
+                                  widget.textEditingController.text.isNotEmpty,
+                              horizontalTitleGap: 0,
+                              title: const Align(
+                                  alignment: AlignmentGeometry.center,
+                                  child: Text('Change tone')),
                               trailing: Icon(iconData),
                             ),
                           );
@@ -407,7 +409,7 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                       ),
                     ],
                 child: const Padding(
-                    padding: EdgeInsets.fromLTRB(2, 2, 4, 2),
+                    padding: EdgeInsets.fromLTRB(2, 2, 6, 2),
                     child: Icon(Icons.auto_awesome_outlined, color: dullGray))),
           ),
         ));
