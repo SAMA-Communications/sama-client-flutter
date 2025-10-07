@@ -269,7 +269,7 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                           return PopupMenuButton<AISubSumMenuItem>(
                             popUpAnimationStyle: AnimationStyle.noAnimation,
                             requestFocus: false,
-                            offset: Offset(12.0, -estimatedMenuHeight(3)),
+                            offset: Offset(12.0, -estimatedMenuHeight(2)),
                             tooltip: "",
                             onOpened: () {
                               submenuIsOpen = true;
@@ -304,10 +304,11 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                             },
                             itemBuilder: (BuildContext context) =>
                                 <PopupMenuEntry<AISubSumMenuItem>>[
-                              PopupMenuItem<AISubSumMenuItem>(
-                                  value: AISubSumMenuItem.subUnread,
-                                  padding: EdgeInsets.only(left: subMenuPad),
-                                  child: const Text('unreads')),
+                              //     comment for now
+                              // PopupMenuItem<AISubSumMenuItem>(
+                              //     value: AISubSumMenuItem.subUnread,
+                              //     padding: EdgeInsets.only(left: subMenuPad),
+                              //     child: const Text('unreads')),
                               PopupMenuItem<AISubSumMenuItem>(
                                 value: AISubSumMenuItem.subLastDay,
                                 padding: EdgeInsets.only(left: subMenuPad),
