@@ -10,6 +10,7 @@ import '../features/conversations_list/view/conversations_page.dart';
 import '../features/conversation/view/conversation_page.dart';
 import '../features/login/view/login_page.dart';
 import '../features/profile/view/profile_page.dart';
+import '../features/reset_password/view/reset_password_page.dart';
 import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
 import '../features/user_info/view/user_info_page.dart';
@@ -94,13 +95,19 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
             return GroupInfoPage.route(state.extra);
           },
         ),
+        GoRoute(
+          path: resetPasswordPath,
+          builder: (context, state) {
+            return ResetPasswordPage.route();
+          },
+        ),
       ],
       refreshListenable: GoRouterRefreshBloc(
         BlocProvider.of<AuthenticationBloc>(context),
         BlocProvider.of<SharingIntentBloc>(context),
         BlocProvider.of<PushNotificationsBloc>(context),
       ),
-      redirect: (context, state) {
+      redirect: (context, state) async {
         final status = context.read<AuthenticationBloc>().state.status;
         print(
             'refreshListenable status = $status [router][redirect] ${state.fullPath}');
@@ -147,15 +154,17 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
               ? rootScreenPath
               : state.fullPath;
         } else {
-          return BlocProvider.of<AuthenticationBloc>(context)
-              .tryGetHasCurrentUser()
-              .then((hasUser) {
-            return hasUser
-                ? state.fullPath == rootScreenPath
-                    ? conversationListScreenPath
-                    : state.fullPath
-                : loginScreenPath;
-          });
+          return state.fullPath == resetPasswordPath
+              ? resetPasswordPath
+              : await BlocProvider.of<AuthenticationBloc>(context)
+                  .tryGetHasCurrentUser()
+                  .then((hasUser) {
+                  return hasUser
+                      ? state.fullPath == rootScreenPath
+                          ? conversationListScreenPath
+                          : state.fullPath
+                      : loginScreenPath;
+                });
         }
       },
     );

@@ -358,13 +358,13 @@ class DatabaseService {
   }
 
   Future<List<MessageModel>> getMessagesLocalByStatus(String status) async {
-    final query = store!
-        .box<MessageModel>()
+    final query = store
+        ?.box<MessageModel>()
         .query(MessageModel_.rawStatus.equals(status))
         .build();
-    final results = query.findAsync();
-    query.close();
-    return results;
+    final results = query?.findAsync();
+    query?.close();
+    return results ?? Future.value(List.empty());
   }
 
   Future<MessageModel?> getMessageLocalByStatus(

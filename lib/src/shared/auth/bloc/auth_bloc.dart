@@ -30,7 +30,8 @@ class AuthenticationBloc
         .listen((status) async {
       //fix to set authenticated when open app without network
       if (status == api.ConnectionState.connected &&
-          state.status == AuthenticationStatus.unauthenticated) {
+          state.status == AuthenticationStatus.unauthenticated &&
+          await tryGetHasCurrentUser()) {
         tryAuthUser();
       }
     });

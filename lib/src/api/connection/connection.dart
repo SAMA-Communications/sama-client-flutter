@@ -235,29 +235,36 @@ class SamaConnectionService {
     );
 
     var responseId = response['id'];
-    var error = response['error'];
 
     var requestInfo = awaitingRequests.remove(responseId);
     if (requestInfo != null) {
       var completer = requestInfo.completer;
-      if (error != null) {
-        var responseException = ResponseException.fromJson(error);//CHECK AFTER FIX https://connectycube-apps.atlassian.net/browse/FM-114
-        if (responseException.status == HttpStatus.unauthorized) {
-          print('Unauthorized wait to reconnect $unauthorizedTimeout seconds');
-          //Unauthorized wait to reconnect
-          awaitingRequests[responseId] = requestInfo;
-          Future.delayed(unauthorizedTimeout, () {
-            if (awaitingRequests[responseId] != null) {
-              print('Unauthorized completeError');
-              awaitingRequests.remove(responseId);
-              completer.completeError(responseException);
-            }
-          });
+      try {
+        var error = response['error'];
+        if (error != null) {
+          var responseException = ResponseException.fromJson(
+              error); //CHECK AFTER FIX https://connectycube-apps.atlassian.net/browse/FM-114
+          if (responseException.status == HttpStatus.unauthorized) {
+            print(
+                'Unauthorized wait to reconnect $unauthorizedTimeout seconds');
+            //Unauthorized wait to reconnect
+            awaitingRequests[responseId] = requestInfo;
+            Future.delayed(unauthorizedTimeout, () {
+              if (awaitingRequests[responseId] != null) {
+                print('Unauthorized completeError');
+                awaitingRequests.remove(responseId);
+                completer.completeError(responseException);
+              }
+            });
+          } else {
+            completer.completeError(responseException);
+          }
         } else {
-          completer.completeError(responseException);
+          completer.complete(response);
         }
-      } else {
-        completer.complete(response);
+      } catch (e) {
+        completer.completeError(ResponseException.fromJson(
+            ({'status': -1, 'message': 'Unexpected error'})));
       }
     }
   }

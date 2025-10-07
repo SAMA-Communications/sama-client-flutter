@@ -68,13 +68,17 @@ class AuthenticationRepository {
   Future<void> signUp({
     required String username,
     required String password,
+    required String email,
     bool signInWithCreatedUser = true,
   }) async {
     var deviceId = await AppSetId().getIdentifier();
 
     try {
       await api.createUser(
-          login: username, password: password, deviceId: deviceId ?? '');
+          login: username,
+          password: password,
+          email: email,
+          deviceId: deviceId ?? '');
 
       if (signInWithCreatedUser) {
         login(username: username, password: password, deviceId: deviceId);
@@ -101,6 +105,25 @@ class AuthenticationRepository {
     await api.signOut().then((success) {
       disposeCurrentUser();
     });
+  }
+
+  Future<void> sendOtpEmail(String email) async {
+    try {
+      await api.sendOtpEmail(email);
+      return Future.value(null);
+    } catch (e) {
+      return Future.error((e as api.ResponseException).message ?? '');
+    }
+  }
+
+  Future<void> sendResetPassword(
+      String email, int token, String newPassword) async {
+    try {
+      await api.sendResetPassword(email, token, newPassword);
+      return Future.value(null);
+    } catch (e) {
+      return Future.error((e as api.ResponseException).message ?? '');
+    }
   }
 
   disposeCurrentUser() async {
