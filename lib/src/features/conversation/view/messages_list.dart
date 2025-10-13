@@ -334,7 +334,7 @@ class MessageItem extends StatelessWidget {
                               FocusedPopupMenu(
                                       menuItems: <FocusedPopupMenuItem>[
                                     FocusedPopupMenuItem(
-                                        title: const Text('Delete for All'),
+                                        title: const Text('Delete for all'),
                                         onPressed: () {
                                           context
                                               .read<DeleteMessagesBloc>()
@@ -342,7 +342,7 @@ class MessageItem extends StatelessWidget {
                                                   DeleteMessageType.all));
                                         }),
                                     FocusedPopupMenuItem(
-                                        title: const Text('Delete for Me'),
+                                        title: const Text('Delete for me'),
                                         onPressed: () {
                                           context
                                               .read<DeleteMessagesBloc>()
@@ -391,9 +391,8 @@ class MessageItem extends StatelessWidget {
                             title: const Text('Select'),
                             onPressed: () {
                               print('select message= ${message.body}');
-                              context
-                                  .read<ConversationBloc>()
-                                  .add(SelectMessagesMode(true, message: message));
+                              context.read<ConversationBloc>().add(
+                                  SelectMessagesMode(true, message: message));
                             }),
                       ],
                           context: context,

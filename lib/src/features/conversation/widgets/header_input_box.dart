@@ -46,7 +46,8 @@ class HeaderInputBox extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    Flexible(
+                        child: Text(
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -55,7 +56,7 @@ class HeaderInputBox extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.25,
                       ),
-                    ),
+                    )),
                     IconButton(
                       style: TextButton.styleFrom(
                           minimumSize: Size.zero,

@@ -75,6 +75,7 @@ class FocusedMenuDetails extends StatelessWidget {
   final topMenuPadding = 8;
   final leftMenuPadding = 6;
   final horizontalMenuPadding = 50;
+  final topPaddingHeight = 45.0;
 
   const FocusedMenuDetails(
       {required this.menuItems,
@@ -90,14 +91,23 @@ class FocusedMenuDetails extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
 
     final menuHeight = menuItems.length * menuItemHeight;
+    final childPaddingDy = menuHeight + topPaddingHeight;
+
+    final needToMove = menuHeight +
+            childSize.height +
+            topPaddingHeight -
+            childOffset.dy.abs() >
+        size.height;
+
     final leftOffset = stickToRight
         ? childOffset.dx -
             maxMenuWidth +
             childSize.width -
             horizontalMenuPadding
         : childOffset.dx + horizontalMenuPadding + leftMenuPadding;
-    final topOffset =
-        (childOffset.dy + menuHeight + childSize.height) < size.height
+    final topOffset = needToMove
+        ? topPaddingHeight - topMenuPadding
+        : (childOffset.dy + menuHeight + childSize.height) < size.height
             ? childOffset.dy + childSize.height + topMenuPadding
             : childOffset.dy - menuHeight - topMenuPadding;
 
@@ -180,7 +190,7 @@ class FocusedMenuDetails extends StatelessWidget {
             ),
           ),
           Positioned(
-              top: childOffset.dy,
+              top: needToMove ? childPaddingDy : childOffset.dy,
               left: childOffset.dx,
               child: AbsorbPointer(
                   absorbing: true,

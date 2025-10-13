@@ -39,8 +39,9 @@ class _SelectInputState extends State<SelectInput> {
                           () => showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext bc) {
-                                  return SizedBox(
-                                    height: 85,
+                                  return SafeArea(
+                                      child: SizedBox(
+                                    height: 90,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.stretch,
@@ -48,31 +49,37 @@ class _SelectInputState extends State<SelectInput> {
                                         BlocProvider.value(
                                             value: BlocProvider.of<
                                                 DeleteMessagesBloc>(context),
-                                            child: TextButton(
-                                              style: const ButtonStyle(
-                                                tapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                              ),
-                                              onPressed: () {
-                                                context
-                                                    .read<DeleteMessagesBloc>()
-                                                    .add(DeleteMessages(
-                                                        state.selectedMessages
-                                                            .value,
-                                                        DeleteMessageType.all));
-                                                Navigator.pop(context);
-                                              },
-                                              child:
-                                                  const Text('Delete for All'),
-                                            )),
+                                            child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 5),
+                                                // Adds padding only at the bottom
+                                                child: TextButton(
+                                                  style: const ButtonStyle(
+                                                    tapTargetSize:
+                                                        MaterialTapTargetSize
+                                                            .shrinkWrap,
+                                                  ),
+                                                  onPressed: () {
+                                                    context
+                                                        .read<
+                                                            DeleteMessagesBloc>()
+                                                        .add(DeleteMessages(
+                                                            state
+                                                                .selectedMessages
+                                                                .value,
+                                                            DeleteMessageType
+                                                                .all));
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text(
+                                                      'Delete for all'),
+                                                ))),
                                         BlocProvider.value(
                                           value: BlocProvider.of<
                                               DeleteMessagesBloc>(context),
                                           child: Padding(
                                               padding: const EdgeInsets.only(
                                                   bottom: 5),
-                                              // Adds padding only at the bottom
                                               child: TextButton(
                                                 style: const ButtonStyle(
                                                   tapTargetSize:
@@ -91,12 +98,12 @@ class _SelectInputState extends State<SelectInput> {
                                                   Navigator.pop(context);
                                                 },
                                                 child:
-                                                    const Text('Delete for Me'),
+                                                    const Text('Delete for me'),
                                               )),
                                         )
                                       ],
                                     ),
-                                  );
+                                  ));
                                 },
                               )),
                   color: dullGray,
