@@ -17,7 +17,7 @@ class SelectedMessages
   @override
   SelectedChatsValidationError? validator(Set<ChatMessage> value) {
     if (value.isEmpty) return SelectedChatsValidationError.empty;
-    if (value.length > maxChatsForwardTo) {
+    if (value.length > maxChatsSelected) {
       return SelectedChatsValidationError.long;
     }
     return null;

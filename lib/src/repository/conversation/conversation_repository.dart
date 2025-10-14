@@ -143,6 +143,18 @@ class ConversationRepository {
             conversationStored.lastMessage?.id == status.messageId) {
           _conversationsController.add(conversationStored);
         }
+      } else if (status is DeleteMessagesStatus) {
+        final conversationStored =
+            await localDatasource.getConversationLocal(status.cid);
+        if (conversationStored != null &&
+            conversationStored.lastMessage == null) {
+          var lastMsg = (await messagesRepository
+                  .getStoredMessages(conversationStored, limit: 1))
+              .firstOrNull;
+          var updatedChat = conversationStored.copyWith(lastMessage: lastMsg);
+          await localDatasource.updateConversationLocal(updatedChat);
+          _conversationsController.add(updatedChat);
+        }
       }
     });
 
@@ -219,22 +231,12 @@ class ConversationRepository {
       createCallSlice: () => _fetchConversationsWithParticipants(
           ltDate: ltDate ?? DateTime.now(), limit: 10),
       createCall: () => _fetchConversationsWithParticipants(ltDate: ltDate),
-      saveCallResult: localDatasource.saveConversationsLocal,
+      saveCallResult: (newData, oldData) {
+        return localDatasource.saveConversationsLocal(newData);
+      },
       processResponse: (data) async {
         return data.whereNot((c) => _chatsFilter(c)).toList();
       },
-    );
-  }
-
-  Future<Resource<ConversationModel?>> getConversation(String id) async {
-    return NetworkBoundResources<ConversationModel?, ConversationModel?>()
-        .asFuture(
-      loadFromDb: () => localDatasource.getConversationLocal(id),
-      shouldFetch: (data, slice) => data == null,
-      createCall: () => getConversationById(id),
-      saveCallResult: (data) => data != null
-          ? localDatasource.saveConversationLocal(data)
-          : Future.value(false),
     );
   }
 
@@ -302,7 +304,7 @@ class ConversationRepository {
         allParticipants[conversation.id]!.map((id) => usersMap[id]!).toList();
     var conversationModel = _buildConversationModel(
         conversation, usersMap, participantsModels, currentUser);
-    localDatasource.updateConversationLocal(conversationModel);
+    await localDatasource.updateConversationLocal(conversationModel);
     return conversationModel;
   }
 
