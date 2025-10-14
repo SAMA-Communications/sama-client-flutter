@@ -19,6 +19,7 @@ import '../widgets/reply_bubble.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
 import '../widgets/unsupported_message.dart';
+import '../../../shared/widget/swipe_to.dart';
 
 class MessagesList extends StatefulWidget {
   const MessagesList({super.key});
@@ -120,23 +121,42 @@ class _MessagesListState extends State<MessagesList> {
                         reverse: true,
                         itemBuilder: (BuildContext context, int index) {
                           var msg = state.messages[index];
-                          return MessageItem(
-                              message: msg,
-                              onTapReply: () {
-                                var replyIndex = state.messages.indexWhere(
-                                    (item) => item.id == msg.repliedMessageId);
-                                if (replyIndex == -1) {
-                                  if (!state.hasReachedMax) {
-                                    context.read<ConversationBloc>().add(
-                                        MessagesMoreForReply(
-                                            msg.repliedMessageId!));
-                                    showProgress();
+                          return SwipeTo(
+                            key: Key(msg.id.toString()),
+                            stickToRight: msg.isOwn,
+                            direction: msg.isOwn
+                                ? DismissDirection.endToStart
+                                : DismissDirection.startToEnd,
+                            onSwipe: () {
+                              print('onSwipe');
+                              context
+                                  .read<SendMessageBloc>()
+                                  .add(AddReplyMessage(msg));
+                            },
+                            actionIcon: const Icon(
+                              Icons.reply_rounded,
+                              color: Colors.black,
+                              size: 25,
+                            ),
+                            child: MessageItem(
+                                message: msg,
+                                onTapReply: () {
+                                  var replyIndex = state.messages.indexWhere(
+                                      (item) =>
+                                          item.id == msg.repliedMessageId);
+                                  if (replyIndex == -1) {
+                                    if (!state.hasReachedMax) {
+                                      context.read<ConversationBloc>().add(
+                                          MessagesMoreForReply(
+                                              msg.repliedMessageId!));
+                                      showProgress();
+                                    }
+                                    return;
                                   }
-                                  return;
-                                }
-                                scrollTo(replyIndex);
-                              },
-                              onTapForward: () => print('onTapForward'));
+                                  scrollTo(replyIndex);
+                                },
+                                onTapForward: () => print('onTapForward')),
+                          );
                         },
                         itemCount: state.messages.length,
                         itemScrollController: _scrollController,
@@ -314,7 +334,7 @@ class MessageItem extends StatelessWidget {
                               FocusedPopupMenu(
                                       menuItems: <FocusedPopupMenuItem>[
                                     FocusedPopupMenuItem(
-                                        title: const Text('Delete for All'),
+                                        title: const Text('Delete for all'),
                                         onPressed: () {
                                           context
                                               .read<DeleteMessagesBloc>()
@@ -322,7 +342,7 @@ class MessageItem extends StatelessWidget {
                                                   DeleteMessageType.all));
                                         }),
                                     FocusedPopupMenuItem(
-                                        title: const Text('Delete for Me'),
+                                        title: const Text('Delete for me'),
                                         onPressed: () {
                                           context
                                               .read<DeleteMessagesBloc>()
@@ -371,9 +391,8 @@ class MessageItem extends StatelessWidget {
                             title: const Text('Select'),
                             onPressed: () {
                               print('select message= ${message.body}');
-                              context
-                                  .read<ConversationBloc>()
-                                  .add(SelectMessagesMode(true, message: message));
+                              context.read<ConversationBloc>().add(
+                                  SelectMessagesMode(true, message: message));
                             }),
                       ],
                           context: context,

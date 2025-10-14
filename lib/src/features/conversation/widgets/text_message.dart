@@ -9,6 +9,7 @@ class TextMessage extends StatelessWidget {
   final String body;
   final TextStyle style;
   final TextStyle? linkStyle;
+  final Color? iconColor;
   final Widget time;
   final Widget? status;
   final Widget? edited;
@@ -18,6 +19,7 @@ class TextMessage extends StatelessWidget {
     required this.body,
     required this.style,
     required this.time,
+    this.iconColor,
     this.linkStyle,
     this.status,
     this.edited,
@@ -48,10 +50,10 @@ class TextMessage extends StatelessWidget {
                 child: RichText(
                   text: TextSpan(
                     children: [
-                      const WidgetSpan(
+                      WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: Icon(Icons.public_outlined,
-                            color: dullGray, size: 25),
+                            color: iconColor, size: 25),
                       ),
                       const WidgetSpan(
                         child: SizedBox(width: 4),
@@ -60,10 +62,13 @@ class TextMessage extends StatelessWidget {
                     ],
                   ),
                 ))),
-        LinkPreviewWidget(
-            link: linkToOpen,
-            errorBody: 'No description available',
-            key: Key(linkToOpen)),
+        GestureDetector(
+          onTap: () => openUrl(Uri.parse(linkToOpen)),
+          child: LinkPreviewWidget(
+              link: linkToOpen,
+              errorBody: 'No description available',
+              key: Key(linkToOpen)),
+        ),
         const SizedBox(height: 4),
       ]));
 
