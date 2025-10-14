@@ -83,7 +83,7 @@ class GroupCreateFormState extends State<GroupCreateForm> {
           return previous.participants != current.participants;
         }, builder: (context, state) {
           return Visibility(
-            visible: !keyboardIsOpen(context),
+            visible: !keyboardIsOpenCtx(context),
             child: Visibility(
               visible: state.participants.isValid,
               child: FloatingActionButton(
@@ -119,7 +119,7 @@ void _showGroupDetails(BuildContext context) {
                 value: BlocProvider.of<GroupBloc>(context),
                 child: _GroupDetailsForm()),
             floatingActionButton: Visibility(
-              visible: !keyboardIsOpen(context),
+              visible: !keyboardIsOpenCtx(context),
               child: FloatingActionButton(
                 backgroundColor: slateBlue,
                 tooltip: 'Create chat',

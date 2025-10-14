@@ -8,6 +8,7 @@ const String messageEditRequestName = 'message_edit';
 const String messagesListRequestName = 'message_list';
 const String messagesReadRequestName = 'message_read';
 const String messagesDeleteRequestName = 'message_delete';
+const String messagesSummaryRequestName = 'message_summary';
 const String messageTypingName = 'typing';
 
 String linkPreviewUrl = dotenv.env['LINK_PREVIEW_URL'] ?? '';
@@ -68,6 +69,14 @@ Future<List<Message>> getMessages(Map<String, dynamic> params) {
     return List.from(response['messages'])
         .map((element) => Message.fromJson(element))
         .toList();
+  });
+}
+
+Future<String> getMessagesSummary(Map<String, dynamic> params) {
+  return SamaConnectionService.instance
+      .sendRequest(messagesSummaryRequestName, params)
+      .then((response) {
+    return response['message'];
   });
 }
 

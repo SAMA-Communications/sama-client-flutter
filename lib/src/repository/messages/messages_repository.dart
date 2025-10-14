@@ -101,6 +101,25 @@ class MessagesRepository {
     return buildMessageModels(chat, messages);
   }
 
+  Future<void> getMessagesSummary(String cid, String filter) async {
+    var messageBody = await api.getMessagesSummary({
+      'cid': cid,
+      'filter': filter,
+    });
+    var currentUser = await userRepository.getCurrentUser();
+    var messageModel = MessageModel(
+        body: messageBody,
+        isOwn: true,
+        cid: cid,
+        from: currentUser!.id!,
+        id: const Uuid().v1(),
+        extension: const {'type': 'summary'},
+        t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        createdAt: DateTime.now());
+
+    _incomingMessagesController.add(messageModel.toChatMessage(true, true));
+  }
+
   Future<List<ChatMessage>> getStoredMessagesByIds(List<String> ids) async {
     var messages = await localDatasource.getMessagesLocal(ids);
     return buildChatMessageModels(messages);

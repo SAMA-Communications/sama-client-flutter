@@ -453,6 +453,10 @@ class MessageItem extends StatelessWidget {
           notification = ' removed you from conversation';
           break;
 
+        case 'summary':
+          notification = ' Only you can see this summary';
+          break;
+
         default:
           notification = '';
       }
@@ -463,18 +467,31 @@ class MessageItem extends StatelessWidget {
         initiator = User.fromJson((message.extension?['user'])).toUserModel();
       }
 
+      bool isAiType = (message.extension?['type'] == 'summary');
+
       return ServiceMessageBubble(
         child: RichText(
           text: TextSpan(
             style: DefaultTextStyle.of(context).style,
-            children: <TextSpan>[
+            children: [
               if (initiator != null)
                 TextSpan(
                     text: getUserName(initiator),
                     style: const TextStyle(fontWeight: FontWeight.bold)),
+              if (isAiType)
+                const WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Icon(Icons.auto_awesome_outlined, color: dullGray),
+                ),
               TextSpan(
-                text: notification,
-              ),
+                  text: notification,
+                  style: TextStyle(color: isAiType ? dullGray : black)),
+              if (isAiType)
+                WidgetSpan(
+                    child: Container(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text('${message.body}'),
+                ))
             ],
           ),
         ),

@@ -24,6 +24,8 @@ double keyboardHeight() {
   return viewInsets.bottom;
 }
 
-bool keyboardIsOpen(BuildContext ctx) => keyboardHeightCtx(ctx) != 0;
+bool keyboardIsOpenCtx(BuildContext ctx) => keyboardHeightCtx(ctx) != 0;
+
+bool keyboardIsOpen() => keyboardHeight() != 0;
 
 void hideKeyboard() => FocusManager.instance.primaryFocus?.unfocus();

@@ -422,7 +422,7 @@ void _showSearchScreenDialog(BuildContext context) {
                   ),
                 ),
                 floatingActionButton: Visibility(
-                  visible: !keyboardIsOpen(context),
+                  visible: !keyboardIsOpenCtx(context),
                   child: FloatingActionButton(
                     backgroundColor: dullGray,
                     tooltip: 'Add participants',
