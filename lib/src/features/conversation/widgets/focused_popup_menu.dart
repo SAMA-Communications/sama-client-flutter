@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -19,12 +20,14 @@ class FocusedPopupMenu {
   final List<FocusedPopupMenuItem> menuItems;
   final BuildContext context;
   final bool stickToRight;
+  final bool showDivider;
 
   FocusedPopupMenu(
       {required this.child,
       required this.menuItems,
       required this.context,
-      required this.stickToRight});
+      required this.stickToRight,
+      this.showDivider = true});
 
   Future<void> show() async {
     RenderBox renderBox = context.findRenderObject()! as RenderBox;
@@ -32,7 +35,12 @@ class FocusedPopupMenu {
     Offset offset = renderBox.localToGlobal(Offset.zero);
     var childOffset = Offset(offset.dx, offset.dy);
 
-    HapticFeedback.vibrate();
+    if (Platform.isIOS) {
+      HapticFeedback.heavyImpact();
+    } else if (Platform.isAndroid) {
+      HapticFeedback.vibrate();
+    }
+
     await Navigator.push(
         context,
         PageRouteBuilder(
@@ -46,6 +54,7 @@ class FocusedPopupMenu {
                     childOffset: childOffset,
                     childSize: childSize,
                     stickToRight: stickToRight,
+                    showDivider: showDivider,
                     child: child,
                   ));
             },
@@ -60,17 +69,20 @@ class FocusedMenuDetails extends StatelessWidget {
   final List<FocusedPopupMenuItem> menuItems;
   final Widget child;
   final bool stickToRight;
+  final bool showDivider;
   final menuItemHeight = 45.0;
   final maxMenuWidth = 140.0;
   final topMenuPadding = 8;
   final leftMenuPadding = 6;
   final horizontalMenuPadding = 50;
+  final topPaddingHeight = 45.0;
 
   const FocusedMenuDetails(
       {required this.menuItems,
       required this.childOffset,
       required this.childSize,
       required this.stickToRight,
+      required this.showDivider,
       required this.child,
       super.key});
 
@@ -79,14 +91,23 @@ class FocusedMenuDetails extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
 
     final menuHeight = menuItems.length * menuItemHeight;
+    final childPaddingDy = menuHeight + topPaddingHeight;
+
+    final needToMove = menuHeight +
+            childSize.height +
+            topPaddingHeight -
+            childOffset.dy.abs() >
+        size.height;
+
     final leftOffset = stickToRight
         ? childOffset.dx -
             maxMenuWidth +
             childSize.width -
             horizontalMenuPadding
         : childOffset.dx + horizontalMenuPadding + leftMenuPadding;
-    final topOffset =
-        (childOffset.dy + menuHeight + childSize.height) < size.height
+    final topOffset = needToMove
+        ? topPaddingHeight - topMenuPadding
+        : (childOffset.dy + menuHeight + childSize.height) < size.height
             ? childOffset.dy + childSize.height + topMenuPadding
             : childOffset.dy - menuHeight - topMenuPadding;
 
@@ -132,7 +153,7 @@ class FocusedMenuDetails extends StatelessWidget {
                     ]),
                 child: ListView.separated(
                   separatorBuilder: (context, index) =>
-                      index == menuItems.length - 2
+                      index == menuItems.length - 2 && showDivider
                           ? const Divider(height: 1)
                           : const SizedBox.shrink(),
                   itemCount: menuItems.length,
@@ -169,7 +190,7 @@ class FocusedMenuDetails extends StatelessWidget {
             ),
           ),
           Positioned(
-              top: childOffset.dy,
+              top: needToMove ? childPaddingDy : childOffset.dy,
               left: childOffset.dx,
               child: AbsorbPointer(
                   absorbing: true,

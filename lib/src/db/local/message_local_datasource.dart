@@ -98,6 +98,16 @@ class MessageLocalDatasource {
     }
   }
 
+  Future<bool> removeMessagesLocal(List<String> ids) async {
+    print('removeMessagesLocal= $ids');
+    try {
+      return await _databaseService.removeMessagesLocal(ids);
+    } catch (e) {
+      print('removeMessagesLocal e= $ids');
+      throw DatabaseException(e.toString());
+    }
+  }
+
   Stream<ConversationModel?> watchedConversation(String id) {
     print('watchedConversation');
     try {

@@ -68,7 +68,7 @@ class EditMessageStatus implements MessageSendStatus {
       {'id': messageId, 'body': newBody, 'from': from};
 }
 
-class DeleteMessagesStatus extends MessageStatus {
+class DeleteMessagesStatus extends MessageStatus implements MessageSendStatus {
   DeleteMessageType deletingType; // type
 
   DeleteMessagesStatus.fromJson(super.json)
