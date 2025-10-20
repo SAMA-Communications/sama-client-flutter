@@ -73,6 +73,14 @@ class _MessageInputState extends State<MessageInput> {
               textEditingController.text = state.draftMessage!.body!;
             }
           },
+        ),
+        BlocListener<AiMessageBloc, AiMessageState>(
+          listenWhen: (previous, current) {
+            return (previous.text != current.text);
+          },
+          listener: (context, state) {
+            textEditingController.text = state.text;
+          },
         )
       ],
       child: BlocBuilder<SendMessageBloc, SendMessageState>(
@@ -164,7 +172,7 @@ class _MessageInputState extends State<MessageInput> {
                             rootContext, textEditingController.text),
                     color: dullGray,
                   ),
-                  const _MagicMenuButton()
+                  _MagicMenuButton(textEditingController)
                 ],
               ),
             )
@@ -196,20 +204,29 @@ class _MessageInputState extends State<MessageInput> {
 
 enum AIMainMenuItem { mainSummary, messageTone }
 
-enum AISubMenuItem {
+enum AISubSumMenuItem {
   subUnread,
   subLastDay,
   subLast7days,
 }
 
+enum AISubToneMenuItem {
+  subPositive,
+  subNegative,
+  subCringe,
+}
+
 class _MagicMenuButton extends StatefulWidget {
-  const _MagicMenuButton();
+  final TextEditingController textEditingController;
+
+  const _MagicMenuButton(this.textEditingController);
 
   @override
   State<_MagicMenuButton> createState() => _MagicMenuButtonState();
 }
 
 class _MagicMenuButtonState extends State<_MagicMenuButton> {
+  final subMenuPad = 32.0;
   IconData iconData = Icons.arrow_drop_up_outlined;
   var mainMenuIsOpen = false;
   var submenuIsOpen = false;
@@ -229,6 +246,7 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
           child: Material(
             color: Colors.transparent,
             child: PopupMenuButton<AIMainMenuItem>(
+                constraints: const BoxConstraints.tightFor(width: 150),
                 popUpAnimationStyle: AnimationStyle.noAnimation,
                 requestFocus: false,
                 offset: Offset(2.0, -estimatedMenuHeight(2)),
@@ -240,12 +258,6 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                   mainMenuIsOpen = false;
                 },
                 onSelected: (value) {
-                  switch (value) {
-                    case AIMainMenuItem.mainSummary:
-                      break;
-                    case AIMainMenuItem.messageTone:
-                      break;
-                  }
                   mainMenuIsOpen = false;
                 },
                 itemBuilder: (BuildContext rootContext) =>
@@ -254,7 +266,79 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                         value: AIMainMenuItem.mainSummary,
                         child: StatefulBuilder(builder:
                             (BuildContext context, StateSetter setState) {
-                          return PopupMenuButton<AISubMenuItem>(
+                          return PopupMenuButton<AISubSumMenuItem>(
+                            popUpAnimationStyle: AnimationStyle.noAnimation,
+                            requestFocus: false,
+                            offset: Offset(12.0, -estimatedMenuHeight(2)),
+                            tooltip: "",
+                            onOpened: () {
+                              submenuIsOpen = true;
+                              setState(() =>
+                                  iconData = Icons.arrow_drop_down_outlined);
+                            },
+                            onCanceled: () {
+                              submenuIsOpen = false;
+                              setState(() =>
+                                  iconData = Icons.arrow_drop_up_outlined);
+                            },
+                            onSelected: (subValue) {
+                              switch (subValue) {
+                                case AISubSumMenuItem.subUnread:
+                                  BlocProvider.of<AiMessageBloc>(rootContext)
+                                      .add(const GetMessagesSummary('unreads'));
+                                  break;
+                                case AISubSumMenuItem.subLastDay:
+                                  BlocProvider.of<AiMessageBloc>(rootContext)
+                                      .add(
+                                          const GetMessagesSummary('last-day'));
+                                  break;
+                                case AISubSumMenuItem.subLast7days:
+                                  BlocProvider.of<AiMessageBloc>(rootContext)
+                                      .add(const GetMessagesSummary(
+                                          'last-7-days'));
+                                  break;
+                              }
+                              submenuIsOpen = false;
+                              iconData = Icons.arrow_drop_up_outlined;
+                              Navigator.pop(context); //close main menu
+                            },
+                            itemBuilder: (BuildContext context) =>
+                                <PopupMenuEntry<AISubSumMenuItem>>[
+                              //     comment for now
+                              // PopupMenuItem<AISubSumMenuItem>(
+                              //     value: AISubSumMenuItem.subUnread,
+                              //     padding: EdgeInsets.only(left: subMenuPad),
+                              //     child: const Text('unreads')),
+                              PopupMenuItem<AISubSumMenuItem>(
+                                value: AISubSumMenuItem.subLastDay,
+                                padding: EdgeInsets.only(left: subMenuPad),
+                                child: const Text('last day'),
+                              ),
+                              PopupMenuItem<AISubSumMenuItem>(
+                                value: AISubSumMenuItem.subLast7days,
+                                padding: EdgeInsets.only(left: subMenuPad),
+                                child: const Text('7 days'),
+                              ),
+                            ],
+                            child: ListTile(
+                              horizontalTitleGap: 0,
+                              title: const Align(
+                                alignment: Alignment(0.5, 0),
+                                child: Text('Get summary'),
+                              ),
+                              trailing: Icon(iconData),
+                            ),
+                          );
+                        }),
+                      ),
+                      PopupMenuItem<AIMainMenuItem>(
+                        enabled: widget.textEditingController.text.isNotEmpty,
+                        value: AIMainMenuItem.messageTone,
+                        child: StatefulBuilder(builder:
+                            (BuildContext context, StateSetter setState) {
+                          return PopupMenuButton<AISubToneMenuItem>(
+                            enabled:
+                                widget.textEditingController.text.isNotEmpty,
                             popUpAnimationStyle: AnimationStyle.noAnimation,
                             requestFocus: false,
                             offset: Offset(12.0, -estimatedMenuHeight(3)),
@@ -271,55 +355,62 @@ class _MagicMenuButtonState extends State<_MagicMenuButton> {
                             },
                             onSelected: (subValue) {
                               switch (subValue) {
-                                case AISubMenuItem.subUnread:
+                                case AISubToneMenuItem.subPositive:
                                   BlocProvider.of<AiMessageBloc>(rootContext)
-                                      .add(const GetMessagesSummary('unreads'));
+                                      .add(GetMessageTone(
+                                          widget.textEditingController.text,
+                                          'positive'));
                                   break;
-                                case AISubMenuItem.subLastDay:
+                                case AISubToneMenuItem.subNegative:
                                   BlocProvider.of<AiMessageBloc>(rootContext)
-                                      .add(
-                                          const GetMessagesSummary('last-day'));
+                                      .add(GetMessageTone(
+                                          widget.textEditingController.text,
+                                          'negative'));
                                   break;
-                                case AISubMenuItem.subLast7days:
+                                case AISubToneMenuItem.subCringe:
                                   BlocProvider.of<AiMessageBloc>(rootContext)
-                                      .add(const GetMessagesSummary(
-                                          'last-7-days'));
+                                      .add(GetMessageTone(
+                                          widget.textEditingController.text,
+                                          'cringe'));
                                   break;
                               }
                               submenuIsOpen = false;
+                              iconData = Icons.arrow_drop_up_outlined;
                               Navigator.pop(context); //close main menu
                             },
                             itemBuilder: (BuildContext context) =>
-                                <PopupMenuEntry<AISubMenuItem>>[
-                              const PopupMenuItem<AISubMenuItem>(
-                                value: AISubMenuItem.subUnread,
-                                child: Text('unreads'),
+                                <PopupMenuEntry<AISubToneMenuItem>>[
+                              PopupMenuItem<AISubToneMenuItem>(
+                                value: AISubToneMenuItem.subPositive,
+                                padding: EdgeInsets.only(left: subMenuPad),
+                                child: const Text('positive'),
                               ),
-                              const PopupMenuItem<AISubMenuItem>(
-                                value: AISubMenuItem.subLastDay,
-                                child: Text('last day'),
+                              PopupMenuItem<AISubToneMenuItem>(
+                                value: AISubToneMenuItem.subNegative,
+                                padding: EdgeInsets.only(left: subMenuPad),
+                                child: const Text('negative'),
                               ),
-                              const PopupMenuItem<AISubMenuItem>(
-                                value: AISubMenuItem.subLast7days,
-                                child: Text('last 7 days'),
+                              PopupMenuItem<AISubToneMenuItem>(
+                                value: AISubToneMenuItem.subCringe,
+                                padding: EdgeInsets.only(left: subMenuPad),
+                                child: const Text('cringe'),
                               ),
                             ],
                             child: ListTile(
-                              visualDensity: const VisualDensity(
-                                  horizontal: 0, vertical: -4),
-                              title: const Text('Get summary'),
+                              enabled:
+                                  widget.textEditingController.text.isNotEmpty,
+                              horizontalTitleGap: 0,
+                              title: const Align(
+                                  alignment: AlignmentGeometry.center,
+                                  child: Text('Change tone')),
                               trailing: Icon(iconData),
                             ),
                           );
                         }),
                       ),
-                      const PopupMenuItem<AIMainMenuItem>(
-                        value: AIMainMenuItem.messageTone,
-                        child: Text('Change message tone'),
-                      ),
                     ],
                 child: const Padding(
-                    padding: EdgeInsets.fromLTRB(2, 2, 4, 2),
+                    padding: EdgeInsets.fromLTRB(2, 2, 6, 2),
                     child: Icon(Icons.auto_awesome_outlined, color: dullGray))),
           ),
         ));
