@@ -45,7 +45,7 @@ class AiMessageBloc extends Bloc<AiMessageEvent, AiMessageState> {
     try {
       emit(state.copyWith(status: AiMessageStatus.processing));
       var message = await messagesRepository.changeMessageTone(
-          currentConversation.id, event.filter);
+          event.message, event.filter);
       emit(state.copyWith(text: message, status: AiMessageStatus.success));
     } catch (_) {}
   }
