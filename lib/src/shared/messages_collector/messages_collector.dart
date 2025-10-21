@@ -27,16 +27,8 @@ class MessagesCollector {
     this.messagesRepository = messagesRepository;
     statusMessagesSubscription ??=
         messagesRepository.statusMessagesStream.listen((status) async {
-      switch (status) {
-        case PendingMessageStatus():
-          break;
-        case SentMessageStatus():
-          _onSentStatusReceived(status);
-          break;
-        case ReadMessagesStatus():
-          break;
-        case FailedMessagesStatus():
-          break;
+      if (status is SentMessageStatus) {
+        _onSentStatusReceived(status);
       }
     });
 

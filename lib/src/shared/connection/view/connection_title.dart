@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide ConnectionState;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../features/conversations_list/conversations_list.dart';
 import '../../../shared/connection/bloc/connection_bloc.dart';
 
 class ConnectionTitle extends StatelessWidget {
@@ -15,16 +16,7 @@ class ConnectionTitle extends StatelessWidget {
       if (state.status == ConnectionStatus.connected) {
         return title;
       }
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 10,
-        children: [
-          Transform.scale(
-              scale: 0.75,
-              child: CircularProgressIndicator(color: color, strokeWidth: 3.0)),
-          _getTitleWidget(state),
-        ],
-      );
+      return TitleLoader(color, _getTitleWidget(state));
     });
   }
 

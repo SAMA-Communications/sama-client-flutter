@@ -24,6 +24,7 @@ class ChatMessage extends MessageModel {
     super.createdAt,
     super.t,
     super.isTempReplied,
+    super.isEdited,
     super.extension,
   });
 
@@ -43,6 +44,7 @@ class ChatMessage extends MessageModel {
     bool? isOwn,
     int? t,
     bool? isTempReplied,
+    bool? isEdited,
     DateTime? createdAt,
     Map<String, dynamic>? extension,
     List<AttachmentModel>? attachments,
@@ -65,6 +67,7 @@ class ChatMessage extends MessageModel {
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         isTempReplied: isTempReplied ?? this.isTempReplied,
+        isEdited: isEdited ?? this.isEdited,
         extension: extension ?? this.extension)
       ..sender = sender ?? this.sender
       ..replyMessage = replyMessage ?? this.replyMessage
@@ -108,7 +111,8 @@ extension ChatMessageExtension on MessageModel {
         isOwn: isOwn,
         createdAt: createdAt,
         t: t,
-        extension: extension)
+        extension: extension,
+        isEdited: isEdited)
       ..sender = sender
       ..replyMessage = replyMessage
       ..attachments.addAll(attachments);

@@ -8,6 +8,8 @@ const String messageEditRequestName = 'message_edit';
 const String messagesListRequestName = 'message_list';
 const String messagesReadRequestName = 'message_read';
 const String messagesDeleteRequestName = 'message_delete';
+const String messagesSummaryRequestName = 'message_summary';
+const String messagesToneRequestName = 'message_tone';
 const String messageTypingName = 'typing';
 
 String linkPreviewUrl = dotenv.env['LINK_PREVIEW_URL'] ?? '';
@@ -54,10 +56,9 @@ Future<(String?, Message?)> sendMessage({
   });
 }
 
-Future<bool> editMessage(EditMessageStatus editMessageStatus) {
-  return SamaConnectionService.instance
-      .sendRequest(messageEditRequestName, editMessageStatus.toJson())
-      .then((response) {
+Future<bool> editMessage(String messageId, String body) {
+  return SamaConnectionService.instance.sendRequest(
+      messageEditRequestName, {'id': messageId, 'body': body}).then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
 }
@@ -69,6 +70,22 @@ Future<List<Message>> getMessages(Map<String, dynamic> params) {
     return List.from(response['messages'])
         .map((element) => Message.fromJson(element))
         .toList();
+  });
+}
+
+Future<String> getMessagesSummary(Map<String, dynamic> params) {
+  return SamaConnectionService.instance
+      .sendRequest(messagesSummaryRequestName, params)
+      .then((response) {
+    return response['message'];
+  });
+}
+
+Future<String> changeMessageTone(Map<String, dynamic> params) {
+  return SamaConnectionService.instance
+      .sendRequest(messagesToneRequestName, params)
+      .then((response) {
+    return response['message'];
   });
 }
 

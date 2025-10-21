@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0
+
+### Features
+- Implemented the option to edit messages
+- Implemented the option to delete messages
+- Implemented reset password feature
+- Integrated AI agent for changing tone of messages and summarizing them
+
 ## 0.13.0
 
 ### Features

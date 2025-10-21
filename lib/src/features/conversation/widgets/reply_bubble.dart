@@ -7,6 +7,7 @@ import '../../../db/models/attachment_model.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/media_utils.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../../../shared/widget/vertical_line.dart';
 import '../models/chat_message.dart';
 
 const double horizontalPadding = 8;
@@ -60,7 +61,7 @@ class ReplyBubble extends StatelessWidget {
                     : MainAxisAlignment.start,
                 children: [
                   if (!isReplyBySender)
-                    const ReplyLine(
+                    const VerticalLine(
                       rightPadding: 4,
                     ),
                   Flexible(
@@ -93,7 +94,7 @@ class ReplyBubble extends StatelessWidget {
                     ),
                   ),
                   if (isReplyBySender)
-                    const ReplyLine(
+                    const VerticalLine(
                       leftPadding: 4,
                     ),
                 ],
@@ -147,31 +148,4 @@ class ReplyBubble extends StatelessWidget {
           : (replyMessage.length < 29
               ? BorderRadius.circular(replyBorderRadius1)
               : BorderRadius.circular(replyBorderRadius2));
-}
-
-class ReplyLine extends StatelessWidget {
-  const ReplyLine({
-    super.key,
-    this.leftPadding = 0,
-    this.rightPadding = 0,
-    this.verticalBarColor,
-    this.verticalBarWidth,
-  });
-
-  final Color? verticalBarColor;
-  final double leftPadding;
-  final double rightPadding;
-  final double? verticalBarWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: verticalBarWidth ?? 2.5,
-      color: verticalBarColor ?? Colors.grey.shade300,
-      margin: EdgeInsets.only(
-        left: leftPadding,
-        right: rightPadding,
-      ),
-    );
-  }
 }

@@ -9,16 +9,20 @@ class TextMessage extends StatelessWidget {
   final String body;
   final TextStyle style;
   final TextStyle? linkStyle;
+  final Color? iconColor;
   final Widget time;
   final Widget? status;
+  final Widget? edited;
 
   const TextMessage({
     super.key,
     required this.body,
     required this.style,
     required this.time,
+    this.iconColor,
     this.linkStyle,
     this.status,
+    this.edited,
   });
 
   @override
@@ -29,6 +33,7 @@ class TextMessage extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.end,
       children: [
         Text.rich(TextSpan(children: linkify(body)), style: style),
+        if (edited != null) edited!,
         time,
         if (status != null) status!,
       ],
@@ -45,10 +50,10 @@ class TextMessage extends StatelessWidget {
                 child: RichText(
                   text: TextSpan(
                     children: [
-                      const WidgetSpan(
+                      WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: Icon(Icons.public_outlined,
-                            color: dullGray, size: 25),
+                            color: iconColor, size: 25),
                       ),
                       const WidgetSpan(
                         child: SizedBox(width: 4),
@@ -57,10 +62,13 @@ class TextMessage extends StatelessWidget {
                     ],
                   ),
                 ))),
-        LinkPreviewWidget(
-            link: linkToOpen,
-            errorBody: 'No description available',
-            key: Key(linkToOpen)),
+        GestureDetector(
+          onTap: () => openUrl(Uri.parse(linkToOpen)),
+          child: LinkPreviewWidget(
+              link: linkToOpen,
+              errorBody: 'No description available',
+              key: Key(linkToOpen)),
+        ),
         const SizedBox(height: 4),
       ]));
 

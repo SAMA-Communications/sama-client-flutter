@@ -32,6 +32,18 @@ final class _PendingStatusReceived extends ConversationEvent {
   const _PendingStatusReceived(this.status);
 }
 
+final class _EditStatusReceived extends ConversationEvent {
+  final EditMessageStatus status;
+
+  const _EditStatusReceived(this.status);
+}
+
+final class _DeleteStatusReceived extends ConversationEvent {
+  final DeleteMessagesStatus status;
+
+  const _DeleteStatusReceived(this.status);
+}
+
 final class _SentStatusReceived extends ConversationEvent {
   final SentMessageStatus status;
 
@@ -93,11 +105,11 @@ final class RemoveMessagesMoreForReply extends ConversationEvent {
   const RemoveMessagesMoreForReply();
 }
 
-final class ChooseMessages extends ConversationEvent {
+final class SelectMessagesMode extends ConversationEvent {
   final bool choose;
   final ChatMessage? message;
 
-  const ChooseMessages(this.choose, {this.message});
+  const SelectMessagesMode(this.choose, {this.message});
 }
 
 final class SelectedChatsAdded extends ConversationEvent {

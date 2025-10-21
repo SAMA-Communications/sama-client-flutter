@@ -4,6 +4,7 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../models/models.dart';
 import 'message_bubble.dart';
+import 'message_edit_widget.dart';
 import 'message_status_widget.dart';
 import 'text_message.dart';
 
@@ -27,12 +28,16 @@ class TextMessageItem extends StatelessWidget {
         style: TextStyle(color: message.isOwn ? white : black, fontSize: 16.0),
         linkStyle:
             TextStyle(color: message.isOwn ? gold : slateBlue, fontSize: 16.0),
+        iconColor: message.isOwn ? lightMallow : dullGray,
         time: Text(
           dateToTime(DateTime.fromMillisecondsSinceEpoch(message.t! * 1000)),
           style: TextStyle(
               color: message.isOwn ? white : dullGray, fontSize: 12.0),
         ),
         status: MessageStatusWidget(status: message.status),
+        edited: message.isEdited ?? false
+            ? MessageEditWidget(isOwn: message.isOwn)
+            : null,
       ),
     );
   }

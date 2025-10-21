@@ -75,6 +75,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<_PendingStatusReceived>(
       _onPendingStatusReceived,
     );
+    on<_EditStatusReceived>(
+      _onEditStatusReceived,
+    );
+    on<_DeleteStatusReceived>(
+      _onDeleteStatusReceived,
+    );
     on<_SentStatusReceived>(
       _onSentStatusReceived,
     );
@@ -107,8 +113,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<RemoveMessagesMoreForReply>(
       onRemoveMessagesMoreForReply,
     );
-    on<ChooseMessages>(
-      onChooseMessages,
+    on<SelectMessagesMode>(
+      onSelectMessagesMode,
     );
     on<SelectedChatsAdded>(
       onSelectedChatsAdded,
@@ -140,6 +146,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       switch (status) {
         case PendingMessageStatus():
           add(_PendingStatusReceived(status));
+          break;
+        case EditMessageStatus():
+          add(_EditStatusReceived(status));
+          break;
+        case DeleteMessagesStatus():
+          add(_DeleteStatusReceived(status));
           break;
         case SentMessageStatus():
           add(_SentStatusReceived(status));
@@ -351,10 +363,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(replyIdToScroll: ''));
   }
 
-  Future<void> onChooseMessages(
-      ChooseMessages event, Emitter<ConversationState> emit) async {
+  Future<void> onSelectMessagesMode(
+      SelectMessagesMode event, Emitter<ConversationState> emit) async {
     final selectedMessages = Set.of(state.selectedMessages.value);
-    if (event.choose) selectedMessages.add(event.message!);
+    event.choose
+        ? selectedMessages.add(event.message!)
+        : selectedMessages.clear();
+
     final allSelectedMessages = SelectedMessages.dirty(selectedMessages);
     emit(state.copyWith(
         selectedMessages: allSelectedMessages, choose: event.choose));
@@ -421,6 +436,26 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(messages: messages));
   }
 
+  Future<void> _onEditStatusReceived(
+      _EditStatusReceived event, Emitter<ConversationState> emit) async {
+    var messages = [...state.messages];
+
+    var msg = messages.firstWhere((o) => o.id == event.status.messageId);
+    var msgUpdated = msg.copyWith(isEdited: true, body: event.status.newBody);
+    messages[messages.indexOf(msg)] = msgUpdated;
+    emit(state.copyWith(messages: messages));
+  }
+
+  Future<void> _onDeleteStatusReceived(
+      _DeleteStatusReceived event, Emitter<ConversationState> emit) async {
+    var messages = [...state.messages];
+    var messagesMap = {}..addEntries(messages.map((m) => MapEntry(m.id, m)));
+    event.status.msgIds?.forEach((id) {
+      messages.remove(messagesMap[id]);
+    });
+    emit(state.copyWith(messages: messages));
+  }
+
   FutureOr<void> _onSentStatusReceived(
       _SentStatusReceived event, Emitter<ConversationState> emit) async {
     var messages = [...state.messages];
@@ -434,6 +469,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     messages[messages.indexOf(msg)] = msgLocal.toChatMessage(
         msgUpdated.isLastUserMessage, msgUpdated.isFirstUserMessage);
+    emit(state.copyWith(messages: messages));
 
     var chatLocal = await conversationRepository
         .getConversationById(currentConversation.id);
@@ -441,7 +477,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       conversationRepository.updateConversationLocal(currentConversation
           .copyWith(lastMessage: msgLocal, updatedAt: msg.createdAt));
     }
-    emit(state.copyWith(messages: messages));
   }
 
   FutureOr<void> _onReadStatusReceived(

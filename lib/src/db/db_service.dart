@@ -276,15 +276,20 @@ class DatabaseService {
 
   Future<List<MessageModel>> getAllMessagesLocal(
       String cid, DateTime? ltDate, int? limit) async {
+    var condition = MessageModel_.cid
+        .equals(cid)
+        .and(MessageModel_.isTempReplied
+            .isNull()) //hide Replied messages, that's not loaded by pagination
+        .and(MessageModel_.rawStatus
+            .notEquals(ChatMessageStatus.draft.name) //hide draft messages
+            .or(MessageModel_.rawStatus.isNull()));
+    if (ltDate != null) {
+      condition = condition.and(MessageModel_.createdAt.lessThanDate(ltDate));
+    }
+
     final query = store!
         .box<MessageModel>()
-        .query(MessageModel_.cid
-            .equals(cid)
-            .and(MessageModel_.createdAt.lessThanDate(ltDate ?? DateTime.now()))
-            .and(MessageModel_.isTempReplied.isNull()) //hide Replied messages, that's not loaded by pagination
-            .and(MessageModel_.rawStatus
-                .notEquals(ChatMessageStatus.draft.name) //hide draft messages
-                .or(MessageModel_.rawStatus.isNull())))
+        .query(condition)
         .order(MessageModel_.createdAt, flags: Order.descending)
         .build()
       ..limit = limit ?? 0;
@@ -353,13 +358,13 @@ class DatabaseService {
   }
 
   Future<List<MessageModel>> getMessagesLocalByStatus(String status) async {
-    final query = store!
-        .box<MessageModel>()
+    final query = store
+        ?.box<MessageModel>()
         .query(MessageModel_.rawStatus.equals(status))
         .build();
-    final results = query.findAsync();
-    query.close();
-    return results;
+    final results = query?.findAsync();
+    query?.close();
+    return results ?? Future.value(List.empty());
   }
 
   Future<MessageModel?> getMessageLocalByStatus(
@@ -422,6 +427,14 @@ class DatabaseService {
   Future<bool> removeMessageLocal(String id) async {
     final query =
         store!.box<MessageModel>().query(MessageModel_.id.equals(id)).build();
+    var result = await query.removeAsync();
+    query.close();
+    return true;
+  }
+
+  Future<bool> removeMessagesLocal(List<String> ids) async {
+    final query =
+        store!.box<MessageModel>().query(MessageModel_.id.oneOf(ids)).build();
     var result = await query.removeAsync();
     query.close();
     return true;

@@ -28,7 +28,7 @@ class ConversationLocalDatasource {
   }
 
   Future<ConversationModel?> getConversationLocalByMsgId(String id) async {
-    print('getConversationLocalByMsgId cid= $id');
+    print('getConversationLocalByMsgId id= $id');
     try {
       return await _databaseService.getConversationLocalByMsgId(id);
     } catch (e) {

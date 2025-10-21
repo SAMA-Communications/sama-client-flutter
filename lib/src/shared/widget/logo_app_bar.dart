@@ -8,7 +8,9 @@ import 'env_dialog_widget.dart';
 import 'multi_gesture_detector.dart';
 
 class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const LogoAppBar({super.key});
+  final VoidCallback? onPressed;
+
+  const LogoAppBar({this.onPressed, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,15 @@ class LogoAppBar extends StatelessWidget implements PreferredSizeWidget {
                   color: white,
                 ),
               ),
-            )
+            ),
+            if (onPressed != null)
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_outlined, color: black),
+                  onPressed: () => onPressed!(),
+                ),
+              ),
           ],
         ),
       ),

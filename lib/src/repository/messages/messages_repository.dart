@@ -14,6 +14,7 @@ import '../user/user_repository.dart';
 class MessagesRepository {
   final MessageLocalDatasource localDatasource;
   final UserRepository userRepository;
+  final limitMessages = 30;
 
   MessagesRepository(
       {required this.localDatasource, required this.userRepository}) {
@@ -23,6 +24,8 @@ class MessagesRepository {
   StreamSubscription<api.Message>? incomingMessagesSubscription;
   StreamSubscription<api.MessageSendStatus>? sentMessageSubscription;
   StreamSubscription<api.MessageSendStatus>? readMessagesSubscription;
+  StreamSubscription<api.MessageSendStatus>? editMessageSubscription;
+  StreamSubscription<api.MessageSendStatus>? deletedMessageSubscription;
   StreamSubscription<api.TypingStatus>? typingMessageSubscription;
 
   final StreamController<ChatMessage> _incomingMessagesController =
@@ -47,21 +50,28 @@ class MessagesRepository {
       {DateTime? ltDate, DateTime? gtTime}) async {
     return NetworkBoundResources<List<ChatMessage>, List<MessageModel>>()
         .asFuture(
-      loadFromDb: () =>
-          localDatasource.getAllMessagesLocal(chat.id, ltDate: ltDate),
-      shouldFetch: (data, slice) {
-        var oldData = data?.take(10).toList();
-        var result = data != null && !listEquals(oldData, slice);
+      loadFromDb: () => localDatasource.getAllMessagesLocal(chat.id,
+          ltDate: ltDate, limit: limitMessages),
+      shouldFetch: (oldData, slice) {
+        var result = oldData != null && !listEquals(oldData, slice);
         return result;
       },
       createCallSlice: () =>
-          _fetchMessages(chat, ltDate: ltDate ?? DateTime.now(), limit: 10),
-      createCall: () => _fetchMessages(chat, ltDate: ltDate, gtTime: gtTime),
-      saveCallResult: localDatasource.saveMessagesLocal,
-      processResponse: (data) async {
-        return buildChatMessageModels(chat, data);
+          _fetchMessages(chat, ltDate: ltDate, limit: limitMessages),
+      saveCallResult: (newData, oldData) {
+        List<String> idsToDelete = detectGapMessageIds(newData, oldData);
+        localDatasource.removeMessagesLocal(idsToDelete);
+        return localDatasource.saveMessagesLocal(newData);
       },
+      processResponse: buildChatMessageModels,
     );
+  }
+
+  List<String> detectGapMessageIds(
+      List<MessageModel> newData, List<MessageModel> oldData) {
+    var difference = oldData
+        .where((element) => !newData.map((m) => m.id).contains(element.id));
+    return difference.map((m) => m.id).toList();
   }
 
   Future<List<MessageModel>> _fetchMessages(ConversationModel chat,
@@ -91,10 +101,36 @@ class MessagesRepository {
     return buildMessageModels(chat, messages);
   }
 
+  Future<void> getMessagesSummary(String cid, String filter) async {
+    var messageBody = await api.getMessagesSummary({
+      'cid': cid,
+      'filter': filter,
+    });
+    var currentUser = await userRepository.getCurrentUser();
+    var messageModel = MessageModel(
+        body: messageBody,
+        isOwn: true,
+        cid: cid,
+        from: currentUser!.id!,
+        id: const Uuid().v1(),
+        extension: const {'type': 'summary'},
+        t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        createdAt: DateTime.now());
+
+    _incomingMessagesController.add(messageModel.toChatMessage(true, true));
+  }
+
+  Future<String> changeMessageTone(String body, String tone) async {
+    return await api.changeMessageTone({
+      'body': body,
+      'tone': tone,
+    });
+  }
+
   Future<List<ChatMessage>> getStoredMessagesByIds(
       ConversationModel chat, List<String> ids) async {
     var messages = await localDatasource.getMessagesLocal(ids);
-    return buildChatMessageModels(chat, messages);
+    return buildChatMessageModels(messages);
   }
 
   Future<ChatMessage?> getReplyMessageById(
@@ -107,16 +143,16 @@ class MessagesRepository {
     }
 
     if (message != null) {
-      return (await buildChatMessageModels(chat, [message])).firstOrNull;
+      return (await buildChatMessageModels([message])).firstOrNull;
     }
     return null;
   }
 
   Future<List<ChatMessage>> getStoredMessages(ConversationModel chat,
       {int? limit}) async {
-    var messages =
-        await localDatasource.getAllMessagesLocal(chat.id, limit: limit);
-    return buildChatMessageModels(chat, messages);
+    var messages = await localDatasource.getAllMessagesLocal(chat.id,
+        limit: limit ?? limitMessages);
+    return buildChatMessageModels(messages);
   }
 
   Future<MessageModel?> getMessageLocalById(String id) {
@@ -193,6 +229,23 @@ class MessagesRepository {
     });
   }
 
+  Future<void> editMessage(String body, MessageModel? editMessage) async {
+    var editMessageStatus =
+        api.EditMessageStatus(editMessage!.id, body, editMessage.from);
+
+    return api.editMessage(editMessage.id, body).then((response) async {
+      if (response) {
+        var msgUpdated = editMessage.copyWith(body: body, isEdited: true);
+        saveMessageLocal(msgUpdated);
+        _statusMessagesController.add(editMessageStatus);
+      }
+    }).catchError((onError) {
+      if (onError is api.ResponseException) {
+        throw onError;
+      }
+    });
+  }
+
   Future<bool> sendStatusReadMessages(String cid) {
     return api.readMessages(api.ReadMessagesStatus.fromJson({'cid': cid}));
   }
@@ -227,15 +280,34 @@ class MessagesRepository {
         createdAt: DateTime.now());
 
     return api.sendMessage(message: message).then(
-      (response) {
+      (response) async {
         var (serverMid, msg) = response;
         var msgModel = message.toMessageModel(true, currentUser!).copyWith(
             id: serverMid,
             replyMessage: replyMessage,
             rawStatus: ChatMessageStatus.sent.name);
-        _incomingMessagesController.add(msgModel.toChatMessage(true, true));
+        var msgUpdated = await saveMessageLocal(msgModel);
+        _incomingMessagesController.add(msgUpdated.toChatMessage(true, true));
       },
     );
+  }
+
+  Future<void> deleteMessage(
+      String cid, List<String> ids, api.DeleteMessageType type) async {
+    var deleteMessageStatus = api.DeleteMessagesStatus.fromJson(
+        {'cid': cid, 'ids': ids, 'type': type.name});
+    return api.deleteMessages(deleteMessageStatus).then(
+      (response) async {
+        if (response) {
+          await localDatasource.removeMessagesLocal(ids);
+          _statusMessagesController.add(deleteMessageStatus);
+        }
+      },
+    ).catchError((onError) {
+      if (onError is api.ResponseException) {
+        throw onError;
+      }
+    });
   }
 
   Future<MessageModel> saveMessageLocal(MessageModel message) async {
@@ -273,6 +345,10 @@ class MessagesRepository {
     await localDatasource.removeMessageLocal(id);
   }
 
+  Future<void> deleteMessagesLocal(List<String> ids) async {
+    await localDatasource.removeMessagesLocal(ids);
+  }
+
   void initChatListeners() {
     if (incomingMessagesSubscription != null) return;
 
@@ -304,6 +380,26 @@ class MessagesRepository {
       _statusMessagesController.add(readStatus);
     });
 
+    editMessageSubscription = api
+        .MessagesManager.instance.editMessageStatusStream
+        .listen((editStatus) async {
+      var message = await getMessageLocalById(editStatus.messageId);
+      if (message != null) {
+        await updateMessageLocal(
+            message.copyWith(body: editStatus.newBody, isEdited: true));
+      }
+
+      _statusMessagesController.add(editStatus);
+    });
+
+    deletedMessageSubscription = api
+        .MessagesManager.instance.deletedMessageStatusStream
+        .listen((deletedStatus) async {
+      await deleteMessagesLocal(deletedStatus.msgIds!);
+
+      _statusMessagesController.add(deletedStatus);
+    });
+
     typingMessageSubscription = api.TypingManager.instance.typingStatusStream
         .listen((typingStatus) async {
       _typingMessageController.add(typingStatus);
@@ -314,6 +410,8 @@ class MessagesRepository {
     incomingMessagesSubscription?.cancel();
     sentMessageSubscription?.cancel();
     readMessagesSubscription?.cancel();
+    editMessageSubscription?.cancel();
+    deletedMessageSubscription?.cancel();
     typingMessageSubscription?.cancel();
     api.MessagesManager.instance.destroy();
     api.TypingManager.instance.destroy();
@@ -369,7 +467,7 @@ class MessagesRepository {
   }
 
   Future<List<ChatMessage>> buildChatMessageModels(
-      ConversationModel chat, List<MessageModel> messages) async {
+      List<MessageModel> messages) async {
     var result = <ChatMessage>[];
 
     for (int i = 0; i < messages.length; i++) {
