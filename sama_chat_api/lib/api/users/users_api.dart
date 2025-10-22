@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:app_set_id/app_set_id.dart';
 
-import '../../db/models/models.dart';
-import '../../features/conversations_list/conversations_list.dart';
-import '../../shared/secure_storage.dart';
 import '../connection/connection.dart';
 import '../connection/http_request.dart';
+import '../connection/managers/connection_manager.dart';
+import '../conversations/models/avatar.dart';
+import '../settings.dart';
 import 'models/models.dart';
+import 'models/refresh_token.dart';
 
 const String userCreateRequestName = 'user_create';
 const String userLoginRequestName = 'user_login';
@@ -38,7 +39,7 @@ Future<User> createUser({
     'password': password,
     'email': email,
     'device_id': deviceId,
-    'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
+    'organization_id': SamaSettings.instance.organizationId,
     if (phone != null) 'phone': phone,
     if (firstName != null) 'first_name': firstName,
     if (lastName != null) 'last_name': lastName,
@@ -47,33 +48,32 @@ Future<User> createUser({
   });
 }
 
-Future<(AccessToken, UserModel)> loginHttp(User user) {
+Future<(AccessToken, RefreshToken, User)> loginHttp(User user) {
   return sendSamaHTTPRequest(httpLoginRequestName, {
     'login': user.login,
     'password': user.password,
     'device_id': user.deviceId,
   }).then((response) {
-    var loggedUser = User.fromJson(response['user'])
-        .copyWith(deviceId: user.deviceId)
-        .toUserModel();
+    var loggedUser =
+        User.fromJson(response['user']).copyWith(deviceId: user.deviceId);
     var accessToken = AccessToken.fromJson(response);
-    var refreshToken = response['refresh_token'];
+    var refreshToken = RefreshToken.fromJson(response);
 
-    SecureStorage.instance.saveAccessToken(accessToken);
-    SecureStorage.instance.saveRefreshToken(refreshToken);
-    return (accessToken, loggedUser);
+    ConnectionManager.instance.accessToken = accessToken;
+    ConnectionManager.instance.refreshToken = refreshToken;
+    return (accessToken, refreshToken, loggedUser);
   });
 }
 
 Future<bool> loginWithToken([AccessToken? accessToken]) async {
   var deviceId = await AppSetId().getIdentifier();
-  accessToken ??= await SecureStorage.instance.getAccessToken();
+  accessToken ??= ConnectionManager.instance.accessToken;
 
   if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
     print('loginWithAccessToken accessToken is expired, so refresh Token');
-    final refreshToken = await SecureStorage.instance.getRefreshToken();
-    accessToken =
-        await _refreshToken(accessToken.token!, refreshToken!, deviceId!);
+    final refreshToken = ConnectionManager.instance.refreshToken;
+    accessToken = await _refreshToken(
+        accessToken.token!, refreshToken!.token!, deviceId!);
   }
   return _loginWithAccessToken(accessToken.token!, deviceId!);
 }
@@ -95,10 +95,10 @@ Future<AccessToken> _refreshToken(
     HttpHeaders.cookieHeader: 'refresh_token=$refreshToken'
   }).then((response) {
     var accessToken = AccessToken.fromJson(response);
-    var refreshToken = response['refresh_token'];
+    var refreshToken = RefreshToken.fromJson(response);
 
-    SecureStorage.instance.saveAccessToken(accessToken);
-    SecureStorage.instance.saveRefreshToken(refreshToken);
+    ConnectionManager.instance.accessToken = accessToken;
+    ConnectionManager.instance.refreshToken = refreshToken;
     return accessToken;
   });
 }
@@ -136,7 +136,7 @@ Future<bool> sendOtpEmail(String email) async {
   return SamaConnectionService.instance.sendRequest(userSendOtp, {
     'email': email,
     'device_id': await AppSetId().getIdentifier(),
-    'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
+    'organization_id': SamaSettings.instance.organizationId,
   }).then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });
@@ -149,7 +149,7 @@ Future<bool> sendResetPassword(
     'token': token,
     'new_password': newPassword,
     'device_id': await AppSetId().getIdentifier(),
-    'organization_id': await SecureStorage.instance.getEnvironmentOrgId(),
+    'organization_id': SamaSettings.instance.organizationId,
   }).then((response) {
     return bool.tryParse(response['success']?.toString() ?? 'false') ?? false;
   });

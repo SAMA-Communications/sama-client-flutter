@@ -2,7 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/api.dart';
-import '../api/utils/config.dart';
+import '../features/config.dart';
 import '../db/models/models.dart';
 
 const String storageUserId = "storage_user_id";

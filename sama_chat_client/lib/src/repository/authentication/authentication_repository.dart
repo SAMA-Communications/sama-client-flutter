@@ -40,6 +40,7 @@ class AuthenticationRepository {
           password: password,
           deviceId: deviceId ?? await AppSetId().getIdentifier());
       var (accessToken, loggedUser) = await api.loginHttp(user);
+      SecureStorage.instance.saveCurrentUserIfNeed(loggedUser);
       await loginWithAccessToken(accessToken);
       await userRepository.updateUserLocal(loggedUser);
       return Future.value(null);

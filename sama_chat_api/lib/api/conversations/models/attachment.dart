@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../db/models/attachment_model.dart';
-
 class Attachment extends Equatable {
   final String? fileId; //file_id
   final String? fileName; //file_name
@@ -31,25 +29,25 @@ class Attachment extends Equatable {
         fileWidth = json['file_width'];
 
   Map<String, dynamic> toJson() => {
-        'file_id': fileId,
-        'file_name': fileName,
-        'file_blur_hash': fileBlurHash,
-        if (fileUrl != null) 'file_url': fileUrl,
-        if (fileContentType != null) 'file_content_type': fileContentType,
-        if (fileHeight != null) 'file_height': fileHeight,
-        if (fileWidth != null) 'file_width': fileWidth,
-      };
+    'file_id': fileId,
+    'file_name': fileName,
+    'file_blur_hash': fileBlurHash,
+    if (fileUrl != null) 'file_url': fileUrl,
+    if (fileContentType != null) 'file_content_type': fileContentType,
+    if (fileHeight != null) 'file_height': fileHeight,
+    if (fileWidth != null) 'file_width': fileWidth,
+  };
 
   @override
   List<Object?> get props => [
-        fileId,
-        fileName,
-        fileBlurHash,
-        fileUrl,
-        fileContentType,
-        fileHeight,
-        fileWidth
-      ];
+    fileId,
+    fileName,
+    fileBlurHash,
+    fileUrl,
+    fileContentType,
+    fileHeight,
+    fileWidth
+  ];
 
   static const empty = Attachment();
 }

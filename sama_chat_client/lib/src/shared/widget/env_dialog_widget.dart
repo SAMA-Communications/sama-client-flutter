@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../api/utils/config.dart';
+import '../../features/config.dart';
 import '../../shared/auth/bloc/auth_bloc.dart';
 import '../secure_storage.dart';
 import '../ui/colors.dart';

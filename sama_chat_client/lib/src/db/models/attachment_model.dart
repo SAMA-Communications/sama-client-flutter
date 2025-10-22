@@ -72,3 +72,16 @@ extension AttachmentModelExtension on Attachment {
         fileWidth: fileWidth);
   }
 }
+
+extension AttachmentExtension on AttachmentModel {
+  Attachment toAttachment() {
+    return Attachment(
+        fileId: fileId,
+        fileName: fileName,
+        fileBlurHash: fileBlurHash,
+        // fileUrl: url, // not available on server
+        fileContentType: contentType,
+        fileHeight: fileHeight,
+        fileWidth: fileWidth);
+  }
+}

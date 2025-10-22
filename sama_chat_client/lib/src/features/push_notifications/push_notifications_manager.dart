@@ -8,15 +8,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../shared/utils/media_utils.dart';
 import '../../shared/secure_storage.dart';
 import '../../shared/ui/colors.dart';
-import '../api.dart';
+import '../../api/api.dart';
 import '/src/api/push_notifications/push_notifications_api.dart';
-import 'models/models.dart';
-import 'models/push_message_data.dart';
+import '../../api/push_notifications/models/models.dart';
+import '../../api/push_notifications/models/push_message_data.dart';
 
 const String channelId = 'sama_messages_channel_id';
 const String channelName = 'Sama messages';
 const String channelDescription = 'Sama messages will be received here';
-
+//??move or not 🤔
 class PushNotificationsManager {
   static final PushNotificationsManager _instance =
       PushNotificationsManager._internal();
