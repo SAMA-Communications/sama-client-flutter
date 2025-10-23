@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_chat_api/api/api.dart';
 
-import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../models/chat_message.dart';

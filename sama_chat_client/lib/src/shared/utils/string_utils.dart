@@ -1,4 +1,5 @@
-import '../../api/api.dart';
+import 'package:sama_chat_api/api/api.dart';
+
 import '../../db/models/models.dart';
 
 String getUserName(UserModel? user) {

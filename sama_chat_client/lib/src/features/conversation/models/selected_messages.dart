@@ -1,6 +1,6 @@
 import 'package:formz/formz.dart';
+import 'package:sama_chat_api/api/settings.dart';
 
-import '../../../shared/utils/api_utils.dart';
 import 'chat_message.dart';
 
 enum SelectedChatsValidationError {
@@ -17,7 +17,7 @@ class SelectedMessages
   @override
   SelectedChatsValidationError? validator(Set<ChatMessage> value) {
     if (value.isEmpty) return SelectedChatsValidationError.empty;
-    if (value.length > maxChatsSelected) {
+    if (value.length > maxChatsToSelect) {
       return SelectedChatsValidationError.long;
     }
     return null;

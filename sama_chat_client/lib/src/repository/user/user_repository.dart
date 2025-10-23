@@ -3,9 +3,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_chat_api/api/api.dart' as api;
 
-import '../../api/api.dart';
-import '../../api/api.dart' as api;
 import '../../db/local/user_local_datasource.dart';
 import '../../db/models/models.dart';
 import '../../shared/secure_storage.dart';
@@ -29,9 +29,8 @@ class UserRepository {
   void initListeners() {
     if (_lastActivitySubscription != null) return;
 
-    _lastActivitySubscription = api
-        .UsersManager.instance.lastActivityControllerStream
-        .listen((data) async {
+    _lastActivitySubscription =
+        UsersManager.instance.lastActivityControllerStream.listen((data) async {
       _lastActivityController.add(data);
     });
   }
@@ -66,7 +65,7 @@ class UserRepository {
         avatar: avatar);
 
     if (avatar != null) {
-      final filesUrls = await api.getFilesUrls({avatar.fileId!});
+      final filesUrls = await getFilesUrls({avatar.fileId!});
       avatar = avatar.copyWith(imageUrl: filesUrls[avatar.fileId!]);
       user = user.copyWith(avatar: avatar);
     }
@@ -79,7 +78,7 @@ class UserRepository {
     var compressedFile =
         await compressImageFile(avatarUrl, const Size(640, 480));
     final blur = await getImageHashInIsolate(compressedFile);
-    final id = await api.uploadAvatarFile(compressedFile);
+    final id = await uploadAvatarFile(compressedFile);
     final name = basename(compressedFile.path);
     Avatar avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
 
@@ -103,7 +102,7 @@ class UserRepository {
   }
 
   Future<List<UserModel>> getUsersByCids(List<String> cids) async {
-    return (await api.fetchParticipants(cids))
+    return (await fetchParticipants(cids))
         .$2
         .map((element) => element.toUserModel())
         .toList();
@@ -138,6 +137,6 @@ class UserRepository {
 
   void dispose() {
     _lastActivitySubscription?.cancel();
-    api.UsersManager.instance.destroy();
+    UsersManager.instance.destroy();
   }
 }

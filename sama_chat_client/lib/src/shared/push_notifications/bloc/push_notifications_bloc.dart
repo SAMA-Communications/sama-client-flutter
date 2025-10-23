@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../api/api.dart';
 import '../../../db/models/conversation_model.dart';
+import '../push_notifications_manager.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 
 part 'push_notifications_event.dart';

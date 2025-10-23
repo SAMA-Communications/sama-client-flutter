@@ -4,19 +4,17 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_chat_api/api/push_notifications/models/models.dart';
 
-import '../../shared/utils/media_utils.dart';
-import '../../shared/secure_storage.dart';
-import '../../shared/ui/colors.dart';
-import '../../api/api.dart';
-import '/src/api/push_notifications/push_notifications_api.dart';
-import '../../api/push_notifications/models/models.dart';
-import '../../api/push_notifications/models/push_message_data.dart';
+import '../utils/media_utils.dart';
+import '../secure_storage.dart';
+import '../ui/colors.dart';
 
 const String channelId = 'sama_messages_channel_id';
 const String channelName = 'Sama messages';
 const String channelDescription = 'Sama messages will be received here';
-//??move or not 🤔
+
 class PushNotificationsManager {
   static final PushNotificationsManager _instance =
       PushNotificationsManager._internal();
@@ -129,7 +127,8 @@ class PushNotificationsManager {
             ? 'ios'
             : '';
 
-    String? deviceId = (await SecureStorage.instance.getCurrentUser())?.deviceId;
+    String? deviceId =
+        (await SecureStorage.instance.getCurrentUser())?.deviceId;
     if (deviceId == null) {
       print('[subscribe] skip subscription for unregistered user');
       return;
@@ -145,17 +144,21 @@ class PushNotificationsManager {
   }
 
   Future<void> unsubscribe() {
-    return SecureStorage.instance.getCurrentUser().then((user) {
-      String? deviceId = user?.deviceId;
-      if (deviceId != null) {
-        return deleteSubscription(deviceId).whenComplete(() {
-          FirebaseMessaging.instance.deleteToken();
+    return SecureStorage.instance
+        .getCurrentUser()
+        .then((user) {
+          String? deviceId = user?.deviceId;
+          if (deviceId != null) {
+            return deleteSubscription(deviceId).whenComplete(() {
+              FirebaseMessaging.instance.deleteToken();
+            });
+          }
+          return Future.value();
+        })
+        .timeout(logoutRequestTimeout)
+        .catchError((onError) {
+          print('[unsubscribe] ERROR: $onError');
         });
-      }
-      return Future.value();
-    }).timeout(logoutRequestTimeout).catchError((onError) {
-      print('[unsubscribe] ERROR: $onError');
-    });
   }
 
   Future<dynamic> onDidReceiveLocalNotification(

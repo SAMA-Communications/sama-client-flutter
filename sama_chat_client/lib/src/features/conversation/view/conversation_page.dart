@@ -4,8 +4,8 @@ import 'package:flutter/material.dart' hide ConnectionState;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:sama_chat_api/api/chats/realtime/typing_manager.dart';
 
-import '../../../api/api.dart' show TypingState;
 import '../../../db/models/conversation_model.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/attachments/attachments_repository.dart';
@@ -92,8 +92,10 @@ class ConversationPage extends StatelessWidget {
               title: BlocBuilder<AiMessageBloc, AiMessageState>(
                   builder: (BuildContext context, aiState) {
                 return aiState.status == AiMessageStatus.processing
-                    ? const TitleLoader(black, Text('AI processing',
-                        style: TextStyle(color: black, fontSize: 20.0)))
+                    ? const TitleLoader(
+                        black,
+                        Text('AI processing',
+                            style: TextStyle(color: black, fontSize: 20.0)))
                     : ConnectionTitle(
                         color: black,
                         title: Padding(

@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:sama_chat_api/api/api.dart';
 
-import '../../../api/api.dart' as api;
-import '../../../api/utils/logger.dart';
 import '../../../db/models/models.dart';
 import '../../../repository/authentication/authentication_repository.dart';
 import '../../secure_storage.dart';
@@ -25,11 +24,11 @@ class AuthenticationBloc
     _authenticationStatusSubscription = _authenticationRepository.status.listen(
       (status) => add(_AuthenticationStatusChanged(status)),
     );
-    _connectionStateSubscription = api
-        .SamaConnectionService.instance.connectionStateStream
+    _connectionStateSubscription = SamaConnectionService
+        .instance.connectionStateStream
         .listen((status) async {
       //fix to set authenticated when open app without network
-      if (status == api.ConnectionState.connected &&
+      if (status == ConnectionState.connected &&
           state.status == AuthenticationStatus.unauthenticated &&
           await tryGetHasCurrentUser()) {
         tryAuthUser();
@@ -40,7 +39,7 @@ class AuthenticationBloc
   final AuthenticationRepository _authenticationRepository;
   late StreamSubscription<AuthenticationStatus>
       _authenticationStatusSubscription;
-  late StreamSubscription<api.ConnectionState> _connectionStateSubscription;
+  late StreamSubscription<ConnectionState> _connectionStateSubscription;
 
   @override
   Future<void> close() {

@@ -29,7 +29,7 @@ class EnvDialogInput extends StatelessWidget {
             child: const Text("Save"),
             onPressed: () {
               if (envType != null) {
-                SecureStorage.instance.saveEnvironmentType(envType!);
+                SecureStorage.instance.updateSettings(envType!);
                 ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()
                   ..showSnackBar(

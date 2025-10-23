@@ -23,7 +23,7 @@ Future<Map<String, dynamic>> sendHTTPRequest(
   try {
     response = await post(urlQuery, headers: headers, body: body);
   } catch (e) {
-    print('response e = ${e}');
+    log('response e = ${e}');
   }
   log('HTTP response statusCode ${response!.statusCode}, headers $headers ${response.headers} body ${response.body}');
 

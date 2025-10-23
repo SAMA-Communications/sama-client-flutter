@@ -4,9 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
+import 'package:sama_chat_api/api/api.dart';
 
-import '../../../api/api.dart';
-import '../../../db/models/conversation_model.dart';
 import '../../../db/models/models.dart';
 import '../../../db/resource.dart';
 import '../../../repository/conversation/conversation_repository.dart';

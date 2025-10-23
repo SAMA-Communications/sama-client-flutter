@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_chat_api/api/settings.dart';
 
-import '../../../api/api.dart';
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/utils/api_utils.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/delete_messages/delete_messages_bloc.dart';
 import 'forward_messages/forward_messages_widget.dart';
@@ -109,7 +109,7 @@ class _SelectInputState extends State<SelectInput> {
                   color: dullGray,
                 ),
                 Text(
-                    '${state.selectedMessages.value.length} of $maxChatsSelected selected',
+                    '${state.selectedMessages.value.length} of $maxChatsToSelect selected',
                     style: const TextStyle(fontSize: 15)),
                 IconButton(
                   icon: const Icon(Icons.forward_outlined),

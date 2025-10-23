@@ -1,7 +1,7 @@
-import '../../api/api.dart' as api;
 import 'dart:async';
 
-import '../../api/api.dart';
+import 'package:sama_chat_api/api/api.dart';
+
 import '../../db/models/models.dart';
 import '../../features/search/models/models.dart';
 import '../conversation/conversation_repository.dart';
@@ -17,8 +17,8 @@ class GlobalSearchRepository {
   });
 
   Future<SearchResult> search(String term) async {
-    final List<User> users = await api.searchUsersByKeyword(term);
-    final List<String> ids = await api.searchConversationsIdsByName(term);
+    final List<User> users = await searchUsersByKeyword(term);
+    final List<String> ids = await searchConversationsIdsByName(term);
     final List<ConversationModel> conversations =
         await conversationRepository.getConversationsByIds(ids);
     final List<UserModel> userModels = await userRepository

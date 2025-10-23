@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'sama_firebase_options.dart';
-import 'src/api/api.dart';
+
 import 'src/db/db_service.dart';
 import 'src/db/local/attachment_local_datasource.dart';
 import 'src/db/local/conversation_local_datasource.dart';
 import 'src/db/local/message_local_datasource.dart';
 import 'src/db/local/user_local_datasource.dart';
+import 'src/shared/push_notifications/push_notifications_manager.dart';
 import 'src/navigation/app_router.dart';
 import 'src/repository/attachments/attachments_repository.dart';
 import 'src/repository/authentication/authentication_repository.dart';
@@ -59,6 +60,7 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+    initSettings();
     clearKeychainValuesIfUninstall();
     _conversationLocalDatasource = ConversationLocalDatasource();
     _messageLocalDatasource = MessageLocalDatasource();

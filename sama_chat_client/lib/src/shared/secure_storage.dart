@@ -1,7 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_chat_api/api/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../api/api.dart';
 import '../features/config.dart';
 import '../db/models/models.dart';
 
@@ -142,8 +143,13 @@ class SecureStorage {
     return _storage.read(key: storageSubscriptionToken);
   }
 
-  saveEnvironmentType(EnvType type) {
+  Future<void> saveEnvironmentType(EnvType type) async {
     _storage.write(key: storageEnvironmentType, value: type.name);
+  }
+
+  Future<void> updateSettings(EnvType type) async {
+    await saveEnvironmentType(type);
+    initSettings();
   }
 
   Future<EnvType> getDevEnvironmentType() async {
@@ -158,6 +164,12 @@ class SecureStorage {
   Future<String> getEnvironmentOrgId() async {
     return (await getDevEnvironmentType()).organizationId;
   }
+}
+
+void initSettings() async {
+  final url = await SecureStorage.instance.getEnvironmentUrl();
+  final orgId = await SecureStorage.instance.getEnvironmentOrgId();
+  SamaSettings.instance.setEndpoints(url, orgId);
 }
 
 //fix to clear iOS data when uninstall app (can/should be removed when app is stable)

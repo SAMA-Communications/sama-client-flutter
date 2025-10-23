@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_chat_api/api/api.dart' hide DeleteMessagesStatus;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import '../../../api/api.dart' hide DeleteMessagesStatus;
+
 import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/screen_factor.dart';

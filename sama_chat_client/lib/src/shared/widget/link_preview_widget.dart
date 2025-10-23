@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:sama_chat_api/api/api.dart';
 
-import '../../api/api.dart';
 import '../ui/colors.dart';
 import '../utils/file_utils.dart';
 

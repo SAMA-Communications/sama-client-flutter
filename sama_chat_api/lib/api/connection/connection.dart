@@ -65,7 +65,7 @@ class SamaConnectionService {
 
     _updateConnectionState(ConnectionState.connecting);
 
-    final wssUrl = Uri.parse('wss://${SamaSettings.instance.apiEndpoint}}');
+    final wssUrl = Uri.parse('wss://${SamaSettings.instance.apiEndpoint}');
     final channel = WebSocketChannel.connect(wssUrl);
 
     return channel.ready.then((_) {
@@ -105,14 +105,12 @@ class SamaConnectionService {
       return Future.value(connection);
     }
 
-    openConnectionFeature = connect()
-        .then((channel) {
-          connection = channel;
-          return connection!;
-        })
-        .whenComplete(() {
-          openConnectionFeature = null;
-        });
+    openConnectionFeature = connect().then((channel) {
+      connection = channel;
+      return connection!;
+    }).whenComplete(() {
+      openConnectionFeature = null;
+    });
 
     return openConnectionFeature!;
   }
@@ -145,58 +143,54 @@ class SamaConnectionService {
 
     log('request', jsonData: request);
 
-    getConnection()
-        .then((connection) {
-          connection.sink.add(jsonEncode(request));
-        })
-        .catchError((onError) {
-          _updateConnectionState(ConnectionState.failed);
-          awaitingRequests.remove(requestId);
-          if (onError is SocketException) {
-            log('request', stringData: 'SocketException');
-            requestCompleter.completeError(
-              ResponseException.fromJson({
-                'status': -1,
-                'message': onError.message,
-              }),
-            );
-          } else if (onError is WebSocketChannelException) {
-            log('request', stringData: 'WebSocketChannelException');
-            requestCompleter.completeError(
-              ResponseException.fromJson({
-                'status': -1,
-                'message': onError.message,
-              }),
-            );
-          } else {
-            log('request', stringData: 'Exception: ${onError.toString()}');
-            requestCompleter.completeError(
-              ResponseException.fromJson({
-                'status': -1,
-                'message':
-                    'Unknown error happens. Please check internet connection and try again',
-              }),
-            );
-          }
-        });
+    getConnection().then((connection) {
+      connection.sink.add(jsonEncode(request));
+    }).catchError((onError) {
+      _updateConnectionState(ConnectionState.failed);
+      awaitingRequests.remove(requestId);
+      if (onError is SocketException) {
+        log('request', stringData: 'SocketException');
+        requestCompleter.completeError(
+          ResponseException.fromJson({
+            'status': -1,
+            'message': onError.message,
+          }),
+        );
+      } else if (onError is WebSocketChannelException) {
+        log('request', stringData: 'WebSocketChannelException');
+        requestCompleter.completeError(
+          ResponseException.fromJson({
+            'status': -1,
+            'message': onError.message,
+          }),
+        );
+      } else {
+        log('request', stringData: 'Exception: ${onError.toString()}');
+        requestCompleter.completeError(
+          ResponseException.fromJson({
+            'status': -1,
+            'message':
+                'Unknown error happens. Please check internet connection and try again',
+          }),
+        );
+      }
+    });
 
     return requestCompleter.future;
   }
 
   Future<bool> reconnect() {
     log('[SamaConnectionService][reconnect]');
-    return getConnection(forciblyRecreateConnection: true)
-        .then((onValue) {
-          log('[SamaConnectionService][reconnect]', stringData: 'reconnected');
-          return true;
-        })
-        .catchError((exception) {
-          log(
-            '[SamaConnectionService][reconnect]',
-            stringData: 'reconnect failed',
-          );
-          return false;
-        });
+    return getConnection(forciblyRecreateConnection: true).then((onValue) {
+      log('[SamaConnectionService][reconnect]', stringData: 'reconnected');
+      return true;
+    }).catchError((exception) {
+      log(
+        '[SamaConnectionService][reconnect]',
+        stringData: 'reconnect failed',
+      );
+      return false;
+    });
   }
 
   closeConnection() {
@@ -258,14 +252,14 @@ class SamaConnectionService {
             error,
           ); //CHECK AFTER FIX https://connectycube-apps.atlassian.net/browse/FM-114
           if (responseException.status == HttpStatus.unauthorized) {
-            print(
+            log(
               'Unauthorized wait to reconnect $unauthorizedTimeout seconds',
             );
             //Unauthorized wait to reconnect
             awaitingRequests[responseId] = requestInfo;
             Future.delayed(unauthorizedTimeout, () {
               if (awaitingRequests[responseId] != null) {
-                print('Unauthorized completeError');
+                log('Unauthorized completeError');
                 awaitingRequests.remove(responseId);
                 completer.completeError(responseException);
               }

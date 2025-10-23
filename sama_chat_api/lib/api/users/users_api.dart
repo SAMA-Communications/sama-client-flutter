@@ -8,7 +8,7 @@ import '../connection/managers/connection_manager.dart';
 import '../conversations/models/avatar.dart';
 import '../settings.dart';
 import 'models/models.dart';
-import 'models/refresh_token.dart';
+import '../utils/logger.dart';
 
 const String userCreateRequestName = 'user_create';
 const String userLoginRequestName = 'user_login';
@@ -48,7 +48,7 @@ Future<User> createUser({
   });
 }
 
-Future<(AccessToken, RefreshToken, User)> loginHttp(User user) {
+Future<(AccessToken, User)> loginHttp(User user) {
   return sendSamaHTTPRequest(httpLoginRequestName, {
     'login': user.login,
     'password': user.password,
@@ -61,7 +61,7 @@ Future<(AccessToken, RefreshToken, User)> loginHttp(User user) {
 
     ConnectionManager.instance.accessToken = accessToken;
     ConnectionManager.instance.refreshToken = refreshToken;
-    return (accessToken, refreshToken, loggedUser);
+    return (accessToken, loggedUser);
   });
 }
 
@@ -70,7 +70,7 @@ Future<bool> loginWithToken([AccessToken? accessToken]) async {
   accessToken ??= ConnectionManager.instance.accessToken;
 
   if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
-    print('loginWithAccessToken accessToken is expired, so refresh Token');
+    log('loginWithAccessToken accessToken is expired, so refresh Token');
     final refreshToken = ConnectionManager.instance.refreshToken;
     accessToken = await _refreshToken(
         accessToken.token!, refreshToken!.token!, deviceId!);

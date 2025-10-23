@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import '../../api/api.dart';
+import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_chat_api/api/connection/connection.dart' as conn;
+
 import '../../repository/conversation/conversation_repository.dart';
 import '../../repository/messages/messages_repository.dart';
-
-import '../../api/connection/connection.dart' as conn;
 
 class MessagesCollector {
   MessagesCollector._();

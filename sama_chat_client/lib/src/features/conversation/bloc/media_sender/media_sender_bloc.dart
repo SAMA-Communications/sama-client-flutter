@@ -5,14 +5,13 @@ import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart';
+import 'package:sama_chat_api/api/api.dart';
 
-import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
 import '../../../../db/models/message_model.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../../../shared/utils/file_utils.dart';
 import '../../../../shared/utils/media_utils.dart';
-import '../../models/chat_message.dart';
 
 part 'media_sender_event.dart';
 

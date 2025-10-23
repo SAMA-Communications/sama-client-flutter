@@ -4,8 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
+import 'package:sama_chat_api/api/api.dart';
 
-import '../../../api/api.dart';
 import '../../../db/models/models.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/user/user_repository.dart';

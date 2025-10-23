@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:app_set_id/app_set_id.dart';
+import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_chat_api/api/api.dart' as api;
 
-import '../../api/api.dart' as api;
-import '../../api/api.dart';
 import '../../db/db_service.dart';
+import '../../db/models/models.dart';
+import '../../shared/push_notifications/push_notifications_manager.dart';
 import '../../shared/secure_storage.dart';
 import '../user/user_repository.dart';
 
@@ -18,7 +20,9 @@ class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>.broadcast();
   final UserRepository userRepository;
 
-  AuthenticationRepository(this.userRepository);
+  AuthenticationRepository(this.userRepository) {
+    initListeners();
+  }
 
   Stream<AuthenticationStatus> get status async* {
     //TODO RP not clear why this delay is needed, commented for now
@@ -27,6 +31,20 @@ class AuthenticationRepository {
       yield AuthenticationStatus.canBeAuthenticated;
     }
     yield* _controller.stream;
+  }
+
+  StreamSubscription<ReconnectionState>? reconnectionStream;
+
+  void initListeners() {
+    if (reconnectionStream != null) return;
+
+    reconnectionStream = ReconnectionManager.instance.reconnectionStateStream
+        .listen((state) async {
+      if (state == ReconnectionState.tokenExpired) {
+        await logOut();
+        _controller.add(AuthenticationStatus.unauthenticated);
+      }
+    });
   }
 
   Future<void> login({
@@ -40,9 +58,10 @@ class AuthenticationRepository {
           password: password,
           deviceId: deviceId ?? await AppSetId().getIdentifier());
       var (accessToken, loggedUser) = await api.loginHttp(user);
-      SecureStorage.instance.saveCurrentUserIfNeed(loggedUser);
+      var loggedUserModel = loggedUser.toUserModel();
+      SecureStorage.instance.saveCurrentUserIfNeed(loggedUserModel);
       await loginWithAccessToken(accessToken);
-      await userRepository.updateUserLocal(loggedUser);
+      await userRepository.updateUserLocal(loggedUserModel);
       return Future.value(null);
     } catch (e) {
       _controller.add(AuthenticationStatus.unauthenticated);
@@ -57,7 +76,7 @@ class AuthenticationRepository {
     try {
       await api.loginWithToken(accessToken);
 
-      api.PushNotificationsManager.instance.subscribe();
+      PushNotificationsManager.instance.subscribe();
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
     } catch (e) {
@@ -95,14 +114,14 @@ class AuthenticationRepository {
   }
 
   Future<void> logOut() async {
-    await api.PushNotificationsManager.instance.unsubscribe();
+    await PushNotificationsManager.instance.unsubscribe();
     await api.logout().whenComplete(() {
       disposeCurrentUser();
     });
   }
 
   Future<void> signOut() async {
-    await api.PushNotificationsManager.instance.unsubscribe();
+    await PushNotificationsManager.instance.unsubscribe();
     await api.signOut().then((success) {
       disposeCurrentUser();
     });
@@ -129,11 +148,15 @@ class AuthenticationRepository {
 
   disposeCurrentUser() async {
     await SecureStorage.instance.deleteCurrentUser();
-    api.ReconnectionManager.instance.destroy();
+    ReconnectionManager.instance.destroy();
     api.SamaConnectionService.instance.closeConnection();
     DatabaseService.instance.drop();
     _controller.add(AuthenticationStatus.unauthenticated);
   }
 
-  void dispose() => _controller.close();
+  void dispose() {
+    reconnectionStream?.cancel();
+    reconnectionStream = null;
+    _controller.close();
+  }
 }

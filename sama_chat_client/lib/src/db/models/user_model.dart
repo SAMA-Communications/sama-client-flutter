@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
+import 'package:sama_chat_api/api/users/models/user.dart';
 
-import '../../api/users/models/models.dart';
 import 'avatar_model.dart';
 
 @Entity()

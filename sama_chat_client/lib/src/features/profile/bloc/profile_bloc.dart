@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
 
-import '../../../api/api.dart';
 import '../../../db/models/models.dart';
 import '../../../repository/user/user_repository.dart';
 import '../models/models.dart';

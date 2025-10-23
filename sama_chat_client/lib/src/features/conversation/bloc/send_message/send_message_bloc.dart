@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sama_chat_api/api/api.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../../../api/api.dart';
 import '../../../../db/models/conversation_model.dart';
 import '../../../../db/models/message_model.dart';
 import '../../../../repository/conversation/conversation_repository.dart';

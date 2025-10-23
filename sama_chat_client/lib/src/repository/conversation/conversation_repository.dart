@@ -5,14 +5,15 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:sama_chat_api/api/api.dart' as api;
+import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_chat_api/api/push_notifications/models/models.dart';
 
-import '../../api/api.dart' as api;
-import '../../api/api.dart';
-import '../../api/push_notifications/models/models.dart';
 import '../../db/models/models.dart';
 import '../../db/network_bound_resource.dart';
 import '../../db/resource.dart';
 import '../../features/conversation/models/chat_message.dart';
+import '../../shared/push_notifications/push_notifications_manager.dart';
 import '../../repository/messages/messages_repository.dart';
 import '../../shared/utils/media_utils.dart';
 import '../../shared/utils/string_utils.dart';
@@ -34,9 +35,9 @@ class ConversationRepository {
     initChatListeners();
   }
 
-  StreamSubscription<api.SystemMessage>? incomingSystemMessagesSubscription;
+  StreamSubscription<SystemMessage>? incomingSystemMessagesSubscription;
   StreamSubscription<ChatMessage>? incomingMessagesSubscription;
-  StreamSubscription<api.MessageSendStatus>? statusMessagesSubscription;
+  StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
   StreamSubscription<TypingStatus>? typingMessageSubscription;
 
   final StreamController<ConversationModel> _conversationsController =
@@ -45,10 +46,10 @@ class ConversationRepository {
   Stream<ConversationModel> get updateConversationStream =>
       _conversationsController.stream;
 
-  final StreamController<api.TypingStatus> _typingMessageController =
+  final StreamController<TypingStatus> _typingMessageController =
       StreamController.broadcast();
 
-  Stream<api.TypingStatus> get typingMessageStream =>
+  Stream<TypingStatus> get typingMessageStream =>
       _typingMessageController.stream;
 
   bool _chatsFilter(ConversationModel c) =>
@@ -57,8 +58,8 @@ class ConversationRepository {
   void initChatListeners() {
     if (incomingSystemMessagesSubscription != null) return;
 
-    incomingSystemMessagesSubscription = api
-        .MessagesManager.instance.systemChatMessagesStream
+    incomingSystemMessagesSubscription = MessagesManager
+        .instance.systemChatMessagesStream
         .listen((message) async {
       var (participants, users) =
           await getParticipants([message.conversation!.id!]);
@@ -94,7 +95,7 @@ class ConversationRepository {
       }
       _conversationsController.add(conversation);
 
-      api.showNotificationIfAppPaused(PushMessageData(
+      showNotificationIfAppPaused(PushMessageData(
           cid: conversation.id,
           title: conversation.name,
           body: getSystemMessagePushBody(conversation, message, opponent)));
@@ -125,7 +126,7 @@ class ConversationRepository {
         await localDatasource.updateConversationLocal(updatedConversation);
         _conversationsController.add(updatedConversation);
 
-        api.showNotificationIfAppPaused(PushMessageData(
+        showNotificationIfAppPaused(PushMessageData(
             cid: updatedConversation.id,
             title: updatedConversation.name,
             body: updatedConversation.lastMessage?.body,
@@ -158,8 +159,8 @@ class ConversationRepository {
       }
     });
 
-    typingMessageSubscription = api.TypingManager.instance.typingStatusStream
-        .listen((typingStatus) async {
+    typingMessageSubscription =
+        TypingManager.instance.typingStatusStream.listen((typingStatus) async {
       _typingMessageController.add(typingStatus);
     });
   }
@@ -173,8 +174,8 @@ class ConversationRepository {
     statusMessagesSubscription = null;
     typingMessageSubscription?.cancel();
     typingMessageSubscription = null;
-    api.MessagesManager.instance.destroy();
-    api.TypingManager.instance.destroy();
+    MessagesManager.instance.destroy();
+    TypingManager.instance.destroy();
   }
 
   Future<void> resetUnreadMessagesCount(String conversationId) async {
@@ -192,14 +193,14 @@ class ConversationRepository {
 
   Future<(Map<String, List<String>>, List<UserModel>)> getParticipants(
       List<String> cids) async {
-    var (participants, users) = await api.fetchParticipants(cids);
+    var (participants, users) = await fetchParticipants(cids);
     var usersModels = users.map((element) => element.toUserModel()).toList();
     var usersLocal = await userRepository.saveUsersLocal(usersModels);
     return (participants, usersLocal);
   }
 
   Future<List<UserModel>> updateParticipants(String cid) async {
-    var (participants, users) = await api.fetchParticipants([cid]);
+    var (participants, users) = await fetchParticipants([cid]);
     var usersModels = users.map((element) => element.toUserModel()).toList();
     var usersLocal = await userRepository.saveUsersLocal(usersModels);
     return usersLocal;
@@ -247,7 +248,7 @@ class ConversationRepository {
 
   Future<List<ConversationModel>> _fetchConversationsWithParticipants(
       {DateTime? ltDate, int limit = 100}) async {
-    final conversations = await api.fetchConversations({
+    final conversations = await fetchConversations({
       if (ltDate != null)
         'updated_at': {
           'lt': ltDate.toUtc().toIso8601String(),
@@ -320,7 +321,7 @@ class ConversationRepository {
       var compressedFile =
           await compressImageFile(avatarUrl, const Size(640, 480));
       final blur = await getImageHashInIsolate(compressedFile);
-      final id = await api.uploadAvatarFile(compressedFile);
+      final id = await uploadAvatarFile(compressedFile);
       final name = basename(compressedFile.path);
       avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
     }
@@ -363,7 +364,7 @@ class ConversationRepository {
       var compressedFile =
           await compressImageFile(avatarUrl, const Size(640, 480));
       final blur = await getImageHashInIsolate(compressedFile);
-      final id = await api.uploadAvatarFile(compressedFile);
+      final id = await uploadAvatarFile(compressedFile);
       final name = basename(compressedFile.path);
       avatar = Avatar(fileId: id, fileName: name, fileBlurHash: blur);
     }

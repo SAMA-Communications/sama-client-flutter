@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
+import 'package:sama_chat_api/api/conversations/models/message.dart';
 
-import '../../api/conversations/models/models.dart';
 import 'models.dart';
 
 @Entity()
