@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app_set_id/app_set_id.dart';
 import 'package:sama_chat_api/api/api.dart';
 import 'package:sama_chat_api/api/api.dart' as api;
+import 'package:sama_chat_api/api/connection/managers/connection_manager.dart';
 
 import '../../db/db_service.dart';
 import '../../db/models/models.dart';
@@ -34,6 +35,7 @@ class AuthenticationRepository {
   }
 
   StreamSubscription<ReconnectionState>? reconnectionStream;
+  StreamSubscription<ConnectionTokens>? connectionManagerStream;
 
   void initListeners() {
     if (reconnectionStream != null) return;
@@ -44,6 +46,12 @@ class AuthenticationRepository {
         await logOut();
         _controller.add(AuthenticationStatus.unauthenticated);
       }
+    });
+
+    connectionManagerStream = ConnectionManager.instance.connectionManagerStream
+        .listen((tokens) async {
+      SecureStorage.instance.saveAccessToken(tokens.accessToken);
+      SecureStorage.instance.saveRefreshToken(tokens.refreshToken);
     });
   }
 
@@ -57,10 +65,14 @@ class AuthenticationRepository {
           login: username,
           password: password,
           deviceId: deviceId ?? await AppSetId().getIdentifier());
-      var (accessToken, loggedUser) = await api.loginHttp(user);
+      var (accessToken, refreshToken, loggedUser) = await api.loginHttp(user);
       var loggedUserModel = loggedUser.toUserModel();
+
+      SecureStorage.instance.saveAccessToken(accessToken);
+      SecureStorage.instance.saveRefreshToken(refreshToken);
       SecureStorage.instance.saveCurrentUserIfNeed(loggedUserModel);
-      await loginWithAccessToken(accessToken);
+
+      await loginWithAccessToken(accessToken, refreshToken);
       await userRepository.updateUserLocal(loggedUserModel);
       return Future.value(null);
     } catch (e) {
@@ -70,12 +82,12 @@ class AuthenticationRepository {
     }
   }
 
-  Future<void> loginWithAccessToken([AccessToken? accessToken]) async {
+  Future<void> loginWithAccessToken(
+      AccessToken accessToken, RefreshToken refreshToken) async {
     ReconnectionManager.instance.init();
     DatabaseService.instance.init();
     try {
-      await api.loginWithToken(accessToken);
-
+      await api.loginWithToken(accessToken, refreshToken);
       PushNotificationsManager.instance.subscribe();
       _controller.add(AuthenticationStatus.authenticated);
       return Future.value(null);
@@ -157,6 +169,8 @@ class AuthenticationRepository {
   void dispose() {
     reconnectionStream?.cancel();
     reconnectionStream = null;
+    connectionManagerStream?.cancel();
+    connectionManagerStream = null;
     _controller.close();
   }
 }

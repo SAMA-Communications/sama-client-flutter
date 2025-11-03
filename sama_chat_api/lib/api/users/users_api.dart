@@ -48,7 +48,7 @@ Future<User> createUser({
   });
 }
 
-Future<(AccessToken, User)> loginHttp(User user) {
+Future<(AccessToken, RefreshToken, User)> loginHttp(User user) {
   return sendSamaHTTPRequest(httpLoginRequestName, {
     'login': user.login,
     'password': user.password,
@@ -59,21 +59,20 @@ Future<(AccessToken, User)> loginHttp(User user) {
     var accessToken = AccessToken.fromJson(response);
     var refreshToken = RefreshToken.fromJson(response);
 
-    ConnectionManager.instance.accessToken = accessToken;
-    ConnectionManager.instance.refreshToken = refreshToken;
-    return (accessToken, loggedUser);
+    return (accessToken, refreshToken, loggedUser);
   });
 }
 
-Future<bool> loginWithToken([AccessToken? accessToken]) async {
-  var deviceId = await AppSetId().getIdentifier();
-  accessToken ??= ConnectionManager.instance.accessToken;
+Future<bool> loginWithToken(AccessToken accessToken, RefreshToken refreshToken,
+    [String? deviceId]) async {
+  deviceId ??= await AppSetId().getIdentifier();
+  ConnectionManager.instance.accessToken = accessToken;
+  ConnectionManager.instance.refreshToken = refreshToken;
 
-  if (accessToken!.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
+  if (accessToken.expiredAt! < DateTime.now().millisecondsSinceEpoch) {
     log('loginWithAccessToken accessToken is expired, so refresh Token');
-    final refreshToken = ConnectionManager.instance.refreshToken;
-    accessToken = await _refreshToken(
-        accessToken.token!, refreshToken!.token!, deviceId!);
+    accessToken =
+        await _refreshToken(accessToken.token!, refreshToken.token!, deviceId!);
   }
   return _loginWithAccessToken(accessToken.token!, deviceId!);
 }
@@ -99,6 +98,8 @@ Future<AccessToken> _refreshToken(
 
     ConnectionManager.instance.accessToken = accessToken;
     ConnectionManager.instance.refreshToken = refreshToken;
+
+    ConnectionManager.instance.updateTokens(accessToken, refreshToken);
     return accessToken;
   });
 }

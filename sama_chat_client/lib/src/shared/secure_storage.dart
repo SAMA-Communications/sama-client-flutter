@@ -127,12 +127,13 @@ class SecureStorage {
     return AccessToken(token: token, expiredAt: expiredAt);
   }
 
-  saveRefreshToken(String token) {
-    _storage.write(key: storageRefreshToken, value: token);
+  saveRefreshToken(RefreshToken token) {
+    _storage.write(key: storageRefreshToken, value: token.token);
   }
 
-  Future<String?> getRefreshToken() {
-    return _storage.read(key: storageRefreshToken);
+  Future<RefreshToken?> getRefreshToken() async {
+    String? token = await _storage.read(key: storageRefreshToken);
+    return RefreshToken(token: token);
   }
 
   saveSubscriptionToken(String token) {

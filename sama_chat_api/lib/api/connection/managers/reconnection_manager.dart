@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../api.dart';
+import 'connection_manager.dart';
 
 const int reconnectionTimeout = 5;
 const int statusTokenExpired = 422;
@@ -73,11 +74,13 @@ class ReconnectionManager {
           if (reconnected) {
             log('[ReconnectionManager]', stringData: 'reconnected');
             _reconnectionTime = 0;
-            loginWithToken().then((_) {
+            var accessToken = ConnectionManager.instance.accessToken;
+            var refreshToken = ConnectionManager.instance.refreshToken;
+            loginWithToken(accessToken!, refreshToken!).then((_) {
               SamaConnectionService.instance.resendAwaitingRequests();
             }).catchError((onError) async {
               if (onError is ResponseException) {
-                loginWithToken().then((_) {
+                loginWithToken(accessToken, refreshToken).then((_) {
                   SamaConnectionService.instance.resendAwaitingRequests();
                 }).catchError((onError) {
                   var ex = onError as ResponseException;

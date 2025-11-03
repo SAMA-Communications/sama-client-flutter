@@ -99,7 +99,10 @@ class AuthenticationBloc
 
   Future<void> tryAuthUser() async {
     try {
-      await _authenticationRepository.loginWithAccessToken();
+      var accessToken = await SecureStorage.instance.getAccessToken();
+      var refreshToken = await SecureStorage.instance.getRefreshToken();
+      await _authenticationRepository.loginWithAccessToken(
+          accessToken!, refreshToken!);
     } catch (e) {
       log('tryAuthUser e= $e');
       //TODO RP CHECK ME (use checking with code 422)
