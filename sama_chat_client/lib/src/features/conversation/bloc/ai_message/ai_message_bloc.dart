@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_sdk/api/api.dart';
 
 import '../../../../db/models/models.dart';
 import '../../../../repository/messages/messages_repository.dart';

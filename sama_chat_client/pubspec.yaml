@@ -47,8 +47,8 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent
       ref: 2cea396843cd3ab1b5ec4334be4233864637874e
-  sama_chat_api:
-    path: ../sama_chat_api
+  sama_sdk:
+    path: ../sama_sdk
   scrollable_positioned_list: ^0.3.8
   shared_preferences: ^2.5.2
   sqflite: ^2.3.3+1

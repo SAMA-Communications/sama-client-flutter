@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:app_set_id/app_set_id.dart';
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/api.dart' as api;
-import 'package:sama_chat_api/api/connection/managers/connection_manager.dart';
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/api.dart' as api;
+import 'package:sama_sdk/api/connection/managers/connection_manager.dart';
 
 import '../../db/db_service.dart';
 import '../../db/models/models.dart';

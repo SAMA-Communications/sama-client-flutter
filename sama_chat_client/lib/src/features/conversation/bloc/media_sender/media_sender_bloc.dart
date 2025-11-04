@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart';
-import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_sdk/api/api.dart';
 
 import '../../../../db/models/conversation_model.dart';
 import '../../../../db/models/message_model.dart';

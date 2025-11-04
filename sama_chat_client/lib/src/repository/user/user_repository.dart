@@ -3,8 +3,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/api.dart' as api;
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/api.dart' as api;
 
 import '../../db/local/user_local_datasource.dart';
 import '../../db/models/models.dart';

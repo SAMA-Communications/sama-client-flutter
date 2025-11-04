@@ -5,7 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
-import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_sdk/api/api.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../db/models/models.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/connection/connection.dart' as conn;
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/connection/connection.dart' as conn;
 
 import '../../repository/conversation/conversation_repository.dart';
 import '../../repository/messages/messages_repository.dart';

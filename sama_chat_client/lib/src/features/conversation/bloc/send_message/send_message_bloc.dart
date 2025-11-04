@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_sdk/api/api.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../db/models/conversation_model.dart';

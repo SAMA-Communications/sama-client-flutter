@@ -1,4 +1,4 @@
-import 'package:sama_chat_api/api/api.dart' as api;
+import 'package:sama_sdk/api/api.dart' as api;
 
 import '../../db/local/attachment_local_datasource.dart';
 import '../../db/models/attachment_model.dart';

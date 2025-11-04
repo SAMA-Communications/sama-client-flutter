@@ -1,4 +1,4 @@
-name: sama_chat_api
+name: sama_sdk
 description: "The SAMA api for Flutter"
 version: 0.0.1
 issue_tracker: https://github.com/SAMA-Communications/sama-client-flutter/issues

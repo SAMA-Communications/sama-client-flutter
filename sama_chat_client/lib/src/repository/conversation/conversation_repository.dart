@@ -5,9 +5,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:sama_chat_api/api/api.dart' as api;
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/push_notifications/models/models.dart';
+import 'package:sama_sdk/api/api.dart' as api;
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/push_notifications/models/models.dart';
 
 import '../../db/models/models.dart';
 import '../../db/network_bound_resource.dart';

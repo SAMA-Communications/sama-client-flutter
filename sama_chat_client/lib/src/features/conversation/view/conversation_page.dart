@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide ConnectionState;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:sama_chat_api/api/chats/realtime/typing_manager.dart';
+import 'package:sama_sdk/api/chats/realtime/typing_manager.dart';
 
 import '../../../db/models/conversation_model.dart';
 import '../../../navigation/constants.dart';

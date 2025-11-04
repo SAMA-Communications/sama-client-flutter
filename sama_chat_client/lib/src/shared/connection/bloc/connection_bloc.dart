@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/connection/connection.dart' as conn;
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/connection/connection.dart' as conn;
 
 import '../../../repository/authentication/authentication_repository.dart';
 

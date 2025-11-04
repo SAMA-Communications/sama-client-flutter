@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
-import 'package:sama_chat_api/api/users/models/user.dart';
+import 'package:sama_sdk/api/users/models/user.dart';
 
 import 'avatar_model.dart';
 

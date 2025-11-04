@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_sdk/api/api.dart';
 
 import '../../db/models/models.dart';
 import '../../features/search/models/models.dart';

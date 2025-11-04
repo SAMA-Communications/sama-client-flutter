@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/settings.dart';
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/config.dart';

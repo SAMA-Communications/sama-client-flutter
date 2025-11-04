@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/settings.dart';
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/settings.dart';
 
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sama_chat_api/api/api.dart';
+import 'package:sama_sdk/api/api.dart';
 
 import '../../../db/models/conversation_model.dart';
 import '../../../features/conversations_list/widgets/avatar_group_icon.dart';

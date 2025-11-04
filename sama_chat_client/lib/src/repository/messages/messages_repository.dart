@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import 'package:sama_chat_api/api/api.dart' as api;
+import 'package:sama_sdk/api/api.dart' as api;
 
 import '../../db/local/message_local_datasource.dart';
 import '../../db/models/models.dart';

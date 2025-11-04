@@ -1,5 +1,5 @@
 import 'package:formz/formz.dart';
-import 'package:sama_chat_api/api/settings.dart';
+import 'package:sama_sdk/api/settings.dart';
 
 import 'chat_message.dart';
 

@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:sama_chat_api/api/api.dart';
-import 'package:sama_chat_api/api/push_notifications/models/models.dart';
+import 'package:sama_sdk/api/api.dart';
+import 'package:sama_sdk/api/push_notifications/models/models.dart';
 
 import '../utils/media_utils.dart';
 import '../secure_storage.dart';
