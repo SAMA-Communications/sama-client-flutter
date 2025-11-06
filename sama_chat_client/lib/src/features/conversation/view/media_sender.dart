@@ -9,6 +9,7 @@ import 'package:path/path.dart';
 import '../../../db/models/conversation_model.dart';
 import '../../../db/models/message_model.dart';
 import '../../../repository/messages/messages_repository.dart';
+import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/media_utils.dart';
@@ -16,13 +17,15 @@ import '../bloc/media_sender/media_sender_bloc.dart';
 
 class MediaSender extends StatelessWidget {
   final MessageModel? replyMessage;
+  final String? path;
 
-  const MediaSender(this.replyMessage, {super.key});
+  const MediaSender(this.replyMessage, this.path, {super.key});
 
   static Widget create({
     Key? key,
     required ConversationModel currentConversation,
     required MessageModel? replyMessage,
+    required String? path,
   }) {
     return BlocProvider<MediaSenderBloc>(
       create: (context) => MediaSenderBloc(
@@ -31,6 +34,7 @@ class MediaSender extends StatelessWidget {
               RepositoryProvider.of<MessagesRepository>(context)),
       child: MediaSender(
         replyMessage,
+        path,
         key: key,
       ),
     );
@@ -38,11 +42,20 @@ class MediaSender extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (path != null) {
+      BlocProvider.of<MediaSenderBloc>(context).add(AddFiles([File(path!)]));
+    } else {
+      BlocProvider.of<MediaSenderBloc>(context).add(const PickMoreFiles());
+    }
     return BlocListener<MediaSenderBloc, MediaSenderState>(
       listener: (context, state) {
         if (state.status == MediaSelectorStatus.processingFinished ||
             state.status == MediaSelectorStatus.canceled) {
           context.pop();
+          if (context.read<SharingIntentBloc>().state.status ==
+              SharingIntentStatus.processing) {
+            context.read<SharingIntentBloc>().add(SharingIntentCompleted());
+          }
         }
       },
       child: BlocBuilder<MediaSenderBloc, MediaSenderState>(

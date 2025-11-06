@@ -36,7 +36,7 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
       _onMessageChanged,
     );
 
-    on<_AddFiles>(
+    on<AddFiles>(
       _onFilesAdded,
     );
 
@@ -55,8 +55,6 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
     on<CancelSelection>(
       _onCancelSelection,
     );
-
-    _pickMedia();
   }
 
   FutureOr<void> _onPickFiles(
@@ -65,8 +63,7 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
     _pickMedia();
   }
 
-  FutureOr<void> _onFilesAdded(
-      _AddFiles event, Emitter<MediaSenderState> emit) {
+  FutureOr<void> _onFilesAdded(AddFiles event, Emitter<MediaSenderState> emit) {
     emit(state.copyWith(status: MediaSelectorStatus.mediaSelected));
     if (event.error?.isNotEmpty ?? false) {
       emit(state.copyWith(error: event.error));
@@ -191,16 +188,16 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
         .then((result) {
       var files = result?.files;
       if (files?.isEmpty ?? true) {
-        add(const _AddFiles([]));
+        add(const AddFiles([]));
       } else {
         var files = List<File>.from(result?.files
                 .map((platformFile) => File(platformFile.path!))
                 .toList() ??
             []);
-        add(_AddFiles(files));
+        add(AddFiles(files));
       }
     }).catchError((onError) {
-      add(const _AddFiles([],
+      add(const AddFiles([],
           error: 'Please allow permission access to Gallery'));
     });
   }

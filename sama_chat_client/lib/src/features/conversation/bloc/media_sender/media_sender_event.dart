@@ -7,11 +7,11 @@ class MediaSenderEvent extends Equatable {
   List<Object> get props => [];
 }
 
-final class _AddFiles extends MediaSenderEvent {
+final class AddFiles extends MediaSenderEvent {
   final List<File> selectedFiles;
   final String? error;
 
-  const _AddFiles(this.selectedFiles, {this.error});
+  const AddFiles(this.selectedFiles, {this.error});
 }
 
 final class PickMoreFiles extends MediaSenderEvent {
