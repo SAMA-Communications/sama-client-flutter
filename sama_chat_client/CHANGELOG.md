@@ -1,0 +1,135 @@
+# Changelog
+
+## 0.14.0
+
+### Features
+- Implemented the option to edit messages
+- Implemented the option to delete messages
+- Implemented reset password feature
+- Integrated AI agent for changing tone of messages and summarizing them
+
+## 0.13.0
+
+### Features
+- Implemented Forward messages feature
+- Improved Link preview functionality
+
+## 0.12.0
+
+### Features
+- Implemented Typing status
+- Implemented Link preview for message
+- Implemented message Reply functionality
+
+### Improvements
+- Minor bug fixes and improvements
+
+## 0.11.2
+
+### Features:
+- Added support for Programmable Chat attachments
+- Added new attachments fields
+
+## 0.11.1
+
+### Fixes:
+- Added organization id for production environment
+
+## 0.11.0
+
+### Features:
+- Implemented the Draft feature to locally save unsent messages
+- Added support for Programmable Chat
+- Added support for verifying that a user belongs to a specific organization
+
+### Fixes:
+- Improved real-time updates for Online status to enhance compatibility with the web app
+
+## 0.10.0
+
+### Features:
+- Implemented a new view for media items within the app
+- Improved thumbnail quality for media item previews
+- Added caching to display media items in offline mode
+- Added a new media player to play videos within the app
+
+### Fixes:
+- Improved and stabilized the logic for the “Last Seen” user functionality
+
+## 0.9.0
+
+### Features:
+- Implemented offline mode for chats
+- Implemented offline mode for messages
+- Improved message attachments caching
+
+## 0.8.0
+
+### Features:
+- Implemented local database for Chats
+- Implemented local database for Messages
+- Enhance app by adding offline stubs for some functionalities
+- Implemented CI
+
+## 0.7.0
+
+### Features:
+
+- Implemented a progressive authentication flow to enhance security
+- Implemented push notifications for the iOS platform
+
+### Fixes:
+- Fixed minor UI bugs for the iOS app
+
+## 0.6.0
+
+### Enhancements:
+
+- Implement Pending/Sent/Read receipts
+- Quick display the chats instead of login screen after app was run
+- Re-design Create Group chat screen
+
+### Fixes:
+- Resolve issue when chats aren’t displayed while the user tries to share some text
+- Fix send empty text message
+
+## 0.5.0
+
+### Released Fifth Phase
+
+- Enabled push notifications for Android devices.
+- Added server-side support for push notifications.
+- Improved chat functionality to auto-hide the keyboard during scrolling.
+- Updated link highlight color within chat for better visibility.
+- Made minor UI improvements to user and group chat descriptions.
+
+### Fixes:
+- Resolved an issue where users remained in chats after deletion.
+- Updated messaging when maximum participant limit is reached.
+
+## 0.4.0
+
+### Released Forth Phase
+
+- Updated app name
+- Implemented 1-1 info screen
+- Implemented group info screen
+
+### Fixes
+-  iOS UI issues
+-  iOS ShareTo
+-  Attachments blinking download
+
+## 0.1.0
+
+### Released all core features
+
+### Released Third Phase
+
+- Implemented avatars for conversations
+- Implemented links highlighting in chat
+- Added ShareTo (text only)
+
+### Fixes
+
+- Block 'x' buttons for separate items while sending attachments

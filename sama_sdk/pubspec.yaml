@@ -1,0 +1,27 @@
+name: sama_sdk
+description: "The SAMA api for Flutter"
+version: 0.0.1
+issue_tracker: https://github.com/SAMA-Communications/sama-client-flutter/issues
+documentation: https://github.com/SAMA-Communications/sama-client-flutter/blob/master/README.md
+repository: https://github.com/SAMA-Communications/sama-client-flutter
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  app_set_id: ^1.2.0
+  connectivity_plus: ^6.0.3
+  equatable: ^2.0.5
+  flutter:
+    sdk: flutter
+  flutter_dotenv: ^5.2.1
+  http: ^1.2.2
+  mime: ^1.0.5
+  path: ^1.9.0
+  uuid: ^4.4.0
+  web_socket_channel: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
