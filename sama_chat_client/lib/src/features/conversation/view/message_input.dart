@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
@@ -11,9 +12,9 @@ import '../widgets/header_input_box.dart';
 import 'media_sender.dart';
 
 class MessageInput extends StatefulWidget {
-  final String? sharedText;
+  final SharedMediaFile? sharedMessage;
 
-  const MessageInput({super.key, this.sharedText});
+  const MessageInput({super.key, this.sharedMessage});
 
   @override
   State<StatefulWidget> createState() {
@@ -23,17 +24,32 @@ class MessageInput extends StatefulWidget {
 
 class _MessageInputState extends State<MessageInput> {
   late final TextEditingController textEditingController =
-      TextEditingController(text: widget.sharedText);
+      TextEditingController(
+          text: widget.sharedMessage?.type == SharedMediaType.text ||
+                  widget.sharedMessage?.type == SharedMediaType.url
+              ? widget.sharedMessage?.path
+              : null);
 
   final FocusNode showFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.sharedMessage?.type == SharedMediaType.image) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showMedia(widget.sharedMessage?.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var showReply = false;
     var showEdit = false;
-    if (widget.sharedText != null) {
+    if (widget.sharedMessage?.type == SharedMediaType.text ||
+        widget.sharedMessage?.type == SharedMediaType.url) {
       BlocProvider.of<SendMessageBloc>(context)
-          .add(TextMessageChanged(widget.sharedText!));
+          .add(TextMessageChanged(widget.sharedMessage!.path));
     }
     return MultiBlocListener(
       listeners: [
@@ -57,7 +73,7 @@ class _MessageInputState extends State<MessageInput> {
             return (previous.draftMessage != current.draftMessage ||
                     previous.replyMessage != current.replyMessage ||
                     previous.editMessage != current.editMessage) &&
-                widget.sharedText == null;
+                widget.sharedMessage == null;
           },
           listener: (context, state) {
             showReply = state.replyMessage != null;
@@ -121,28 +137,7 @@ class _MessageInputState extends State<MessageInput> {
                     icon: const Icon(Icons.attach_file_outlined),
                     color: dullGray,
                     onPressed: () {
-                      connectionChecker(
-                          context,
-                          () => showDialog(
-                                barrierDismissible: false,
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 10.0),
-                                    actionsPadding: EdgeInsets.zero,
-                                    buttonPadding: EdgeInsets.zero,
-                                    content: SizedBox(
-                                      width: double.maxFinite,
-                                      child: MediaSender.create(
-                                          currentConversation: rootContext
-                                              .watch<SendMessageBloc>()
-                                              .currentConversation,
-                                          replyMessage: state.replyMessage),
-                                    ),
-                                  );
-                                },
-                              ));
+                      connectionChecker(context, () => showMedia());
                     },
                   ),
                   Flexible(
@@ -193,6 +188,30 @@ class _MessageInputState extends State<MessageInput> {
     if (context.read<SendMessageBloc>().state.editMessage != null) {
       BlocProvider.of<SendMessageBloc>(context).add(const RemoveEditMessage());
     }
+  }
+
+  showMedia([String? path]) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
+            actionsPadding: EdgeInsets.zero,
+            buttonPadding: EdgeInsets.zero,
+            content: SizedBox(
+              width: double.maxFinite,
+              child: MediaSender.create(
+                  currentConversation:
+                      context.watch<SendMessageBloc>().currentConversation,
+                  replyMessage: BlocProvider.of<SendMessageBloc>(context)
+                      .state
+                      .replyMessage,
+                  path: path),
+            ));
+      },
+    );
   }
 
   @override
