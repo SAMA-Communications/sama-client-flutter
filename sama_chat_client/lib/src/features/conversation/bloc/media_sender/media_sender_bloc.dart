@@ -29,8 +29,12 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
     required this.currentConversation,
     required this.messagesRepository,
   }) : super(MediaSenderState()) {
-    on<PickMoreFiles>(
-      _onPickFiles,
+    on<PickMedia>(
+      _onPickMedia,
+    );
+
+    on<PickCamera>(
+      _onPickCamera,
     );
 
     on<ChangeMessage>(
@@ -58,10 +62,15 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
     );
   }
 
-  FutureOr<void> _onPickFiles(
-      PickMoreFiles event, Emitter<MediaSenderState> emit) {
+  FutureOr<void> _onPickMedia(PickMedia event, Emitter<MediaSenderState> emit) {
     emit(state.copyWith(status: MediaSelectorStatus.picking));
     _pickMedia();
+  }
+
+  FutureOr<void> _onPickCamera(
+      PickCamera event, Emitter<MediaSenderState> emit) {
+    emit(state.copyWith(status: MediaSelectorStatus.picking));
+    _pickCamera();
   }
 
   FutureOr<void> _onFilesAdded(AddFiles event, Emitter<MediaSenderState> emit) {
@@ -180,10 +189,22 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
       if (result.isEmpty) {
         add(const AddFiles([]));
       } else {
-        var files = List<File>.from(result
-            .map((platformFile) => File(platformFile.path))
-            .toList());
+        var files = List<File>.from(
+            result.map((platformFile) => File(platformFile.path)).toList());
         add(AddFiles(files));
+      }
+    }).catchError((onError) {
+      add(const AddFiles([],
+          error: 'Please allow permission access to Gallery'));
+    });
+  }
+
+  void _pickCamera() {
+    picker.pickImage(source: ImageSource.camera).then((result) {
+      if (result?.path.isEmpty ?? true) {
+        add(const AddFiles([]));
+      } else {
+        add(AddFiles([File(result!.path)]));
       }
     }).catchError((onError) {
       add(const AddFiles([],
