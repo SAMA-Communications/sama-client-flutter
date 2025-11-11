@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../db/models/models.dart';
 import '../../../repository/user/user_repository.dart';
@@ -56,11 +56,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileAvatarPicked event,
     Emitter<ProfileState> emit,
   ) async {
-    await FilePicker.platform
-        .pickFiles(type: FileType.image, compressionQuality: 0)
+    await ImagePicker()
+        .pickImage(source: ImageSource.gallery)
         .then((result) async {
       if (result != null) {
-        File file = File(result.files.single.path!);
+        File file = File(result.path);
         try {
           final user = await _userRepository.updateAvatar(file);
           emit(state.copyWith(

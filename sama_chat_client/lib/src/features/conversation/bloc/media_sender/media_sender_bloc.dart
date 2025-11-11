@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:sama_sdk/api/api.dart';
 
@@ -23,6 +23,7 @@ const maxAttachmentsCount = 10;
 class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
   final ConversationModel currentConversation;
   final MessagesRepository messagesRepository;
+  final ImagePicker picker = ImagePicker();
 
   MediaSenderBloc({
     required this.currentConversation,
@@ -178,25 +179,13 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
   }
 
   void _pickMedia() {
-    FilePicker.platform
-        .pickFiles(
-            type: FileType.media,
-            //TODO RP remove this if it's all ok on both android and iOS sides
-            // allowedExtensions: [
-            //   ...supportedImageAttachmentExtentions,
-            //   ...supportedVideoAttachmentExtentions
-            // ],
-            allowMultiple: true,
-            compressionQuality: 0)
-        .then((result) {
-      var files = result?.files;
-      if (files?.isEmpty ?? true) {
+    picker.pickMultipleMedia().then((result) {
+      if (result.isEmpty) {
         add(const _AddFiles([]));
       } else {
-        var files = List<File>.from(result?.files
-                .map((platformFile) => File(platformFile.path!))
-                .toList() ??
-            []);
+        var files = List<File>.from(result
+            .map((platformFile) => File(platformFile.path))
+            .toList());
         add(_AddFiles(files));
       }
     }).catchError((onError) {
