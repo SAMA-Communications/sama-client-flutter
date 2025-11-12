@@ -33,6 +33,9 @@ class GroupInfoPage extends StatelessWidget {
         builder: (context, state) {
       return PopScope(
           canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            context.pop(state.status.isSuccess);
+          },
           child: Scaffold(
               backgroundColor: black,
               resizeToAvoidBottomInset: false,
