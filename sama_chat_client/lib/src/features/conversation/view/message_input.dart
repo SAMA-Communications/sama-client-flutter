@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../../shared/connection/view/connection_checker.dart';
@@ -31,6 +32,7 @@ class _MessageInputState extends State<MessageInput> {
               : null);
 
   final FocusNode showFocusNode = FocusNode();
+  BuildContext? dialogContext;
 
   @override
   void initState() {
@@ -194,7 +196,8 @@ class _MessageInputState extends State<MessageInput> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (_) {
+      builder: (ctx) {
+        dialogContext = ctx;
         return AlertDialog(
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
@@ -211,11 +214,14 @@ class _MessageInputState extends State<MessageInput> {
                   path: path),
             ));
       },
-    );
+    ).then((result) async {
+      dialogContext = null;
+    });
   }
 
   @override
   void dispose() {
+    if (dialogContext != null && dialogContext!.mounted) dialogContext!.pop();
     showFocusNode.dispose();
     super.dispose();
   }
