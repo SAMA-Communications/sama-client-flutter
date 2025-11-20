@@ -35,41 +35,45 @@ class ConversationPage extends StatelessWidget {
   static MultiBlocProvider route(Object? extra) {
     ConversationModel currentConversation = extra as ConversationModel;
 
-    return MultiBlocProvider(providers: [
-      BlocProvider(
-          create: (context) => ConversationBloc(
+    return MultiBlocProvider(
+        key: Key(currentConversation.id),
+        providers: [
+          BlocProvider(
+              create: (context) => ConversationBloc(
+                  currentConversation: currentConversation,
+                  conversationRepository:
+                      RepositoryProvider.of<ConversationRepository>(context),
+                  messagesRepository:
+                      RepositoryProvider.of<MessagesRepository>(context),
+                  userRepository:
+                      RepositoryProvider.of<UserRepository>(context))
+                ..add(const MessagesRequested())),
+          BlocProvider(
+            create: (context) => SendMessageBloc(
               currentConversation: currentConversation,
               conversationRepository:
                   RepositoryProvider.of<ConversationRepository>(context),
               messagesRepository:
                   RepositoryProvider.of<MessagesRepository>(context),
-              userRepository: RepositoryProvider.of<UserRepository>(context))
-            ..add(const MessagesRequested())),
-      BlocProvider(
-        create: (context) => SendMessageBloc(
-          currentConversation: currentConversation,
-          conversationRepository:
-              RepositoryProvider.of<ConversationRepository>(context),
-          messagesRepository:
-              RepositoryProvider.of<MessagesRepository>(context),
-        ),
-      ),
-      BlocProvider(
-        create: (context) => DeleteMessagesBloc(
-          messagesRepository:
-              RepositoryProvider.of<MessagesRepository>(context),
-        ),
-      ),
-      BlocProvider(
-          create: (context) => MediaAttachmentBloc(
-              attachmentsRepository:
-                  RepositoryProvider.of<AttachmentsRepository>(context))),
-      BlocProvider(
-          create: (context) => AiMessageBloc(
-              currentConversation: currentConversation,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => DeleteMessagesBloc(
               messagesRepository:
-                  RepositoryProvider.of<MessagesRepository>(context))),
-    ], child: const ConversationPage());
+                  RepositoryProvider.of<MessagesRepository>(context),
+            ),
+          ),
+          BlocProvider(
+              create: (context) => MediaAttachmentBloc(
+                  attachmentsRepository:
+                      RepositoryProvider.of<AttachmentsRepository>(context))),
+          BlocProvider(
+              create: (context) => AiMessageBloc(
+                  currentConversation: currentConversation,
+                  messagesRepository:
+                      RepositoryProvider.of<MessagesRepository>(context))),
+        ],
+        child: const ConversationPage());
   }
 
   @override
