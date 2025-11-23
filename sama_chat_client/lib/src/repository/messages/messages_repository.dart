@@ -459,7 +459,8 @@ class MessagesRepository {
       var message = messages[i];
       var isOwn = currentUser?.id == message.from;
       var sender = participants[message.from] ??
-          await userRepository.getUserById(message.from!);
+          await userRepository.getUserById(message.from!) ??
+          UserModel();
       var messageModel = message.toMessageModel(isOwn, sender);
       result.add(messageModel);
     }
