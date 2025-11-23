@@ -143,12 +143,11 @@ class ConversationPage extends StatelessWidget {
                                 },
                                 child: ConnectionChecker(
                                     child: MessageInput(
-                                        sharedText: context
+                                        sharedMessage: context
                                             .read<SharingIntentBloc>()
                                             .state
                                             .sharedFiles
-                                            .firstOrNull
-                                            ?.path)),
+                                            .firstOrNull)),
                               )
                             : const MessageInput()
                         : const SelectInput())
