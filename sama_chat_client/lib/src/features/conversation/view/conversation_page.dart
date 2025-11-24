@@ -20,6 +20,7 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/loaders.dart';
 import '../../../shared/widget/typing_indicator.dart';
+import '../../group_info/view/group_info_page.dart';
 import '../bloc/ai_message/ai_message_bloc.dart';
 import '../bloc/conversation_bloc.dart';
 import '../bloc/delete_messages/delete_messages_bloc.dart';
@@ -290,10 +291,17 @@ Future<void> _infoAction(BuildContext context) async {
   if (state.conversation.type == 'u') {
     context.push(userInfoPath, extra: state.conversation.opponent);
   } else {
-    bool conversationUpdated =
-        await context.push(groupInfoPath, extra: state.conversation) as bool;
-    if (conversationUpdated && context.mounted) {
-      context.read<ConversationBloc>().add(const ParticipantsReceived());
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => GroupInfoPage.route(state.conversation,
+                  onResult: (conversationUpdated) {
+                if (conversationUpdated && context.mounted) {
+                  context
+                      .read<ConversationBloc>()
+                      .add(const ParticipantsReceived());
+                }
+              })),
+    );
   }
 }

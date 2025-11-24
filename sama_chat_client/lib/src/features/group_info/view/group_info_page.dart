@@ -10,12 +10,15 @@ import '../../../shared/ui/colors.dart';
 import '../bloc/group_info_bloc.dart';
 import 'group_info_form.dart';
 
+typedef GroupInfoPageCallback = void Function(bool result);
+
 class GroupInfoPage extends StatelessWidget {
   final ConversationModel conversation;
+  final GroupInfoPageCallback? onResult;
 
-  const GroupInfoPage({required this.conversation, super.key});
+  const GroupInfoPage({required this.conversation, this.onResult, super.key});
 
-  static BlocProvider route(Object? extra) {
+  static BlocProvider route(Object? extra, {GroupInfoPageCallback? onResult}) {
     ConversationModel conversation = extra as ConversationModel;
 
     return BlocProvider<GroupInfoBloc>(
@@ -23,7 +26,7 @@ class GroupInfoPage extends StatelessWidget {
           RepositoryProvider.of<ConversationRepository>(context),
           RepositoryProvider.of<UserRepository>(context),
           conversation: conversation),
-      child: GroupInfoPage(conversation: conversation),
+      child: GroupInfoPage(conversation: conversation, onResult: onResult),
     );
   }
 
@@ -32,12 +35,8 @@ class GroupInfoPage extends StatelessWidget {
     return BlocBuilder<GroupInfoBloc, GroupInfoState>(
         builder: (context, state) {
       return PopScope(
-          canPop: false,
           onPopInvokedWithResult: (didPop, result) {
-            if (didPop) {
-              return;
-            }
-            context.pop(state.status.isSuccess);
+            onResult?.call(state.status.isSuccess);
           },
           child: Scaffold(
               backgroundColor: black,
@@ -46,7 +45,7 @@ class GroupInfoPage extends StatelessWidget {
                 backgroundColor: black,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back_outlined, color: white),
-                  onPressed: () => context.pop(state.status.isSuccess),
+                  onPressed: () => context.pop(),
                 ),
                 title: Text(
                   state.name.value,
