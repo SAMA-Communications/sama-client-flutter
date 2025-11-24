@@ -34,6 +34,9 @@ class GroupInfoPage extends StatelessWidget {
       return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, result) {
+            if (didPop) {
+              return;
+            }
             context.pop(state.status.isSuccess);
           },
           child: Scaffold(
