@@ -352,11 +352,14 @@ class MessageItem extends StatelessWidget {
                                         }),
                                   ],
                                       context: context,
-                                      child: BlocProvider.value(
-                                          value:
-                                              BlocProvider.of<ConversationBloc>(
-                                                  context),
-                                          child: this),
+                                      child: MultiBlocProvider(providers: [
+                                        BlocProvider.value(
+                                            value: BlocProvider.of<
+                                                MediaAttachmentBloc>(context)),
+                                        BlocProvider.value(
+                                            value: BlocProvider.of<
+                                                ConversationBloc>(context)),
+                                      ], child: this),
                                       stickToRight: message.isOwn)
                                   .show();
                             }),

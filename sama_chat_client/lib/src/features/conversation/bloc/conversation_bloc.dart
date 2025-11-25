@@ -193,7 +193,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   subscribeOpponentLastActivity() async {
-    if (currentConversation.type == 'u') {
+    if (currentConversation.type == 'u' &&
+        currentConversation.opponent != null) {
       var recentActivity = await userRepository
           .subscribeUserLastActivity(currentConversation.opponent!.id!);
       _updateOpponentRecentActivity(recentActivity);
