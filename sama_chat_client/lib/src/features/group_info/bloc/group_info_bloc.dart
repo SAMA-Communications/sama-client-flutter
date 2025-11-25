@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sama_sdk/api/api.dart';
 
 import '../../../db/models/models.dart';
@@ -60,11 +60,11 @@ class GroupInfoBloc extends Bloc<GroupInfoEvent, GroupInfoState> {
     GroupAvatarPicked event,
     Emitter<GroupInfoState> emit,
   ) async {
-    await FilePicker.platform
-        .pickFiles(type: FileType.image, compressionQuality: 0)
+    await ImagePicker()
+        .pickImage(source: ImageSource.gallery)
         .then((result) async {
       if (result != null) {
-        File file = File(result.files.single.path!);
+        File file = File(result.path);
         try {
           final chat = await _conversationRepository.updateConversation(
               id: state.conversation.id, avatarUrl: file);

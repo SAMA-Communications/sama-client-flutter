@@ -14,8 +14,12 @@ final class AddFiles extends MediaSenderEvent {
   const AddFiles(this.selectedFiles, {this.error});
 }
 
-final class PickMoreFiles extends MediaSenderEvent {
-  const PickMoreFiles();
+final class PickCamera extends MediaSenderEvent {
+  const PickCamera();
+}
+
+final class PickMedia extends MediaSenderEvent {
+  const PickMedia();
 }
 
 final class ChangeMessage extends MediaSenderEvent {

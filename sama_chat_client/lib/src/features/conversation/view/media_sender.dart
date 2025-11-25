@@ -44,8 +44,6 @@ class MediaSender extends StatelessWidget {
   Widget build(BuildContext context) {
     if (path != null) {
       BlocProvider.of<MediaSenderBloc>(context).add(AddFiles([File(path!)]));
-    } else {
-      BlocProvider.of<MediaSenderBloc>(context).add(const PickMoreFiles());
     }
     return BlocListener<MediaSenderBloc, MediaSenderState>(
       listener: (context, state) {
@@ -74,18 +72,7 @@ class MediaSender extends StatelessWidget {
                     const SizedBox(
                       height: 8,
                     ),
-                    if (state.selectedFiles.isEmpty &&
-                        state.status == MediaSelectorStatus.initial)
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        width: 48,
-                        height: 48,
-                        child: const CircularProgressIndicator(
-                          strokeWidth: 3.0,
-                        ),
-                      ),
-                    if (state.selectedFiles.isEmpty &&
-                        state.status != MediaSelectorStatus.initial)
+                    if (state.selectedFiles.isEmpty)
                       const Center(
                         child: Text(
                           'Select files',
@@ -131,25 +118,55 @@ class MediaSender extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        TextButton(
-                          onPressed: () {
-                            if (state.selectedFiles.length < 10 &&
-                                state.status !=
-                                    MediaSelectorStatus.processing) {
-                              BlocProvider.of<MediaSenderBloc>(context)
-                                  .add(const PickMoreFiles());
-                            }
-                          },
-                          child: Text(
-                            'Add',
-                            style: TextStyle(
-                                color: state.selectedFiles.length < 10 &&
-                                        state.status !=
-                                            MediaSelectorStatus.processing
-                                    ? slateBlue
-                                    : whiteAluminum),
-                          ),
-                        ),
+                        Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  if (state.selectedFiles.length < 10 &&
+                                      state.status !=
+                                          MediaSelectorStatus.processing) {
+                                    BlocProvider.of<MediaSenderBloc>(context)
+                                        .add(const PickCamera());
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap),
+                                child: Text(
+                                  'Camera',
+                                  style: TextStyle(
+                                      color: state.selectedFiles.length < 10 &&
+                                              state.status !=
+                                                  MediaSelectorStatus.processing
+                                          ? slateBlue
+                                          : whiteAluminum),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  if (state.selectedFiles.length < 10 &&
+                                      state.status !=
+                                          MediaSelectorStatus.processing) {
+                                    BlocProvider.of<MediaSenderBloc>(context)
+                                        .add(const PickMedia());
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap),
+                                child: Text(
+                                  'Media',
+                                  style: TextStyle(
+                                      color: state.selectedFiles.length < 10 &&
+                                              state.status !=
+                                                  MediaSelectorStatus.processing
+                                          ? slateBlue
+                                          : whiteAluminum),
+                                ),
+                              ),
+                            ]),
                         const Expanded(child: SizedBox.shrink()),
                         TextButton(
                             onPressed: () {

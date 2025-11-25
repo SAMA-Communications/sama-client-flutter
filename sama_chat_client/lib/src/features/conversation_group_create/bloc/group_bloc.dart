@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../db/models/user_model.dart';
 import '../models/avatar.dart';
@@ -41,11 +41,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     GroupAvatarPicked event,
     Emitter<GroupState> emit,
   ) async {
-    await FilePicker.platform
-        .pickFiles(type: FileType.image, compressionQuality: 0)
-        .then((result) {
+    await ImagePicker().pickImage(source: ImageSource.gallery).then((result) {
       if (result != null) {
-        File file = File(result.files.single.path!);
+        File file = File(result.path);
         final avatarUrl = GroupAvatar.dirty(file);
         emit(
           state.copyWith(

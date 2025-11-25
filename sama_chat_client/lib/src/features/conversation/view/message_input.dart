@@ -196,8 +196,7 @@ class _MessageInputState extends State<MessageInput> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (ctx) {
-        dialogContext = ctx;
+      builder: (_) {
         return AlertDialog(
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
@@ -214,9 +213,7 @@ class _MessageInputState extends State<MessageInput> {
                   path: path),
             ));
       },
-    ).then((result) async {
-      dialogContext = null;
-    });
+    );
   }
 
   @override
