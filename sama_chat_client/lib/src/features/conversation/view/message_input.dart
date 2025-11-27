@@ -48,6 +48,9 @@ class _MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     var showReply = false;
     var showEdit = false;
+    var currentChat = context.read<SendMessageBloc>().currentConversation;
+    var blockSending = currentChat.type == 'u' && currentChat.opponent == null;
+
     if (widget.sharedMessage?.type == SharedMediaType.text ||
         widget.sharedMessage?.type == SharedMediaType.url) {
       BlocProvider.of<SendMessageBloc>(context)
@@ -138,20 +141,23 @@ class _MessageInputState extends State<MessageInput> {
                   IconButton(
                     icon: const Icon(Icons.attach_file_outlined),
                     color: dullGray,
-                    onPressed: () {
-                      connectionChecker(context, () => showMedia());
-                    },
+                    onPressed: blockSending
+                        ? null
+                        : () => {connectionChecker(context, () => showMedia())},
                   ),
                   Flexible(
                     child: TextField(
                       focusNode: showFocusNode,
+                      enabled: !blockSending,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       style: const TextStyle(fontSize: 15.0),
                       controller: textEditingController,
-                      decoration: const InputDecoration.collapsed(
-                        hintText: 'Type your message...',
-                        hintStyle: TextStyle(color: dullGray),
+                      decoration: InputDecoration.collapsed(
+                        hintText: blockSending
+                            ? 'Can\'t send message'
+                            : 'Type your message...',
+                        hintStyle: const TextStyle(color: dullGray),
                       ),
                       onChanged: (text) {
                         BlocProvider.of<SendMessageBloc>(rootContext)
