@@ -117,6 +117,8 @@ class _ContinueButton extends StatelessWidget {
 }
 
 class OtpInput extends StatefulWidget {
+  static const otpSize = 6;
+
   const OtpInput({super.key});
 
   @override
@@ -125,9 +127,10 @@ class OtpInput extends StatefulWidget {
 
 class OtpInputState extends State<OtpInput> {
   final List<TextEditingController> _controllers =
-      List.generate(6, (_) => TextEditingController());
+      List.generate(OtpInput.otpSize, (_) => TextEditingController());
 
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final List<FocusNode> _focusNodes =
+      List.generate(OtpInput.otpSize, (_) => FocusNode());
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +150,7 @@ class OtpInputState extends State<OtpInput> {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(6, (index) {
+            children: List.generate(OtpInput.otpSize, (index) {
               return digitField(index);
             }),
           ),
@@ -166,8 +169,21 @@ class OtpInputState extends State<OtpInput> {
         focusNode: _focusNodes[index],
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
-        maxLength: 1,
+        autofocus: true,
         onChanged: (value) {
+          if (value.characters.length == OtpInput.otpSize) {
+            for (final (index, controller) in _controllers.indexed) {
+              controller.text = value.characters.elementAt(index);
+              if (index < 5) {
+                FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+              }
+              context
+                  .read<ResetPasswordBloc>()
+                  .add(OtpChanged(index, value.characters.elementAt(index)));
+            }
+            return;
+          }
+
           if (value.isNotEmpty && index < 5) {
             FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
           } else if (value.isEmpty && index > 0) {
