@@ -143,13 +143,6 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
         }
 
         if (status == AuthenticationStatus.authenticated) {
-          // fix for https://github.com/flutter/flutter/issues/146616 - ignoring Failed assertion for now
-          if (state.fullPath ==
-                  '$conversationListScreenPath/$conversationScreenSubPath' &&
-              state.extra == null) {
-            context.goNamed(state.matchedLocation);
-          }
-
           return state.fullPath == loginScreenPath
               ? rootScreenPath
               : state.fullPath;
