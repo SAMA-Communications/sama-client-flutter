@@ -110,11 +110,15 @@ class ReplyBubble extends StatelessWidget {
     var isImageType = isImage(attachment.fileName, attachment.contentType);
 
     return FutureBuilder(
-        future: isImageType
-            ? Future.value(attachment.url ?? '')
-            : getVideoThumbnailByUrl(attachment.url!, attachment.fileId),
+        future: attachment.url == null
+            ? Future.value('')
+            : isImageType
+                ? Future.value(attachment.url!)
+                : getVideoThumbnailByUrl(attachment.url!, attachment.fileId),
         builder: (context, snapshot) {
-          if (snapshot.hasError || !snapshot.hasData) {
+          if (snapshot.hasError ||
+              !snapshot.hasData ||
+              snapshot.data!.isEmpty) {
             return const SizedBox(height: 40, width: 40);
           }
           return Container(
