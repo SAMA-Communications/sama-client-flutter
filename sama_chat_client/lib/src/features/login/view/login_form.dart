@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/ui/view/text_field_form.dart';
 import '../bloc/login_bloc.dart';
 import '../models/models.dart';
 
@@ -105,20 +106,6 @@ class LoginFormState extends State<LoginForm> {
               const Padding(padding: EdgeInsets.all(8)),
               _EmailInput(),
               const Padding(padding: EdgeInsets.all(4)),
-              Row(
-                children: [
-                  Checkbox(
-                      checkColor: white,
-                      activeColor: whiteAluminum,
-                      value: loginWithNewUser,
-                      onChanged: (checked) {
-                        setState(() {
-                          loginWithNewUser = checked ?? true;
-                        });
-                      }),
-                  const Text('* Sign in automatically')
-                ],
-              ),
             ] else ...[
               const Padding(padding: EdgeInsets.all(4)),
               Align(
@@ -170,40 +157,16 @@ class _UsernameInput extends StatelessWidget {
     return BlocBuilder<LoginBloc, LoginState>(
       buildWhen: (previous, current) => previous.username != current.username,
       builder: (context, state) {
-        return Container(
-          padding: const EdgeInsets.all(4),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-            color: gainsborough,
-          ),
-          child: TextField(
-            key: const Key('loginForm_usernameInput_textField'),
-            keyboardType: TextInputType.text,
+        return TextFieldForm(
             onChanged: (username) =>
                 context.read<LoginBloc>().add(LoginUsernameChanged(username)),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              label: const Row(
-                children: [
-                  Icon(
-                    Icons.person_outlined,
-                    size: 16,
-                    color: dullGray,
-                  ),
-                  Text(
-                    'Username',
-                    style: TextStyle(color: dullGray, fontSize: 16),
-                  )
-                ],
-              ),
-              errorText: state.username.displayError != null
-                  ? state.username.displayError == UsernameValidationError.short
-                      ? 'User name is too short'
-                      : null
-                  : null,
-            ),
-          ),
-        );
+            iconData: Icons.person_outlined,
+            hint: 'Username',
+            error: state.username.displayError != null
+                ? state.username.displayError == UsernameValidationError.short
+                    ? 'User name is too short'
+                    : null
+                : null);
       },
     );
   }
@@ -224,68 +187,41 @@ class _PasswordInputState extends State<_PasswordInput> {
     return BlocBuilder<LoginBloc, LoginState>(
       buildWhen: (previous, current) => previous.password != current.password,
       builder: (context, state) {
-        return Container(
-          padding: const EdgeInsets.all(4),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-            color: gainsborough,
-          ),
-          child: TextField(
-            key: const Key('loginForm_passwordInput_textField'),
+        return TextFieldForm(
             keyboardType: TextInputType.visiblePassword,
             onChanged: (password) =>
                 context.read<LoginBloc>().add(LoginPasswordChanged(password)),
+            iconData: Icons.lock_outline,
             obscureText: isPasswordInvisible,
-            obscuringCharacter: '*',
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              label: const Row(
-                children: [
-                  Icon(
-                    Icons.lock_outline,
-                    size: 16,
-                    color: dullGray,
-                  ),
-                  Text(
-                    'Password',
-                    style: TextStyle(color: dullGray, fontSize: 16),
-                  )
-                ],
-              ),
-              errorText: state.password.displayError != null
-                  ? state.password.displayError == PasswordValidationError.short
-                      ? 'Password is too short'
-                      : state.password.displayError ==
-                              PasswordValidationError.long
-                          ? 'Password is too long'
-                          : state.password.displayError ==
-                                  PasswordValidationError.unavailableSymbols
-                              ? 'Password contains not allowed symbols'
-                              : null
-                  : null,
-              suffixIcon: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      isPasswordInvisible = !isPasswordInvisible;
-                    });
-                  },
-                  icon: Icon(
-                    isPasswordInvisible
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    color: dullGray,
-                  ),
+            suffix: Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: IconButton(
+                onPressed: () {
+                  setState(() {
+                    isPasswordInvisible = !isPasswordInvisible;
+                  });
+                },
+                icon: Icon(
+                  isPasswordInvisible
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: dullGray,
+                  size: 20,
                 ),
               ),
             ),
-          ),
-        );
+            hint: 'Password',
+            error: state.password.displayError != null
+                ? state.password.displayError == PasswordValidationError.short
+                    ? 'Password is too short'
+                    : state.password.displayError ==
+                            PasswordValidationError.long
+                        ? 'Password is too long'
+                        : state.password.displayError ==
+                                PasswordValidationError.unavailableSymbols
+                            ? 'Password contains not allowed symbols'
+                            : null
+                : null);
       },
     );
   }
@@ -297,46 +233,19 @@ class _EmailInput extends StatelessWidget {
     return BlocBuilder<LoginBloc, LoginState>(
       buildWhen: (previous, current) => previous.email != current.email,
       builder: (context, state) {
-        return Container(
-          padding: const EdgeInsets.all(4),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-            color: gainsborough,
-          ),
-          child: TextField(
-            keyboardType: TextInputType.emailAddress,
+        return TextFieldForm(
             onChanged: (email) =>
                 context.read<LoginBloc>().add(LoginEmailChanged(email)),
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: InputDecoration(
-                border: InputBorder.none,
-                label: const Row(
-                  children: [
-                    Icon(
-                      Icons.email_outlined,
-                      size: 16,
-                      color: dullGray,
-                    ),
-                    Padding(padding: EdgeInsets.all(4)),
-                    Text(
-                      'Email',
-                      style: TextStyle(color: dullGray, fontSize: 16),
-                    )
-                  ],
-                ),
-                errorText: state.email.displayError != null
-                    ? state.email.displayError == EmailValidationError.empty
-                        ? 'Email is too short'
-                        : state.email.displayError ==
-                                EmailValidationError.incorrect
-                            ? 'The format of the email address is incorrect'
-                            : null
-                    : null),
-          ),
-        );
+            iconData: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            hint: 'Email',
+            error: state.email.displayError != null
+                ? state.email.displayError == EmailValidationError.empty
+                    ? 'Email is too short'
+                    : state.email.displayError == EmailValidationError.incorrect
+                        ? 'The format of the email address is incorrect'
+                        : null
+                : null);
       },
     );
   }
@@ -374,7 +283,7 @@ class _LoginButton extends StatelessWidget {
                         isSignInValid || isSignUpValid ? white : gainsborough),
                     shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                        borderRadius: BorderRadius.circular(22),
                       ),
                     ),
                   ),
@@ -386,7 +295,8 @@ class _LoginButton extends StatelessWidget {
                               );
                         }
                       : null,
-                  child: Text(isSignup ? 'Create account' : 'Login'),
+                  child: Text(isSignup ? 'Create account' : 'Login',
+                      style: const TextStyle(fontSize: 16)),
                 ),
               );
       },
