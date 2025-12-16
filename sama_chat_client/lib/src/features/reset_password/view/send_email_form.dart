@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import '../../../shared/ui/view/text_button_forms.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../bloc/timer_bloc/timer_bloc.dart';
 import '../models/models.dart';
@@ -37,7 +38,9 @@ class SendEmailForm extends StatelessWidget {
           const Padding(padding: EdgeInsets.all(8)),
           _EmailInput(),
           const Padding(padding: EdgeInsets.all(8)),
-          _ContinueButton()
+          const Spacer(),
+          _ContinueButton(),
+          const Padding(padding: EdgeInsets.all(16))
         ],
       ),
     );
@@ -50,46 +53,19 @@ class _EmailInput extends StatelessWidget {
     return BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
       buildWhen: (previous, current) => previous.email != current.email,
       builder: (context, state) {
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(
-              Radius.circular(12),
-            ),
-            color: gainsborough,
-          ),
-          child: TextField(
-            keyboardType: TextInputType.emailAddress,
+        return TextFieldForm(
             onChanged: (email) =>
                 context.read<ResetPasswordBloc>().add(EmailChanged(email)),
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: InputDecoration(
-                border: InputBorder.none,
-                label: const Row(
-                  children: [
-                    Icon(
-                      Icons.email_outlined,
-                      size: 16,
-                      color: dullGray,
-                    ),
-                    Padding(padding: EdgeInsets.all(4)),
-                    Text(
-                      'Email',
-                      style: TextStyle(color: dullGray, fontSize: 16),
-                    )
-                  ],
-                ),
-                errorText: state.email.displayError != null
-                    ? state.email.displayError == EmailValidationError.empty
-                        ? 'Email is too short'
-                        : state.email.displayError ==
-                                EmailValidationError.incorrect
-                            ? 'The format of the email address is incorrect'
-                            : null
-                    : null),
-          ),
-        );
+            iconData: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            hint: 'Email',
+            error: state.email.displayError != null
+                ? state.email.displayError == EmailValidationError.empty
+                    ? 'Email is too short'
+                    : state.email.displayError == EmailValidationError.incorrect
+                        ? 'The format of the email address is incorrect'
+                        : null
+                : null);
       },
     );
   }
@@ -107,53 +83,37 @@ class _ContinueButton extends StatelessWidget {
       builder: (context, state) {
         return state.status.isInProgress
             ? const CircularProgressIndicator()
-            : Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(12),
-                  ),
-                ),
-                height: 46,
-                width: double.infinity,
-                child: FilledButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                        state.isEmailValid ? slateBlue : whiteAluminum),
-                    foregroundColor: WidgetStatePropertyAll(
-                        state.isEmailValid ? white : gainsborough),
-                    shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                    ),
-                  ),
-                  onPressed: state.isEmailValid
-                      ? () {
-                          hideKeyboard();
-                          var time = context.read<TimerBloc>().state.duration;
-                          if (time != 0) {
-                            ScaffoldMessenger.of(context)
-                              ..hideCurrentSnackBar()
-                              ..showSnackBar(
-                                SnackBar(
-                                  content: ValueListenableBuilder<String>(
-                                    valueListenable: snackBarText,
-                                    builder: (context, currentText, child) {
-                                      return Text(currentText,
-                                          textAlign: TextAlign.center);
-                                    },
-                                  ),
+            : ButtonForm(
+                onPressed: state.isEmailValid
+                    ? () {
+                        hideKeyboard();
+                        var time = context.read<TimerBloc>().state.duration;
+                        if (time != 0) {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              SnackBar(
+                                content: ValueListenableBuilder<String>(
+                                  valueListenable: snackBarText,
+                                  builder: (context, currentText, child) {
+                                    return Text(currentText,
+                                        textAlign: TextAlign.center);
+                                  },
                                 ),
-                              );
-                          } else {
-                            context
-                                .read<ResetPasswordBloc>()
-                                .add(const EmailSubmitted());
-                          }
+                              ),
+                            );
+                        } else {
+                          context
+                              .read<ResetPasswordBloc>()
+                              .add(const EmailSubmitted());
                         }
-                      : null,
-                  child: const Text('Continue'),
-                ));
+                      }
+                    : null,
+                backgroundColor: WidgetStatePropertyAll(
+                    state.isEmailValid ? slateBlue : whiteAluminum),
+                foregroundColor: WidgetStatePropertyAll(
+                    state.isEmailValid ? white : gainsborough),
+                hint: 'Continue');
       },
     ));
   }

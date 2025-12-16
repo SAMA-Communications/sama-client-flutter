@@ -54,16 +54,24 @@ class ResetPasswordPage extends StatelessWidget {
               context.read<ResetPasswordBloc>().add(const OnBackCurrentForm());
             }
           }),
-          body: Container(
-            alignment: Alignment.topCenter,
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: SingleChildScrollView(
-                child: forms[state.currentForm],
+          body: LayoutBuilder(builder: (context, constraint) {
+            return Container(
+              alignment: Alignment.topCenter,
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraint.maxHeight),
+                    child: IntrinsicHeight(
+                      child: forms[state.currentForm],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          }),
           bottomNavigationBar: SafeArea(
               child: SizedBox(
             height: 18,

@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
-import '../../../shared/ui/view/text_field_form.dart';
+import '../../../shared/ui/view/text_button_forms.dart';
 import '../bloc/login_bloc.dart';
 import '../models/models.dart';
 
@@ -193,21 +193,18 @@ class _PasswordInputState extends State<_PasswordInput> {
                 context.read<LoginBloc>().add(LoginPasswordChanged(password)),
             iconData: Icons.lock_outline,
             obscureText: isPasswordInvisible,
-            suffix: Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: IconButton(
-                onPressed: () {
-                  setState(() {
-                    isPasswordInvisible = !isPasswordInvisible;
-                  });
-                },
-                icon: Icon(
-                  isPasswordInvisible
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: dullGray,
-                  size: 20,
-                ),
+            suffix: IconButton(
+              onPressed: () {
+                setState(() {
+                  isPasswordInvisible = !isPasswordInvisible;
+                });
+              },
+              icon: Icon(
+                isPasswordInvisible
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: dullGray,
+                size: 22,
               ),
             ),
             hint: 'Password',
@@ -265,40 +262,19 @@ class _LoginButton extends StatelessWidget {
         var isSignUpValid = state.isValidSignup && isSignup;
         return state.status.isInProgress
             ? const CircularProgressIndicator()
-            : Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(12),
-                  ),
-                ),
-                height: 46,
-                width: double.infinity,
-                child: FilledButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                        isSignInValid || isSignUpValid
-                            ? slateBlue
-                            : whiteAluminum),
-                    foregroundColor: WidgetStatePropertyAll(
-                        isSignInValid || isSignUpValid ? white : gainsborough),
-                    shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                    ),
-                  ),
-                  key: const Key('loginForm_continue_raisedButton'),
-                  onPressed: isSignInValid || isSignUpValid
-                      ? () {
-                          context.read<LoginBloc>().add(
-                                LoginSubmitted(isSignup, isSighupWithLogin),
-                              );
-                        }
-                      : null,
-                  child: Text(isSignup ? 'Create account' : 'Login',
-                      style: const TextStyle(fontSize: 16)),
-                ),
-              );
+            : ButtonForm(
+                onPressed: isSignInValid || isSignUpValid
+                    ? () {
+                        context.read<LoginBloc>().add(
+                              LoginSubmitted(isSignup, isSighupWithLogin),
+                            );
+                      }
+                    : null,
+                backgroundColor: WidgetStatePropertyAll(
+                    isSignInValid || isSignUpValid ? slateBlue : whiteAluminum),
+                foregroundColor: WidgetStatePropertyAll(
+                    isSignInValid || isSignUpValid ? white : gainsborough),
+                hint: isSignup ? 'Create account' : 'Login');
       },
     );
   }

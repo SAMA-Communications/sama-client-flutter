@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import '../../../shared/ui/colors.dart';
 
+import '../../../shared/ui/view/text_button_forms.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../bloc/reset_password_bloc.dart';
@@ -38,6 +39,7 @@ class SendOtpForm extends StatelessWidget {
           const Padding(padding: EdgeInsets.all(8)),
           const OtpInput(),
           const Padding(padding: EdgeInsets.all(8)),
+          const Spacer(),
           _ContinueButton(),
           const Padding(padding: EdgeInsets.all(8)),
           const Text('Didn\'t receive the email?'),
@@ -67,6 +69,7 @@ class SendOtpForm extends StatelessWidget {
               ],
             ),
           ),
+          const Padding(padding: EdgeInsets.all(16))
         ],
       );
     }));
@@ -80,37 +83,20 @@ class _ContinueButton extends StatelessWidget {
       builder: (context, state) {
         return state.status.isInProgress
             ? const CircularProgressIndicator()
-            : Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(12),
-                  ),
-                ),
-                height: 46,
-                width: double.infinity,
-                child: FilledButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                        state.isOTPValid ? slateBlue : whiteAluminum),
-                    foregroundColor: WidgetStatePropertyAll(
-                        state.isOTPValid ? white : gainsborough),
-                    shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                    ),
-                  ),
-                  onPressed: state.isOTPValid
-                      ? () {
-                          hideKeyboard();
-                          context
-                              .read<ResetPasswordBloc>()
-                              .add(const OtpSubmitted());
-                        }
-                      : null,
-                  child: const Text('Continue'),
-                ),
-              );
+            : ButtonForm(
+                onPressed: state.isOTPValid
+                    ? () {
+                        hideKeyboard();
+                        context
+                            .read<ResetPasswordBloc>()
+                            .add(const OtpSubmitted());
+                      }
+                    : null,
+                backgroundColor: WidgetStatePropertyAll(
+                    state.isOTPValid ? slateBlue : whiteAluminum),
+                foregroundColor: WidgetStatePropertyAll(
+                    state.isOTPValid ? white : gainsborough),
+                hint: 'Continue');
       },
     );
   }
@@ -160,43 +146,50 @@ class OtpInputState extends State<OtpInput> {
   }
 
   Widget digitField(int index) {
-    return SizedBox(
-      width: 45,
-      height: 45,
-      child: TextField(
-        style: const TextStyle(fontSize: 22),
-        controller: _controllers[index],
-        focusNode: _focusNodes[index],
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        autofocus: true,
-        onChanged: (value) {
-          if (value.characters.length == OtpInput.otpSize) {
-            for (final (index, controller) in _controllers.indexed) {
-              controller.text = value.characters.elementAt(index);
-              if (index < 5) {
-                FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+    return Material(
+      elevation: 8.0,
+      borderRadius: BorderRadius.circular(5.0),
+      shadowColor: black.withValues(alpha: 0.6),
+      child: SizedBox(
+        width: 45,
+        height: 45,
+        child: TextField(
+          style: const TextStyle(fontSize: 22),
+          controller: _controllers[index],
+          focusNode: _focusNodes[index],
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          autofocus: true,
+          onChanged: (value) {
+            if (value.characters.length == OtpInput.otpSize) {
+              for (final (index, controller) in _controllers.indexed) {
+                controller.text = value.characters.elementAt(index);
+                if (index < 5) {
+                  FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+                }
+                context
+                    .read<ResetPasswordBloc>()
+                    .add(OtpChanged(index, value.characters.elementAt(index)));
               }
-              context
-                  .read<ResetPasswordBloc>()
-                  .add(OtpChanged(index, value.characters.elementAt(index)));
+              return;
             }
-            return;
-          }
 
-          if (value.isNotEmpty && index < 5) {
-            FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
-          } else if (value.isEmpty && index > 0) {
-            FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
-          }
-          context.read<ResetPasswordBloc>().add(OtpChanged(index, value));
-        },
-        decoration: const InputDecoration(
-            counterText: '',
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.only(
-              bottom: 10,
-            )),
+            if (value.isNotEmpty && index < 5) {
+              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+            } else if (value.isEmpty && index > 0) {
+              FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
+            }
+            context.read<ResetPasswordBloc>().add(OtpChanged(index, value));
+          },
+          decoration: const InputDecoration(
+              counterText: '',
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: EdgeInsets.only(
+                bottom: 10,
+              )),
+        ),
       ),
     );
   }
