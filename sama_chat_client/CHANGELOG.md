@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.15.0
+
+### Features
+- Split project into two modules
+- Implemented share to image feature
+- Implemented take photo to send attachment
+
+### Improvements
+- Minor bug fixes and improvements
+
 ## 0.14.0
 
 ### Features
