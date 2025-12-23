@@ -14,25 +14,26 @@ class AvatarForm extends StatelessWidget {
     return Container(
         decoration: BoxDecoration(
           color: black,
-          borderRadius: BorderRadius.circular(5.0),
+          shape: BoxShape.circle,
+          border: Border.all(color: white, width: 2),
         ),
-        padding: const EdgeInsets.all(4.0),
         height: 85.0,
         width: 85.0,
         child: Center(child: () {
           if (avatar == null || avatar!.isEmpty) {
             return _defaultIcon();
           } else {
-            return Image.network(
+            return ClipOval(
+                child: Image.network(
               avatar!,
-              height: 75.0,
-              width: 75.0,
+              height: 85.0,
+              width: 85.0,
               fit: BoxFit.cover,
               errorBuilder: (BuildContext context, Object exception,
                   StackTrace? stackTrace) {
                 return _defaultIcon();
               },
-            );
+            ));
           }
         }()));
   }
