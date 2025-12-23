@@ -16,6 +16,14 @@ class AvatarForm extends StatelessWidget {
           color: black,
           shape: BoxShape.circle,
           border: Border.all(color: white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: black.withValues(alpha: 0.5),
+                spreadRadius: 3,
+                blurRadius: 7,
+                offset: const Offset(0, 3), // Controls the shadow's position
+              ),
+            ],
         ),
         height: 85.0,
         width: 85.0,
@@ -91,19 +99,19 @@ class UserPhoneForm extends StatelessWidget {
     return Ink(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: lightWhite,
+          color: white,
           border: Border.all(
             color: lightWhite,
           ),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(Icons.local_phone_outlined, color: dullGray, size: 25),
+                Icon(Icons.local_phone_outlined, color: dullGray, size: 26),
                 Text(
                   ' Mobile phone',
                   style: TextStyle(fontWeight: FontWeight.w300),

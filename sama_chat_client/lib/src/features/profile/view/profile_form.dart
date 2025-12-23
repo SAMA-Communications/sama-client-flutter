@@ -185,7 +185,7 @@ class _UsernameForm extends StatelessWidget {
 }
 
 class _PhoneForm extends StatelessWidget {
-  const _PhoneForm({super.key});
+  const _PhoneForm();
 
   @override
   Widget build(BuildContext context) {
