@@ -104,8 +104,8 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: IconButton(
             onPressed: () => _openSearch(context),
             icon: const Icon(
-              Icons.add_circle_outline,
-              color: white,
+              Icons.edit_note_outlined,
+              color: lightWhite,
               size: 32,
             ),
           ),

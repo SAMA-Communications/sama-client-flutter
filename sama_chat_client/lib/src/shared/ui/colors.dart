@@ -11,6 +11,7 @@ const Color dullGray = Color(0xFF6D6D6D);
 const Color signalBlack = Color(0xFF2A2A2A);
 const Color blackBlue = Color(0xFF1B1B1D);
 const Color black = Color(0xFF000000);
+const Color paleMallow = Color(0xFFE6E7F8);
 const Color lightMallow = Color(0xFFDBDCFC);
 const Color slateBlue = Color(0xFF7678E5);
 const Color cyan = Color(0xFF00FFFF);

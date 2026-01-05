@@ -44,19 +44,18 @@ class AvatarNameTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    return IntrinsicWidth(
+        child: ListTile(
       titleAlignment: ListTileTitleAlignment.top,
-      title: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: _UserAvatar(),
-        ),
+      title: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: _UserAvatar(),
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(bottom: 4),
         child: _UserFullName(),
       ),
-    );
+    ));
   }
 }
 
@@ -72,20 +71,32 @@ class ProfileCard extends StatelessWidget {
         child: Card(
           child: Padding(
             padding: EdgeInsets.all(15),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Stack(
               children: [
-                ConnectionChecker(child: AvatarNameTile()),
-                ConnectionChecker(child: _UsernameForm()),
-                SizedBox(height: columnItemMargin),
-                ConnectionChecker(child: _PhoneForm()),
-                SizedBox(height: columnItemMargin),
-                ConnectionChecker(child: _EmailForm()),
-                SizedBox(height: columnItemMargin),
-                ConnectionChecker(child: _AccountForm()),
-                Expanded(
-                    child: Align(
-                        alignment: Alignment.bottomRight, child: _LogoutForm()))
+                Card(
+                  color: paleMallow,
+                  margin: EdgeInsets.only(top: 60),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 100, left: 4, right: 4),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ConnectionChecker(child: _UsernameForm()),
+                        SizedBox(height: columnItemMargin),
+                        ConnectionChecker(child: _PhoneForm()),
+                        SizedBox(height: columnItemMargin),
+                        ConnectionChecker(child: _EmailForm()),
+                        SizedBox(height: columnItemMargin),
+                        ConnectionChecker(child: _AccountForm()),
+                      ],
+                    ),
+                  ),
+                ),
+                Align(alignment: Alignment.bottomRight, child: _LogoutForm()),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConnectionChecker(child: AvatarNameTile()),
+                ),
               ],
             ),
           ),
@@ -122,50 +133,48 @@ class _UserFullName extends StatelessWidget {
             previous.userLastname != current.userLastname &&
                 current.userLastname.isPure,
         builder: (context, state) {
-          return Align(
-              alignment: Alignment.center,
-              child: TextButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (_) {
-                        return BlocProvider.value(
-                          value: BlocProvider.of<ProfileBloc>(context),
-                          child: const NameDialogInput(),
-                        );
-                      });
-                },
-                style: TextButton.styleFrom(
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    alignment: Alignment.center),
-                child: Column(children: [
-                  Text(
-                    state.userFirstname.value.isEmpty
-                        ? "First name"
-                        : state.userFirstname.value,
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: state.userFirstname.value.isEmpty
-                            ? FontWeight.w200
-                            : FontWeight.bold,
-                        color: signalBlack),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    state.userLastname.value.isEmpty
-                        ? "Last name"
-                        : state.userLastname.value,
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: signalBlack,
-                        fontWeight: state.userLastname.value.isEmpty
-                            ? FontWeight.w200
-                            : FontWeight.normal),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ]),
-              ));
+          return TextButton(
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (_) {
+                    return BlocProvider.value(
+                      value: BlocProvider.of<ProfileBloc>(context),
+                      child: const NameDialogInput(),
+                    );
+                  });
+            },
+            style: TextButton.styleFrom(
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                alignment: Alignment.center),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(
+                state.userFirstname.value.isEmpty
+                    ? "First name"
+                    : state.userFirstname.value,
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: state.userFirstname.value.isEmpty
+                        ? FontWeight.w200
+                        : FontWeight.bold,
+                    color: signalBlack),
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                state.userLastname.value.isEmpty
+                    ? "Last name"
+                    : state.userLastname.value,
+                style: TextStyle(
+                    fontSize: 18,
+                    color: signalBlack,
+                    fontWeight: state.userLastname.value.isEmpty
+                        ? FontWeight.w200
+                        : FontWeight.normal),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ]),
+          );
         });
   }
 }
@@ -325,15 +334,13 @@ class _LogoutForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton.icon(
+    return ElevatedButton.icon(
       onPressed: () {
         context.read<AuthenticationBloc>().add(AuthenticationLogoutRequested());
       },
       icon: const Icon(Icons.exit_to_app_outlined, color: dullGray, size: 25),
       style: TextButton.styleFrom(
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          alignment: Alignment.centerLeft),
+          backgroundColor: paleMallow, alignment: Alignment.centerLeft),
       label: const Text(
         'Logout',
         style: TextStyle(fontWeight: FontWeight.w300),
@@ -451,7 +458,7 @@ class InfoDialogInput extends StatelessWidget {
           return AlertDialog(
               title: const Text('Edit personal info'),
               actionsPadding: const EdgeInsets.only(bottom: 8),
-              contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              contentPadding: const EdgeInsets.fromLTRB(26, 16, 16, 8),
               content: Column(mainAxisSize: MainAxisSize.min, children: [
                 Container(
                   padding: const EdgeInsets.all(8),
