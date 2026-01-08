@@ -103,7 +103,7 @@ class UserPhoneForm extends StatelessWidget {
           border: Border.all(
             color: lightWhite,
           ),
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,7 +146,7 @@ class UserEmailForm extends StatelessWidget {
           border: Border.all(
             color: lightWhite,
           ),
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
