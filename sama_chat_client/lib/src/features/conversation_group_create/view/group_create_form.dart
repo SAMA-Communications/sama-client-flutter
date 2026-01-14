@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:sama_sdk/api/settings.dart';
 
 import '../../../db/models/user_model.dart';
 import '../../../features/conversation_create/bloc/conversation_create_event.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/participants_forms.dart';
+import '../../../shared/ui/view/text_button_forms.dart';
 import '../../../shared/utils/api_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
@@ -83,19 +85,23 @@ class GroupCreateFormState extends State<GroupCreateForm> {
           return previous.participants != current.participants;
         }, builder: (context, state) {
           return Visibility(
-            visible: !keyboardIsOpenCtx(context),
-            child: Visibility(
-              visible: state.participants.isValid,
-              child: FloatingActionButton(
-                backgroundColor: slateBlue,
-                tooltip: 'Next',
-                onPressed: () {
-                  _showGroupDetails(context);
-                },
-                child: const Icon(Icons.arrow_forward, color: white, size: 28),
-              ),
-            ),
-          );
+              visible: !keyboardIsOpenCtx(context),
+              child: Visibility(
+                visible: state.participants.isValid,
+                child: IntrinsicWidth(
+                  child: ButtonForm(
+                      onPressed: () {
+                        _showGroupDetails(context);
+                      },
+                      backgroundColor: WidgetStatePropertyAll(
+                          state.participants.isValid
+                              ? slateBlue
+                              : whiteAluminum),
+                      foregroundColor: WidgetStatePropertyAll(
+                          state.participants.isValid ? white : gainsborough),
+                      hint: 'Next'),
+                ),
+              ));
         }));
   }
 }
@@ -119,16 +125,16 @@ void _showGroupDetails(BuildContext context) {
                 value: BlocProvider.of<GroupBloc>(context),
                 child: _GroupDetailsForm()),
             floatingActionButton: Visibility(
-              visible: !keyboardIsOpenCtx(context),
-              child: FloatingActionButton(
-                backgroundColor: slateBlue,
-                tooltip: 'Create chat',
-                onPressed: () {
-                  context.read<GroupBloc>().add(GroupSubmitted());
-                },
-                child: const Icon(Icons.check, color: white, size: 28),
-              ),
-            ),
+                visible: !keyboardIsOpenCtx(context),
+                child: IntrinsicWidth(
+                  child: ButtonForm(
+                      onPressed: () {
+                        context.read<GroupBloc>().add(GroupSubmitted());
+                      },
+                      backgroundColor: const WidgetStatePropertyAll(slateBlue),
+                      foregroundColor: const WidgetStatePropertyAll(white),
+                      hint: 'Create'),
+                )),
           )));
 }
 
@@ -170,7 +176,7 @@ class _GroupDetailsForm extends StatelessWidget {
             padding: const EdgeInsets.only(top: 24.0),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('Participants ${users.length}/$maxParticipantsCount',
+              child: Text('Participants ${users.length + 1}/$maxParticipants',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 18)),
             ),
@@ -189,14 +195,13 @@ class _GroupAvatar extends StatelessWidget {
           return GestureDetector(
               onTap: () => context.read<GroupBloc>().add(GroupAvatarPicked()),
               child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: black,
-                    borderRadius: BorderRadius.circular(5.0),
+                    shape: BoxShape.circle,
                   ),
-                  padding: const EdgeInsets.all(4.0),
                   height: 60.0,
                   width: 60.0,
-                  child: Center(child: () {
+                  child: Center(child: ClipOval(child: () {
                     if (state.avatar.value == null) {
                       return const Icon(
                         Icons.image_outlined,
@@ -212,7 +217,7 @@ class _GroupAvatar extends StatelessWidget {
                         fit: BoxFit.cover,
                       );
                     }
-                  }())));
+                  }()))));
         });
   }
 }
@@ -223,43 +228,16 @@ class _GroupNameInput extends StatelessWidget {
     return BlocBuilder<GroupBloc, GroupState>(
       buildWhen: (previous, current) => previous.groupname != current.groupname,
       builder: (context, state) {
-        return Container(
-          height: 60.0,
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-            color: gainsborough,
-          ),
-          child: TextField(
-            key: const Key('groupCreateForm_groupnameInput_textField'),
-            keyboardType: TextInputType.text,
+        return TextFieldForm(
             onChanged: (groupname) =>
                 context.read<GroupBloc>().add(GroupnameChanged(groupname)),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.only(bottom: 4),
-              label: const Row(
-                children: [
-                  Icon(
-                    Icons.group,
-                    size: 16,
-                    color: dullGray,
-                  ),
-                  Text(
-                    'Groupname',
-                    style: TextStyle(color: dullGray, fontSize: 16),
-                  )
-                ],
-              ),
-              errorText: state.groupname.displayError != null
-                  ? state.groupname.displayError ==
-                          GroupnameValidationError.short
-                      ? 'Group name is too short'
-                      : null
-                  : null,
-            ),
-          ),
-        );
+            iconData: Icons.group,
+            hint: 'Groupname',
+            error: state.groupname.displayError != null
+                ? state.groupname.displayError == GroupnameValidationError.short
+                    ? 'Group name is too short'
+                    : null
+                : null);
       },
     );
   }
