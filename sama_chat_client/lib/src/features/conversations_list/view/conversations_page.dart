@@ -46,22 +46,7 @@ class HomePage extends StatelessWidget {
               }
             },
             child: const ConversationsList(),
-          ),
-          floatingActionButton: state.status == SharingIntentStatus.processing
-              ? null
-              : ConnectionChecker(
-                  child: FloatingActionButton(
-                    // fix error https://github.com/flutter/flutter/issues/115358
-                    heroTag: null,
-                    child: const Padding(
-                      padding: EdgeInsets.only(top: 4.0),
-                      child: Icon(Icons.add_comment_outlined, size: 32.0),
-                    ),
-                    onPressed: () {
-                      context.push(groupCreateScreenPath);
-                    },
-                  ),
-                ));
+          ));
     });
   }
 }
@@ -104,8 +89,8 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: Align(
           alignment: Alignment.centerRight,
           child: IconButton(
-            icon:
-                const Icon(Icons.person_outline, color: lightWhite, size: 32.0),
+            icon: const Icon(Icons.account_circle_outlined,
+                color: lightWhite, size: 32.0),
             tooltip: 'Profile',
             onPressed: () {
               context.push(profilePath);
@@ -119,8 +104,8 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: IconButton(
             onPressed: () => _openSearch(context),
             icon: const Icon(
-              Icons.search,
-              color: white,
+              Icons.edit_note_outlined,
+              color: lightWhite,
               size: 32,
             ),
           ),
@@ -130,7 +115,8 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   _openSearch(BuildContext context) {
-    context.push(globalSearchPath);
+    context.push(groupCreateScreenPath);
+    // context.push(globalSearchPath);
   }
 
   @override

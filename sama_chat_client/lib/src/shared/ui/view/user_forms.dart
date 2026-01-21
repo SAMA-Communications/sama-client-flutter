@@ -14,25 +14,34 @@ class AvatarForm extends StatelessWidget {
     return Container(
         decoration: BoxDecoration(
           color: black,
-          borderRadius: BorderRadius.circular(5.0),
+          shape: BoxShape.circle,
+          border: Border.all(color: white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: black.withValues(alpha: 0.5),
+                spreadRadius: 3,
+                blurRadius: 7,
+                offset: const Offset(0, 3), // Controls the shadow's position
+              ),
+            ],
         ),
-        padding: const EdgeInsets.all(4.0),
         height: 85.0,
         width: 85.0,
         child: Center(child: () {
           if (avatar == null || avatar!.isEmpty) {
             return _defaultIcon();
           } else {
-            return Image.network(
+            return ClipOval(
+                child: Image.network(
               avatar!,
-              height: 75.0,
-              width: 75.0,
+              height: 85.0,
+              width: 85.0,
               fit: BoxFit.cover,
               errorBuilder: (BuildContext context, Object exception,
                   StackTrace? stackTrace) {
                 return _defaultIcon();
               },
-            );
+            ));
           }
         }()));
   }
@@ -90,19 +99,19 @@ class UserPhoneForm extends StatelessWidget {
     return Ink(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: lightWhite,
+          color: white,
           border: Border.all(
             color: lightWhite,
           ),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(Icons.local_phone_outlined, color: dullGray, size: 25),
+                Icon(Icons.local_phone_outlined, color: dullGray, size: 26),
                 Text(
                   ' Mobile phone',
                   style: TextStyle(fontWeight: FontWeight.w300),
@@ -137,7 +146,7 @@ class UserEmailForm extends StatelessWidget {
           border: Border.all(
             color: lightWhite,
           ),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
