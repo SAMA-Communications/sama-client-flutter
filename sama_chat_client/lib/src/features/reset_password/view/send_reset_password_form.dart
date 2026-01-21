@@ -35,7 +35,7 @@ class SendResetPasswordForm extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Set new password'),
+          const Text('Set new password', style: TextStyle(fontSize: 20)),
           const Padding(padding: EdgeInsets.all(8)),
           _PasswordInput(),
           const Padding(padding: EdgeInsets.all(8)),

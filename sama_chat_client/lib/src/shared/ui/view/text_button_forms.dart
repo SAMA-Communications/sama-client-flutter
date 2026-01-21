@@ -40,9 +40,6 @@ class TextFieldForm extends StatelessWidget {
           onChanged: (username) => onChanged(username),
           decoration: InputDecoration(
             border: InputBorder.none,
-            floatingLabelBehavior: error != null
-                ? FloatingLabelBehavior.never
-                : FloatingLabelBehavior.auto,
             contentPadding: const EdgeInsets.only(left: 12.0),
             isDense: true,
             label: Row(
@@ -53,13 +50,15 @@ class TextFieldForm extends StatelessWidget {
                   size: 26,
                   color: dullGray,
                 ),
-                Text(
-                  hint,
-                  style: const TextStyle(color: dullGray, fontSize: 16),
-                )
+                Expanded(
+                    child: Text(
+                  error ?? hint,
+                  style: TextStyle(
+                      color: error != null ? red : dullGray, fontSize: 16),
+                  overflow: TextOverflow.ellipsis,
+                ))
               ],
             ),
-            errorText: error,
             suffixIcon: Padding(
               padding: const EdgeInsets.only(right: 8),
               child: suffix ?? const SizedBox(),
