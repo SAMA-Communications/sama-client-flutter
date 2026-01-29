@@ -532,7 +532,7 @@ class InfoDialogInput extends StatelessWidget {
                       ),
                       errorText: state.userEmail.displayError ==
                               UserEmailValidationError.incorrect
-                          ? 'The format of the email address is incorrect.'
+                          ? 'The format of the email is incorrect.'
                           : null,
                     ),
                   ),

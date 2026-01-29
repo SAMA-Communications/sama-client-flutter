@@ -240,7 +240,7 @@ class _EmailInput extends StatelessWidget {
                 ? state.email.displayError == EmailValidationError.empty
                     ? 'Email is too short'
                     : state.email.displayError == EmailValidationError.incorrect
-                        ? 'The format of the email address is incorrect'
+                        ? 'The format of the email is incorrect'
                         : null
                 : null);
       },

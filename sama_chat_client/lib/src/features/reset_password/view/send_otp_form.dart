@@ -28,13 +28,13 @@ class SendOtpForm extends StatelessWidget {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Reset password'),
+          const Text('Reset password', style: TextStyle(fontSize: 20)),
           const Padding(padding: EdgeInsets.all(8)),
           Text(
               'We have sent a verification code to ${context.read<ResetPasswordBloc>().state.email.value}',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 14,
               )),
           const Padding(padding: EdgeInsets.all(8)),
           const OtpInput(),
@@ -127,10 +127,11 @@ class OtpInputState extends State<OtpInput> {
         ),
         const Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text(
-            "Enter the 6 digit OTP sent to your email",
-            textAlign: TextAlign.center,
-          ),
+          child: Text("Enter the 6 digit OTP sent to your email",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+              )),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),

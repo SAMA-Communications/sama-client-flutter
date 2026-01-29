@@ -28,12 +28,13 @@ class SendEmailForm extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Reset password'),
+          const Text('Reset password', style: TextStyle(fontSize: 20)),
           const Padding(padding: EdgeInsets.all(8)),
           const Text(
               'To reset your password, enter the email that you used to create your account',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 14,
               )),
           const Padding(padding: EdgeInsets.all(8)),
           _EmailInput(),
@@ -63,7 +64,7 @@ class _EmailInput extends StatelessWidget {
                 ? state.email.displayError == EmailValidationError.empty
                     ? 'Email is too short'
                     : state.email.displayError == EmailValidationError.incorrect
-                        ? 'The format of the email address is incorrect'
+                        ? 'The format of the email is incorrect'
                         : null
                 : null);
       },
