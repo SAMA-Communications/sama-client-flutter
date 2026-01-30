@@ -33,18 +33,20 @@ class ConversationCreateFormState extends State<ConversationCreateForm> {
                 Row(children: <Widget>[
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                      padding: const EdgeInsets.only(top: 20.0, bottom: 16.0),
                       child: TextButton.icon(
                         style: const ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(lightMallow),
+                          backgroundColor: WidgetStatePropertyAll(slateBlue),
                         ),
                         onPressed: () => context.push(groupCreateScreenPath),
                         icon: const Icon(Icons.group_outlined,
-                            color: dullGray, size: 25),
+                            color: lightWhite, size: 25),
                         label: const Text(
                           'Create group',
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w300),
+                              color: lightWhite,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
