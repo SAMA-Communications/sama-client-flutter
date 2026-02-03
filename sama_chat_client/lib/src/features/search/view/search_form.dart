@@ -20,16 +20,20 @@ class SearchForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: <Widget>[
-        const GlobalSearchBar(),
-        _SearchBody(),
+        GlobalSearchBar(),
+        SearchBody(),
       ],
     );
   }
 }
 
-class _SearchBody extends StatelessWidget {
+class SearchBody extends StatelessWidget {
+  const SearchBody({this.searchType = SearchType.both, super.key});
+
+  final SearchType searchType;
+
   @override
   Widget build(BuildContext context) {
     // final LoadingOverlay loadingOverlay = LoadingOverlay();
@@ -69,7 +73,7 @@ class _SearchBody extends StatelessWidget {
               ),
             SearchStateSuccess() => Expanded(
                 child: _SearchResults(
-                    users: state.users, conversations: state.conversations)),
+                    state.users, state.conversations, searchType)),
           };
         },
       ),
@@ -77,11 +81,18 @@ class _SearchBody extends StatelessWidget {
   }
 }
 
+enum SearchType {
+  users,
+  chats,
+  both,
+}
+
 class _SearchResults extends StatelessWidget {
-  const _SearchResults({required this.users, required this.conversations});
+  const _SearchResults(this.users, this.conversations, this.searchType);
 
   final List<UserModel> users;
   final List<ConversationModel> conversations;
+  final SearchType searchType;
 
   Widget _header(String title) {
     return Padding(
@@ -160,10 +171,16 @@ class _SearchResults extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.only(top: 10.0),
         children: <Widget>[
-          _header('Users'),
-          userList,
-          _header('Chats'),
-          conversationList,
+          if (searchType == SearchType.both ||
+              searchType == SearchType.users) ...[
+            if (searchType == SearchType.both) _header('Users'),
+            userList,
+          ],
+          if (searchType == SearchType.both ||
+              searchType == SearchType.chats) ...[
+            if (searchType == SearchType.both) _header('Chats'),
+            conversationList,
+          ],
         ],
       ),
     );

@@ -12,16 +12,14 @@ class AvatarGroupIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: black,
-          borderRadius: BorderRadius.circular(5.0),
+          shape: BoxShape.circle,
         ),
-        padding: const EdgeInsets.all(4.0),
         height: size.height,
         width: size.width,
         child: Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(5.0),
+          child: ClipOval(
             child: avatar?.imageUrl != null
                 ? Image.network(
                     avatar!.imageUrl!,

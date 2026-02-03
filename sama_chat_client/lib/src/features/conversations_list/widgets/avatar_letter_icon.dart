@@ -9,8 +9,7 @@ class AvatarLetterIcon extends StatelessWidget {
     this.lastName,
     super.key,
     this.size = const Size(55, 60),
-    this.borderRadius = 5.0,
-    this.padding = const EdgeInsets.all(4.0),
+    this.padding = EdgeInsets.zero,
     this.backgroundColor = black,
     this.textColor = dullGray,
     this.avatar,
@@ -21,7 +20,6 @@ class AvatarLetterIcon extends StatelessWidget {
   final String name;
   final String? lastName;
   final Size size;
-  final double borderRadius;
   final EdgeInsetsGeometry padding;
   final Color backgroundColor;
   final Color textColor;
@@ -41,14 +39,14 @@ class AvatarLetterIcon extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(borderRadius),
+        shape: BoxShape.circle,
+        // border: Border.all(color: whiteAluminum, width: 2),
       ),
-      padding: padding,
+      // padding: padding,
       height: size.height,
       width: size.width,
       child: Center(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(borderRadius),
+        child: ClipOval(
           child: avatar?.imageUrl != null
               ? Image.network(
                   avatar!.imageUrl!,

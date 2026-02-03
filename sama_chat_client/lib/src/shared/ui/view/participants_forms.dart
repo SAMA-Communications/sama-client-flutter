@@ -180,21 +180,23 @@ class ParticipantsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      childAspectRatio: 4 / 4,
-      //or 5 / 4 for crossAxisCount: 4
-      crossAxisCount: 5,
-      crossAxisSpacing: 8.0,
-      mainAxisSpacing: 8.0,
-      children: List.generate(users.length, (index) {
-        var user = users.elementAt(index);
-        return _ParticipantsListItem(
-            user: user,
-            removable: nonRemovableUsers?.contains(user) != true,
-            onRemoveParticipants: onRemoveParticipants);
-      }),
-    );
+    return SingleChildScrollView(
+        child: Padding(
+      padding: const EdgeInsets.all(0),
+      child: Align(
+          alignment: Alignment.topLeft,
+          child: Wrap(
+            spacing: 2,
+            runSpacing: 2,
+            children: List.generate(users.length, (index) {
+              var user = users.elementAt(index);
+              return _ParticipantsListItem(
+                  user: user,
+                  removable: nonRemovableUsers?.contains(user) != true,
+                  onRemoveParticipants: onRemoveParticipants);
+            }),
+          )),
+    ));
   }
 }
 
@@ -210,44 +212,56 @@ class _ParticipantsListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-            width: 40,
-            height: 40,
-            child: Stack(fit: StackFit.expand, children: [
-              AvatarLetterIcon(
-                name: getUserName(user),
-                padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 4.0),
-                size: const Size(50.0, 50.0),
-              ),
-              removable
-                  ? Positioned(
-                      top: -2,
-                      right: -2,
-                      child: InkWell(
-                          borderRadius: BorderRadius.circular(6.0),
-                          onTap: () {
-                            onRemoveParticipants(user);
-                          },
-                          child: const Icon(
-                            Icons.close,
-                            size: 20,
-                            color: gainsborough,
-                          )))
-                  : const SizedBox.shrink(),
-            ])),
-        Text(
-          getUserName(user),
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 10.0,
-            fontFamily: 'Roboto',
-            color: dullGray,
-            fontWeight: FontWeight.bold,
-          ),
+    return ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 150,
         ),
-      ],
-    );
+        child: Stack(fit: StackFit.loose, children: [
+          Card(
+              elevation: 4.0,
+              margin: const EdgeInsets.all(4.0),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10,
+                  children: [
+                    AvatarLetterIcon(
+                      name: getUserName(user),
+                      avatar: user.avatar,
+                      padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 4.0),
+                      size: const Size(25, 25),
+                    ),
+                    Flexible(
+                      child: Text(
+                        getUserName(user),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+          removable
+              ? Positioned(
+                  top: 2,
+                  right: 2,
+                  child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8.0),
+                        onTap: () {
+                          onRemoveParticipants(user);
+                        },
+                        child: const Icon(Icons.cancel_outlined,
+                            size: 18,
+                            color: semiBlack,
+                            fontWeight: FontWeight.w100),
+                      )))
+              : const SizedBox.shrink(),
+        ]));
   }
 }
