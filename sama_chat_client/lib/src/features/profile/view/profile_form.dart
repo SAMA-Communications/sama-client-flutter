@@ -308,13 +308,14 @@ class _AccountForm extends StatelessWidget {
                             content: const Text(
                                 'Are you sure you want to delete this user?',
                                 style: TextStyle(fontSize: 16)),
+                            actionsAlignment: MainAxisAlignment.spaceAround,
                             actions: <Widget>[
                               TextButton(
                                 child: const Text("Cancel"),
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
                               TextButton(
-                                child: const Text("Ok"),
+                                child: const Text("Confirm"),
                                 onPressed: () {
                                   context
                                       .read<AuthenticationBloc>()
@@ -661,6 +662,7 @@ class _ChangePasswordInput extends StatelessWidget {
 }
 
 List<Widget> _formActions(BuildContext context) {
+  final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
   return [
     TextButton(
       onPressed: () {
@@ -681,7 +683,9 @@ List<Widget> _formActions(BuildContext context) {
             ..showSnackBar(
               SnackBar(
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: keyboardHeightCtx(context)),
+                  margin: EdgeInsets.only(
+                      bottom: keyboardHeightCtx(context) -
+                          (Platform.isIOS ? bottomPadding : 0.0)),
                   content: const Text('Please make changes to the data.')),
             );
         }
