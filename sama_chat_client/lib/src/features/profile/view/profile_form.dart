@@ -48,7 +48,7 @@ class AvatarNameTile extends StatelessWidget {
         child: ListTile(
       titleAlignment: ListTileTitleAlignment.top,
       title: Padding(
-        padding: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.only(top: 4),
         child: _UserAvatar(),
       ),
       subtitle: Padding(
@@ -66,43 +66,55 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
-      child: const SizedBox(
-        width: double.infinity,
-        child: Card(
-          child: Padding(
-            padding: EdgeInsets.all(15),
-            child: Stack(
-              children: [
-                Card(
-                  color: paleMallow,
-                  margin: EdgeInsets.only(top: 60),
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 100, left: 4, right: 4),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ConnectionChecker(child: _UsernameForm()),
-                        SizedBox(height: columnItemMargin),
-                        ConnectionChecker(child: _PhoneForm()),
-                        SizedBox(height: columnItemMargin),
-                        ConnectionChecker(child: _EmailForm()),
-                        SizedBox(height: columnItemMargin),
-                        ConnectionChecker(child: _AccountForm()),
-                      ],
-                    ),
-                  ),
-                ),
-                Align(alignment: Alignment.bottomRight, child: _LogoutForm()),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: ConnectionChecker(child: AvatarNameTile()),
-                ),
-              ],
-            ),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Stack(
+            children: [
+              _UserData(),
+              const Align(
+                  alignment: Alignment.bottomRight, child: _LogoutForm()),
+            ],
           ),
         ),
       ),
     );
+  }
+}
+
+class _UserData extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+        alignment: Alignment(0, -0.5),
+        child: IntrinsicHeight(
+            child: Stack(
+          children: [
+            Card(
+              color: paleMallow,
+              margin: EdgeInsets.only(top: 40),
+              child: Padding(
+                padding: EdgeInsets.only(top: 100, left: 4, right: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ConnectionChecker(child: _UsernameForm()),
+                    SizedBox(height: columnItemMargin),
+                    ConnectionChecker(child: _PhoneForm()),
+                    SizedBox(height: columnItemMargin),
+                    ConnectionChecker(child: _EmailForm()),
+                    SizedBox(height: columnItemMargin),
+                    ConnectionChecker(child: _AccountForm()),
+                  ],
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment(0, -1.1),
+              child: ConnectionChecker(child: AvatarNameTile()),
+            ),
+          ],
+        )));
   }
 }
 
@@ -435,6 +447,7 @@ class NameDialogInput extends StatelessWidget {
                   ),
                 ),
               ]),
+              actionsAlignment: MainAxisAlignment.spaceAround,
               actions: _formActions(context));
         });
   }
@@ -493,7 +506,7 @@ class InfoDialogInput extends StatelessWidget {
                       ),
                       errorText: state.userPhone.displayError ==
                               UserPhoneValidationError.outOfRange
-                          ? 'The phone number should be 3 to 15 digits in length.'
+                          ? 'The phone range 3 to 15 digits.'
                           : null,
                     ),
                   ),
@@ -538,6 +551,7 @@ class InfoDialogInput extends StatelessWidget {
                   ),
                 ),
               ]),
+              actionsAlignment: MainAxisAlignment.spaceAround,
               actions: _formActions(context));
         });
   }
@@ -640,6 +654,7 @@ class _ChangePasswordInput extends StatelessWidget {
                   ),
                 ),
               ]),
+              actionsAlignment: MainAxisAlignment.spaceAround,
               actions: _formActions(context));
         });
   }

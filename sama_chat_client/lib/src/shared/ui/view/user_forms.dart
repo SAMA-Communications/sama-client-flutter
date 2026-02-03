@@ -16,14 +16,14 @@ class AvatarForm extends StatelessWidget {
           color: black,
           shape: BoxShape.circle,
           border: Border.all(color: white, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: black.withValues(alpha: 0.5),
-                spreadRadius: 3,
-                blurRadius: 7,
-                offset: const Offset(0, 3), // Controls the shadow's position
-              ),
-            ],
+          boxShadow: [
+            BoxShadow(
+              color: black.withValues(alpha: 0.5),
+              spreadRadius: 3,
+              blurRadius: 7,
+              offset: const Offset(0, 3), // Controls the shadow's position
+            ),
+          ],
         ),
         height: 85.0,
         width: 85.0,
@@ -77,11 +77,13 @@ class UsernameForm extends StatelessWidget {
                 ),
               ],
             ),
-            Text(
-              userLogin ?? "",
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.normal),
-            ),
+            Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  userLogin ?? "",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.normal),
+                )),
           ],
         ));
   }
@@ -118,13 +120,16 @@ class UserPhoneForm extends StatelessWidget {
                 ),
               ],
             ),
-            Text(
-              userPhone == null ? userPhoneStub : userPhone!,
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight:
-                      userPhone == null ? FontWeight.w200 : FontWeight.normal),
-            ),
+            Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  userPhone == null ? userPhoneStub : userPhone!,
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: userPhone == null
+                          ? FontWeight.w200
+                          : FontWeight.normal),
+                )),
           ],
         ));
   }
@@ -161,13 +166,16 @@ class UserEmailForm extends StatelessWidget {
                 ),
               ],
             ),
-            Text(
-              userEmail == null ? userEmailStub : userEmail!,
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight:
-                      userEmail == null ? FontWeight.w200 : FontWeight.normal),
-            ),
+            Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  userEmail == null ? userEmailStub : userEmail!,
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: userEmail == null
+                          ? FontWeight.w200
+                          : FontWeight.normal),
+                )),
           ],
         ));
   }
