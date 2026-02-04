@@ -108,18 +108,27 @@ class _ChatNameDescription extends StatelessWidget {
           return Align(
               alignment: Alignment.center,
               child: TextButton(
-                onPressed: isOwner
-                    ? () {
-                        showDialog(
-                            context: context,
-                            builder: (_) {
-                              return BlocProvider.value(
-                                value: BlocProvider.of<GroupInfoBloc>(context),
-                                child: const NameDialogInput(),
-                              );
-                            });
-                      }
-                    : null,
+                onPressed: () {
+                  isOwner
+                      ? showDialog(
+                          context: context,
+                          builder: (_) {
+                            return BlocProvider.value(
+                              value: BlocProvider.of<GroupInfoBloc>(context),
+                              child: const NameDialogInput(),
+                            );
+                          })
+                      : {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              const SnackBar(
+                                  behavior: SnackBarBehavior.fixed,
+                                  content:
+                                      Text('Only owner can make changes.')),
+                            )
+                        };
+                },
                 style: TextButton.styleFrom(
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -363,12 +372,13 @@ void _showSearchScreenDialog(BuildContext context) {
   showDialog(
       context: context,
       useSafeArea: false,
-      builder: (_) => Dialog.fullscreen(
-          child: BlocProvider<GlobalSearchBloc>(
+      builder: (_) =>
+          Dialog.fullscreen(child: StatefulBuilder(builder: (_, setState) {
+            return BlocProvider<GlobalSearchBloc>(
               create: (context) => GlobalSearchBloc(
-                    globalSearchRepository:
-                        RepositoryProvider.of<GlobalSearchRepository>(context),
-                  ),
+                globalSearchRepository:
+                    RepositoryProvider.of<GlobalSearchRepository>(context),
+              ),
               child: Scaffold(
                 appBar: const GlobalSearchBar(),
                 body: Container(
@@ -439,7 +449,9 @@ void _showSearchScreenDialog(BuildContext context) {
                     child: const Icon(Icons.check, color: white, size: 28),
                   ),
                 ),
-              ))));
+              ),
+            );
+          })));
 }
 
 void _showRemoveParticipantsDialog(BuildContext context) {

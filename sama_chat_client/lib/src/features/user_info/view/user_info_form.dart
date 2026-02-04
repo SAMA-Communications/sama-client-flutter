@@ -23,25 +23,6 @@ class UserInfoForm extends StatelessWidget {
   }
 }
 
-class AvatarTileFrom extends StatelessWidget {
-  final UserModel user;
-
-  const AvatarTileFrom({required this.user, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      titleAlignment: ListTileTitleAlignment.top,
-      title: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 32),
-          child: AvatarForm(avatar: user.avatar?.imageUrl),
-        ),
-      ),
-    );
-  }
-}
-
 class UserInfoCard extends StatelessWidget {
   final UserModel user;
 
@@ -50,33 +31,44 @@ class UserInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
-      child: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
+        padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
         child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AvatarTileFrom(user: user),
-                UsernameForm(userLogin: user.login),
-                const SizedBox(height: columnItemMargin),
-                UserPhoneForm(userPhone: user.phone),
-                const SizedBox(height: columnItemMargin),
-                UserEmailForm(userEmail: user.email),
-                const SizedBox(height: columnItemMargin),
-                Expanded(
-                    child: Align(
-                        alignment: Alignment.bottomLeft,
-                        child: _StartConversationForm(user: user)))
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+            child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Stack(children: [
+                  Align(
+                    alignment: const Alignment(0, -0.5),
+                    child: IntrinsicHeight(
+                      child: Stack(children: [
+                        Card(
+                          color: paleMallow,
+                          margin: const EdgeInsets.only(top: 40),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 50, left: 4, right: 4, bottom: 30),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                UsernameForm(userLogin: user.login),
+                                const SizedBox(height: columnItemMargin),
+                                UserPhoneForm(userPhone: user.phone),
+                                const SizedBox(height: columnItemMargin),
+                                UserEmailForm(userEmail: user.email),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: const Alignment(0, -1.03),
+                          child: AvatarForm(avatar: user.avatar?.imageUrl),
+                        ),
+                      ]),
+                    ),
+                  ),
+                  Align(
+                      alignment: Alignment.bottomRight,
+                      child: _StartConversationForm(user: user))
+                ]))));
   }
 }
 
@@ -106,9 +98,11 @@ class _StartConversationForm extends StatelessWidget {
               );
           }
         },
-        child: TextButton(
-            child: const Text("Start a conversation",
+        child: TextButton.icon(
+            label: const Text("Start a conversation",
                 style: TextStyle(fontSize: 20, color: slateBlue)),
+            icon: const Icon(Icons.arrow_forward, color: slateBlue, size: 25),
+            iconAlignment: IconAlignment.end,
             onPressed: () => context.read<ConversationCreateBloc>().add(
                   ConversationCreated(user: user, type: 'u'),
                 )));
