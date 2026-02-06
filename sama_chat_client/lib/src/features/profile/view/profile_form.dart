@@ -678,15 +678,22 @@ List<Widget> _formActions(BuildContext context) {
           context.read<ProfileBloc>().add(ProfileSubmitted());
           Navigator.pop(context, 'Save');
         } else {
+          var content = 'Please make changes to the data.';
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(
-                      bottom: keyboardHeightCtx(context) -
-                          (Platform.isIOS ? bottomPadding : 0.0)),
-                  content: const Text('Please make changes to the data.')),
+              keyboardIsOpen()
+                  ? SnackBar(
+                      content: Text(content),
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                      margin: EdgeInsets.only(
+                          bottom: keyboardHeightCtx(context) -
+                              (Platform.isIOS ? bottomPadding : 0.0)))
+                  : SnackBar(
+                      content: Text(content),
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.fixed),
             );
         }
       },
