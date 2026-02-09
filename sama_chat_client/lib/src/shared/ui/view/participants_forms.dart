@@ -218,6 +218,7 @@ class _ParticipantsListItem extends StatelessWidget {
         ),
         child: Stack(fit: StackFit.loose, children: [
           Card(
+              color: removable ? null : gainsborough,
               elevation: 4.0,
               margin: const EdgeInsets.all(4.0),
               child: Padding(

@@ -59,7 +59,7 @@ class _EmailInput extends StatelessWidget {
                 context.read<ResetPasswordBloc>().add(EmailChanged(email)),
             iconData: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
-            hint: 'Email',
+            text: 'Email',
             error: state.email.displayError != null
                 ? state.email.displayError == EmailValidationError.empty
                     ? 'Email is too short'
@@ -114,7 +114,7 @@ class _ContinueButton extends StatelessWidget {
                     state.isEmailValid ? slateBlue : whiteAluminum),
                 foregroundColor: WidgetStatePropertyAll(
                     state.isEmailValid ? white : gainsborough),
-                hint: 'Continue');
+                text: 'Continue');
       },
     ));
   }

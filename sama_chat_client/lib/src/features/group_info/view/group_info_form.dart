@@ -257,22 +257,22 @@ class GroupInfoCard extends StatelessWidget {
           var isOwner = ownerId == currentUserId;
           return Padding(
               padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
-              child: SizedBox(
-                  width: double.infinity,
-                  child: Card(
-                    child: Padding(
+              child: Card(
+                  child: Padding(
                       padding: const EdgeInsets.all(15),
                       child: Column(children: [
                         const AvatarDescriptionTile(),
-                        _ParticipantsHeaderForm(isOwner: isOwner),
-                        Expanded(
-                            child: _ParticipantsListForm(
+                        Card(
+                          color: paleMallow,
+                          child: Column(children: [
+                            _ParticipantsHeaderForm(isOwner: isOwner),
+                            _ParticipantsListForm(
                                 isOwner: isOwner,
                                 ownerId: ownerId,
-                                currentUserId: currentUserId)),
-                      ]),
-                    ),
-                  )));
+                                currentUserId: currentUserId),
+                          ]),
+                        ),
+                      ]))));
         });
   }
 }

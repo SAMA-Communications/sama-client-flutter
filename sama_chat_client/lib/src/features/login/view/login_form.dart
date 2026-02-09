@@ -161,7 +161,7 @@ class _UsernameInput extends StatelessWidget {
             onChanged: (username) =>
                 context.read<LoginBloc>().add(LoginUsernameChanged(username)),
             iconData: Icons.person_outlined,
-            hint: 'Username',
+            text: 'Username',
             error: state.username.displayError != null
                 ? state.username.displayError == UsernameValidationError.short
                     ? 'User name is too short'
@@ -207,7 +207,7 @@ class _PasswordInputState extends State<_PasswordInput> {
                 size: 22,
               ),
             ),
-            hint: 'Password',
+            text: 'Password',
             error: state.password.displayError != null
                 ? state.password.displayError == PasswordValidationError.short
                     ? 'Password is too short'
@@ -235,7 +235,7 @@ class _EmailInput extends StatelessWidget {
                 context.read<LoginBloc>().add(LoginEmailChanged(email)),
             iconData: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
-            hint: 'Email',
+            text: 'Email',
             error: state.email.displayError != null
                 ? state.email.displayError == EmailValidationError.empty
                     ? 'Email is too short'
@@ -274,7 +274,7 @@ class _LoginButton extends StatelessWidget {
                     isSignInValid || isSignUpValid ? slateBlue : whiteAluminum),
                 foregroundColor: WidgetStatePropertyAll(
                     isSignInValid || isSignUpValid ? white : gainsborough),
-                hint: isSignup ? 'Create account' : 'Login');
+                text: isSignup ? 'Create account' : 'Login');
       },
     );
   }
