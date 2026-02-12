@@ -257,9 +257,9 @@ class _ParticipantsListItem extends StatelessWidget {
                         onTap: () {
                           onRemoveParticipants(user);
                         },
-                        child: const Icon(Icons.cancel_outlined,
+                        child: const Icon(Icons.cancel,
                             size: 18,
-                            color: semiBlack,
+                            color: slateBlue,
                             fontWeight: FontWeight.w100),
                       )))
               : const SizedBox.shrink(),

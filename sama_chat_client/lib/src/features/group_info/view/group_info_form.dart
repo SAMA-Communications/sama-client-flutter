@@ -11,9 +11,11 @@ import '../../../repository/global_search/global_search_repository.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/participants_forms.dart';
+import '../../../shared/ui/view/text_button_forms.dart';
 import '../../../shared/ui/view/user_forms.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
+import '../../../shared/widget/keyboard_listener.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../../search/bloc/global_search_bloc.dart';
 import '../../search/view/search_bar.dart';
@@ -57,17 +59,12 @@ class AvatarDescriptionTile extends StatelessWidget {
           context.read<GroupInfoBloc>().state.conversation.owner?.id ==
               context.read<GroupInfoBloc>().state.currentUser?.id;
       return ListTile(
-        titleAlignment: ListTileTitleAlignment.top,
-        title: Center(
-          child: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: _ChatAvatar(isOwner: isOwner)),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: _ChatNameDescription(isOwner: isOwner),
-        ),
-      );
+          titleAlignment: ListTileTitleAlignment.top,
+          title: Center(
+            child: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _ChatAvatar(isOwner: isOwner)),
+          ));
     });
   }
 }
@@ -237,6 +234,7 @@ class NameDialogInput extends StatelessWidget {
                   ),
                 ),
               ]),
+              actionsAlignment: MainAxisAlignment.spaceAround,
               actions: _formActions(context));
         });
   }
@@ -255,6 +253,11 @@ class GroupInfoCard extends StatelessWidget {
           var currentUserId =
               context.read<GroupInfoBloc>().state.currentUser?.id ?? '';
           var isOwner = ownerId == currentUserId;
+
+          var groupNameTxt = TextEditingController()
+            ..text = context.read<GroupInfoBloc>().state.name.value;
+          var descriptionTxt = TextEditingController()
+            ..text = context.read<GroupInfoBloc>().state.description.value;
           return Padding(
               padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
               child: Card(
@@ -263,15 +266,97 @@ class GroupInfoCard extends StatelessWidget {
                       child: Column(children: [
                         const AvatarDescriptionTile(),
                         Card(
+                            color: paleMallow,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsetsGeometry.symmetric(
+                                      horizontal: 8),
+                                  child: TextField(
+                                    keyboardType: TextInputType.text,
+                                    controller: groupNameTxt,
+                                    style: const TextStyle(fontSize: 18),
+                                    onSubmitted: (value) =>
+                                        ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar(),
+                                    onChanged: (groupname) => context
+                                        .read<GroupInfoBloc>()
+                                        .add(GroupNameChanged(groupname)),
+                                    decoration: InputDecoration(
+                                      fillColor: paleMallow,
+                                      border: InputBorder.none,
+                                      label: const Text(
+                                        'Group name',
+                                        style: TextStyle(
+                                            color: dullGray, fontSize: 16),
+                                      ),
+                                      errorText: state.name.displayError ==
+                                              GroupnameValidationError.empty
+                                          ? 'group name is empty'
+                                          : state.name.displayError ==
+                                                  GroupnameValidationError.short
+                                              ? 'group name is too short'
+                                              : null,
+                                    ),
+                                  ),
+                                ),
+                                const Divider(
+                                  indent: 8,
+                                  endIndent: 8,
+                                  color: slateBlue,
+                                  thickness: 1,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsetsGeometry.symmetric(
+                                      horizontal: 8),
+                                  child: TextField(
+                                    keyboardType: TextInputType.text,
+                                    controller: descriptionTxt,
+                                    style: const TextStyle(fontSize: 18),
+                                    onSubmitted: (value) =>
+                                        ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar(),
+                                    onChanged: (description) => context
+                                        .read<GroupInfoBloc>()
+                                        .add(GroupDescriptionChanged(
+                                            description)),
+                                    decoration: InputDecoration(
+                                      fillColor: paleMallow,
+                                      border: InputBorder.none,
+                                      label: const Text(
+                                        'Description',
+                                        style: TextStyle(
+                                            color: dullGray, fontSize: 16),
+                                      ),
+                                      errorText: state
+                                                  .description.displayError ==
+                                              GroupDescriptionValidationError
+                                                  .empty
+                                          ? 'group description is empty'
+                                          : state.description.displayError ==
+                                                  GroupDescriptionValidationError
+                                                      .short
+                                              ? 'group description is too short'
+                                              : null,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )),
+                        const SizedBox(height: 30),
+                        Expanded(
+                            child: Card(
                           color: paleMallow,
                           child: Column(children: [
                             _ParticipantsHeaderForm(isOwner: isOwner),
-                            _ParticipantsListForm(
-                                isOwner: isOwner,
-                                ownerId: ownerId,
-                                currentUserId: currentUserId),
+                            Expanded(
+                                child: _ParticipantsListForm(
+                                    isOwner: isOwner,
+                                    ownerId: ownerId,
+                                    currentUserId: currentUserId)),
                           ]),
-                        ),
+                        )),
                       ]))));
         });
   }
@@ -288,13 +373,12 @@ class _ParticipantsHeaderForm extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.all(8.0),
       leading: Text(
-        '${state.participants.value.length} members',
+        '${state.participants.value.length} ${state.participants.value.length > 1 ? 'members' : 'member'}',
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
       ),
       trailing: isOwner
           ? IconButton(
               style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
                   padding: EdgeInsets.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap),
               icon: const Icon(Icons.person_add_alt_outlined,
@@ -372,13 +456,12 @@ void _showSearchScreenDialog(BuildContext context) {
   showDialog(
       context: context,
       useSafeArea: false,
-      builder: (_) =>
-          Dialog.fullscreen(child: StatefulBuilder(builder: (_, setState) {
-            return BlocProvider<GlobalSearchBloc>(
+      builder: (_) => Dialog.fullscreen(
+          child: BlocProvider<GlobalSearchBloc>(
               create: (context) => GlobalSearchBloc(
-                globalSearchRepository:
-                    RepositoryProvider.of<GlobalSearchRepository>(context),
-              ),
+                    globalSearchRepository:
+                        RepositoryProvider.of<GlobalSearchRepository>(context),
+                  ),
               child: Scaffold(
                 appBar: const GlobalSearchBar(),
                 body: Container(
@@ -405,7 +488,7 @@ void _showSearchScreenDialog(BuildContext context) {
                       var currentParticipants = List.of(
                           state.participants.value..remove(state.currentUser));
                       return ParticipantsForm(
-                        users: currentParticipants
+                        users: List.of(currentParticipants)
                           ..addAll(state.addParticipants.value),
                         nonRemovableUsers: currentParticipants,
                         onAddParticipants: (user) {
@@ -431,27 +514,45 @@ void _showSearchScreenDialog(BuildContext context) {
                     }),
                   ),
                 ),
-                floatingActionButton: Visibility(
-                  visible: !keyboardIsOpenCtx(context),
-                  child: FloatingActionButton(
-                    backgroundColor: dullGray,
-                    tooltip: 'Add participants',
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (_) {
-                            return BlocProvider.value(
-                              value: BlocProvider.of<GroupInfoBloc>(context),
-                              child: _AddParticipantsDialog(),
-                            );
-                          });
-                    },
-                    child: const Icon(Icons.check, color: white, size: 28),
-                  ),
-                ),
-              ),
-            );
-          })));
+                floatingActionButton: StatefulBuilder(builder: (_, setState) {
+                  return BlocProvider.value(
+                    value: BlocProvider.of<GroupInfoBloc>(context),
+                    child: BlocBuilder<GroupInfoBloc, GroupInfoState>(
+                      builder: (context, state) {
+                        return KeyboardVisibilityListener(
+                            listener: (isKeyboardVisible) {
+                              setState(() {});
+                            },
+                            child: Visibility(
+                                visible: !keyboardIsOpen() && state.isValid,
+                                child: IntrinsicWidth(
+                                    child: ButtonForm(
+                                        onPressed: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (_) {
+                                                return BlocProvider.value(
+                                                  value: BlocProvider.of<
+                                                      GroupInfoBloc>(context),
+                                                  child:
+                                                      _AddParticipantsDialog(),
+                                                );
+                                              });
+                                        },
+                                        backgroundColor:
+                                            const WidgetStatePropertyAll(
+                                                slateBlue),
+                                        foregroundColor:
+                                            const WidgetStatePropertyAll(white),
+                                        text: 'Done',
+                                        textStyle: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16)))));
+                      },
+                    ),
+                  );
+                }),
+              ))));
 }
 
 void _showRemoveParticipantsDialog(BuildContext context) {
@@ -474,6 +575,7 @@ class _AddParticipantsDialog extends StatelessWidget {
         title: const Text('Add participants', style: TextStyle(fontSize: 20)),
         content: const Text('Add selected users to the chat?',
             style: TextStyle(fontSize: 16)),
+        actionsAlignment: MainAxisAlignment.spaceAround,
         actions: _formActions(context));
   }
 }
@@ -486,6 +588,7 @@ class _RemoveParticipantsDialog extends StatelessWidget {
             const Text('Remove user from chat', style: TextStyle(fontSize: 20)),
         content: const Text('Do you want to delete this user?',
             style: TextStyle(fontSize: 16)),
+        actionsAlignment: MainAxisAlignment.spaceAround,
         actions: _formActions(context));
   }
 }
