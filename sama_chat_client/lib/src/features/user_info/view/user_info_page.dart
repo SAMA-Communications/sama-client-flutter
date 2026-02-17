@@ -14,7 +14,7 @@ class UserInfoPage extends StatelessWidget {
   const UserInfoPage({required this.user, super.key});
 
   static BlocProvider route(Object? extra) {
-    UserModel user = extra as UserModel;
+    UserModel user = extra != null ? extra as UserModel : UserModel();
     return BlocProvider<ConversationCreateBloc>(
         create: (context) => ConversationCreateBloc(
               conversationRepository:
