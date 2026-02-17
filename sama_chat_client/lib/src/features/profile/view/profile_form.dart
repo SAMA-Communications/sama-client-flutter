@@ -308,13 +308,14 @@ class _AccountForm extends StatelessWidget {
                             content: const Text(
                                 'Are you sure you want to delete this user?',
                                 style: TextStyle(fontSize: 16)),
+                            actionsAlignment: MainAxisAlignment.spaceAround,
                             actions: <Widget>[
                               TextButton(
                                 child: const Text("Cancel"),
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
                               TextButton(
-                                child: const Text("Ok"),
+                                child: const Text("Confirm"),
                                 onPressed: () {
                                   context
                                       .read<AuthenticationBloc>()
@@ -661,6 +662,7 @@ class _ChangePasswordInput extends StatelessWidget {
 }
 
 List<Widget> _formActions(BuildContext context) {
+  final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
   return [
     TextButton(
       onPressed: () {
@@ -676,13 +678,22 @@ List<Widget> _formActions(BuildContext context) {
           context.read<ProfileBloc>().add(ProfileSubmitted());
           Navigator.pop(context, 'Save');
         } else {
+          var content = 'Please make changes to the data.';
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: keyboardHeightCtx(context)),
-                  content: const Text('Please make changes to the data.')),
+              keyboardIsOpen()
+                  ? SnackBar(
+                      content: Text(content),
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                      margin: EdgeInsets.only(
+                          bottom: keyboardHeightCtx(context) -
+                              (Platform.isIOS ? bottomPadding : 0.0)))
+                  : SnackBar(
+                      content: Text(content),
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.fixed),
             );
         }
       },
