@@ -6,10 +6,11 @@ class MessageLocalDatasource {
   final DatabaseService _databaseService = DatabaseService.instance;
 
   Future<List<MessageModel>> getAllMessagesLocal(String cid,
-      {DateTime? ltDate, int? limit}) async {
+      {DateTime? ltDate, DateTime? gtDate, int? limit}) async {
     print('getAllMessagesLocal');
     try {
-      return await _databaseService.getAllMessagesLocal(cid, ltDate, limit);
+      return await _databaseService.getAllMessagesLocal(
+          cid, ltDate, gtDate, limit);
     } catch (e) {
       print('getAllMessagesLocal e ${e.toString()}');
       throw DatabaseException(e.toString());

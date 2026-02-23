@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import '../../objectbox.g.dart';
 import '../features/conversation/models/chat_message.dart';
 import 'models/attachment_model.dart';
+import 'models/avatar_model.dart';
 import 'models/conversation_model.dart';
 import 'models/message_model.dart';
 import 'models/user_model.dart';
@@ -187,6 +188,13 @@ class DatabaseService {
     }
     if (chatInDb.avatar?.fileId == chat.avatar?.fileId) {
       chat.avatar?.bid = chatInDb.avatar?.bid;
+      if (chat.avatar?.imageUrl != chatInDb.avatar?.imageUrl) {
+        //to check
+        print('AMBRA chat.avatar putAsync');
+        await store!
+            .box<AvatarModel>()
+            .putAsync(chat.avatar!, mode: PutMode.update);
+      }
     }
     if (chatInDb.lastMessage?.id == chat.lastMessage?.id) {
       chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
@@ -275,7 +283,7 @@ class DatabaseService {
   /// ///////////////////////////
 
   Future<List<MessageModel>> getAllMessagesLocal(
-      String cid, DateTime? ltDate, int? limit) async {
+      String cid, DateTime? ltDate, DateTime? gtDate, int? limit) async {
     var condition = MessageModel_.cid
         .equals(cid)
         .and(MessageModel_.isTempReplied
@@ -285,12 +293,14 @@ class DatabaseService {
             .or(MessageModel_.rawStatus.isNull()));
     if (ltDate != null) {
       condition = condition.and(MessageModel_.createdAt.lessThanDate(ltDate));
+    } if (gtDate != null) {
+      condition = condition.and(MessageModel_.createdAt.greaterThanDate(gtDate));
     }
 
     final query = store!
         .box<MessageModel>()
         .query(condition)
-        .order(MessageModel_.createdAt, flags: Order.descending)
+        .order(MessageModel_.createdAt, flags: gtDate == null ? Order.descending : 0)
         .build()
       ..limit = limit ?? 0;
     final results = await query.findAsync();

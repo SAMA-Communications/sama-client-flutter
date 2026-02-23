@@ -471,16 +471,27 @@ class MessagesRepository {
       List<MessageModel> messages) async {
     var result = <ChatMessage>[];
 
+    final nextMsg = messages.isNotEmpty
+        ? (await localDatasource.getAllMessagesLocal(messages[0].cid,
+                gtDate: messages[0].createdAt, limit: 1))
+            .firstOrNull
+        : null;
+
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
-
       var chatMessage = message.toChatMessage(
-          i == 0 ||
-              isServiceMessage(messages[i - 1]) ||
-              messages[i - 1].from != messages[i].from,
+          i == 0
+              ? nextMsg?.from != messages[i].from
+              : isServiceMessage(messages[i - 1]) ||
+                  messages[i - 1].from != messages[i].from,
           i == messages.length - 1 ||
               isServiceMessage(messages[i + 1]) ||
               messages[i + 1].from != messages[i].from);
+
+      if (i == messages.length - 1 && limitMessages == messages.length) {
+        // do not put last message in result to determine if it's last for user with next pagination
+        continue;
+      }
 
       result.add(chatMessage);
     }

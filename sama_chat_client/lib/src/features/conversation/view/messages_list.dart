@@ -5,6 +5,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/list_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
@@ -163,8 +164,9 @@ class _MessagesListState extends State<MessagesList> {
                         itemScrollController: _scrollController,
                         itemPositionsListener: itemPositionsListener,
                         padding: EdgeInsets.zero,
-                        separatorBuilder: (context, index) => const SizedBox(
-                          height: 5,
+                        separatorBuilder: (context, index) => SizedBox(
+                          height: separateSpace(state.messages[index],
+                              state.messages.tryGet(index + 1)),
                         ),
                       ));
                 case ConversationStatus.initial:
@@ -179,6 +181,19 @@ class _MessagesListState extends State<MessagesList> {
           ),
           scrollFAB,
         ]));
+  }
+
+  double separateSpace(ChatMessage currentMsg, ChatMessage? prevMsg) {
+    int diffTime = 30;
+
+    var prevMsgMs = (prevMsg?.createdAt!.millisecondsSinceEpoch ?? 0) ~/ 1000;
+    var msgMs = currentMsg.createdAt!.millisecondsSinceEpoch ~/ 1000;
+    var timeGap = (msgMs - prevMsgMs);
+
+    bool isSameOwner = (prevMsg?.isOwn ?? false) && currentMsg.isOwn ||
+        (!(prevMsg?.isOwn ?? false)) && !currentMsg.isOwn;
+
+    return isSameOwner && timeGap < diffTime ? 2 : 15;
   }
 
   Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(

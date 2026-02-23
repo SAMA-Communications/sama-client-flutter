@@ -112,7 +112,8 @@ class MessageModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, from, rawStatus, body, t];
+  List<Object?> get props =>
+      [id, from, rawStatus, body, t, createdAt?.millisecondsSinceEpoch];
 }
 
 extension MessageModelExtension on Message {
