@@ -10,10 +10,12 @@ import 'text_message.dart';
 
 class TextMessageItem extends StatelessWidget {
   final ChatMessage message;
+  final BubbleType bubbleType;
 
   const TextMessageItem({
     super.key,
     required this.message,
+    required this.bubbleType,
   });
 
   @override
@@ -23,6 +25,7 @@ class TextMessageItem extends StatelessWidget {
       isFirst: message.isFirstUserMessage,
       isLast: message.isLastUserMessage,
       isOwn: message.isOwn,
+      bubbleType: bubbleType,
       child: TextMessage(
         body: message.body ?? '',
         style: TextStyle(color: message.isOwn ? white : black, fontSize: 16.0),

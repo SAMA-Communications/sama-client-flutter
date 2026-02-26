@@ -13,6 +13,7 @@ import '../../../db/resource.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
+import '../../../shared/utils/list_utils.dart';
 import '../models/models.dart';
 
 part 'conversation_event.dart';
@@ -452,6 +453,37 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var messages = [...state.messages];
     var messagesMap = {}..addEntries(messages.map((m) => MapEntry(m.id, m)));
     event.status.msgIds?.forEach((id) {
+
+      int currentIndex = messages.indexOf(messagesMap[id]);
+      int prevIndex = currentIndex + 1;
+      int nextIndex = currentIndex - 1;
+      ChatMessage? prevMsg = messages.tryGet(prevIndex);
+      ChatMessage? nextMsg = messages.tryGet(nextIndex);
+
+      var prevMsgUpdated = prevMsg?.copyWith(
+          isLastUserMessage: prevIndex == 0 ||
+              isServiceMessage(messages[prevIndex - 2]) ||
+              messages[prevIndex - 2].from != messages[prevIndex].from,
+          isFirstUserMessage: prevIndex == messages.length - 1 ||
+              isServiceMessage(messages[prevIndex + 2]) ||
+              messages[prevIndex + 2].from != messages[prevIndex].from);
+
+      var nextMsgUpdated = nextMsg?.copyWith(
+          isLastUserMessage: nextIndex == 0 ||
+              isServiceMessage(messages[nextIndex - 2]) ||
+              messages[nextIndex - 2].from != messages[nextIndex].from,
+          isFirstUserMessage: nextIndex == messages.length - 1 ||
+              isServiceMessage(messages[nextIndex + 2]) ||
+              messages[nextIndex + 2].from != messages[nextIndex].from);
+
+      if (prevMsgUpdated != null && prevMsgUpdated != prevMsg) {
+        messages[prevIndex] = prevMsgUpdated;
+      }
+
+      if (nextMsgUpdated != null && nextMsgUpdated != nextMsg) {
+        messages[nextIndex] = nextMsgUpdated;
+      }
+
       messages.remove(messagesMap[id]);
     });
     emit(state.copyWith(messages: messages));

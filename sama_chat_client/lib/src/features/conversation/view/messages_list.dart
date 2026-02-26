@@ -17,6 +17,7 @@ import '../widgets/focused_popup_menu.dart';
 import '../widgets/forward_messages/forward_bubble.dart';
 import '../widgets/forward_messages/forward_messages_widget.dart';
 import '../widgets/media_attachment.dart';
+import '../widgets/message_bubble.dart';
 import '../widgets/reply_bubble.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
@@ -142,6 +143,7 @@ class _MessagesListState extends State<MessagesList> {
                             ),
                             child: MessageItem(
                                 message: msg,
+                                bubbleType: bubbleType(state.messages, index),
                                 onTapReply: () {
                                   var replyIndex = state.messages.indexWhere(
                                       (item) =>
@@ -165,8 +167,7 @@ class _MessagesListState extends State<MessagesList> {
                         itemPositionsListener: itemPositionsListener,
                         padding: EdgeInsets.zero,
                         separatorBuilder: (context, index) => SizedBox(
-                          height: separateSpace(state.messages[index],
-                              state.messages.tryGet(index + 1)),
+                          height: separateSpace(state.messages, index),
                         ),
                       ));
                 case ConversationStatus.initial:
@@ -183,17 +184,42 @@ class _MessagesListState extends State<MessagesList> {
         ]));
   }
 
-  double separateSpace(ChatMessage currentMsg, ChatMessage? prevMsg) {
+  BubbleType bubbleType(List<ChatMessage> messages, int index) {
+    ChatMessage currentMsg = messages[index];
+    ChatMessage? prevMsg = messages.tryGet(index + 1);
+    ChatMessage? nextMsg = messages.tryGet(index - 1);
+
+    var prevSame = sameMsgGroup(currentMsg, prevMsg);
+    var nextSame = sameMsgGroup(currentMsg, nextMsg);
+
+    BubbleType bubbleType = prevSame && nextSame
+        ? BubbleType.middle
+        : prevSame
+            ? BubbleType.upper
+            : nextSame
+                ? BubbleType.lower
+                : BubbleType.common;
+
+    return bubbleType;
+  }
+
+  bool sameMsgGroup(ChatMessage msg, ChatMessage? other) {
     int diffTime = 30;
 
-    var prevMsgMs = (prevMsg?.createdAt!.millisecondsSinceEpoch ?? 0) ~/ 1000;
-    var msgMs = currentMsg.createdAt!.millisecondsSinceEpoch ~/ 1000;
-    var timeGap = (msgMs - prevMsgMs);
+    bool isSameOwner = (other?.isOwn ?? false) && msg.isOwn ||
+        (!(other?.isOwn ?? false)) && !msg.isOwn;
 
-    bool isSameOwner = (prevMsg?.isOwn ?? false) && currentMsg.isOwn ||
-        (!(prevMsg?.isOwn ?? false)) && !currentMsg.isOwn;
+    var otherMs = (other?.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
+    var msgMs = (msg.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
+    var timeGap = (msgMs - otherMs).abs();
 
-    return isSameOwner && timeGap < diffTime ? 2 : 15;
+    return isSameOwner && timeGap < diffTime;
+  }
+
+  double separateSpace(List<ChatMessage> messages, int index) {
+    ChatMessage currentMsg = messages[index];
+    ChatMessage? prevMsg = messages.tryGet(index + 1);
+    return sameMsgGroup(currentMsg, prevMsg) ? 2 : 15;
   }
 
   Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
@@ -284,9 +310,14 @@ class MessageItem extends StatelessWidget {
   final ChatMessage message;
   final VoidCallback? onTapReply;
   final VoidCallback? onTapForward;
+  final BubbleType bubbleType;
 
   const MessageItem(
-      {required this.message, this.onTapReply, this.onTapForward, super.key});
+      {required this.message,
+      required this.bubbleType,
+      this.onTapReply,
+      this.onTapForward,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -536,6 +567,6 @@ class MessageItem extends StatelessWidget {
       );
     }
 
-    return TextMessageItem(message: message);
+    return TextMessageItem(message: message, bubbleType: bubbleType);
   }
 }
