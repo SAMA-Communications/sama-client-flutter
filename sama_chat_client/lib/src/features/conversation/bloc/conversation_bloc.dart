@@ -48,7 +48,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final MessagesRepository messagesRepository;
   final UserRepository userRepository;
 
-  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
+  StreamSubscription<MessageModel>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
   StreamSubscription<TypingStatus>? typingMessageSubscription;
   StreamSubscription<Map<String, dynamic>>? lastActivitySubscription;
@@ -222,8 +222,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   ) async {
     try {
       if (state.status == ConversationStatus.initial) {
-        final messages =
-            await messagesRepository.getStoredMessages(currentConversation);
+        final messages = await buildChatMessageModels(
+            await messagesRepository.getStoredMessages(currentConversation.id));
         emit(
           state.copyWith(
               status: ConversationStatus.success,
@@ -261,7 +261,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         ltDate: ltDate, gtTime: gtTime);
     switch (resource.status) {
       case Status.success:
-        var messages = resource.data ?? List.empty();
+        var messages =
+            await buildChatMessageModels(resource.data ?? List.empty());
         messages.isEmpty
             ? emit(state.copyWith(hasReachedMax: true, initial: false))
             : emit(
@@ -401,7 +402,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     if (event.message.extension?['modified'] ?? false) {
       var indexMsg = messages.indexWhere((m) => m.id == event.message.id);
-      messages[indexMsg] = event.message;
+      var msg = messages[indexMsg];
+      messages[indexMsg] = event.message
+          .toChatMessage(msg.isLastUserMessage, msg.isFirstUserMessage);
     } else {
       if (messages.isNotEmpty) {
         messages.first = messages.first.copyWith(
@@ -414,14 +417,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       }
 
       messages.insert(
-        0,
-        event.message.copyWith(
-          isFirstUserMessage: messages.isEmpty ||
-              isServiceMessage(messages.first) ||
-              event.message.from != messages.first.from,
-          isLastUserMessage: true,
-        ),
-      );
+          0,
+          event.message.toChatMessage(
+              true,
+              messages.isEmpty ||
+                  isServiceMessage(messages.first) ||
+                  event.message.from != messages.first.from));
     }
 
     emit(
@@ -433,7 +434,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var messages = [...state.messages];
 
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
-    var msgUpdated = msg.copyWith(status: ChatMessageStatus.pending);
+    var msgUpdated = msg.copyWith(status: MessageModelStatus.pending);
     messages[messages.indexOf(msg)] = msgUpdated;
     emit(state.copyWith(messages: messages));
   }
@@ -453,7 +454,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var messages = [...state.messages];
     var messagesMap = {}..addEntries(messages.map((m) => MapEntry(m.id, m)));
     event.status.msgIds?.forEach((id) {
-
       int currentIndex = messages.indexOf(messagesMap[id]);
       int prevIndex = currentIndex + 1;
       int nextIndex = currentIndex - 1;
@@ -496,7 +496,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var msg = messages.firstWhereOrNull((o) => o.id == event.status.messageId);
     if (msg == null) return;
     var msgUpdated = msg.copyWith(
-        id: event.status.serverMessageId, status: ChatMessageStatus.sent);
+        id: event.status.serverMessageId, status: MessageModelStatus.sent);
 
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
 
@@ -514,12 +514,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   FutureOr<void> _onReadStatusReceived(
       _ReadStatusReceived event, Emitter<ConversationState> emit) async {
-    var messages = {for (var v in state.messages) v.id!: v};
+    var messages = {for (var v in state.messages) v.id: v};
     var msgListUpdated = <MessageModel>[];
     event.status.msgIds?.forEach((id) {
       if (messages[id] != null &&
-          messages[id]?.status != ChatMessageStatus.read) {
-        var msg = messages[id]!.copyWith(status: ChatMessageStatus.read);
+          messages[id]?.status != MessageModelStatus.read) {
+        var msg = messages[id]!.copyWith(status: MessageModelStatus.read);
         messages[id] = msg;
         msgListUpdated.add(msg);
       }
@@ -538,6 +538,37 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     // messages[messages.indexOf(msg)] = msgUpdated;
     messages.remove(msg);
     emit(state.copyWith(messages: messages));
+  }
+
+  Future<List<ChatMessage>> buildChatMessageModels(
+      List<MessageModel> messages) async {
+    var result = <ChatMessage>[];
+
+    final nextMsg = messages.isNotEmpty
+        ? (await messagesRepository.getStoredMessages(messages[0].cid,
+                gtDate: messages[0].createdAt, limit: 1))
+            .firstOrNull
+        : null;
+
+    for (int i = 0; i < messages.length; i++) {
+      var message = messages[i];
+      var chatMessage = message.toChatMessage(
+          i == 0
+              ? nextMsg?.from != messages[i].from
+              : isServiceMessage(messages[i - 1]) ||
+                  messages[i - 1].from != messages[i].from,
+          i == messages.length - 1 ||
+              isServiceMessage(messages[i + 1]) ||
+              messages[i + 1].from != messages[i].from);
+
+      if (i == messages.length - 1 && limitMessages == messages.length) {
+        // do not put last message in result to determine if it's last for user with next pagination
+        continue;
+      }
+
+      result.add(chatMessage);
+    }
+    return result;
   }
 
   @override

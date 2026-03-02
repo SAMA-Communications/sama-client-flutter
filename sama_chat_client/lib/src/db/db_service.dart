@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import '../../objectbox.g.dart';
-import '../features/conversation/models/chat_message.dart';
 import 'models/attachment_model.dart';
 import 'models/avatar_model.dart';
 import 'models/conversation_model.dart';
@@ -190,7 +189,7 @@ class DatabaseService {
       chat.avatar?.bid = chatInDb.avatar?.bid;
       if (chat.avatar?.imageUrl != chatInDb.avatar?.imageUrl) {
         //to check
-        print('AMBRA chat.avatar putAsync');
+        print('chat.avatar putAsync');
         await store!
             .box<AvatarModel>()
             .putAsync(chat.avatar!, mode: PutMode.update);
@@ -200,8 +199,8 @@ class DatabaseService {
       chat.lastMessage?.bid = chatInDb.lastMessage?.bid;
 
       if (chat.lastMessage != chatInDb.lastMessage) {
-        var msg = chatInDb.lastMessage
-            ?.copyWith(rawStatus: chat.lastMessage?.rawStatus);
+        var msg =
+            chatInDb.lastMessage?.copyWith(status: chat.lastMessage?.status);
         await store!.box<MessageModel>().putAsync(msg!, mode: PutMode.update);
       }
     } else {
@@ -288,19 +287,22 @@ class DatabaseService {
         .equals(cid)
         .and(MessageModel_.isTempReplied
             .isNull()) //hide Replied messages, that's not loaded by pagination
-        .and(MessageModel_.rawStatus
-            .notEquals(ChatMessageStatus.draft.name) //hide draft messages
-            .or(MessageModel_.rawStatus.isNull()));
+        .and(MessageModel_.dbStatus
+            .notEquals(MessageModelStatus.draft.index) //hide draft messages
+            .or(MessageModel_.dbStatus.isNull()));
     if (ltDate != null) {
       condition = condition.and(MessageModel_.createdAt.lessThanDate(ltDate));
-    } if (gtDate != null) {
-      condition = condition.and(MessageModel_.createdAt.greaterThanDate(gtDate));
+    }
+    if (gtDate != null) {
+      condition =
+          condition.and(MessageModel_.createdAt.greaterThanDate(gtDate));
     }
 
     final query = store!
         .box<MessageModel>()
         .query(condition)
-        .order(MessageModel_.createdAt, flags: gtDate == null ? Order.descending : 0)
+        .order(MessageModel_.createdAt,
+            flags: gtDate == null ? Order.descending : 0)
         .build()
       ..limit = limit ?? 0;
     final results = await query.findAsync();
@@ -367,10 +369,11 @@ class DatabaseService {
     return results;
   }
 
-  Future<List<MessageModel>> getMessagesLocalByStatus(String status) async {
+  Future<List<MessageModel>> getMessagesLocalByStatus(
+      MessageModelStatus status) async {
     final query = store
         ?.box<MessageModel>()
-        .query(MessageModel_.rawStatus.equals(status))
+        .query(MessageModel_.dbStatus.equals(status.index))
         .build();
     final results = query?.findAsync();
     query?.close();
@@ -378,12 +381,12 @@ class DatabaseService {
   }
 
   Future<MessageModel?> getMessageLocalByStatus(
-      String cid, String status) async {
+      String cid, MessageModelStatus status) async {
     final query = store!
         .box<MessageModel>()
         .query(MessageModel_.cid
             .equals(cid)
-            .and(MessageModel_.rawStatus.equals(status)))
+            .and(MessageModel_.dbStatus.equals(status.index)))
         .build();
     final result = await query.findFirstAsync();
     query.close();

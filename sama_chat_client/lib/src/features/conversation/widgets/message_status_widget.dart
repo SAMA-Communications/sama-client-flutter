@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../db/models/message_model.dart';
 import '../../../shared/ui/colors.dart';
-import '../models/chat_message.dart';
 
 class MessageStatusWidget extends StatelessWidget {
-  final ChatMessageStatus status;
+  final MessageModelStatus status;
 
   const MessageStatusWidget({
     super.key,
@@ -13,7 +13,7 @@ class MessageStatusWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     switch (status) {
-      case ChatMessageStatus.read:
+      case MessageModelStatus.read:
         return const Stack(children: <Widget>[
           Icon(
             Icons.check_rounded,
@@ -27,7 +27,7 @@ class MessageStatusWidget extends StatelessWidget {
             child: Icon(Icons.check_rounded, size: 15.0, color: lightMallow),
           )
         ]);
-      case ChatMessageStatus.sent:
+      case MessageModelStatus.sent:
         return const Stack(children: <Widget>[
           Icon(Icons.check_rounded, size: 15.0, color: lightMallow),
           Padding(
@@ -37,7 +37,7 @@ class MessageStatusWidget extends StatelessWidget {
             child: SizedBox.square(dimension: 15.0),
           )
         ]);
-      case ChatMessageStatus.pending:
+      case MessageModelStatus.pending:
         return const Stack(children: <Widget>[
           Icon(Icons.watch_later_outlined, size: 15.0, color: lightMallow),
           Padding(

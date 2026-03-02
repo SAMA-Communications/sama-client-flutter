@@ -1,12 +1,9 @@
 import '../../../db/models/models.dart';
 
-enum ChatMessageStatus { none, pending, draft, sent, read }
-
 // ignore: must_be_immutable
 class ChatMessage extends MessageModel {
   final bool isFirstUserMessage;
   final bool isLastUserMessage;
-  final ChatMessageStatus status;
 
   ChatMessage({
     required this.isFirstUserMessage,
@@ -15,11 +12,10 @@ class ChatMessage extends MessageModel {
     required super.id,
     required super.from,
     required super.cid,
-    this.status = ChatMessageStatus.none,
     super.bid,
     super.repliedMessageId,
     super.forwardedMessageId,
-    super.rawStatus,
+    super.status,
     super.body,
     super.createdAt,
     super.t,
@@ -32,14 +28,13 @@ class ChatMessage extends MessageModel {
   ChatMessage copyWith({
     bool? isFirstUserMessage,
     bool? isLastUserMessage,
-    ChatMessageStatus? status,
     int? bid,
     String? id,
     String? from,
     String? cid,
     String? repliedMessageId,
     String? forwardedMessageId,
-    String? rawStatus,
+    MessageModelStatus? status,
     String? body,
     bool? isOwn,
     int? t,
@@ -54,7 +49,6 @@ class ChatMessage extends MessageModel {
     return ChatMessage(
         isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
         isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
-        status: status ?? this.status,
         bid: bid ?? this.bid,
         id: id ?? this.id,
         from: from ?? this.from,
@@ -63,7 +57,7 @@ class ChatMessage extends MessageModel {
         forwardedMessageId: forwardedMessageId ?? this.forwardedMessageId,
         body: body ?? this.body,
         isOwn: isOwn ?? this.isOwn,
-        rawStatus: rawStatus ?? status?.name ?? this.rawStatus,
+        status: status ?? this.status,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         isTempReplied: isTempReplied ?? this.isTempReplied,
@@ -95,18 +89,12 @@ extension ChatMessageExtension on MessageModel {
         bid: bid,
         isLastUserMessage: isLastUserMessage,
         isFirstUserMessage: isFirstUserMessage,
-        //consider move ChatMessageStatus enum to model base
-        status: rawStatus != null
-            ? ChatMessageStatus.values.byName(rawStatus!)
-            : isOwn
-                ? ChatMessageStatus.sent
-                : ChatMessageStatus.none,
         id: id,
         from: from,
         cid: cid,
         repliedMessageId: repliedMessageId,
         forwardedMessageId: forwardedMessageId,
-        rawStatus: rawStatus,
+        status: status,
         body: body,
         isOwn: isOwn,
         createdAt: createdAt,

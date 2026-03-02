@@ -21,7 +21,7 @@ final class MessagesMoreRequested extends ConversationEvent {
 }
 
 final class _MessageReceived extends ConversationEvent {
-  final ChatMessage message;
+  final MessageModel message;
 
   const _MessageReceived(this.message);
 }

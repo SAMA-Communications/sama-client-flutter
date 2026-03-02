@@ -125,7 +125,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   Future<void> _onDraftMessageReceived(
       _DraftMessageReceived event, Emitter<SendMessageState> emit) async {
     var draftMsg = await messagesRepository.getMessageLocalByStatus(
-        currentConversation.id, ChatMessageStatus.draft.name);
+        currentConversation.id, MessageModelStatus.draft);
     if (draftMsg != null) {
       emit(state.copyWith(
           draftMessage: () => draftMsg,

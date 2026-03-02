@@ -27,7 +27,7 @@ class MessageLocalDatasource {
   }
 
   Future<MessageModel?> getMessageLocalByStatus(
-      String cid, String status) async {
+      String cid, MessageModelStatus status) async {
     print('getMessageLocalByStatus= $cid');
     try {
       return await _databaseService.getMessageLocalByStatus(cid, status);
@@ -44,7 +44,8 @@ class MessageLocalDatasource {
     }
   }
 
-  Future<List<MessageModel>> getMessagesLocalByStatus(String status) async {
+  Future<List<MessageModel>> getMessagesLocalByStatus(
+      MessageModelStatus status) async {
     try {
       return await _databaseService.getMessagesLocalByStatus(status);
     } catch (e) {
