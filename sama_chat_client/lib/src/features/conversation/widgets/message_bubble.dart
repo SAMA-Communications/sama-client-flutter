@@ -6,8 +6,7 @@ import '../../../navigation/constants.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
-
-enum BubbleType { common, upper, middle, lower }
+import '../models/chat_message.dart';
 
 class MessageBubble extends StatelessWidget {
   final UserModel sender;

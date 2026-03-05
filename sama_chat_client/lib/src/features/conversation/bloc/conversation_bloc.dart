@@ -403,17 +403,18 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     if (event.message.extension?['modified'] ?? false) {
       var indexMsg = messages.indexWhere((m) => m.id == event.message.id);
       var msg = messages[indexMsg];
-      messages[indexMsg] = event.message
-          .toChatMessage(msg.isLastUserMessage, msg.isFirstUserMessage);
+      messages[indexMsg] = event.message.toChatMessage(
+          msg.isLastUserMessage, msg.isFirstUserMessage, msg.bubbleType);
     } else {
       if (messages.isNotEmpty) {
         messages.first = messages.first.copyWith(
-          isLastUserMessage: isServiceMessage(messages.first) ||
-              event.message.from != messages.first.from,
-          isFirstUserMessage: messages.length == 1 ||
-              isServiceMessage(messages[1]) ||
-              messages[1].from != messages.first.from,
-        );
+            isLastUserMessage: isServiceMessage(messages.first) ||
+                event.message.from != messages.first.from,
+            isFirstUserMessage: messages.length == 1 ||
+                isServiceMessage(messages[1]) ||
+                messages[1].from != messages.first.from,
+            bubbleType:
+                bubbleType(List.of(messages)..insert(0, event.message), 1));
       }
 
       messages.insert(
@@ -422,7 +423,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
               true,
               messages.isEmpty ||
                   isServiceMessage(messages.first) ||
-                  event.message.from != messages.first.from));
+                  event.message.from != messages.first.from,
+              bubbleType(List.of(messages)..insert(0, event.message), 0)));
     }
 
     emit(
@@ -501,7 +503,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
 
     messages[messages.indexOf(msg)] = msgLocal.toChatMessage(
-        msgUpdated.isLastUserMessage, msgUpdated.isFirstUserMessage);
+        msgUpdated.isLastUserMessage,
+        msgUpdated.isFirstUserMessage,
+        msgUpdated.bubbleType);
     emit(state.copyWith(messages: messages));
 
     var chatLocal = await conversationRepository
@@ -559,7 +563,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
                   messages[i - 1].from != messages[i].from,
           i == messages.length - 1 ||
               isServiceMessage(messages[i + 1]) ||
-              messages[i + 1].from != messages[i].from);
+              messages[i + 1].from != messages[i].from,
+          bubbleType(messages, i));
 
       if (i == messages.length - 1 && limitMessages == messages.length) {
         // do not put last message in result to determine if it's last for user with next pagination

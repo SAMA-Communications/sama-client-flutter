@@ -1,13 +1,18 @@
 import '../../../db/models/models.dart';
+import '../../../shared/utils/list_utils.dart';
+
+enum BubbleType { common, upper, middle, lower }
 
 // ignore: must_be_immutable
 class ChatMessage extends MessageModel {
   final bool isFirstUserMessage;
   final bool isLastUserMessage;
+  final BubbleType bubbleType;
 
   ChatMessage({
     required this.isFirstUserMessage,
     required this.isLastUserMessage,
+    required this.bubbleType,
     required super.isOwn,
     required super.id,
     required super.from,
@@ -28,6 +33,7 @@ class ChatMessage extends MessageModel {
   ChatMessage copyWith({
     bool? isFirstUserMessage,
     bool? isLastUserMessage,
+    BubbleType? bubbleType,
     int? bid,
     String? id,
     String? from,
@@ -49,6 +55,7 @@ class ChatMessage extends MessageModel {
     return ChatMessage(
         isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
         isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
+        bubbleType: bubbleType ?? this.bubbleType,
         bid: bid ?? this.bid,
         id: id ?? this.id,
         from: from ?? this.from,
@@ -84,11 +91,13 @@ class ChatMessage extends MessageModel {
 }
 
 extension ChatMessageExtension on MessageModel {
-  ChatMessage toChatMessage(bool isLastUserMessage, bool isFirstUserMessage) {
+  ChatMessage toChatMessage(
+      bool isLastUserMessage, bool isFirstUserMessage, BubbleType bubbleType) {
     return ChatMessage(
         bid: bid,
         isLastUserMessage: isLastUserMessage,
         isFirstUserMessage: isFirstUserMessage,
+        bubbleType: bubbleType,
         id: id,
         from: from,
         cid: cid,
@@ -113,4 +122,36 @@ extension ChatMessageExtension on MessageModel {
   bool hasAttachments() {
     return attachments.isNotEmpty;
   }
+}
+
+bool sameMsgGroup(MessageModel msg, MessageModel? other) {
+  int diffTime = 30;
+
+  bool isSameOwner = (other?.isOwn ?? false) && msg.isOwn ||
+      (!(other?.isOwn ?? false)) && !msg.isOwn;
+
+  var otherMs = (other?.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
+  var msgMs = (msg.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
+  var timeGap = (msgMs - otherMs).abs();
+
+  return isSameOwner && timeGap < diffTime;
+}
+
+BubbleType bubbleType(List<MessageModel> messages, int index) {
+  MessageModel currentMsg = messages[index];
+  MessageModel? prevMsg = messages.tryGet(index + 1);
+  MessageModel? nextMsg = messages.tryGet(index - 1);
+
+  var prevSame = sameMsgGroup(currentMsg, prevMsg);
+  var nextSame = sameMsgGroup(currentMsg, nextMsg);
+
+  BubbleType bubbleType = prevSame && nextSame
+      ? BubbleType.middle
+      : prevSame
+          ? BubbleType.upper
+          : nextSame
+              ? BubbleType.lower
+              : BubbleType.common;
+
+  return bubbleType;
 }

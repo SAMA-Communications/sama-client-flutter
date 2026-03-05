@@ -143,7 +143,6 @@ class _MessagesListState extends State<MessagesList> {
                             ),
                             child: MessageItem(
                                 message: msg,
-                                bubbleType: bubbleType(state.messages, index),
                                 onTapReply: () {
                                   var replyIndex = state.messages.indexWhere(
                                       (item) =>
@@ -182,38 +181,6 @@ class _MessagesListState extends State<MessagesList> {
           ),
           scrollFAB,
         ]));
-  }
-
-  BubbleType bubbleType(List<ChatMessage> messages, int index) {
-    ChatMessage currentMsg = messages[index];
-    ChatMessage? prevMsg = messages.tryGet(index + 1);
-    ChatMessage? nextMsg = messages.tryGet(index - 1);
-
-    var prevSame = sameMsgGroup(currentMsg, prevMsg);
-    var nextSame = sameMsgGroup(currentMsg, nextMsg);
-
-    BubbleType bubbleType = prevSame && nextSame
-        ? BubbleType.middle
-        : prevSame
-            ? BubbleType.upper
-            : nextSame
-                ? BubbleType.lower
-                : BubbleType.common;
-
-    return bubbleType;
-  }
-
-  bool sameMsgGroup(ChatMessage msg, ChatMessage? other) {
-    int diffTime = 30;
-
-    bool isSameOwner = (other?.isOwn ?? false) && msg.isOwn ||
-        (!(other?.isOwn ?? false)) && !msg.isOwn;
-
-    var otherMs = (other?.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
-    var msgMs = (msg.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
-    var timeGap = (msgMs - otherMs).abs();
-
-    return isSameOwner && timeGap < diffTime;
   }
 
   double separateSpace(List<ChatMessage> messages, int index) {
@@ -310,14 +277,9 @@ class MessageItem extends StatelessWidget {
   final ChatMessage message;
   final VoidCallback? onTapReply;
   final VoidCallback? onTapForward;
-  final BubbleType bubbleType;
 
   const MessageItem(
-      {required this.message,
-      required this.bubbleType,
-      this.onTapReply,
-      this.onTapForward,
-      super.key});
+      {required this.message, this.onTapReply, this.onTapForward, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -567,6 +529,6 @@ class MessageItem extends StatelessWidget {
       );
     }
 
-    return TextMessageItem(message: message, bubbleType: bubbleType);
+    return TextMessageItem(message: message);
   }
 }
