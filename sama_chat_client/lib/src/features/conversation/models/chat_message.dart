@@ -125,7 +125,7 @@ extension ChatMessageExtension on MessageModel {
 }
 
 bool sameMsgGroup(MessageModel msg, MessageModel? other) {
-  int diffTime = 30;
+  int diffTime = 45;
 
   bool isSameOwner = (other?.isOwn ?? false) && msg.isOwn ||
       (!(other?.isOwn ?? false)) && !msg.isOwn;
@@ -142,16 +142,26 @@ BubbleType bubbleType(List<MessageModel> messages, int index) {
   MessageModel? prevMsg = messages.tryGet(index + 1);
   MessageModel? nextMsg = messages.tryGet(index - 1);
 
+  bool isSimpleCurrent = currentMsg.forwardedMessageId == null &&
+      currentMsg.repliedMessageId == null;
+  bool isSimpleNext =
+      nextMsg?.forwardedMessageId == null && nextMsg?.repliedMessageId == null;
+
   var prevSame = sameMsgGroup(currentMsg, prevMsg);
   var nextSame = sameMsgGroup(currentMsg, nextMsg);
 
-  BubbleType bubbleType = prevSame && nextSame
-      ? BubbleType.middle
-      : prevSame
-          ? BubbleType.upper
-          : nextSame
-              ? BubbleType.lower
-              : BubbleType.common;
+  BubbleType bubbleType =
+      prevSame && nextSame && isSimpleCurrent && isSimpleNext
+          ? BubbleType.middle
+          : prevSame && isSimpleCurrent
+              ? BubbleType.upper
+              : nextSame && isSimpleNext
+                  ? BubbleType.lower
+                  : BubbleType.common;
 
   return bubbleType;
+}
+
+bool isServiceMessage(MessageModel? message) {
+  return message?.extension != null && message?.extension?['type'] != null;
 }

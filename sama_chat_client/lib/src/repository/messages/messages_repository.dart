@@ -458,7 +458,3 @@ class MessagesRepository {
     return result;
   }
 }
-
-bool isServiceMessage(MessageModel message) {
-  return message.extension != null && message.extension?['type'] != null;
-}

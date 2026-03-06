@@ -464,8 +464,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
       var prevMsgUpdated = prevMsg?.copyWith(
           isLastUserMessage: prevIndex == 0 ||
-              isServiceMessage(messages[prevIndex - 2]) ||
-              messages[prevIndex - 2].from != messages[prevIndex].from,
+              isServiceMessage(messages.tryGet(prevIndex - 2)) ||
+              messages.tryGet(prevIndex - 2)?.from != messages[prevIndex].from,
           isFirstUserMessage: prevIndex == messages.length - 1 ||
               isServiceMessage(messages[prevIndex + 2]) ||
               messages[prevIndex + 2].from != messages[prevIndex].from);
@@ -548,26 +548,29 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       List<MessageModel> messages) async {
     var result = <ChatMessage>[];
 
-    final nextMsg = messages.isNotEmpty
-        ? (await messagesRepository.getStoredMessages(messages[0].cid,
-                gtDate: messages[0].createdAt, limit: 1))
-            .firstOrNull
-        : null;
+    var shouldUpdate = state.messages.isNotEmpty &&
+        state.messages.lastOrNull?.id !=
+            messages.tryGet(messages.length - 2)?.id;
+
+    var lastPrevMsg = shouldUpdate ? state.messages.last : null;
 
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
       var chatMessage = message.toChatMessage(
           i == 0
-              ? nextMsg?.from != messages[i].from
+              ? lastPrevMsg?.from != messages[i].from
               : isServiceMessage(messages[i - 1]) ||
                   messages[i - 1].from != messages[i].from,
           i == messages.length - 1 ||
               isServiceMessage(messages[i + 1]) ||
               messages[i + 1].from != messages[i].from,
-          bubbleType(messages, i));
+          i == 0 && shouldUpdate
+              ? bubbleType(
+                  List.of(messages)..insert(0, state.messages.last), i + 1)
+              : bubbleType(messages, i));
 
       if (i == messages.length - 1 && limitMessages == messages.length) {
-        // do not put last message in result to determine if it's last for user with next pagination
+// do not put last message in result to determine bubbleType and if it's last for user with next pagination
         continue;
       }
 

@@ -17,7 +17,6 @@ import '../widgets/focused_popup_menu.dart';
 import '../widgets/forward_messages/forward_bubble.dart';
 import '../widgets/forward_messages/forward_messages_widget.dart';
 import '../widgets/media_attachment.dart';
-import '../widgets/message_bubble.dart';
 import '../widgets/reply_bubble.dart';
 import '../widgets/service_message_bubble.dart';
 import '../widgets/text_message_item.dart';
@@ -71,6 +70,8 @@ class _MessagesListState extends State<MessagesList> {
         ],
         child: Stack(children: [
           BlocBuilder<ConversationBloc, ConversationState>(
+            buildWhen: (previous, current) =>
+                current.messages != previous.messages,
             builder: (context, state) {
               switch (state.status) {
                 case ConversationStatus.failure:
@@ -183,9 +184,9 @@ class _MessagesListState extends State<MessagesList> {
         ]));
   }
 
-  double separateSpace(List<ChatMessage> messages, int index) {
-    ChatMessage currentMsg = messages[index];
-    ChatMessage? prevMsg = messages.tryGet(index + 1);
+  double separateSpace(List<MessageModel> messages, int index) {
+    MessageModel currentMsg = messages[index];
+    MessageModel? prevMsg = messages.tryGet(index + 1);
     return sameMsgGroup(currentMsg, prevMsg) ? 2 : 15;
   }
 
