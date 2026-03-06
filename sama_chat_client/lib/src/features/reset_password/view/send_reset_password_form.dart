@@ -85,7 +85,7 @@ class _PasswordInputState extends State<_PasswordInput> {
                 color: dullGray,
               ),
             ),
-            hint: 'Password',
+            text: 'Password',
             error: state.password.displayError != null
                 ? state.password.displayError == PasswordValidationError.short
                     ? 'Password is too short'
@@ -124,7 +124,7 @@ class _ConfirmPasswordInputState extends State<_ConfirmPasswordInput> {
               .read<ResetPasswordBloc>()
               .add(ConfirmPasswordChanged(psw)),
           iconData: Icons.lock_outline,
-          hint: 'Confirm password',
+          text: 'Confirm password',
           error: state.confirmPassword.displayError != null
               ? state.confirmPassword.displayError ==
                       ConfirmPasswordValidationError.empty
@@ -174,7 +174,7 @@ class _ContinueButton extends StatelessWidget {
                     state.isPasswordValid ? slateBlue : whiteAluminum),
                 foregroundColor: WidgetStatePropertyAll(
                     state.isPasswordValid ? white : gainsborough),
-                hint: 'Continue');
+                text: 'Continue');
       },
     );
   }

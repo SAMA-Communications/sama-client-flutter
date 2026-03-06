@@ -5,7 +5,7 @@ import '../colors.dart';
 class TextFieldForm extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final IconData iconData;
-  final String hint;
+  final String text;
   final TextInputType? keyboardType;
   final String? error;
   final Widget? suffix;
@@ -15,7 +15,7 @@ class TextFieldForm extends StatelessWidget {
       {super.key,
       required this.onChanged,
       required this.iconData,
-      required this.hint,
+      required this.text,
       this.keyboardType,
       this.error,
       this.suffix,
@@ -52,7 +52,7 @@ class TextFieldForm extends StatelessWidget {
                 ),
                 Expanded(
                     child: Text(
-                  error ?? hint,
+                  error ?? text,
                   style: TextStyle(
                       color: error != null ? red : dullGray, fontSize: 16),
                   overflow: TextOverflow.ellipsis,
@@ -72,14 +72,16 @@ class ButtonForm extends StatelessWidget {
   final VoidCallback? onPressed;
   final WidgetStateProperty<Color?>? backgroundColor;
   final WidgetStateProperty<Color?>? foregroundColor;
-  final String hint;
+  final String text;
+  final TextStyle? textStyle;
 
   const ButtonForm(
       {super.key,
       required this.onPressed,
       required this.backgroundColor,
       required this.foregroundColor,
-      required this.hint});
+      required this.text,
+      this.textStyle});
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +104,10 @@ class ButtonForm extends StatelessWidget {
           ),
         ),
         onPressed: onPressed,
-        child: Text(hint),
+        child: Text(
+          text,
+          style: textStyle,
+        ),
       ),
     );
   }

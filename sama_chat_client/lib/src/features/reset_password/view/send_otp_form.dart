@@ -96,7 +96,7 @@ class _ContinueButton extends StatelessWidget {
                     state.isOTPValid ? slateBlue : whiteAluminum),
                 foregroundColor: WidgetStatePropertyAll(
                     state.isOTPValid ? white : gainsborough),
-                hint: 'Continue');
+                text: 'Continue');
       },
     );
   }

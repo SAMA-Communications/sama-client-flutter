@@ -218,6 +218,7 @@ class _ParticipantsListItem extends StatelessWidget {
         ),
         child: Stack(fit: StackFit.loose, children: [
           Card(
+              color: removable ? null : gainsborough,
               elevation: 4.0,
               margin: const EdgeInsets.all(4.0),
               child: Padding(
@@ -256,9 +257,9 @@ class _ParticipantsListItem extends StatelessWidget {
                         onTap: () {
                           onRemoveParticipants(user);
                         },
-                        child: const Icon(Icons.cancel_outlined,
+                        child: const Icon(Icons.cancel,
                             size: 18,
-                            color: semiBlack,
+                            color: slateBlue,
                             fontWeight: FontWeight.w100),
                       )))
               : const SizedBox.shrink(),

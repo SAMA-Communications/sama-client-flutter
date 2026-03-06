@@ -85,23 +85,21 @@ class GroupCreateFormState extends State<GroupCreateForm> {
           return previous.participants != current.participants;
         }, builder: (context, state) {
           return Visibility(
-              visible: !keyboardIsOpenCtx(context),
-              child: Visibility(
-                visible: state.participants.isValid,
-                child: IntrinsicWidth(
-                  child: ButtonForm(
-                      onPressed: () {
-                        _showGroupDetails(context);
-                      },
-                      backgroundColor: WidgetStatePropertyAll(
-                          state.participants.isValid
-                              ? slateBlue
-                              : whiteAluminum),
-                      foregroundColor: WidgetStatePropertyAll(
-                          state.participants.isValid ? white : gainsborough),
-                      hint: 'Next'),
-                ),
-              ));
+            visible: !keyboardIsOpenCtx(context) && state.participants.isValid,
+            child: IntrinsicWidth(
+              child: ButtonForm(
+                  onPressed: () {
+                    _showGroupDetails(context);
+                  },
+                  backgroundColor: WidgetStatePropertyAll(
+                      state.participants.isValid ? slateBlue : whiteAluminum),
+                  foregroundColor: WidgetStatePropertyAll(
+                      state.participants.isValid ? white : gainsborough),
+                  text: 'Next',
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16)),
+            ),
+          );
         }));
   }
 }
@@ -133,7 +131,9 @@ void _showGroupDetails(BuildContext context) {
                       },
                       backgroundColor: const WidgetStatePropertyAll(slateBlue),
                       foregroundColor: const WidgetStatePropertyAll(white),
-                      hint: 'Create'),
+                      text: 'Create',
+                      textStyle: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 16)),
                 )),
           )));
 }
@@ -232,7 +232,7 @@ class _GroupNameInput extends StatelessWidget {
             onChanged: (groupname) =>
                 context.read<GroupBloc>().add(GroupnameChanged(groupname)),
             iconData: Icons.group,
-            hint: 'Groupname',
+            text: 'Groupname',
             error: state.groupname.displayError != null
                 ? state.groupname.displayError == GroupnameValidationError.short
                     ? 'Group name is too short'

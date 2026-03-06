@@ -8,7 +8,7 @@ class AvatarLetterIcon extends StatelessWidget {
     required this.name,
     this.lastName,
     super.key,
-    this.size = const Size(55, 60),
+    this.size = const Size(55, 55),
     this.padding = EdgeInsets.zero,
     this.backgroundColor = black,
     this.textColor = dullGray,
