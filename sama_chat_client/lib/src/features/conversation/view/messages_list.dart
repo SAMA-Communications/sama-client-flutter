@@ -40,9 +40,16 @@ class _MessagesListState extends State<MessagesList> {
         listeners: [
           BlocListener<SendMessageBloc, SendMessageState>(
             listener: (context, sendState) {
-              if (sendState.status == SendMessageStatus.success) {
+              if (sendState.status == SendMessageStatus.success &&
+                  sendState.scroll) {
                 scrollTo(0);
               }
+            },
+          ),
+          BlocListener<ConversationBloc, ConversationState>(
+            listener: (context, state) {
+              scrollToReplyIfNeed(state);
+              markAsReadIfNeed();
             },
           ),
           BlocListener<DeleteMessagesBloc, DeleteMessagesState>(
@@ -69,11 +76,11 @@ class _MessagesListState extends State<MessagesList> {
           })
         ],
         child: Stack(children: [
-          BlocBuilder<ConversationBloc, ConversationState>(
-            buildWhen: (previous, current) =>
-                current.messages != previous.messages,
-            builder: (context, state) {
-              switch (state.status) {
+          BlocSelector<ConversationBloc, ConversationState, ConversationStatus>(
+            selector: (state) => state.status,
+            builder: (context, status) {
+              var state = context.read<ConversationBloc>().state;
+              switch (status) {
                 case ConversationStatus.failure:
                   WidgetsBinding.instance
                       .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
@@ -103,73 +110,82 @@ class _MessagesListState extends State<MessagesList> {
                             ),
                           );
                   }
-                  markAsReadIfNeed();
-                  scrollToReplyIfNeed(state);
-                  return NotificationListener(
-                      onNotification: (notification) {
-                        if (notification is ScrollUpdateNotification &&
-                            notification.dragDetails != null) {
-                          final keyboardTop = screenHeight - keyboardHeight();
-                          var shouldClose = keyboardTop <
-                              notification.dragDetails!.globalPosition.dy;
-                          if (notification.scrollDelta! > 0 && shouldClose) {
-                            hideKeyboard();
-                          }
-                        } else if (notification is ScrollEndNotification) {
-                          _onScroll(notification.metrics.pixels,
-                              notification.metrics.maxScrollExtent);
-                        }
-                        return false;
-                      },
-                      child: ScrollablePositionedList.separated(
-                        reverse: true,
-                        itemBuilder: (BuildContext context, int index) {
-                          var msg = state.messages[index];
-                          return SwipeTo(
-                            key: Key(msg.id.toString()),
-                            stickToRight: msg.isOwn,
-                            direction: msg.isOwn
-                                ? DismissDirection.endToStart
-                                : DismissDirection.startToEnd,
-                            onSwipe: () {
-                              print('onSwipe');
-                              context
-                                  .read<SendMessageBloc>()
-                                  .add(AddReplyMessage(msg));
+                  return BlocSelector<ConversationBloc, ConversationState,
+                          List<ChatMessage>>(
+                      selector: (state) => state.messages,
+                      builder: (context, messages) {
+                        return NotificationListener(
+                            onNotification: (notification) {
+                              if (notification is ScrollUpdateNotification &&
+                                  notification.dragDetails != null) {
+                                final keyboardTop =
+                                    screenHeight - keyboardHeight();
+                                var shouldClose = keyboardTop <
+                                    notification.dragDetails!.globalPosition.dy;
+                                if (notification.scrollDelta! > 0 &&
+                                    shouldClose) {
+                                  hideKeyboard();
+                                }
+                              } else if (notification
+                                  is ScrollEndNotification) {
+                                _onScroll(notification.metrics.pixels,
+                                    notification.metrics.maxScrollExtent);
+                              }
+                              return false;
                             },
-                            actionIcon: const Icon(
-                              Icons.reply_rounded,
-                              color: Colors.black,
-                              size: 25,
-                            ),
-                            child: MessageItem(
-                                message: msg,
-                                onTapReply: () {
-                                  var replyIndex = state.messages.indexWhere(
-                                      (item) =>
-                                          item.id == msg.repliedMessageId);
-                                  if (replyIndex == -1) {
-                                    if (!state.hasReachedMax) {
-                                      context.read<ConversationBloc>().add(
-                                          MessagesMoreForReply(
-                                              msg.repliedMessageId!));
-                                      showProgress();
-                                    }
-                                    return;
-                                  }
-                                  scrollTo(replyIndex);
-                                },
-                                onTapForward: () => print('onTapForward')),
-                          );
-                        },
-                        itemCount: state.messages.length,
-                        itemScrollController: _scrollController,
-                        itemPositionsListener: itemPositionsListener,
-                        padding: EdgeInsets.zero,
-                        separatorBuilder: (context, index) => SizedBox(
-                          height: separateSpace(state.messages, index),
-                        ),
-                      ));
+                            child: ScrollablePositionedList.separated(
+                              reverse: true,
+                              itemBuilder: (BuildContext context, int index) {
+                                var msg = messages[index];
+                                return SwipeTo(
+                                  key: Key(msg.id.toString()),
+                                  stickToRight: msg.isOwn,
+                                  direction: msg.isOwn
+                                      ? DismissDirection.endToStart
+                                      : DismissDirection.startToEnd,
+                                  onSwipe: () {
+                                    print('onSwipe');
+                                    context
+                                        .read<SendMessageBloc>()
+                                        .add(AddReplyMessage(msg));
+                                  },
+                                  actionIcon: const Icon(
+                                    Icons.reply_rounded,
+                                    color: Colors.black,
+                                    size: 25,
+                                  ),
+                                  child: MessageItem(
+                                      message: msg,
+                                      onTapReply: () {
+                                        var replyIndex = messages.indexWhere(
+                                            (item) =>
+                                                item.id ==
+                                                msg.repliedMessageId);
+                                        if (replyIndex == -1) {
+                                          if (!state.hasReachedMax) {
+                                            context
+                                                .read<ConversationBloc>()
+                                                .add(MessagesMoreForReply(
+                                                    msg.repliedMessageId!));
+                                            showProgress();
+                                          }
+                                          return;
+                                        }
+                                        scrollTo(replyIndex);
+                                      },
+                                      onTapForward: () =>
+                                          print('onTapForward')),
+                                );
+                              },
+                              itemCount: messages.length,
+                              itemScrollController: _scrollController,
+                              itemPositionsListener: itemPositionsListener,
+                              padding: EdgeInsets.zero,
+                              separatorBuilder: (context, index) => SizedBox(
+                                height: separateSpace(messages, index),
+                              ),
+                            ));
+                      });
                 case ConversationStatus.initial:
                   return const Center(child: CircularProgressIndicator());
                 case ConversationStatus.delete:

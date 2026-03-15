@@ -538,7 +538,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
     //TODO RP or set failed status
-    // var msgUpdated = msg.copyWith(status: ChatMessageStatus.failed);
+    // var msgUpdated = msg.copyWith(status: MessageModelStatus.failed);
     // messages[messages.indexOf(msg)] = msgUpdated;
     messages.remove(msg);
     emit(state.copyWith(messages: messages));
