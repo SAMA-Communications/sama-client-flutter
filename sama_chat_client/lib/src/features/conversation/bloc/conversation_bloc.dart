@@ -548,9 +548,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       List<MessageModel> messages) async {
     var result = <ChatMessage>[];
 
+    var lastCurrentMsg = limitMessages == messages.length
+        ? messages.tryGet(messages.length - 2)
+        : messages.tryGet(messages.length - 1);
+
     var shouldUpdate = state.messages.isNotEmpty &&
-        state.messages.lastOrNull?.id !=
-            messages.tryGet(messages.length - 2)?.id;
+        lastCurrentMsg != null &&
+        lastCurrentMsg.id != state.messages.lastOrNull?.id;
 
     var lastPrevMsg = shouldUpdate ? state.messages.last : null;
 

@@ -140,9 +140,11 @@ class _MessagesListState extends State<MessagesList> {
                                 return SwipeTo(
                                   key: Key(msg.id.toString()),
                                   stickToRight: msg.isOwn,
-                                  direction: msg.isOwn
-                                      ? DismissDirection.endToStart
-                                      : DismissDirection.startToEnd,
+                                  direction: msg.isServiceMessage()
+                                      ? DismissDirection.none
+                                      : msg.isOwn
+                                          ? DismissDirection.endToStart
+                                          : DismissDirection.startToEnd,
                                   onSwipe: () {
                                     print('onSwipe');
                                     context
@@ -151,7 +153,7 @@ class _MessagesListState extends State<MessagesList> {
                                   },
                                   actionIcon: const Icon(
                                     Icons.reply_rounded,
-                                    color: Colors.black,
+                                    color: black,
                                     size: 25,
                                   ),
                                   child: MessageItem(
@@ -180,7 +182,7 @@ class _MessagesListState extends State<MessagesList> {
                               itemCount: messages.length,
                               itemScrollController: _scrollController,
                               itemPositionsListener: itemPositionsListener,
-                              padding: EdgeInsets.zero,
+                              padding: const EdgeInsets.only(top: 5),
                               separatorBuilder: (context, index) => SizedBox(
                                 height: separateSpace(messages, index),
                               ),
@@ -203,7 +205,9 @@ class _MessagesListState extends State<MessagesList> {
   double separateSpace(List<MessageModel> messages, int index) {
     MessageModel currentMsg = messages[index];
     MessageModel? prevMsg = messages.tryGet(index + 1);
-    return sameMsgGroup(currentMsg, prevMsg) ? 2 : 15;
+    return sameMsgGroup(currentMsg, prevMsg) && !currentMsg.isServiceMessage()
+        ? 2
+        : 10;
   }
 
   Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
