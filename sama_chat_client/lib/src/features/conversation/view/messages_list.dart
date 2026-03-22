@@ -110,10 +110,11 @@ class _MessagesListState extends State<MessagesList> {
                             ),
                           );
                   }
-                  return BlocSelector<ConversationBloc, ConversationState,
-                          List<ChatMessage>>(
-                      selector: (state) => state.messages,
-                      builder: (context, messages) {
+                  return BlocBuilder<ConversationBloc, ConversationState>(
+                      buildWhen: (previous, current) =>
+                          previous.messages != current.messages ||
+                          previous.selectedMessages != current.selectedMessages,
+                      builder: (context, state) {
                         return NotificationListener(
                             onNotification: (notification) {
                               if (notification is ScrollUpdateNotification &&
@@ -136,7 +137,7 @@ class _MessagesListState extends State<MessagesList> {
                             child: ScrollablePositionedList.separated(
                               reverse: true,
                               itemBuilder: (BuildContext context, int index) {
-                                var msg = messages[index];
+                                var msg = state.messages[index];
                                 return SwipeTo(
                                   key: Key(msg.id.toString()),
                                   stickToRight: msg.isOwn,
@@ -159,8 +160,8 @@ class _MessagesListState extends State<MessagesList> {
                                   child: MessageItem(
                                       message: msg,
                                       onTapReply: () {
-                                        var replyIndex = messages.indexWhere(
-                                            (item) =>
+                                        var replyIndex = state.messages
+                                            .indexWhere((item) =>
                                                 item.id ==
                                                 msg.repliedMessageId);
                                         if (replyIndex == -1) {
@@ -179,12 +180,12 @@ class _MessagesListState extends State<MessagesList> {
                                           print('onTapForward')),
                                 );
                               },
-                              itemCount: messages.length,
+                              itemCount: state.messages.length,
                               itemScrollController: _scrollController,
                               itemPositionsListener: itemPositionsListener,
                               padding: const EdgeInsets.only(top: 5),
                               separatorBuilder: (context, index) => SizedBox(
-                                height: separateSpace(messages, index),
+                                height: separateSpace(state.messages, index),
                               ),
                             ));
                       });

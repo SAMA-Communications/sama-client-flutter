@@ -131,7 +131,7 @@ class _MessageInputState extends State<MessageInput> {
               margin:
                   const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
               decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                borderRadius: BorderRadius.all(Radius.circular(15.0)),
                 color: gainsborough,
               ),
               child: Row(
