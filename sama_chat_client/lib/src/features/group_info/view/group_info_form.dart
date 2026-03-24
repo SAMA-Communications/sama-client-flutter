@@ -312,57 +312,74 @@ void _showSearchScreenDialog(BuildContext context) {
                         RepositoryProvider.of<GlobalSearchRepository>(context),
                   ),
               child: Scaffold(
-                appBar: const GlobalSearchBar(),
+                appBar: AppBar(
+                    backgroundColor: black,
+                    leading: const BackButton(color: white),
+                    centerTitle: false,
+                    title: const Text(
+                      'Group info',
+                      style: TextStyle(color: white),
+                    )),
                 body: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
-                  child: BlocProvider.value(
-                    value: BlocProvider.of<GroupInfoBloc>(context),
-                    child: BlocConsumer<GroupInfoBloc, GroupInfoState>(
-                        listener: (context, state) {
-                      if (state.addParticipants.displayError ==
-                          GroupParticipantsValidationError.long) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'you\'ve reached maximum participant limit')),
-                          );
-                      }
-                    }, buildWhen: (previous, current) {
-                      return previous.addParticipants !=
-                          current.addParticipants;
-                    }, builder: (context, state) {
-                      var currentParticipants = List.of(
-                          state.participants.value..remove(state.currentUser));
-                      return ParticipantsForm(
-                        users: List.of(currentParticipants)
-                          ..addAll(state.addParticipants.value),
-                        nonRemovableUsers: currentParticipants,
-                        onAddParticipants: (user) {
-                          if (!state.participants.value.contains(user)) {
-                            context
-                                .read<GroupInfoBloc>()
-                                .add(GroupAddParticipantsAdded(user));
-                          } else {
-                            ScaffoldMessenger.of(context)
-                              ..hideCurrentSnackBar()
-                              ..showSnackBar(
-                                const SnackBar(
-                                    content: Text('user is already in chat')),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const GlobalSearchBar(),
+                        Expanded(
+                          child: BlocProvider.value(
+                            value: BlocProvider.of<GroupInfoBloc>(context),
+                            child: BlocConsumer<GroupInfoBloc, GroupInfoState>(
+                                listener: (context, state) {
+                              if (state.addParticipants.displayError ==
+                                  GroupParticipantsValidationError.long) {
+                                ScaffoldMessenger.of(context)
+                                  ..hideCurrentSnackBar()
+                                  ..showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'you\'ve reached maximum participant limit')),
+                                  );
+                              }
+                            }, buildWhen: (previous, current) {
+                              return previous.addParticipants !=
+                                  current.addParticipants;
+                            }, builder: (context, state) {
+                              var currentParticipants = List.of(
+                                  state.participants.value
+                                    ..remove(state.currentUser));
+                              return ParticipantsForm(
+                                users: List.of(currentParticipants)
+                                  ..addAll(state.addParticipants.value),
+                                nonRemovableUsers: currentParticipants,
+                                onAddParticipants: (user) {
+                                  if (!state.participants.value
+                                      .contains(user)) {
+                                    context
+                                        .read<GroupInfoBloc>()
+                                        .add(GroupAddParticipantsAdded(user));
+                                  } else {
+                                    ScaffoldMessenger.of(context)
+                                      ..hideCurrentSnackBar()
+                                      ..showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'user is already in chat')),
+                                      );
+                                  }
+                                },
+                                onRemoveParticipants: (user) {
+                                  context
+                                      .read<GroupInfoBloc>()
+                                      .add(GroupAddParticipantsRemoved(user));
+                                },
                               );
-                          }
-                        },
-                        onRemoveParticipants: (user) {
-                          context
-                              .read<GroupInfoBloc>()
-                              .add(GroupAddParticipantsRemoved(user));
-                        },
-                      );
-                    }),
-                  ),
-                ),
+                            }),
+                          ),
+                        ),
+                      ],
+                    )),
                 floatingActionButton: StatefulBuilder(builder: (_, setState) {
                   return BlocProvider.value(
                     value: BlocProvider.of<GroupInfoBloc>(context),

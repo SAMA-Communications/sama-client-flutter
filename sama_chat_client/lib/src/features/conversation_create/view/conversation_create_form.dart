@@ -23,17 +23,28 @@ class ConversationCreateFormState extends State<ConversationCreateForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: const GlobalSearchBar(),
+        appBar: AppBar(
+          backgroundColor: black,
+          iconTheme: const IconThemeData(
+            color: white,
+          ),
+          title: const Text(
+            'Create chat',
+            style: TextStyle(color: white),
+          ),
+          centerTitle: true,
+        ),
         body: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const GlobalSearchBar(),
                 Row(children: <Widget>[
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 20.0, bottom: 16.0),
+                      padding: const EdgeInsets.fromLTRB(15, 20, 15, 16),
                       child: TextButton.icon(
                         style: const ButtonStyle(
                           backgroundColor: WidgetStatePropertyAll(slateBlue),
@@ -65,7 +76,7 @@ class ConversationCreateFormState extends State<ConversationCreateForm> {
                       ),
                     ),
                   ),
-                  SearchBody(searchType: SearchType.users)
+                  SearchForm(searchType: SearchType.both)
                 ]))
               ]),
         ));

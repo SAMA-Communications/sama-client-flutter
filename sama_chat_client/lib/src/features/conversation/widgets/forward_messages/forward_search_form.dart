@@ -13,6 +13,7 @@ import '../../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../../../search/bloc/global_search_bloc.dart';
 import '../../../search/bloc/global_search_state.dart';
 import '../../../search/view/search_bar.dart';
+import '../../../search/view/search_form.dart';
 import '../../bloc/conversation_bloc.dart';
 import '../../bloc/forward_message/forward_messages_bloc.dart';
 import '../../models/chat_message.dart';
@@ -27,12 +28,27 @@ class ForwardSearchForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        const GlobalSearchBar(withBack: false),
-        _SearchBody(forwardMessages),
-      ],
-    );
+    return Scaffold(
+        appBar: AppBar(
+            backgroundColor: black,
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            toolbarHeight: kToolbarHeight + 5,
+            title: const Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Text(
+                  'Forward message',
+                  style: TextStyle(color: white),
+                ))),
+        body: Container(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+            child: Column(
+              spacing: 4,
+              children: [
+                const GlobalSearchBar(),
+                _SearchBody(forwardMessages),
+              ],
+            )));
   }
 }
 
@@ -116,7 +132,12 @@ class _SearchBody extends StatelessWidget {
                     padding: EdgeInsets.only(top: 18.0),
                     child: Text('Please start typing to find chat'),
                   )
-                : Expanded(child: _SearchResults(null, chats, forwardMessages)),
+                : Expanded(
+                    child: SearchResults(null, chats, chatOnTap: (chat) {
+                    context
+                        .read<ForwardMessagesBloc>()
+                        .add(SendForwardMessage([chat], forwardMessages));
+                  })),
             SearchStateLoading() => const Padding(
                 padding: EdgeInsets.only(top: 18.0),
                 child: CircularProgressIndicator.adaptive(),
@@ -126,113 +147,14 @@ class _SearchBody extends StatelessWidget {
                 child: Text(state.error),
               ),
             SearchStateSuccess() => Expanded(
-                child: _SearchResults(
-                    state.users, state.conversations, forwardMessages)),
+                  child: SearchResults(state.users, state.conversations,
+                      chatOnTap: (chat) {
+                context
+                    .read<ForwardMessagesBloc>()
+                    .add(SendForwardMessage([chat], forwardMessages));
+              })),
           };
         },
-      ),
-    );
-  }
-}
-
-class _SearchResults extends StatelessWidget {
-  final List<UserModel>? users;
-  final List<ConversationModel> chats;
-  final Set<ChatMessage> forwardMessages;
-
-  const _SearchResults(this.users, this.chats, this.forwardMessages);
-
-  Widget _header(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: Container(
-        padding: const EdgeInsets.only(left: 18.0),
-        width: double.maxFinite,
-        color: gainsborough, //define the background color
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 18),
-        ),
-      ),
-    );
-  }
-
-  Widget _emptyListText(String title) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w300,
-          fontSize: 16,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final userList = users == null
-        ? null
-        : users!.isEmpty
-            ? _emptyListText('We couldn\'t find the specified users')
-            : ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: users!.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final user = users![index];
-                  return ListTile(
-                    leading: AvatarLetterIcon(
-                        name: user.login!, avatar: user.avatar),
-                    title: Text(
-                      user.login!,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w500, fontSize: 20),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    contentPadding:
-                        const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
-                    onTap: () {
-                      context
-                          .read<ConversationCreateBloc>()
-                          .add(ConversationCreated(user: user, type: 'u'));
-                    },
-                  );
-                },
-              );
-
-    final conversationList = chats.isEmpty
-        ? _emptyListText('We couldn\'t find the specified chats')
-        : ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: chats.length,
-            itemBuilder: (BuildContext context, int index) {
-              final conversation = chats[index];
-              return ConversationListItem(
-                conversation: conversation,
-                onTap: () {
-                  context
-                      .read<ForwardMessagesBloc>()
-                      .add(SendForwardMessage([conversation], forwardMessages));
-                },
-              );
-            },
-          );
-
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      child: ListView(
-        padding: const EdgeInsets.only(top: 10.0),
-        children: <Widget>[
-          if (userList != null) ...[_header('Users'), userList],
-          _header('Chats'),
-          conversationList,
-        ],
       ),
     );
   }

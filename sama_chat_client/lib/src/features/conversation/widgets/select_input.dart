@@ -121,17 +121,14 @@ class _SelectInputState extends State<SelectInput> {
                               context,
                               () => showModalBottomSheet<dynamic>(
                                   isScrollControlled: true,
-                                  useSafeArea: false,
                                   context: context,
-                                  backgroundColor: black,
+                                  backgroundColor: Colors.transparent,
                                   builder: (BuildContext bc) {
-                                    return Container(
-                                        color: lightWhite,
-                                        margin: EdgeInsets.only(
-                                            top: MediaQueryData.fromView(
-                                                    View.of(context))
-                                                .padding
-                                                .top),
+                                    return ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                          top: Radius.circular(24),
+                                        ),
                                         child: BlocProvider.value(
                                           value:
                                               BlocProvider.of<ConversationBloc>(

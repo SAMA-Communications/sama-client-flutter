@@ -7,9 +7,7 @@ import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_event.dart';
 
 class GlobalSearchBar extends StatefulWidget implements PreferredSizeWidget {
-  final bool withBack;
-
-  const GlobalSearchBar({this.withBack = true, super.key});
+  const GlobalSearchBar({super.key});
 
   @override
   State<GlobalSearchBar> createState() => _GlobalSearchBarState();
@@ -36,39 +34,39 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: black,
-      leading: widget.withBack ? const BackButton(color: white) : null,
-      automaticallyImplyLeading: widget.withBack,
-      title: SizedBox(
-        height: kToolbarHeight - 18,
-        child: TextField(
-          controller: _textController,
-          autocorrect: false,
-          onChanged: (text) {
-            if (text.length >= 2) {
-              _globalSearchBloc.add(
-                TextChanged(text: text),
-              );
-            }
-          },
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: white,
-            contentPadding: const EdgeInsets.only(top: 14.0),
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: GestureDetector(
-              onTap: _onClearTapped,
-              child: const Icon(Icons.clear),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            hintText: 'Search',
+    return Container(
+      height: kToolbarHeight - 16,
+      padding: const EdgeInsetsGeometry.symmetric(horizontal: 15),
+      child: TextField(
+        controller: _textController,
+        autocorrect: false,
+        onChanged: (text) {
+          if (text.length >= 2) {
+            _globalSearchBloc.add(
+              TextChanged(text: text),
+            );
+          }
+        },
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: paleMallow,
+          contentPadding: const EdgeInsets.only(top: 14.0),
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: GestureDetector(
+            onTap: _onClearTapped,
+            child: const Icon(Icons.clear),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20.0),
+            borderSide: const BorderSide(color: lightMallow, width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20.0),
+            borderSide: const BorderSide(color: slateBlue, width: 2),
+          ),
+          hintText: 'Search',
         ),
       ),
-      centerTitle: !widget.withBack,
     );
   }
 
