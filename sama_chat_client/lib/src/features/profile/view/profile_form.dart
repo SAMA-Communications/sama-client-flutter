@@ -64,7 +64,8 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SafeArea(
+        child: Padding(
       padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
       child: Card(
         child: Padding(
@@ -78,7 +79,7 @@ class ProfileCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
