@@ -94,6 +94,8 @@ class ConversationPage extends StatelessWidget {
               toolbarHeight: 64,
               centerTitle: false,
               titleSpacing: 0.0,
+              backgroundColor: smokyBorough,
+              surfaceTintColor: Colors.transparent,
               title: BlocBuilder<AiMessageBloc, AiMessageState>(
                   builder: (BuildContext context, aiState) {
                 return aiState.status == AiMessageStatus.processing
@@ -222,6 +224,11 @@ class _PopupMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<_Menu>(
         position: PopupMenuPosition.under,
+        color: lightMallow,
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0), // Rounded corners
+        ),
         onSelected: (_Menu item) {
           switch (item) {
             case _Menu.info:
@@ -273,7 +280,7 @@ class _PopupMenuButton extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
               value: _Menu.info,
               child: ListTile(
-                leading: Icon(Icons.visibility_outlined),
+                leading: Icon(Icons.visibility_outlined, size: 25),
                 title: Text('Info'),
               ),
             ),
@@ -281,7 +288,7 @@ class _PopupMenuButton extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
                 value: _Menu.deleteAndLeave,
                 child: ListTile(
-                  leading: Icon(Icons.exit_to_app_outlined),
+                  leading: Icon(Icons.exit_to_app_outlined, size: 25),
                   title: Text('Delete and leave'),
                 ))
           ];

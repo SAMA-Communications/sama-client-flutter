@@ -35,6 +35,7 @@ class MediaAttachment extends StatelessWidget {
       isFirst: message.isFirstUserMessage,
       isLast: message.isLastUserMessage,
       isOwn: message.isOwn,
+      bubbleType: message.bubbleType,
       child: BlocBuilder<MediaAttachmentBloc, MediaAttachmentState>(
         builder: (context, state) {
           if (message.attachments.first.url == null) {

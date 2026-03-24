@@ -12,6 +12,8 @@ final double screenHeight =
     WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.height /
         WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
+double navBarHeight(BuildContext ctx) => MediaQuery.of(ctx).viewPadding.bottom;
+
 double keyboardHeightCtx(BuildContext ctx) =>
     MediaQuery.of(ctx).viewInsets.bottom;
 

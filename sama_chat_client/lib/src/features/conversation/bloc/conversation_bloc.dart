@@ -13,6 +13,7 @@ import '../../../db/resource.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/messages/messages_repository.dart';
 import '../../../repository/user/user_repository.dart';
+import '../../../shared/utils/list_utils.dart';
 import '../models/models.dart';
 
 part 'conversation_event.dart';
@@ -47,7 +48,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   final MessagesRepository messagesRepository;
   final UserRepository userRepository;
 
-  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
+  StreamSubscription<MessageModel>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
   StreamSubscription<TypingStatus>? typingMessageSubscription;
   StreamSubscription<Map<String, dynamic>>? lastActivitySubscription;
@@ -221,8 +222,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   ) async {
     try {
       if (state.status == ConversationStatus.initial) {
-        final messages =
-            await messagesRepository.getStoredMessages(currentConversation);
+        final messages = await buildChatMessageModels(
+            await messagesRepository.getStoredMessages(currentConversation.id));
         emit(
           state.copyWith(
               status: ConversationStatus.success,
@@ -260,7 +261,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         ltDate: ltDate, gtTime: gtTime);
     switch (resource.status) {
       case Status.success:
-        var messages = resource.data ?? List.empty();
+        var messages =
+            await buildChatMessageModels(resource.data ?? List.empty());
         messages.isEmpty
             ? emit(state.copyWith(hasReachedMax: true, initial: false))
             : emit(
@@ -400,27 +402,29 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     if (event.message.extension?['modified'] ?? false) {
       var indexMsg = messages.indexWhere((m) => m.id == event.message.id);
-      messages[indexMsg] = event.message;
+      var msg = messages[indexMsg];
+      messages[indexMsg] = event.message.toChatMessage(
+          msg.isLastUserMessage, msg.isFirstUserMessage, msg.bubbleType);
     } else {
       if (messages.isNotEmpty) {
         messages.first = messages.first.copyWith(
-          isLastUserMessage: isServiceMessage(messages.first) ||
-              event.message.from != messages.first.from,
-          isFirstUserMessage: messages.length == 1 ||
-              isServiceMessage(messages[1]) ||
-              messages[1].from != messages.first.from,
-        );
+            isLastUserMessage: isServiceMessage(messages.first) ||
+                event.message.from != messages.first.from,
+            isFirstUserMessage: messages.length == 1 ||
+                isServiceMessage(messages[1]) ||
+                messages[1].from != messages.first.from,
+            bubbleType:
+                bubbleType(List.of(messages)..insert(0, event.message), 1));
       }
 
       messages.insert(
-        0,
-        event.message.copyWith(
-          isFirstUserMessage: messages.isEmpty ||
-              isServiceMessage(messages.first) ||
-              event.message.from != messages.first.from,
-          isLastUserMessage: true,
-        ),
-      );
+          0,
+          event.message.toChatMessage(
+              true,
+              messages.isEmpty ||
+                  isServiceMessage(messages.first) ||
+                  event.message.from != messages.first.from,
+              bubbleType(List.of(messages)..insert(0, event.message), 0)));
     }
 
     emit(
@@ -432,7 +436,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var messages = [...state.messages];
 
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
-    var msgUpdated = msg.copyWith(status: ChatMessageStatus.pending);
+    var msgUpdated = msg.copyWith(status: MessageModelStatus.pending);
     messages[messages.indexOf(msg)] = msgUpdated;
     emit(state.copyWith(messages: messages));
   }
@@ -452,6 +456,36 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var messages = [...state.messages];
     var messagesMap = {}..addEntries(messages.map((m) => MapEntry(m.id, m)));
     event.status.msgIds?.forEach((id) {
+      int currentIndex = messages.indexOf(messagesMap[id]);
+      int prevIndex = currentIndex + 1;
+      int nextIndex = currentIndex - 1;
+      ChatMessage? prevMsg = messages.tryGet(prevIndex);
+      ChatMessage? nextMsg = messages.tryGet(nextIndex);
+
+      var prevMsgUpdated = prevMsg?.copyWith(
+          isLastUserMessage: prevIndex == 0 ||
+              isServiceMessage(messages.tryGet(prevIndex - 2)) ||
+              messages.tryGet(prevIndex - 2)?.from != messages[prevIndex].from,
+          isFirstUserMessage: prevIndex == messages.length - 1 ||
+              isServiceMessage(messages[prevIndex + 2]) ||
+              messages[prevIndex + 2].from != messages[prevIndex].from);
+
+      var nextMsgUpdated = nextMsg?.copyWith(
+          isLastUserMessage: nextIndex == 0 ||
+              isServiceMessage(messages[nextIndex - 2]) ||
+              messages[nextIndex - 2].from != messages[nextIndex].from,
+          isFirstUserMessage: nextIndex == messages.length - 1 ||
+              isServiceMessage(messages[nextIndex + 2]) ||
+              messages[nextIndex + 2].from != messages[nextIndex].from);
+
+      if (prevMsgUpdated != null && prevMsgUpdated != prevMsg) {
+        messages[prevIndex] = prevMsgUpdated;
+      }
+
+      if (nextMsgUpdated != null && nextMsgUpdated != nextMsg) {
+        messages[nextIndex] = nextMsgUpdated;
+      }
+
       messages.remove(messagesMap[id]);
     });
     emit(state.copyWith(messages: messages));
@@ -464,12 +498,14 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var msg = messages.firstWhereOrNull((o) => o.id == event.status.messageId);
     if (msg == null) return;
     var msgUpdated = msg.copyWith(
-        id: event.status.serverMessageId, status: ChatMessageStatus.sent);
+        id: event.status.serverMessageId, status: MessageModelStatus.sent);
 
     var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
 
     messages[messages.indexOf(msg)] = msgLocal.toChatMessage(
-        msgUpdated.isLastUserMessage, msgUpdated.isFirstUserMessage);
+        msgUpdated.isLastUserMessage,
+        msgUpdated.isFirstUserMessage,
+        msgUpdated.bubbleType);
     emit(state.copyWith(messages: messages));
 
     var chatLocal = await conversationRepository
@@ -482,12 +518,12 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   FutureOr<void> _onReadStatusReceived(
       _ReadStatusReceived event, Emitter<ConversationState> emit) async {
-    var messages = {for (var v in state.messages) v.id!: v};
+    var messages = {for (var v in state.messages) v.id: v};
     var msgListUpdated = <MessageModel>[];
     event.status.msgIds?.forEach((id) {
       if (messages[id] != null &&
-          messages[id]?.status != ChatMessageStatus.read) {
-        var msg = messages[id]!.copyWith(status: ChatMessageStatus.read);
+          messages[id]?.status != MessageModelStatus.read) {
+        var msg = messages[id]!.copyWith(status: MessageModelStatus.read);
         messages[id] = msg;
         msgListUpdated.add(msg);
       }
@@ -502,10 +538,49 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
     var msg = messages.firstWhere((o) => o.id == event.status.messageId);
     //TODO RP or set failed status
-    // var msgUpdated = msg.copyWith(status: ChatMessageStatus.failed);
+    // var msgUpdated = msg.copyWith(status: MessageModelStatus.failed);
     // messages[messages.indexOf(msg)] = msgUpdated;
     messages.remove(msg);
     emit(state.copyWith(messages: messages));
+  }
+
+  Future<List<ChatMessage>> buildChatMessageModels(
+      List<MessageModel> messages) async {
+    var result = <ChatMessage>[];
+
+    var lastCurrentMsg = limitMessages == messages.length
+        ? messages.tryGet(messages.length - 2)
+        : messages.tryGet(messages.length - 1);
+
+    var shouldUpdate = state.messages.isNotEmpty &&
+        lastCurrentMsg != null &&
+        lastCurrentMsg.id != state.messages.lastOrNull?.id;
+
+    var lastPrevMsg = shouldUpdate ? state.messages.last : null;
+
+    for (int i = 0; i < messages.length; i++) {
+      var message = messages[i];
+      var chatMessage = message.toChatMessage(
+          i == 0
+              ? lastPrevMsg?.from != messages[i].from
+              : isServiceMessage(messages[i - 1]) ||
+                  messages[i - 1].from != messages[i].from,
+          i == messages.length - 1 ||
+              isServiceMessage(messages[i + 1]) ||
+              messages[i + 1].from != messages[i].from,
+          i == 0 && shouldUpdate
+              ? bubbleType(
+                  List.of(messages)..insert(0, state.messages.last), i + 1)
+              : bubbleType(messages, i));
+
+      if (i == messages.length - 1 && limitMessages == messages.length) {
+// do not put last message in result to determine bubbleType and if it's last for user with next pagination
+        continue;
+      }
+
+      result.add(chatMessage);
+    }
+    return result;
   }
 
   @override

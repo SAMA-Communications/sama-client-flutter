@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:sama_sdk/api/conversations/models/message.dart';
 
 import 'models.dart';
+
+enum MessageModelStatus { none, pending, draft, sent, read }
 
 @Entity()
 // ignore: must_be_immutable
@@ -17,7 +20,8 @@ class MessageModel extends Equatable {
   final String cid;
   final String? repliedMessageId;
   final String? forwardedMessageId;
-  final String? rawStatus;
+  @Transient()
+  MessageModelStatus status;
   final String? body;
   final bool isOwn;
   final int? t;
@@ -36,6 +40,30 @@ class MessageModel extends Equatable {
     if (value != null) extension = jsonDecode(value);
   }
 
+  int? get dbStatus {
+    ensureStableEnumValues();
+    return status.index;
+  }
+
+  set dbStatus(int? value) {
+    ensureStableEnumValues();
+    if (value == null) {
+      status = MessageModelStatus.none;
+    } else {
+      status = value >= 0 && value < MessageModelStatus.values.length
+          ? MessageModelStatus.values[value]
+          : MessageModelStatus.none;
+    }
+  }
+
+  void ensureStableEnumValues() {
+    assert(MessageModelStatus.none.index == 0);
+    assert(MessageModelStatus.pending.index == 1);
+    assert(MessageModelStatus.draft.index == 2);
+    assert(MessageModelStatus.sent.index == 3);
+    assert(MessageModelStatus.read.index == 4);
+  }
+
   MessageModel({
     this.bid,
     required this.id,
@@ -44,7 +72,7 @@ class MessageModel extends Equatable {
     required this.isOwn,
     this.repliedMessageId,
     this.forwardedMessageId,
-    this.rawStatus,
+    this.status = MessageModelStatus.none,
     this.body,
     this.createdAt,
     this.t,
@@ -74,7 +102,7 @@ class MessageModel extends Equatable {
     String? cid,
     String? repliedMessageId,
     String? forwardedMessageId,
-    String? rawStatus,
+    MessageModelStatus? status,
     String? body,
     bool? isOwn,
     DateTime? createdAt,
@@ -93,7 +121,7 @@ class MessageModel extends Equatable {
         cid: cid ?? this.cid,
         repliedMessageId: repliedMessageId ?? this.repliedMessageId,
         forwardedMessageId: forwardedMessageId ?? this.forwardedMessageId,
-        rawStatus: rawStatus ?? this.rawStatus,
+        status: status ?? this.status,
         body: body ?? this.body,
         isOwn: isOwn ?? this.isOwn,
         createdAt: createdAt ?? this.createdAt,
@@ -108,11 +136,12 @@ class MessageModel extends Equatable {
 
   @override
   String toString() {
-    return 'MessageModel{bid: $bid, id: $id, from: $from, cid: $cid, rawStatus: $rawStatus, body: $body, t: $t, createdAt: $createdAt, extension: $extension, attachments: $attachments}';
+    return 'MessageModel{bid: $bid, id: $id, from: $from, cid: $cid, status: $status, body: $body, t: $t, createdAt: $createdAt, extension: $extension, attachments: $attachments}';
   }
 
   @override
-  List<Object?> get props => [id, from, rawStatus, body, t];
+  List<Object?> get props =>
+      [id, from, status, body, t, createdAt?.millisecondsSinceEpoch];
 }
 
 extension MessageModelExtension on Message {
@@ -123,7 +152,11 @@ extension MessageModelExtension on Message {
       cid: cid!,
       repliedMessageId: repliedMessageId,
       forwardedMessageId: forwardedMessageId,
-      rawStatus: isOwn ? rawStatus ?? 'sent' : null,
+      status: isOwn
+          ? MessageModelStatus.values
+                  .firstWhereOrNull((i) => i.name == rawStatus) ??
+              MessageModelStatus.sent
+          : MessageModelStatus.none,
       body: body,
       isOwn: isOwn,
       createdAt: createdAt,

@@ -8,13 +8,13 @@ import '../../db/local/message_local_datasource.dart';
 import '../../db/models/models.dart';
 import '../../db/network_bound_resource.dart';
 import '../../db/resource.dart';
-import '../../features/conversation/models/models.dart';
 import '../user/user_repository.dart';
+
+const limitMessages = 30;
 
 class MessagesRepository {
   final MessageLocalDatasource localDatasource;
   final UserRepository userRepository;
-  final limitMessages = 30;
 
   MessagesRepository(
       {required this.localDatasource, required this.userRepository}) {
@@ -28,10 +28,10 @@ class MessagesRepository {
   StreamSubscription<api.MessageSendStatus>? deletedMessageSubscription;
   StreamSubscription<api.TypingStatus>? typingMessageSubscription;
 
-  final StreamController<ChatMessage> _incomingMessagesController =
+  final StreamController<MessageModel> _incomingMessagesController =
       StreamController.broadcast();
 
-  Stream<ChatMessage> get incomingMessagesStream =>
+  Stream<MessageModel> get incomingMessagesStream =>
       _incomingMessagesController.stream;
 
   final StreamController<api.MessageSendStatus> _statusMessagesController =
@@ -46,9 +46,9 @@ class MessagesRepository {
   Stream<api.TypingStatus> get typingMessageStream =>
       _typingMessageController.stream;
 
-  Future<Resource<List<ChatMessage>>> getAllMessages(ConversationModel chat,
+  Future<Resource<List<MessageModel>>> getAllMessages(ConversationModel chat,
       {DateTime? ltDate, DateTime? gtTime}) async {
-    return NetworkBoundResources<List<ChatMessage>, List<MessageModel>>()
+    return NetworkBoundResources<List<MessageModel>, List<MessageModel>>()
         .asFuture(
       loadFromDb: () => localDatasource.getAllMessagesLocal(chat.id,
           ltDate: ltDate, limit: limitMessages),
@@ -63,7 +63,6 @@ class MessagesRepository {
         localDatasource.removeMessagesLocal(idsToDelete);
         return localDatasource.saveMessagesLocal(newData);
       },
-      processResponse: buildChatMessageModels,
     );
   }
 
@@ -117,7 +116,7 @@ class MessagesRepository {
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
-    _incomingMessagesController.add(messageModel.toChatMessage(true, true));
+    _incomingMessagesController.add(messageModel);
   }
 
   Future<String> changeMessageTone(String body, String tone) async {
@@ -127,13 +126,12 @@ class MessagesRepository {
     });
   }
 
-  Future<List<ChatMessage>> getStoredMessagesByIds(
+  Future<List<MessageModel>> getStoredMessagesByIds(
       ConversationModel chat, List<String> ids) async {
-    var messages = await localDatasource.getMessagesLocal(ids);
-    return buildChatMessageModels(messages);
+    return await localDatasource.getMessagesLocal(ids);
   }
 
-  Future<ChatMessage?> getReplyMessageById(
+  Future<MessageModel?> getReplyMessageById(
       ConversationModel chat, String id) async {
     var message = await localDatasource.getMessageLocalById(id);
     if (message == null) {
@@ -141,29 +139,26 @@ class MessagesRepository {
       message = message?.copyWith(isTempReplied: true);
       if (message != null) message = await saveMessageLocal(message);
     }
-
-    if (message != null) {
-      return (await buildChatMessageModels([message])).firstOrNull;
-    }
-    return null;
+    return message;
   }
 
-  Future<List<ChatMessage>> getStoredMessages(ConversationModel chat,
-      {int? limit}) async {
-    var messages = await localDatasource.getAllMessagesLocal(chat.id,
-        limit: limit ?? limitMessages);
-    return buildChatMessageModels(messages);
+  Future<List<MessageModel>> getStoredMessages(String cid,
+      {DateTime? ltDate, DateTime? gtDate, int? limit}) async {
+    return await localDatasource.getAllMessagesLocal(cid,
+        ltDate: ltDate, gtDate: gtDate, limit: limit ?? limitMessages);
   }
 
   Future<MessageModel?> getMessageLocalById(String id) {
     return localDatasource.getMessageLocalById(id);
   }
 
-  Future<MessageModel?> getMessageLocalByStatus(String cid, String status) {
+  Future<MessageModel?> getMessageLocalByStatus(
+      String cid, MessageModelStatus status) {
     return localDatasource.getMessageLocalByStatus(cid, status);
   }
 
-  Future<List<MessageModel>> getMessagesLocalByStatus(String status) {
+  Future<List<MessageModel>> getMessagesLocalByStatus(
+      MessageModelStatus status) {
     return localDatasource.getMessagesLocalByStatus(status);
   }
 
@@ -189,36 +184,33 @@ class MessagesRepository {
         repliedMessageId: replyMessage?.id,
         from: currentUser?.id,
         id: const Uuid().v1(),
-        rawStatus: ChatMessageStatus.none.name,
+        rawStatus: MessageModelStatus.none.name,
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
     var msgModel = message
         .toMessageModel(true, currentUser!)
         .copyWith(replyMessage: replyMessage);
-    _incomingMessagesController.add(msgModel.toChatMessage(true, true));
+    _incomingMessagesController.add(msgModel);
 
     return api.sendMessage(message: message).then((response) async {
       var (serverMid, msg) = response;
       if (serverMid == null) {
-        var msgUpdated =
-            msgModel.copyWith(rawStatus: ChatMessageStatus.pending.name);
+        var msgUpdated = msgModel.copyWith(status: MessageModelStatus.pending);
         saveMessageLocal(msgUpdated);
         _statusMessagesController
             .add(api.PendingMessageStatus.fromJson({'mid': message.id}));
       }
       if (msg != null) {
-        ChatMessage chatMessage;
+        MessageModel msgModel;
         if (msg.extension?['modified'] ?? false) {
-          chatMessage =
-              msg.toMessageModel(true, currentUser).toChatMessage(true, true);
+          msgModel = msg.toMessageModel(true, currentUser);
         } else {
           var sender = await userRepository.getUserById(msg.from ?? '');
           sender ??= UserModel();
-          chatMessage =
-              msg.toMessageModel(false, sender).toChatMessage(true, true);
+          msgModel = msg.toMessageModel(false, sender);
         }
-        _incomingMessagesController.add(chatMessage);
+        _incomingMessagesController.add(msgModel);
       }
     }).catchError((onError) {
       if (onError is api.ResponseException) {
@@ -275,7 +267,7 @@ class MessagesRepository {
         forwardedMessageId: forwardedMessageId,
         from: currentUser?.id,
         id: const Uuid().v1(),
-        rawStatus: ChatMessageStatus.none.name,
+        rawStatus: MessageModelStatus.none.name,
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
@@ -285,9 +277,9 @@ class MessagesRepository {
         var msgModel = message.toMessageModel(true, currentUser!).copyWith(
             id: serverMid,
             replyMessage: replyMessage,
-            rawStatus: ChatMessageStatus.sent.name);
+            status: MessageModelStatus.sent);
         var msgUpdated = await saveMessageLocal(msgModel);
-        _incomingMessagesController.add(msgUpdated.toChatMessage(true, true));
+        _incomingMessagesController.add(msgUpdated);
       },
     );
   }
@@ -325,12 +317,12 @@ class MessagesRepository {
         id: const Uuid().v1(),
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now(),
-        rawStatus: ChatMessageStatus.draft.name)
+        status: MessageModelStatus.draft)
       ..sender = currentUser
       ..replyMessage = replyMessage;
 
     var msg = await saveMessageLocal(message);
-    _incomingMessagesController.add(msg.toChatMessage(true, true));
+    _incomingMessagesController.add(msg);
   }
 
   Future<MessageModel> updateMessageLocal(MessageModel message) async {
@@ -363,9 +355,8 @@ class MessagesRepository {
           message.toMessageModel(currentUser?.id == message.from, sender);
 
       msgModel = await saveMessageLocal(msgModel);
-      var chatMessage = msgModel.toChatMessage(true, true);
 
-      _incomingMessagesController.add(chatMessage);
+      _incomingMessagesController.add(msgModel);
     });
 
     sentMessageSubscription = api
@@ -429,7 +420,7 @@ class MessagesRepository {
         repliedMessageId: replyMessage?.id,
         from: currentUser?.id,
         id: const Uuid().v1(),
-        rawStatus: ChatMessageStatus.none.name,
+        rawStatus: MessageModelStatus.none.name,
         t: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         createdAt: DateTime.now());
 
@@ -438,7 +429,7 @@ class MessagesRepository {
         var msgModel = message
             .toMessageModel(true, currentUser!)
             .copyWith(replyMessage: replyMessage);
-        _incomingMessagesController.add(msgModel.toChatMessage(true, true));
+        _incomingMessagesController.add(msgModel);
       },
     );
   }
@@ -466,28 +457,4 @@ class MessagesRepository {
     }
     return result;
   }
-
-  Future<List<ChatMessage>> buildChatMessageModels(
-      List<MessageModel> messages) async {
-    var result = <ChatMessage>[];
-
-    for (int i = 0; i < messages.length; i++) {
-      var message = messages[i];
-
-      var chatMessage = message.toChatMessage(
-          i == 0 ||
-              isServiceMessage(messages[i - 1]) ||
-              messages[i - 1].from != messages[i].from,
-          i == messages.length - 1 ||
-              isServiceMessage(messages[i + 1]) ||
-              messages[i + 1].from != messages[i].from);
-
-      result.add(chatMessage);
-    }
-    return result;
-  }
-}
-
-bool isServiceMessage(MessageModel message) {
-  return message.extension != null && message.extension?['type'] != null;
 }

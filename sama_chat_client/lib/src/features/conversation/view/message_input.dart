@@ -115,8 +115,7 @@ class _MessageInputState extends State<MessageInput> {
                   onTap: () {
                     BlocProvider.of<SendMessageBloc>(context)
                         .add(const RemoveReplyMessage());
-                  },
-                  icon: const Icon(Icons.replay_outlined)),
+                  }),
             if (showEdit)
               HeaderInputBox(
                 message: state.editMessage!,
@@ -126,14 +125,13 @@ class _MessageInputState extends State<MessageInput> {
                   BlocProvider.of<SendMessageBloc>(context)
                       .add(const RemoveEditMessage());
                 },
-                icon: const Icon(Icons.edit_outlined),
               ),
             Container(
               constraints: const BoxConstraints(maxHeight: 120.0),
               margin:
                   const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
               decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                borderRadius: BorderRadius.all(Radius.circular(15.0)),
                 color: gainsborough,
               ),
               child: Row(

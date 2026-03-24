@@ -13,12 +13,6 @@ final class SendTextMessage extends SendMessageEvent {
   const SendTextMessage(this.message);
 }
 
-final class EditTextMessage extends SendMessageEvent {
-  final String message;
-
-  const EditTextMessage(this.message);
-}
-
 final class TextMessageChanged extends SendMessageEvent {
   final String text;
 

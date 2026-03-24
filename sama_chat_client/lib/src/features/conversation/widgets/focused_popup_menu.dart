@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/screen_factor.dart';
 
 class FocusedPopupMenuItem {
   Widget title;
@@ -107,7 +108,8 @@ class FocusedMenuDetails extends StatelessWidget {
         : childOffset.dx + horizontalMenuPadding + leftMenuPadding;
     final topOffset = needToMove
         ? topPaddingHeight - topMenuPadding
-        : (childOffset.dy + menuHeight + childSize.height) < size.height
+        : (childOffset.dy + menuHeight + childSize.height) <
+                size.height - navBarHeight(context)
             ? childOffset.dy + childSize.height + topMenuPadding
             : childOffset.dy - menuHeight - topMenuPadding;
 
@@ -143,8 +145,8 @@ class FocusedMenuDetails extends StatelessWidget {
                 width: maxMenuWidth,
                 height: menuHeight,
                 decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    color: lightMallow,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     boxShadow: [
                       BoxShadow(
                           color: Colors.black38,

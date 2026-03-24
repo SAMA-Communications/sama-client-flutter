@@ -5,6 +5,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/list_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
@@ -39,9 +40,16 @@ class _MessagesListState extends State<MessagesList> {
         listeners: [
           BlocListener<SendMessageBloc, SendMessageState>(
             listener: (context, sendState) {
-              if (sendState.status == SendMessageStatus.success) {
+              if (sendState.status == SendMessageStatus.success &&
+                  sendState.scroll) {
                 scrollTo(0);
               }
+            },
+          ),
+          BlocListener<ConversationBloc, ConversationState>(
+            listener: (context, state) {
+              scrollToReplyIfNeed(state);
+              markAsReadIfNeed();
             },
           ),
           BlocListener<DeleteMessagesBloc, DeleteMessagesState>(
@@ -68,9 +76,11 @@ class _MessagesListState extends State<MessagesList> {
           })
         ],
         child: Stack(children: [
-          BlocBuilder<ConversationBloc, ConversationState>(
-            builder: (context, state) {
-              switch (state.status) {
+          BlocSelector<ConversationBloc, ConversationState, ConversationStatus>(
+            selector: (state) => state.status,
+            builder: (context, status) {
+              var state = context.read<ConversationBloc>().state;
+              switch (status) {
                 case ConversationStatus.failure:
                   WidgetsBinding.instance
                       .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
@@ -100,73 +110,85 @@ class _MessagesListState extends State<MessagesList> {
                             ),
                           );
                   }
-                  markAsReadIfNeed();
-                  scrollToReplyIfNeed(state);
-                  return NotificationListener(
-                      onNotification: (notification) {
-                        if (notification is ScrollUpdateNotification &&
-                            notification.dragDetails != null) {
-                          final keyboardTop = screenHeight - keyboardHeight();
-                          var shouldClose = keyboardTop <
-                              notification.dragDetails!.globalPosition.dy;
-                          if (notification.scrollDelta! > 0 && shouldClose) {
-                            hideKeyboard();
-                          }
-                        } else if (notification is ScrollEndNotification) {
-                          _onScroll(notification.metrics.pixels,
-                              notification.metrics.maxScrollExtent);
-                        }
-                        return false;
-                      },
-                      child: ScrollablePositionedList.separated(
-                        reverse: true,
-                        itemBuilder: (BuildContext context, int index) {
-                          var msg = state.messages[index];
-                          return SwipeTo(
-                            key: Key(msg.id.toString()),
-                            stickToRight: msg.isOwn,
-                            direction: msg.isOwn
-                                ? DismissDirection.endToStart
-                                : DismissDirection.startToEnd,
-                            onSwipe: () {
-                              print('onSwipe');
-                              context
-                                  .read<SendMessageBloc>()
-                                  .add(AddReplyMessage(msg));
+                  return BlocBuilder<ConversationBloc, ConversationState>(
+                      buildWhen: (previous, current) =>
+                          previous.messages != current.messages ||
+                          previous.selectedMessages != current.selectedMessages,
+                      builder: (context, state) {
+                        return NotificationListener(
+                            onNotification: (notification) {
+                              if (notification is ScrollUpdateNotification &&
+                                  notification.dragDetails != null) {
+                                final keyboardTop =
+                                    screenHeight - keyboardHeight();
+                                var shouldClose = keyboardTop <
+                                    notification.dragDetails!.globalPosition.dy;
+                                if (notification.scrollDelta! > 0 &&
+                                    shouldClose) {
+                                  hideKeyboard();
+                                }
+                              } else if (notification
+                                  is ScrollEndNotification) {
+                                _onScroll(notification.metrics.pixels,
+                                    notification.metrics.maxScrollExtent);
+                              }
+                              return false;
                             },
-                            actionIcon: const Icon(
-                              Icons.reply_rounded,
-                              color: Colors.black,
-                              size: 25,
-                            ),
-                            child: MessageItem(
-                                message: msg,
-                                onTapReply: () {
-                                  var replyIndex = state.messages.indexWhere(
-                                      (item) =>
-                                          item.id == msg.repliedMessageId);
-                                  if (replyIndex == -1) {
-                                    if (!state.hasReachedMax) {
-                                      context.read<ConversationBloc>().add(
-                                          MessagesMoreForReply(
-                                              msg.repliedMessageId!));
-                                      showProgress();
-                                    }
-                                    return;
-                                  }
-                                  scrollTo(replyIndex);
-                                },
-                                onTapForward: () => print('onTapForward')),
-                          );
-                        },
-                        itemCount: state.messages.length,
-                        itemScrollController: _scrollController,
-                        itemPositionsListener: itemPositionsListener,
-                        padding: EdgeInsets.zero,
-                        separatorBuilder: (context, index) => const SizedBox(
-                          height: 5,
-                        ),
-                      ));
+                            child: ScrollablePositionedList.separated(
+                              reverse: true,
+                              itemBuilder: (BuildContext context, int index) {
+                                var msg = state.messages[index];
+                                return SwipeTo(
+                                  key: Key(msg.id.toString()),
+                                  stickToRight: msg.isOwn,
+                                  direction: msg.isServiceMessage()
+                                      ? DismissDirection.none
+                                      : msg.isOwn
+                                          ? DismissDirection.endToStart
+                                          : DismissDirection.startToEnd,
+                                  onSwipe: () {
+                                    print('onSwipe');
+                                    context
+                                        .read<SendMessageBloc>()
+                                        .add(AddReplyMessage(msg));
+                                  },
+                                  actionIcon: const Icon(
+                                    Icons.reply_rounded,
+                                    color: black,
+                                    size: 25,
+                                  ),
+                                  child: MessageItem(
+                                      message: msg,
+                                      onTapReply: () {
+                                        var replyIndex = state.messages
+                                            .indexWhere((item) =>
+                                                item.id ==
+                                                msg.repliedMessageId);
+                                        if (replyIndex == -1) {
+                                          if (!state.hasReachedMax) {
+                                            context
+                                                .read<ConversationBloc>()
+                                                .add(MessagesMoreForReply(
+                                                    msg.repliedMessageId!));
+                                            showProgress();
+                                          }
+                                          return;
+                                        }
+                                        scrollTo(replyIndex);
+                                      },
+                                      onTapForward: () =>
+                                          print('onTapForward')),
+                                );
+                              },
+                              itemCount: state.messages.length,
+                              itemScrollController: _scrollController,
+                              itemPositionsListener: itemPositionsListener,
+                              padding: const EdgeInsets.only(top: 5),
+                              separatorBuilder: (context, index) => SizedBox(
+                                height: separateSpace(state.messages, index),
+                              ),
+                            ));
+                      });
                 case ConversationStatus.initial:
                   return const Center(child: CircularProgressIndicator());
                 case ConversationStatus.delete:
@@ -179,6 +201,14 @@ class _MessagesListState extends State<MessagesList> {
           ),
           scrollFAB,
         ]));
+  }
+
+  double separateSpace(List<MessageModel> messages, int index) {
+    MessageModel currentMsg = messages[index];
+    MessageModel? prevMsg = messages.tryGet(index + 1);
+    return sameMsgGroup(currentMsg, prevMsg) && !currentMsg.isServiceMessage()
+        ? 2
+        : 10;
   }
 
   Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(

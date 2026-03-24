@@ -8,14 +8,14 @@ class HeaderInputBox extends StatelessWidget {
   final MessageModel message;
   final String title;
   final VoidCallback? onTap;
-  final Widget icon;
+  final Widget? icon;
 
   const HeaderInputBox(
       {super.key,
       required this.message,
       required this.title,
       required this.onTap,
-      required this.icon});
+      this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class HeaderInputBox extends StatelessWidget {
           child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          icon,
+          if (icon != null) icon!,
           const VerticalLine(
             rightPadding: 10,
             leftPadding: 10,

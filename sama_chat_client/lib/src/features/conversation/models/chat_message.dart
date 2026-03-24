@@ -1,25 +1,26 @@
 import '../../../db/models/models.dart';
+import '../../../shared/utils/list_utils.dart';
 
-enum ChatMessageStatus { none, pending, draft, sent, read }
+enum BubbleType { common, upper, middle, lower }
 
 // ignore: must_be_immutable
 class ChatMessage extends MessageModel {
   final bool isFirstUserMessage;
   final bool isLastUserMessage;
-  final ChatMessageStatus status;
+  final BubbleType bubbleType;
 
   ChatMessage({
     required this.isFirstUserMessage,
     required this.isLastUserMessage,
+    required this.bubbleType,
     required super.isOwn,
     required super.id,
     required super.from,
     required super.cid,
-    this.status = ChatMessageStatus.none,
     super.bid,
     super.repliedMessageId,
     super.forwardedMessageId,
-    super.rawStatus,
+    super.status,
     super.body,
     super.createdAt,
     super.t,
@@ -32,14 +33,14 @@ class ChatMessage extends MessageModel {
   ChatMessage copyWith({
     bool? isFirstUserMessage,
     bool? isLastUserMessage,
-    ChatMessageStatus? status,
+    BubbleType? bubbleType,
     int? bid,
     String? id,
     String? from,
     String? cid,
     String? repliedMessageId,
     String? forwardedMessageId,
-    String? rawStatus,
+    MessageModelStatus? status,
     String? body,
     bool? isOwn,
     int? t,
@@ -54,7 +55,7 @@ class ChatMessage extends MessageModel {
     return ChatMessage(
         isFirstUserMessage: isFirstUserMessage ?? this.isFirstUserMessage,
         isLastUserMessage: isLastUserMessage ?? this.isLastUserMessage,
-        status: status ?? this.status,
+        bubbleType: bubbleType ?? this.bubbleType,
         bid: bid ?? this.bid,
         id: id ?? this.id,
         from: from ?? this.from,
@@ -63,7 +64,7 @@ class ChatMessage extends MessageModel {
         forwardedMessageId: forwardedMessageId ?? this.forwardedMessageId,
         body: body ?? this.body,
         isOwn: isOwn ?? this.isOwn,
-        rawStatus: rawStatus ?? status?.name ?? this.rawStatus,
+        status: status ?? this.status,
         createdAt: createdAt ?? this.createdAt,
         t: t ?? this.t,
         isTempReplied: isTempReplied ?? this.isTempReplied,
@@ -90,23 +91,19 @@ class ChatMessage extends MessageModel {
 }
 
 extension ChatMessageExtension on MessageModel {
-  ChatMessage toChatMessage(bool isLastUserMessage, bool isFirstUserMessage) {
+  ChatMessage toChatMessage(
+      bool isLastUserMessage, bool isFirstUserMessage, BubbleType bubbleType) {
     return ChatMessage(
         bid: bid,
         isLastUserMessage: isLastUserMessage,
         isFirstUserMessage: isFirstUserMessage,
-        //consider move ChatMessageStatus enum to model base
-        status: rawStatus != null
-            ? ChatMessageStatus.values.byName(rawStatus!)
-            : isOwn
-                ? ChatMessageStatus.sent
-                : ChatMessageStatus.none,
+        bubbleType: bubbleType,
         id: id,
         from: from,
         cid: cid,
         repliedMessageId: repliedMessageId,
         forwardedMessageId: forwardedMessageId,
-        rawStatus: rawStatus,
+        status: status,
         body: body,
         isOwn: isOwn,
         createdAt: createdAt,
@@ -125,4 +122,46 @@ extension ChatMessageExtension on MessageModel {
   bool hasAttachments() {
     return attachments.isNotEmpty;
   }
+}
+
+bool sameMsgGroup(MessageModel msg, MessageModel? other) {
+  int diffTime = 45;
+
+  bool isSameOwner = (other?.isOwn ?? false) && msg.isOwn ||
+      (!(other?.isOwn ?? false)) && !msg.isOwn;
+
+  var otherMs = (other?.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
+  var msgMs = (msg.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
+  var timeGap = (msgMs - otherMs).abs();
+
+  return isSameOwner && timeGap < diffTime;
+}
+
+BubbleType bubbleType(List<MessageModel> messages, int index) {
+  MessageModel currentMsg = messages[index];
+  MessageModel? prevMsg = messages.tryGet(index + 1);
+  MessageModel? nextMsg = messages.tryGet(index - 1);
+
+  bool isSimpleCurrent = currentMsg.forwardedMessageId == null &&
+      currentMsg.repliedMessageId == null;
+  bool isSimpleNext =
+      nextMsg?.forwardedMessageId == null && nextMsg?.repliedMessageId == null;
+
+  var prevSame = sameMsgGroup(currentMsg, prevMsg);
+  var nextSame = sameMsgGroup(currentMsg, nextMsg);
+
+  BubbleType bubbleType =
+      prevSame && nextSame && isSimpleCurrent && isSimpleNext
+          ? BubbleType.middle
+          : prevSame && isSimpleCurrent
+              ? BubbleType.upper
+              : nextSame && isSimpleNext
+                  ? BubbleType.lower
+                  : BubbleType.common;
+
+  return bubbleType;
+}
+
+bool isServiceMessage(MessageModel? message) {
+  return message?.extension != null && message?.extension?['type'] != null;
 }

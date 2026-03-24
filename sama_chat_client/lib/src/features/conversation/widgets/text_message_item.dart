@@ -23,6 +23,7 @@ class TextMessageItem extends StatelessWidget {
       isFirst: message.isFirstUserMessage,
       isLast: message.isLastUserMessage,
       isOwn: message.isOwn,
+      bubbleType: message.bubbleType,
       child: TextMessage(
         body: message.body ?? '',
         style: TextStyle(color: message.isOwn ? white : black, fontSize: 16.0),

@@ -64,7 +64,8 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SafeArea(
+        child: Padding(
       padding: EdgeInsets.only(bottom: Platform.isIOS ? 0.0 : 4.0),
       child: Card(
         child: Padding(
@@ -78,7 +79,7 @@ class ProfileCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -662,7 +663,6 @@ class _ChangePasswordInput extends StatelessWidget {
 }
 
 List<Widget> _formActions(BuildContext context) {
-  final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
   return [
     TextButton(
       onPressed: () {
@@ -689,7 +689,7 @@ List<Widget> _formActions(BuildContext context) {
                       behavior: SnackBarBehavior.floating,
                       margin: EdgeInsets.only(
                           bottom: keyboardHeightCtx(context) -
-                              (Platform.isIOS ? bottomPadding : 0.0)))
+                              (Platform.isIOS ? navBarHeight(context) : 0.0)))
                   : SnackBar(
                       content: Text(content),
                       duration: const Duration(seconds: 2),

@@ -55,7 +55,7 @@ final class ConversationState extends Equatable {
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
       choose: choose ?? this.choose,
-      typingStatus: typingStatus,
+      typingStatus: typingStatus ?? this.typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
     );
   }
@@ -74,7 +74,6 @@ final class ConversationState extends Equatable {
         hasReachedMax,
         initial,
         choose,
-        replyIdToScroll,
         replyIdToScroll,
         participants,
         typingStatus

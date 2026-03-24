@@ -44,9 +44,6 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<SendTextMessage>(
       _onSendTextMessage,
     );
-    on<EditTextMessage>(
-      _onEditTextMessage,
-    );
     on<_DraftMessageReceived>(
       _onDraftMessageReceived,
     );
@@ -77,32 +74,22 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   Future<void> _onSendTextMessage(
       SendTextMessage event, Emitter<SendMessageState> emit) async {
     try {
+      bool scroll;
       emit(state.copyWith(
           isTextEmpty: true, status: SendMessageStatus.processing));
       if (state.editMessage != null) {
+        scroll = false;
         await messagesRepository.editMessage(event.message, state.editMessage);
       } else {
+        scroll = true;
         await messagesRepository.sendTextMessage(
             event.message, currentConversation.id, state.replyMessage);
       }
       emit(state.copyWith(
-          isTextEmpty: true, text: '', status: SendMessageStatus.success));
-    } on ResponseException catch (ex) {
-      emit(state.copyWith(
-          errorMessage: ex.message, status: SendMessageStatus.failure));
-    }
-  }
-
-  Future<void> _onEditTextMessage(
-      EditTextMessage event, Emitter<SendMessageState> emit) async {
-    try {
-      emit(state.copyWith(
-          isTextEmpty: true, status: SendMessageStatus.processing));
-      var replyMessage = state.replyMessage;
-      await messagesRepository.sendTextMessage(
-          event.message, currentConversation.id, replyMessage);
-      emit(state.copyWith(
-          isTextEmpty: true, text: '', status: SendMessageStatus.success));
+          isTextEmpty: true,
+          text: '',
+          scroll: scroll,
+          status: SendMessageStatus.success));
     } on ResponseException catch (ex) {
       emit(state.copyWith(
           errorMessage: ex.message, status: SendMessageStatus.failure));
@@ -125,7 +112,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   Future<void> _onDraftMessageReceived(
       _DraftMessageReceived event, Emitter<SendMessageState> emit) async {
     var draftMsg = await messagesRepository.getMessageLocalByStatus(
-        currentConversation.id, ChatMessageStatus.draft.name);
+        currentConversation.id, MessageModelStatus.draft);
     if (draftMsg != null) {
       emit(state.copyWith(
           draftMessage: () => draftMsg,

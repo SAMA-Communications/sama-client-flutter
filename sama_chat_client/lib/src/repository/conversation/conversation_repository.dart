@@ -36,7 +36,7 @@ class ConversationRepository {
   }
 
   StreamSubscription<SystemMessage>? incomingSystemMessagesSubscription;
-  StreamSubscription<ChatMessage>? incomingMessagesSubscription;
+  StreamSubscription<MessageModel>? incomingMessagesSubscription;
   StreamSubscription<MessageSendStatus>? statusMessagesSubscription;
   StreamSubscription<TypingStatus>? typingMessageSubscription;
 
@@ -113,7 +113,7 @@ class ConversationRepository {
         }
 
         ConversationModel updatedConversation;
-        if (message.status == ChatMessageStatus.draft) {
+        if (message.status == MessageModelStatus.draft) {
           updatedConversation =
               conversation.copyWith(draftMessage: () => message);
         } else {
@@ -150,7 +150,7 @@ class ConversationRepository {
         if (conversationStored != null &&
             conversationStored.lastMessage == null) {
           var lastMsg = (await messagesRepository
-                  .getStoredMessages(conversationStored, limit: 1))
+                  .getStoredMessages(conversationStored.id, limit: 1))
               .firstOrNull;
           var updatedChat = conversationStored.copyWith(lastMessage: lastMsg);
           await localDatasource.updateConversationLocal(updatedChat);

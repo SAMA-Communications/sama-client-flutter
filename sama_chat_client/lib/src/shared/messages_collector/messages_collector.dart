@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:sama_sdk/api/api.dart';
 import 'package:sama_sdk/api/connection/connection.dart' as conn;
 
+import '../../db/models/message_model.dart';
 import '../../repository/conversation/conversation_repository.dart';
 import '../../repository/messages/messages_repository.dart';
 
@@ -42,7 +43,8 @@ class MessagesCollector {
   }
 
   void _collectMessagesPending() async {
-    var messages = await messagesRepository.getMessagesLocalByStatus('pending');
+    var messages = await messagesRepository
+        .getMessagesLocalByStatus(MessageModelStatus.pending);
     for (var message in messages) {
       await messagesRepository.resendTextMessage(message);
     }
@@ -51,11 +53,11 @@ class MessagesCollector {
   void _onSentStatusReceived(SentMessageStatus status) async {
     var msg = await messagesRepository.getMessageLocalById(status.messageId);
     if (msg != null) {
-      var msgUpdated =
-          msg.copyWith(id: status.serverMessageId, rawStatus: 'sent');
+      var msgUpdated = msg.copyWith(
+          id: status.serverMessageId, status: MessageModelStatus.sent);
       var msgLocal = await messagesRepository.updateMessageLocal(msgUpdated);
       var conversation =
-          await conversationRepository.getConversationById(msgLocal.cid!);
+          await conversationRepository.getConversationById(msgLocal.cid);
       conversationRepository.updateConversationLocal(conversation!
           .copyWith(lastMessage: msgLocal, updatedAt: msgLocal.createdAt));
     }
