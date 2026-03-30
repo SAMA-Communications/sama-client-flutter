@@ -45,8 +45,8 @@ dependencies:
   #  receive_sharing_intent: ^1.8.1
   receive_sharing_intent:
     git:
-      url: https://github.com/KasemJaffer/receive_sharing_intent
-      ref: 2cea396843cd3ab1b5ec4334be4233864637874e
+      url: https://github.com/CubeRomanMagellan/receive_sharing_intent
+      ref: 9019083edf3ad8232076d8cc82933709f0003220
   sama_sdk:
     path: ../sama_sdk
   scrollable_positioned_list: ^0.3.8

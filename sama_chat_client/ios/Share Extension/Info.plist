@@ -15,7 +15,7 @@
 				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
 				<integer>1</integer>
                 <key>NSExtensionActivationSupportsImageWithMaxCount</key>
-                <integer>100</integer>
+                <integer>10</integer>
 			</dict>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>
