@@ -15,8 +15,9 @@ final class SendTextMessage extends SendMessageEvent {
 
 final class TextMessageChanged extends SendMessageEvent {
   final String text;
+  final bool safeDraft;
 
-  const TextMessageChanged(this.text);
+  const TextMessageChanged(this.text, {this.safeDraft = true});
 }
 
 final class TextMessageClear extends SendMessageEvent {

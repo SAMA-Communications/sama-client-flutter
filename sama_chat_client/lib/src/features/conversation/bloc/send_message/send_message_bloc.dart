@@ -101,6 +101,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     emit(state.copyWith(
         isTextEmpty: event.text.trim().isEmpty,
         text: event.text,
+        safeDraft: event.safeDraft,
         status: SendMessageStatus.initial));
   }
 
@@ -167,7 +168,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   }
 
   saveDraftIfExist() {
-    if (state.text.isNotEmpty) {
+    if (state.text.isNotEmpty && state.safeDraft) {
       messagesRepository.saveDraftMessage(
           state.text, currentConversation.id, state.replyMessage);
     }

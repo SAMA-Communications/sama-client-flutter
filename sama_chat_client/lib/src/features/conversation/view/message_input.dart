@@ -53,8 +53,8 @@ class _MessageInputState extends State<MessageInput> {
 
     if (widget.sharedMessage?.type == SharedMediaType.text ||
         widget.sharedMessage?.type == SharedMediaType.url) {
-      BlocProvider.of<SendMessageBloc>(context)
-          .add(TextMessageChanged(widget.sharedMessage!.path));
+      BlocProvider.of<SendMessageBloc>(context).add(
+          TextMessageChanged(widget.sharedMessage!.path, safeDraft: false));
     }
     return MultiBlocListener(
       listeners: [
