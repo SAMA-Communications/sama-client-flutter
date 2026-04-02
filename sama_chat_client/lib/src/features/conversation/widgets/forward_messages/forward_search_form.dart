@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,10 +8,7 @@ import '../../../../db/models/models.dart';
 import '../../../../navigation/constants.dart';
 import '../../../../shared/ui/colors.dart';
 import '../../../conversation_create/bloc/conversation_create_bloc.dart';
-import '../../../conversation_create/bloc/conversation_create_event.dart';
 import '../../../conversation_create/bloc/conversation_create_state.dart';
-import '../../../conversations_list/conversations_list.dart';
-import '../../../conversations_list/widgets/avatar_letter_icon.dart';
 import '../../../search/bloc/global_search_bloc.dart';
 import '../../../search/bloc/global_search_state.dart';
 import '../../../search/view/search_bar.dart';
@@ -28,27 +27,34 @@ class ForwardSearchForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-            backgroundColor: black,
-            automaticallyImplyLeading: false,
-            centerTitle: true,
-            toolbarHeight: kToolbarHeight + 5,
-            title: const Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: Text(
-                  'Forward message',
-                  style: TextStyle(color: white),
-                ))),
-        body: Container(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-            child: Column(
-              spacing: 4,
-              children: [
-                const GlobalSearchBar(),
-                _SearchBody(forwardMessages),
-              ],
-            )));
+    final window = WidgetsBinding.instance.platformDispatcher.views.first;
+    double topPadding = window.viewPadding.top / window.devicePixelRatio -
+        (Platform.isIOS ? 30 : 15);
+    return ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(28),
+        ),
+        child: Scaffold(
+            appBar: AppBar(
+                backgroundColor: black,
+                automaticallyImplyLeading: false,
+                centerTitle: true,
+                toolbarHeight: kToolbarHeight + topPadding,
+                title: Padding(
+                    padding: EdgeInsets.only(top: topPadding + 5),
+                    child: const Text(
+                      'Forward message',
+                      style: TextStyle(color: white),
+                    ))),
+            body: Container(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                child: Column(
+                  spacing: 4,
+                  children: [
+                    const GlobalSearchBar(),
+                    _SearchBody(forwardMessages),
+                  ],
+                ))));
   }
 }
 

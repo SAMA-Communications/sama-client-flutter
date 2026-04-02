@@ -124,18 +124,12 @@ class _SelectInputState extends State<SelectInput> {
                                   context: context,
                                   backgroundColor: Colors.transparent,
                                   builder: (BuildContext bc) {
-                                    return ClipRRect(
-                                        borderRadius:
-                                            const BorderRadius.vertical(
-                                          top: Radius.circular(24),
-                                        ),
-                                        child: BlocProvider.value(
-                                          value:
-                                              BlocProvider.of<ConversationBloc>(
-                                                  context),
-                                          child: ForwardMessagesWidget(
-                                              state.selectedMessages.value),
-                                        ));
+                                    return BlocProvider.value(
+                                      value: BlocProvider.of<ConversationBloc>(
+                                          context),
+                                      child: ForwardMessagesWidget(
+                                          state.selectedMessages.value),
+                                    );
                                   }));
                         },
                 ),
