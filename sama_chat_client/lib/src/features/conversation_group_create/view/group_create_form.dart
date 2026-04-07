@@ -34,30 +34,38 @@ class GroupCreateFormState extends State<GroupCreateForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: const GlobalSearchBar(),
-        body: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
-            child: BlocListener<GroupBloc, GroupState>(
-              listener: (context, state) {
-                if (state.status.isInitial) {
-                } else if (state.status.isFailure) {
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      SnackBar(content: Text(state.errorMessage ?? '')),
-                    );
-                } else if (state.status.isSuccess) {
-                  context
-                      .read<ConversationCreateBloc>()
-                      .add(ConversationGroupCreated(
-                        users: state.participants.value.toList(),
-                        type: 'g',
-                        name: state.groupname.value,
-                        avatarUrl: state.avatar.value,
-                      ));
-                }
-              },
+        appBar: AppBar(
+            backgroundColor: black,
+            leading: const BackButton(color: white),
+            centerTitle: true,
+            title: const Text(
+              'Group create',
+              style: TextStyle(color: white),
+            )),
+        body: BlocListener<GroupBloc, GroupState>(
+            listener: (context, state) {
+              if (state.status.isInitial) {
+              } else if (state.status.isFailure) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    SnackBar(content: Text(state.errorMessage ?? '')),
+                  );
+              } else if (state.status.isSuccess) {
+                context
+                    .read<ConversationCreateBloc>()
+                    .add(ConversationGroupCreated(
+                      users: state.participants.value.toList(),
+                      type: 'g',
+                      name: state.groupname.value,
+                      avatarUrl: state.avatar.value,
+                    ));
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const GlobalSearchBar(),
                 Expanded(
                     child: BlocBuilder<GroupBloc, GroupState>(
                         buildWhen: (previous, current) {

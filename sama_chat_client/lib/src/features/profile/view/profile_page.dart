@@ -17,7 +17,7 @@ class ProfilePage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: black,
           iconTheme: const IconThemeData(
-            color: white, //change your color here
+            color: white,
           ),
           title: const Text(
             'Personal information',

@@ -12,7 +12,6 @@ import '../features/conversation/view/conversation_page.dart';
 import '../features/login/view/login_page.dart';
 import '../features/profile/view/profile_page.dart';
 import '../features/reset_password/view/reset_password_page.dart';
-import '../features/search/view/search_page.dart';
 import '../features/splash_page.dart';
 import '../features/user_info/view/user_info_page.dart';
 import '../repository/authentication/authentication_repository.dart';
@@ -64,12 +63,6 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
           path: splashScreenPath,
           builder: (context, state) {
             return const SplashPage();
-          },
-        ),
-        GoRoute(
-          path: globalSearchPath,
-          builder: (context, state) {
-            return SearchPage.route();
           },
         ),
         GoRoute(

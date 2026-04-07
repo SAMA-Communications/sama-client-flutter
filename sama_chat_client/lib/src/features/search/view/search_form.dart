@@ -16,21 +16,7 @@ import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_state.dart';
 
 class SearchForm extends StatelessWidget {
-  const SearchForm({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: <Widget>[
-        GlobalSearchBar(),
-        SearchBody(),
-      ],
-    );
-  }
-}
-
-class SearchBody extends StatelessWidget {
-  const SearchBody({this.searchType = SearchType.both, super.key});
+  const SearchForm({this.searchType = SearchType.both, super.key});
 
   final SearchType searchType;
 
@@ -72,8 +58,8 @@ class SearchBody extends StatelessWidget {
                 child: Text(state.error),
               ),
             SearchStateSuccess() => Expanded(
-                child: _SearchResults(
-                    state.users, state.conversations, searchType)),
+                child: SearchResults(state.users, state.conversations,
+                    searchType: searchType)),
           };
         },
       ),
@@ -87,12 +73,14 @@ enum SearchType {
   both,
 }
 
-class _SearchResults extends StatelessWidget {
-  const _SearchResults(this.users, this.conversations, this.searchType);
+class SearchResults extends StatelessWidget {
+  const SearchResults(this.users, this.conversations,
+      {super.key, this.searchType = SearchType.both, this.chatOnTap});
 
-  final List<UserModel> users;
+  final List<UserModel>? users;
   final List<ConversationModel> conversations;
   final SearchType searchType;
+  final void Function(ConversationModel)? chatOnTap;
 
   Widget _header(String title) {
     return Padding(
@@ -125,33 +113,36 @@ class _SearchResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userList = users.isEmpty
-        ? _emptyListText('We couldn\'t find the specified users')
-        : ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: users.length,
-            itemBuilder: (BuildContext context, int index) {
-              final user = users[index];
-              return ListTile(
-                leading:
-                    AvatarLetterIcon(name: user.login!, avatar: user.avatar),
-                title: Text(
-                  user.login!,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w500, fontSize: 20),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                contentPadding: const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
-                onTap: () {
-                  context
-                      .read<ConversationCreateBloc>()
-                      .add(ConversationCreated(user: user, type: 'u'));
+    final userList = users == null
+        ? null
+        : users!.isEmpty
+            ? _emptyListText('We couldn\'t find the specified users')
+            : ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: users!.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final user = users![index];
+                  return ListTile(
+                    leading: AvatarLetterIcon(
+                        name: user.login!, avatar: user.avatar),
+                    title: Text(
+                      user.login!,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w500, fontSize: 20),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    contentPadding:
+                        const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 8.0),
+                    onTap: () {
+                      context
+                          .read<ConversationCreateBloc>()
+                          .add(ConversationCreated(user: user, type: 'u'));
+                    },
+                  );
                 },
               );
-            },
-          );
 
     final conversationList = conversations.isEmpty
         ? _emptyListText('We couldn\'t find the specified chats')
@@ -160,8 +151,9 @@ class _SearchResults extends StatelessWidget {
             shrinkWrap: true,
             itemCount: conversations.length,
             itemBuilder: (BuildContext context, int index) {
-              final conversation = conversations[index];
-              return ConversationListItem(conversation: conversation);
+              final chat = conversations[index];
+              return ConversationListItem(
+                  conversation: chat, onTap: () => chatOnTap?.call(chat));
             },
           );
 
@@ -173,8 +165,8 @@ class _SearchResults extends StatelessWidget {
         children: <Widget>[
           if (searchType == SearchType.both ||
               searchType == SearchType.users) ...[
-            if (searchType == SearchType.both) _header('Users'),
-            userList,
+            if (searchType == SearchType.both)
+              if (userList != null) ...[_header('Users'), userList],
           ],
           if (searchType == SearchType.both ||
               searchType == SearchType.chats) ...[

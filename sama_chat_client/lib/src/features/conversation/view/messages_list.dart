@@ -397,27 +397,16 @@ class MessageItem extends StatelessWidget {
                             leadingIcon: const Icon(Icons.forward_outlined),
                             title: const Text('Forward'),
                             onPressed: () {
-                              print('forward message= ${message.body}');
                               showModalBottomSheet<dynamic>(
                                   isScrollControlled: true,
-                                  useSafeArea: false,
                                   context: context,
-                                  backgroundColor: black,
+                                  backgroundColor: Colors.transparent,
                                   builder: (BuildContext bc) {
-                                    return Container(
-                                        color: lightWhite,
-                                        margin: EdgeInsets.only(
-                                            top: MediaQueryData.fromView(
-                                                    View.of(context))
-                                                .padding
-                                                .top),
-                                        child: BlocProvider.value(
-                                          value:
-                                              BlocProvider.of<ConversationBloc>(
-                                                  context),
-                                          child:
-                                              ForwardMessagesWidget({message}),
-                                        ));
+                                    return BlocProvider.value(
+                                      value: BlocProvider.of<ConversationBloc>(
+                                          context),
+                                      child: ForwardMessagesWidget({message}),
+                                    );
                                   });
                             }),
                         FocusedPopupMenuItem(
