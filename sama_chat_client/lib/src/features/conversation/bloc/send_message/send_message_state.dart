@@ -8,6 +8,7 @@ final class SendMessageState extends Equatable {
     this.isTextEmpty = true,
     this.text = '',
     this.scroll = false,
+    this.safeDraft = true,
     this.errorMessage,
     this.draftMessage,
     this.replyMessage,
@@ -18,6 +19,7 @@ final class SendMessageState extends Equatable {
   final bool isTextEmpty;
   final String text;
   final bool scroll;
+  final bool safeDraft;
   final String? errorMessage;
   final MessageModel? draftMessage;
   final MessageModel? replyMessage;
@@ -28,6 +30,7 @@ final class SendMessageState extends Equatable {
     bool? isTextEmpty,
     String? text,
     bool? scroll,
+    bool? safeDraft,
     String? errorMessage,
     MessageModel? Function()? draftMessage,
     MessageModel? Function()? replyMessage,
@@ -38,6 +41,7 @@ final class SendMessageState extends Equatable {
       isTextEmpty: isTextEmpty ?? this.isTextEmpty,
       text: text ?? this.text,
       scroll: scroll ?? this.scroll,
+      safeDraft: safeDraft ?? this.safeDraft,
       errorMessage: errorMessage ?? this.errorMessage,
       draftMessage: draftMessage != null ? draftMessage() : this.draftMessage,
       replyMessage: replyMessage != null ? replyMessage() : this.replyMessage,
@@ -56,6 +60,7 @@ final class SendMessageState extends Equatable {
         isTextEmpty,
         text,
         scroll,
+        safeDraft,
         errorMessage,
         draftMessage,
         replyMessage,

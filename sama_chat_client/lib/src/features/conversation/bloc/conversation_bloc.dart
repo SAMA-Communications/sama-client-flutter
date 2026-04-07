@@ -552,17 +552,18 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         ? messages.tryGet(messages.length - 2)
         : messages.tryGet(messages.length - 1);
 
-    var shouldUpdate = state.messages.isNotEmpty &&
-        lastCurrentMsg != null &&
-        lastCurrentMsg.id != state.messages.lastOrNull?.id;
+    var shouldUpdate = state.messages.isNotEmpty;
 
-    var lastPrevMsg = shouldUpdate ? state.messages.last : null;
+    var lastPrevMsg = state.messages.lastOrNull;
+    var firstPrevMsg = state.messages.firstOrNull;
 
     for (int i = 0; i < messages.length; i++) {
       var message = messages[i];
       var chatMessage = message.toChatMessage(
           i == 0
-              ? lastPrevMsg?.from != messages[i].from
+              ? lastPrevMsg == firstPrevMsg ||
+                  lastPrevMsg?.id == lastCurrentMsg?.id ||
+                  lastPrevMsg?.from != messages[i].from
               : isServiceMessage(messages[i - 1]) ||
                   messages[i - 1].from != messages[i].from,
           i == messages.length - 1 ||
