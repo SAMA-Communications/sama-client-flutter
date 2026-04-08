@@ -34,7 +34,7 @@ class SecureStorage {
     }
     saveCurrentUser(user);
   }
-
+//ToDo RP remove all fields to safe but id and deviceId
   Future<void> saveCurrentUser(UserModel user) async {
     if (user.id != null) {
       _storage.write(key: storageUserId, value: user.id);

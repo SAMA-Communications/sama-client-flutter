@@ -264,6 +264,13 @@ class DatabaseService {
       user.bid = userInDb?.bid;
       if (userInDb?.avatar?.fileId == user.avatar?.fileId) {
         user.avatar?.bid = userInDb?.avatar?.bid;
+        if (user.avatar?.imageUrl != userInDb?.avatar?.imageUrl) {
+          //to check
+          print('user.avatar putAsync');
+          await store!
+              .box<AvatarModel>()
+              .putAsync(user.avatar!, mode: PutMode.update);
+        }
       }
     }
     return store!.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);
