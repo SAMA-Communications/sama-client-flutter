@@ -57,9 +57,9 @@ class SearchForm extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 18.0),
                 child: Text(state.error),
               ),
-            SearchStateSuccess() => Expanded(
-                child: SearchResults(state.users, state.conversations,
-                    searchType: searchType)),
+            SearchStateSuccess() => SearchResults(
+                state.users, state.conversations,
+                searchType: searchType),
           };
         },
       ),

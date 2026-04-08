@@ -63,30 +63,35 @@ class GroupCreateFormState extends State<GroupCreateForm> {
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const GlobalSearchBar(),
-                Expanded(
-                    child: BlocBuilder<GroupBloc, GroupState>(
-                        buildWhen: (previous, current) {
-                  return previous.participants != current.participants;
-                }, builder: (context, state) {
-                  var users = state.participants.value;
-                  return ParticipantsForm(
-                    users: List.of(users),
-                    onAddParticipants: (user) {
-                      context
-                          .read<GroupBloc>()
-                          .add(GroupParticipantsAdded(user));
-                    },
-                    onRemoveParticipants: (user) {
-                      context
-                          .read<GroupBloc>()
-                          .add(GroupParticipantsRemoved(user));
-                    },
-                  );
-                }))
-              ]),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10,
+                  children: [
+                    const GlobalSearchBar(hintText: 'Search for people to add'),
+                    Expanded(
+                        child: BlocBuilder<GroupBloc, GroupState>(
+                            buildWhen: (previous, current) {
+                      return previous.participants != current.participants;
+                    }, builder: (context, state) {
+                      var users = state.participants.value;
+                      return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: ParticipantsForm(
+                            users: List.of(users),
+                            onAddParticipants: (user) {
+                              context
+                                  .read<GroupBloc>()
+                                  .add(GroupParticipantsAdded(user));
+                            },
+                            onRemoveParticipants: (user) {
+                              context
+                                  .read<GroupBloc>()
+                                  .add(GroupParticipantsRemoved(user));
+                            },
+                          ));
+                    }))
+                  ]),
             )),
         floatingActionButton:
             BlocBuilder<GroupBloc, GroupState>(buildWhen: (previous, current) {

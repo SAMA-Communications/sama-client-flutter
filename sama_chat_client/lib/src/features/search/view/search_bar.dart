@@ -7,7 +7,9 @@ import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_event.dart';
 
 class GlobalSearchBar extends StatefulWidget implements PreferredSizeWidget {
-  const GlobalSearchBar({super.key});
+  final String? hintText;
+
+  const GlobalSearchBar({this.hintText = 'Search', super.key});
 
   @override
   State<GlobalSearchBar> createState() => _GlobalSearchBarState();
@@ -64,7 +66,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             borderRadius: BorderRadius.circular(20.0),
             borderSide: const BorderSide(color: slateBlue, width: 2),
           ),
-          hintText: 'Search',
+          hintText: widget.hintText,
         ),
       ),
     );

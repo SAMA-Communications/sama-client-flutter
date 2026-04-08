@@ -26,14 +26,6 @@ class ParticipantsForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(mainAxisSize: MainAxisSize.min, children: [
-      const Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-          child: Text('Add participants',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        ),
-      ),
       LimitedBox(
         maxHeight: screenHeight / 5.5,
         child: Padding(
@@ -42,15 +34,6 @@ class ParticipantsForm extends StatelessWidget {
               users: users,
               nonRemovableUsers: nonRemovableUsers,
               onRemoveParticipants: onRemoveParticipants),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text('List of users ${users.length}/$maxParticipantsCount',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         ),
       ),
       _SearchBody(
@@ -76,10 +59,7 @@ class _SearchBody extends StatelessWidget {
     return BlocBuilder<GlobalSearchBloc, GlobalSearchState>(
       builder: (context, state) {
         return switch (state) {
-          SearchStateEmpty() => const Padding(
-              padding: EdgeInsets.only(top: 18.0),
-              child: Text('Please start typing to find user'),
-            ),
+          SearchStateEmpty() => const SizedBox.shrink(),
           SearchStateLoading() => const Padding(
               padding: EdgeInsets.only(top: 18.0),
               child: CircularProgressIndicator.adaptive(),
