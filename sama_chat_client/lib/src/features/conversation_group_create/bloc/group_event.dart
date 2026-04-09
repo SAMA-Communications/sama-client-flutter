@@ -18,6 +18,8 @@ final class GroupnameChanged extends GroupEvent {
 
 final class GroupAvatarPicked extends GroupEvent {}
 
+final class GroupUsersRecent extends GroupEvent {}
+
 final class GroupParticipantsAdded extends GroupEvent {
   const GroupParticipantsAdded(this.user);
 

@@ -57,7 +57,7 @@ class DatabaseService {
   /// ////////////////////////////////
 
   Future<List<ConversationModel>> getAllConversationsLocal(
-      DateTime? ltDate) async {
+      DateTime? ltDate, int? limit) async {
     var filter = ConversationModel_.type
         .equals('u')
         .and(ConversationModel_.lastMessageBind.notEquals(0).and(
@@ -71,7 +71,8 @@ class DatabaseService {
         .query(
             ConversationModel_.updatedAt.lessThanDate(ltDate ?? DateTime.now()))
         .order(ConversationModel_.updatedAt, flags: Order.descending)
-        .build();
+        .build()
+      ..limit = limit ?? 0;
     final results = await query.findAsync();
     query.close();
     return results;

@@ -8,7 +8,6 @@ import '../../../features/conversation_create/bloc/conversation_create_event.dar
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/participants_forms.dart';
 import '../../../shared/ui/view/text_button_forms.dart';
-import '../../../shared/utils/api_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
@@ -72,13 +71,14 @@ class GroupCreateFormState extends State<GroupCreateForm> {
                     Expanded(
                         child: BlocBuilder<GroupBloc, GroupState>(
                             buildWhen: (previous, current) {
-                      return previous.participants != current.participants;
+                      return previous.participants != current.participants ||
+                          previous.users != current.users;
                     }, builder: (context, state) {
-                      var users = state.participants.value;
                       return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 25),
                           child: ParticipantsForm(
-                            users: List.of(users),
+                            participants: List.of(state.participants.value),
+                            users: List.of(state.users),
                             onAddParticipants: (user) {
                               context
                                   .read<GroupBloc>()

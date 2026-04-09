@@ -6,6 +6,7 @@ import '../../../db/models/conversation_model.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/conversation/conversation_repository.dart';
 import '../../../repository/global_search/global_search_repository.dart';
+import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/view/loading_overlay.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
@@ -32,7 +33,9 @@ class GroupCreatePage extends StatelessWidget {
           ),
         ),
         BlocProvider<GroupBloc>(
-          create: (context) => GroupBloc(),
+          create: (context) => GroupBloc(
+              RepositoryProvider.of<ConversationRepository>(context),
+              RepositoryProvider.of<UserRepository>(context)),
         ),
       ],
       child: const GroupCreatePage(),

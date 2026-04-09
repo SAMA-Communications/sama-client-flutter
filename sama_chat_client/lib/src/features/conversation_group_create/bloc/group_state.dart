@@ -6,6 +6,7 @@ final class GroupState extends Equatable {
     this.groupname = const Groupname.pure(),
     this.avatar = const GroupAvatar.pure(),
     this.participants = const Participants.pure(),
+    this.users = const [],
     this.isValid = false,
     this.errorMessage,
     this.informationMessage,
@@ -15,6 +16,7 @@ final class GroupState extends Equatable {
   final Groupname groupname;
   final GroupAvatar avatar;
   final Participants participants;
+  final List<UserModel> users;
   final bool isValid;
   final String? errorMessage;
   final String? informationMessage;
@@ -24,6 +26,7 @@ final class GroupState extends Equatable {
     Groupname? groupname,
     GroupAvatar? avatar,
     Participants? participants,
+    List<UserModel>? users,
     bool? isValid,
     String? errorMessage,
     String? informationMessage,
@@ -33,6 +36,7 @@ final class GroupState extends Equatable {
       groupname: groupname ?? this.groupname,
       avatar: avatar ?? this.avatar,
       participants: participants ?? this.participants,
+      users: users ?? this.users,
       isValid: isValid ?? this.isValid,
       errorMessage: errorMessage ?? this.errorMessage,
       informationMessage: informationMessage ?? this.informationMessage,
@@ -40,5 +44,5 @@ final class GroupState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, groupname, avatar, participants];
+  List<Object?> get props => [status, groupname, avatar, participants, users];
 }
