@@ -16,9 +16,11 @@ import '../bloc/global_search_bloc.dart';
 import '../bloc/global_search_state.dart';
 
 class SearchForm extends StatelessWidget {
-  const SearchForm({this.searchType = SearchType.both, super.key});
+  const SearchForm(
+      {this.searchType = SearchType.both, this.chatOnTap, super.key});
 
   final SearchType searchType;
+  final Function(ConversationModel)? chatOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,7 @@ class SearchForm extends StatelessWidget {
               ),
             SearchStateSuccess() => SearchResults(
                 state.users, state.conversations,
-                searchType: searchType),
+                searchType: searchType, chatOnTap: chatOnTap),
           };
         },
       ),

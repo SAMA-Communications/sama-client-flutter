@@ -64,7 +64,7 @@ class _SearchBody extends StatelessWidget {
     return BlocBuilder<GlobalSearchBloc, GlobalSearchState>(
       builder: (context, state) {
         return switch (state) {
-          SearchStateEmpty() => users?.isEmpty == true
+          SearchStateEmpty() => users?.isEmpty ?? true
               ? const SizedBox.shrink()
               : Expanded(
                   child: _SearchResults(

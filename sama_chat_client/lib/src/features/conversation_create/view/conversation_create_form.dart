@@ -63,12 +63,18 @@ class ConversationCreateFormState extends State<ConversationCreateForm> {
                       ),
                     ),
                   ]),
-                  const Expanded(
+                  Expanded(
                       child: Align(
                           alignment: AlignmentGeometry.topCenter,
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 15),
-                            child: SearchForm(searchType: SearchType.both),
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: SearchForm(
+                                searchType: SearchType.both,
+                                chatOnTap: (chat) {
+                                  context.go(
+                                      '$conversationListScreenPath/$conversationScreenSubPath',
+                                      extra: chat);
+                                }),
                           )))
                 ])));
   }
