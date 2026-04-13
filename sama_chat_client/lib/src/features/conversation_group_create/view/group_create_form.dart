@@ -11,7 +11,8 @@ import '../../../shared/ui/view/text_button_forms.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
-import '../../search/view/search_bar.dart';
+import '../../global_search/view/search_bar.dart';
+import '../../search/bloc/search_bloc.dart';
 import '../bloc/group_bloc.dart';
 import '../models/groupname.dart';
 
@@ -71,14 +72,15 @@ class GroupCreateFormState extends State<GroupCreateForm> {
                     Expanded(
                         child: BlocBuilder<GroupBloc, GroupState>(
                             buildWhen: (previous, current) {
-                      return previous.participants != current.participants ||
-                          previous.users != current.users;
+                      return previous.participants != current.participants;
                     }, builder: (context, state) {
                       return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 25),
                           child: ParticipantsForm(
                             participants: List.of(state.participants.value),
-                            users: List.of(state.users),
+                            users: context.select(
+                              (SearchBloc bloc) => bloc.state.users,
+                            ),
                             onAddParticipants: (user) {
                               context
                                   .read<GroupBloc>()

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,33 +24,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       : super(const GroupState()) {
     on<GroupnameChanged>(_onGroupnameChanged);
     on<GroupAvatarPicked>(_onGroupAvatarPicked);
-    on<GroupUsersRecent>(_onGroupUsersRecent);
     on<GroupParticipantsAdded>(_onGroupParticipantsAdded);
     on<GroupParticipantsRemoved>(_onGroupParticipantsRemoved);
     on<GroupSubmitted>(_onGroupSubmitted);
-
-    add(GroupUsersRecent());
-  }
-
-  Future<void> _onGroupUsersRecent(
-      GroupUsersRecent event, Emitter<GroupState> emit) async {
-    var lim = 10;
-    var currentUserId = await userRepository.getCurrentUserId();
-    var chats = await conversationRepository.getStoredConversations(limit: lim);
-
-    List<UserModel> users = chats
-        .map((chat) => chat.participants.toList())
-        .flattenedToSet
-        .where((u) => u.id != currentUserId)
-        .take(lim)
-        .toList();
-
-    emit(
-      state.copyWith(
-        status: FormzSubmissionStatus.initial,
-        users: users,
-      ),
-    );
   }
 
   void _onGroupnameChanged(

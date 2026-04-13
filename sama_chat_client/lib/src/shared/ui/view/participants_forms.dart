@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../db/models/user_model.dart';
 import '../../../features/conversations_list/widgets/avatar_letter_icon.dart';
-import '../../../features/search/bloc/global_search_bloc.dart';
-import '../../../features/search/bloc/global_search_state.dart';
+import '../../../features/global_search/bloc/global_search_bloc.dart';
+import '../../../features/global_search/bloc/global_search_state.dart';
 import '../../utils/api_utils.dart';
 import '../../utils/screen_factor.dart';
 import '../../utils/string_utils.dart';

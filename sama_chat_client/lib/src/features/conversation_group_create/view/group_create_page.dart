@@ -10,7 +10,8 @@ import '../../../repository/user/user_repository.dart';
 import '../../../shared/ui/view/loading_overlay.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversation_create/bloc/conversation_create_state.dart';
-import '../../search/bloc/global_search_bloc.dart';
+import '../../global_search/bloc/global_search_bloc.dart';
+import '../../search/bloc/search_bloc.dart';
 import '../bloc/group_bloc.dart';
 import 'group_create_form.dart';
 
@@ -34,6 +35,11 @@ class GroupCreatePage extends StatelessWidget {
         ),
         BlocProvider<GroupBloc>(
           create: (context) => GroupBloc(
+              RepositoryProvider.of<ConversationRepository>(context),
+              RepositoryProvider.of<UserRepository>(context)),
+        ),
+        BlocProvider<SearchBloc>(
+          create: (context) => SearchBloc(
               RepositoryProvider.of<ConversationRepository>(context),
               RepositoryProvider.of<UserRepository>(context)),
         ),

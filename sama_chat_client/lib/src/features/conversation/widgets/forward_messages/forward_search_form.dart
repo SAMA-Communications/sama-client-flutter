@@ -9,10 +9,10 @@ import '../../../../navigation/constants.dart';
 import '../../../../shared/ui/colors.dart';
 import '../../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../../conversation_create/bloc/conversation_create_state.dart';
-import '../../../search/bloc/global_search_bloc.dart';
-import '../../../search/bloc/global_search_state.dart';
-import '../../../search/view/search_bar.dart';
-import '../../../search/view/search_form.dart';
+import '../../../global_search/bloc/global_search_bloc.dart';
+import '../../../global_search/bloc/global_search_state.dart';
+import '../../../global_search/view/search_bar.dart';
+import '../../../global_search/view/search_result.dart';
 import '../../bloc/conversation_bloc.dart';
 import '../../bloc/forward_message/forward_messages_bloc.dart';
 import '../../models/chat_message.dart';
@@ -51,7 +51,9 @@ class ForwardSearchForm extends StatelessWidget {
                 child: Column(
                   spacing: 4,
                   children: [
-                    const GlobalSearchBar(),
+                    const Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: GlobalSearchBar()),
                     _SearchBody(forwardMessages),
                   ],
                 ))));

@@ -16,8 +16,8 @@ import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/keyboard_listener.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
-import '../../search/bloc/global_search_bloc.dart';
-import '../../search/view/search_bar.dart';
+import '../../global_search/bloc/global_search_bloc.dart';
+import '../../global_search/view/search_bar.dart';
 import '../bloc/group_info_bloc.dart';
 import '../models/models.dart';
 
