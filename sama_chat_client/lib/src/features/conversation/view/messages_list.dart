@@ -5,6 +5,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/list_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
@@ -135,59 +136,24 @@ class _MessagesListState extends State<MessagesList> {
                               return false;
                             },
                             child: ScrollablePositionedList.separated(
-                              reverse: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                var msg = state.messages[index];
-                                return SwipeTo(
-                                  key: Key(msg.id.toString()),
-                                  stickToRight: msg.isOwn,
-                                  direction: msg.isServiceMessage()
-                                      ? DismissDirection.none
-                                      : msg.isOwn
-                                          ? DismissDirection.endToStart
-                                          : DismissDirection.startToEnd,
-                                  onSwipe: () {
-                                    print('onSwipe');
-                                    context
-                                        .read<SendMessageBloc>()
-                                        .add(AddReplyMessage(msg));
-                                  },
-                                  actionIcon: const Icon(
-                                    Icons.reply_rounded,
-                                    color: black,
-                                    size: 25,
-                                  ),
-                                  child: MessageItem(
-                                      message: msg,
-                                      onTapReply: () {
-                                        var replyIndex = state.messages
-                                            .indexWhere((item) =>
-                                                item.id ==
-                                                msg.repliedMessageId);
-                                        if (replyIndex == -1) {
-                                          if (!state.hasReachedMax) {
-                                            context
-                                                .read<ConversationBloc>()
-                                                .add(MessagesMoreForReply(
-                                                    msg.repliedMessageId!));
-                                            showProgress();
-                                          }
-                                          return;
-                                        }
-                                        scrollTo(replyIndex);
-                                      },
-                                      onTapForward: () =>
-                                          print('onTapForward')),
-                                );
-                              },
-                              itemCount: state.messages.length,
-                              itemScrollController: _scrollController,
-                              itemPositionsListener: itemPositionsListener,
-                              padding: const EdgeInsets.only(top: 5),
-                              separatorBuilder: (context, index) => SizedBox(
-                                height: separateSpace(state.messages, index),
-                              ),
-                            ));
+                                reverse: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  var msg = state.messages[index];
+                                  return Column(children: [
+                                    if (isDifferentDay(msg,
+                                        state.messages.tryGet(index + 1)))
+                                      buildDateDivider(msg),
+                                    buildMessage(msg, state)
+                                  ]);
+                                },
+                                itemCount: state.messages.length,
+                                itemScrollController: _scrollController,
+                                itemPositionsListener: itemPositionsListener,
+                                padding: const EdgeInsets.only(top: 5),
+                                separatorBuilder: (context, index) => SizedBox(
+                                      height:
+                                          separateSpace(state.messages, index),
+                                    )));
                       });
                 case ConversationStatus.initial:
                   return const Center(child: CircularProgressIndicator());
@@ -201,6 +167,53 @@ class _MessagesListState extends State<MessagesList> {
           ),
           scrollFAB,
         ]));
+  }
+
+  Widget buildMessage(ChatMessage msg, ConversationState state) {
+    return SwipeTo(
+      key: Key(msg.id.toString()),
+      stickToRight: msg.isOwn,
+      direction: msg.isServiceMessage()
+          ? DismissDirection.none
+          : msg.isOwn
+              ? DismissDirection.endToStart
+              : DismissDirection.startToEnd,
+      onSwipe: () {
+        print('onSwipe');
+        context.read<SendMessageBloc>().add(AddReplyMessage(msg));
+      },
+      actionIcon: const Icon(
+        Icons.reply_rounded,
+        color: black,
+        size: 25,
+      ),
+      child: MessageItem(
+          message: msg,
+          onTapReply: () {
+            var replyIndex = state.messages
+                .indexWhere((item) => item.id == msg.repliedMessageId);
+            if (replyIndex == -1) {
+              if (!state.hasReachedMax) {
+                context
+                    .read<ConversationBloc>()
+                    .add(MessagesMoreForReply(msg.repliedMessageId!));
+                showProgress();
+              }
+              return;
+            }
+            scrollTo(replyIndex);
+          },
+          onTapForward: () => print('onTapForward')),
+    );
+  }
+
+  Widget buildDateDivider(MessageModel msg) {
+    final date = msg.createdAt ?? DateTime.fromMillisecondsSinceEpoch(msg.t!);
+    return Padding(
+      padding: const EdgeInsets.only(top: 5, bottom: 15),
+      child: Text(formatDateToDay(date),
+          style: const TextStyle(fontWeight: FontWeight.w300)),
+    );
   }
 
   double separateSpace(List<MessageModel> messages, int index) {

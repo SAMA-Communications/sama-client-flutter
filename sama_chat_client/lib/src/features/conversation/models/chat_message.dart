@@ -124,6 +124,26 @@ extension ChatMessageExtension on MessageModel {
   }
 }
 
+bool isDifferentDay(MessageModel msg, MessageModel? other) {
+  final msgCreatedAt =
+      msg.createdAt ?? DateTime.fromMillisecondsSinceEpoch(msg.t!);
+  final currentMsgDate =
+      DateTime(msgCreatedAt.year, msgCreatedAt.month, msgCreatedAt.day);
+
+  final nextMsgCreatedAt =
+      other?.createdAt ?? DateTime.fromMillisecondsSinceEpoch(other?.t ?? 0);
+  final nextMsgDate = other != null
+      ? DateTime(
+          nextMsgCreatedAt.year, nextMsgCreatedAt.month, nextMsgCreatedAt.day)
+      : null;
+
+  if (currentMsgDate != nextMsgDate) {
+    return true;
+  }
+
+  return false;
+}
+
 bool sameMsgGroup(MessageModel msg, MessageModel? other) {
   int diffTime = 45;
 
@@ -134,7 +154,7 @@ bool sameMsgGroup(MessageModel msg, MessageModel? other) {
   var msgMs = (msg.createdAt?.millisecondsSinceEpoch ?? 0) ~/ 1000;
   var timeGap = (msgMs - otherMs).abs();
 
-  return isSameOwner && timeGap < diffTime;
+  return isSameOwner && !isDifferentDay(msg, other) && timeGap < diffTime;
 }
 
 BubbleType bubbleType(List<MessageModel> messages, int index) {
