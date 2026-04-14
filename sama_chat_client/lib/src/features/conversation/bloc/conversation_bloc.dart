@@ -456,27 +456,31 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     var messages = [...state.messages];
     var messagesMap = {}..addEntries(messages.map((m) => MapEntry(m.id, m)));
     event.status.msgIds?.forEach((id) {
-      int currentIndex = messages.indexOf(messagesMap[id]);
-      int prevIndex = currentIndex + 1;
-      int nextIndex = currentIndex - 1;
+      int delMsgIndex = messages.indexOf(messagesMap[id]);
+      messages.remove(messagesMap[id]);
+
+      int prevIndex = delMsgIndex;
+      int nextIndex = delMsgIndex - 1;
       ChatMessage? prevMsg = messages.tryGet(prevIndex);
       ChatMessage? nextMsg = messages.tryGet(nextIndex);
 
       var prevMsgUpdated = prevMsg?.copyWith(
           isLastUserMessage: prevIndex == 0 ||
-              isServiceMessage(messages.tryGet(prevIndex - 2)) ||
-              messages.tryGet(prevIndex - 2)?.from != messages[prevIndex].from,
+              isServiceMessage(messages.tryGet(prevIndex - 1)) ||
+              messages.tryGet(prevIndex - 1)?.from != messages[prevIndex].from,
           isFirstUserMessage: prevIndex == messages.length - 1 ||
-              isServiceMessage(messages[prevIndex + 2]) ||
-              messages[prevIndex + 2].from != messages[prevIndex].from);
+              isServiceMessage(messages[prevIndex + 1]) ||
+              messages[prevIndex + 1].from != messages[prevIndex].from,
+          bubbleType: bubbleType(messages, prevIndex));
 
       var nextMsgUpdated = nextMsg?.copyWith(
           isLastUserMessage: nextIndex == 0 ||
-              isServiceMessage(messages[nextIndex - 2]) ||
-              messages[nextIndex - 2].from != messages[nextIndex].from,
+              isServiceMessage(messages[nextIndex - 1]) ||
+              messages[nextIndex - 1].from != messages[nextIndex].from,
           isFirstUserMessage: nextIndex == messages.length - 1 ||
-              isServiceMessage(messages[nextIndex + 2]) ||
-              messages[nextIndex + 2].from != messages[nextIndex].from);
+              isServiceMessage(messages[nextIndex + 1]) ||
+              messages[nextIndex + 1].from != messages[nextIndex].from,
+          bubbleType: bubbleType(messages, nextIndex));
 
       if (prevMsgUpdated != null && prevMsgUpdated != prevMsg) {
         messages[prevIndex] = prevMsgUpdated;
@@ -485,8 +489,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       if (nextMsgUpdated != null && nextMsgUpdated != nextMsg) {
         messages[nextIndex] = nextMsgUpdated;
       }
-
-      messages.remove(messagesMap[id]);
     });
     emit(state.copyWith(messages: messages));
   }
