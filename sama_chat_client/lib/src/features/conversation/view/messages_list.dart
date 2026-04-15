@@ -166,6 +166,7 @@ class _MessagesListState extends State<MessagesList> {
             },
           ),
           scrollFAB,
+          dateHeader,
         ]));
   }
 
@@ -223,6 +224,40 @@ class _MessagesListState extends State<MessagesList> {
         ? 2
         : 10;
   }
+
+  Widget get dateHeader => ValueListenableBuilder<Iterable<ItemPosition>>(
+      valueListenable: itemPositionsListener.itemPositions,
+      builder: (context, positions, child) {
+        var items = context.read<ConversationBloc>().state.messages;
+
+        String? date;
+        bool? hide = false;
+        if (positions.isNotEmpty) {
+          date = formatDateToDay(items[positions.last.index].createdAt!);
+
+          var isDateWidget = isDifferentDay(items[positions.last.index],
+              items.tryGet(positions.last.index + 1));
+          if (isDateWidget) {
+            if (positions.last.itemLeadingEdge < 0.9 &&
+                positions.last.itemLeadingEdge > 0.8) {
+              hide = true;
+            } else {
+              hide = false;
+            }
+          }
+        }
+        return Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Visibility(
+              visible: date != null && !hide,
+              child: Center(
+                child: Text(date ?? '',
+                    style: const TextStyle(color: whiteAluminum)),
+              )),
+        );
+      });
 
   Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
       valueListenable: itemPositionsListener.itemPositions,
