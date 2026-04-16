@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:sama_sdk/api/chats/realtime/typing_manager.dart';
 
 import '../../../db/models/conversation_model.dart';
+import '../../../db/models/models.dart';
 import '../../../navigation/constants.dart';
 import '../../../repository/attachments/attachments_repository.dart';
 import '../../../repository/conversation/conversation_repository.dart';
@@ -80,89 +81,100 @@ class ConversationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ConversationBloc, ConversationState>(
+        buildWhen: (previous, current) => previous.choose != current.choose,
         builder: (BuildContext context, state) {
-      return PopScope(
-          onPopInvokedWithResult: (didPop, result) {
-            if (didPop) return;
-            context
-                .read<ConversationBloc>()
-                .add(const SelectMessagesMode(false));
-          },
-          canPop: !state.choose,
-          child: Scaffold(
-            appBar: AppBar(
-              toolbarHeight: 64,
-              centerTitle: false,
-              titleSpacing: 0.0,
-              backgroundColor: smokyBorough,
-              surfaceTintColor: Colors.transparent,
-              title: BlocBuilder<AiMessageBloc, AiMessageState>(
-                  builder: (BuildContext context, aiState) {
-                return aiState.status == AiMessageStatus.processing
-                    ? const TitleLoader(
-                        black,
-                        Text('AI processing',
-                            style: TextStyle(color: black, fontSize: 20.0)))
-                    : ConnectionTitle(
-                        color: black,
-                        title: Padding(
-                          padding: const EdgeInsets.only(top: 0.0),
-                          child: ListTile(
-                            onTap: () => _infoAction(context),
-                            title: Text(
-                              overflow: TextOverflow.ellipsis,
-                              state.conversation.name,
-                              style: const TextStyle(
-                                  fontSize: 28.0, fontWeight: FontWeight.bold),
-                              maxLines: 1,
-                            ),
-                            subtitle: _getSubtitle(state),
-                          ),
-                        ),
-                      );
-              }),
-              actions: [_PopupMenuButton()],
-            ),
-            body: Column(
-              children: [
-                BlocListener<ConnectionBloc, ConnectionState>(
-                    listener: (context, state) {
-                      if (state.status == ConnectionStatus.connected) {
-                        BlocProvider.of<ConversationBloc>(context)
-                            .add(const MessagesRequested(refresh: true));
-                      }
-                    },
-                    child: const Flexible(child: MessagesList())),
-                SafeArea(
-                    child: !state.choose
-                        ? context.read<SharingIntentBloc>().state.status ==
-                                SharingIntentStatus.processing
-                            ? BlocListener<SendMessageBloc, SendMessageState>(
-                                listener: (context, sendState) {
-                                  if (sendState.status ==
-                                          SendMessageStatus.success ||
-                                      sendState.status ==
-                                          SendMessageStatus.failure) {
-                                    context
-                                        .read<SharingIntentBloc>()
-                                        .add(SharingIntentCompleted());
-                                  }
-                                },
-                                child: ConnectionChecker(
-                                    child: MessageInput(
-                                        sharedMessage: context
+          return PopScope(
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) return;
+                context
+                    .read<ConversationBloc>()
+                    .add(const SelectMessagesMode(false));
+              },
+              canPop: !state.choose,
+              child: Scaffold(
+                appBar: AppBar(
+                  toolbarHeight: 64,
+                  centerTitle: false,
+                  titleSpacing: 0.0,
+                  backgroundColor: smokyBorough,
+                  surfaceTintColor: Colors.transparent,
+                  title: BlocBuilder<AiMessageBloc, AiMessageState>(
+                      builder: (BuildContext context, aiState) {
+                    return aiState.status == AiMessageStatus.processing
+                        ? const TitleLoader(
+                            black,
+                            Text('AI processing',
+                                style: TextStyle(color: black, fontSize: 20.0)))
+                        : ConnectionTitle(
+                            color: black,
+                            title: title,
+                          );
+                  }),
+                  actions: [_PopupMenuButton()],
+                ),
+                body: Column(
+                  children: [
+                    BlocListener<ConnectionBloc, ConnectionState>(
+                        listener: (context, state) {
+                          if (state.status == ConnectionStatus.connected) {
+                            BlocProvider.of<ConversationBloc>(context)
+                                .add(const MessagesRequested(refresh: true));
+                          }
+                        },
+                        child: const Flexible(child: MessagesList())),
+                    SafeArea(
+                        child: !state.choose
+                            ? context.read<SharingIntentBloc>().state.status ==
+                                    SharingIntentStatus.processing
+                                ? BlocListener<SendMessageBloc,
+                                    SendMessageState>(
+                                    listener: (context, sendState) {
+                                      if (sendState.status ==
+                                              SendMessageStatus.success ||
+                                          sendState.status ==
+                                              SendMessageStatus.failure) {
+                                        context
                                             .read<SharingIntentBloc>()
-                                            .state
-                                            .sharedFiles
-                                            .firstOrNull)),
-                              )
-                            : const MessageInput()
-                        : const SelectInput())
-              ],
-            ),
-          ));
-    });
+                                            .add(SharingIntentCompleted());
+                                      }
+                                    },
+                                    child: ConnectionChecker(
+                                        child: MessageInput(
+                                            sharedMessage: context
+                                                .read<SharingIntentBloc>()
+                                                .state
+                                                .sharedFiles
+                                                .firstOrNull)),
+                                  )
+                                : const MessageInput()
+                            : const SelectInput())
+                  ],
+                ),
+              ));
+        });
   }
+
+  Widget get title => BlocBuilder<ConversationBloc, ConversationState>(
+      buildWhen: (previous, current) =>
+          previous.conversation != current.conversation ||
+          previous.participants != current.participants ||
+          previous.typingStatus != current.typingStatus,
+      builder: (BuildContext context, state) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 0.0),
+          child: ListTile(
+            onTap: () => _infoAction(context),
+            title: Text(
+              overflow: TextOverflow.ellipsis,
+              state.conversation.name,
+              style:
+                  const TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+              maxLines: 1,
+            ),
+            subtitle: _getSubtitle(state),
+          ),
+        );
+      });
 
   Widget _getSubtitle(ConversationState state) {
     var conversation = state.conversation;

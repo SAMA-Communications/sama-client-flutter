@@ -20,7 +20,8 @@ part 'conversation_event.dart';
 
 part 'conversation_state.dart';
 
-const throttleDuration = Duration(milliseconds: 100);
+const messagesThrottleDuration = Duration(milliseconds: 100);
+const scrollThrottleDuration = Duration(milliseconds: 1000);
 const scrollToReplyTimeout = Duration(seconds: 7);
 
 EventTransformer<E> throttleDroppable<E>(Duration duration) {
@@ -54,6 +55,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   StreamSubscription<Map<String, dynamic>>? lastActivitySubscription;
   StreamSubscription<ConversationModel?>? conversationWatcher;
 
+  Timer? headerTimer;
+
   ConversationBloc({
     required this.currentConversation,
     required this.conversationRepository,
@@ -65,7 +68,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<MessagesRequested>(_onMessagesRequested);
     on<MessagesMoreRequested>(
       _onMessagesMoreRequested,
-      transformer: throttleDroppable(throttleDuration),
+      transformer: throttleDroppable(messagesThrottleDuration),
     );
     on<ParticipantsReceived>(
       _onParticipantsReceived,
@@ -122,6 +125,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<SelectedChatsRemoved>(
       onSelectedChatsRemoved,
+    );
+    on<ShowHeader>(
+      onShowHeader,
+      transformer: throttleDroppable(scrollThrottleDuration),
+    );
+    on<HideHeader>(
+      onHideHeader,
     );
 
     add(const ParticipantsReceived());
@@ -273,6 +283,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
                       : (List.of(state.messages)..addAll(messages)),
                   hasReachedMax: false,
                   initial: false,
+                  showHeader: false
                 ),
               );
         break;
@@ -282,6 +293,20 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       case Status.loading:
         break;
     }
+  }
+
+  Future<void> onShowHeader(event, emit) async {
+    emit(state.copyWith(showHeader: true));
+
+    headerTimer?.cancel();
+
+    headerTimer = Timer(const Duration(seconds: 3), () {
+      add(const HideHeader());
+    });
+  }
+
+  void onHideHeader(event, emit) {
+    emit(state.copyWith(showHeader: false));
   }
 
   Future<void> _onParticipantsReceived(
@@ -594,6 +619,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     typingMessageSubscription?.cancel();
     lastActivitySubscription?.cancel();
     conversationWatcher?.cancel();
+    headerTimer?.cancel();
     return super.close();
   }
 }

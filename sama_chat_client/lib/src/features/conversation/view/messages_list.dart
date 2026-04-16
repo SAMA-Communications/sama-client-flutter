@@ -32,7 +32,7 @@ class MessagesList extends StatefulWidget {
 }
 
 class _MessagesListState extends State<MessagesList> {
-  final _scrollController = ItemScrollController();
+  final scrollController = ItemScrollController();
   final itemPositionsListener = ItemPositionsListener.create();
 
   @override
@@ -128,6 +128,10 @@ class _MessagesListState extends State<MessagesList> {
                                     shouldClose) {
                                   hideKeyboard();
                                 }
+
+                                context
+                                    .read<ConversationBloc>()
+                                    .add(const ShowHeader());
                               } else if (notification
                                   is ScrollEndNotification) {
                                 _onScroll(notification.metrics.pixels,
@@ -140,14 +144,14 @@ class _MessagesListState extends State<MessagesList> {
                                 itemBuilder: (BuildContext context, int index) {
                                   var msg = state.messages[index];
                                   return Column(children: [
-                                    if (isDifferentDay(msg,
-                                        state.messages.tryGet(index + 1)))
+                                    if (isDifferentDay(
+                                        msg, state.messages.tryGet(index + 1)))
                                       buildDateDivider(msg),
                                     buildMessage(msg, state)
                                   ]);
                                 },
                                 itemCount: state.messages.length,
-                                itemScrollController: _scrollController,
+                                itemScrollController: scrollController,
                                 itemPositionsListener: itemPositionsListener,
                                 padding: const EdgeInsets.only(top: 5),
                                 separatorBuilder: (context, index) => SizedBox(
@@ -225,38 +229,45 @@ class _MessagesListState extends State<MessagesList> {
         : 10;
   }
 
-  Widget get dateHeader => ValueListenableBuilder<Iterable<ItemPosition>>(
-      valueListenable: itemPositionsListener.itemPositions,
-      builder: (context, positions, child) {
-        var items = context.read<ConversationBloc>().state.messages;
+  Widget get dateHeader => BlocSelector<ConversationBloc, ConversationState,
+          bool>(
+      selector: (state) => state.showHeader,
+      builder: (context, showHeader) {
+        return ValueListenableBuilder<Iterable<ItemPosition>>(
+            valueListenable: itemPositionsListener.itemPositions,
+            builder: (context, positions, child) {
+              var items = context.read<ConversationBloc>().state.messages;
+              String? date;
+              bool? hide = false;
+              if (positions.isNotEmpty) {
+                final maxPos = positions
+                    .where((pos) => pos.itemTrailingEdge > 0)
+                    .reduce((max, pos) =>
+                        pos.itemLeadingEdge > max.itemLeadingEdge ? pos : max);
 
-        String? date;
-        bool? hide = false;
-        if (positions.isNotEmpty) {
-          date = formatDateToDay(items[positions.last.index].createdAt!);
+                final maxIndex = maxPos.index;
 
-          var isDateWidget = isDifferentDay(items[positions.last.index],
-              items.tryGet(positions.last.index + 1));
-          if (isDateWidget) {
-            if (positions.last.itemLeadingEdge < 0.9 &&
-                positions.last.itemLeadingEdge > 0.8) {
-              hide = true;
-            } else {
-              hide = false;
-            }
-          }
-        }
-        return Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Visibility(
-              visible: date != null && !hide,
-              child: Center(
-                child: Text(date ?? '',
-                    style: const TextStyle(color: whiteAluminum)),
-              )),
-        );
+                date = formatDateToDay(
+                    items[maxIndex].createdAt ?? DateTime.now());
+                var isDateWidget =
+                    isDifferentDay(items[maxIndex], items.tryGet(maxIndex + 1));
+                if (isDateWidget) {
+                  hide = maxPos.itemLeadingEdge < 0.92;
+                }
+              }
+              return Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 100),
+                    opacity: (date != null && !hide && showHeader) ? 1.0 : 0.0,
+                    child: Center(
+                      child: Text(date ?? '',
+                          style: const TextStyle(color: whiteAluminum)),
+                    )),
+              );
+            });
       });
 
   Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
@@ -302,7 +313,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void scrollTo(int msgIndex) {
-    _scrollController.scrollTo(
+    scrollController.scrollTo(
         index: msgIndex,
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOutCubic);
