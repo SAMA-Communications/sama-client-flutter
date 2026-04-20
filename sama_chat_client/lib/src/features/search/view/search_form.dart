@@ -36,7 +36,7 @@ class SearchFormState extends State<SearchForm> {
             color: white,
           ),
           title: const Text(
-            'Create chat',
+            'New chat',
             style: TextStyle(color: white),
           ),
           centerTitle: true,

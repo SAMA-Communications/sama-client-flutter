@@ -77,7 +77,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       _textController.text = '';
       _globalSearchBloc.add(const TextChanged(text: ''));
     } else {
-      context.pop();
+      FocusScope.of(context).unfocus();
     }
   }
 }

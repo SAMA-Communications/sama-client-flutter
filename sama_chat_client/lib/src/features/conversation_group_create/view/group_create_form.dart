@@ -39,7 +39,7 @@ class GroupCreateFormState extends State<GroupCreateForm> {
             leading: const BackButton(color: white),
             centerTitle: true,
             title: const Text(
-              'Group create',
+              'New group',
               style: TextStyle(color: white),
             )),
         body: BlocListener<GroupBloc, GroupState>(
