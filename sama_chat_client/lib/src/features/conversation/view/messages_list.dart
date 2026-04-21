@@ -48,6 +48,10 @@ class _MessagesListState extends State<MessagesList> {
             },
           ),
           BlocListener<ConversationBloc, ConversationState>(
+            listenWhen: (previous, current) {
+              return previous.replyIdToScroll != current.replyIdToScroll ||
+                  previous.conversation != current.conversation;
+            },
             listener: (context, state) {
               scrollToReplyIfNeed(state);
               markAsReadIfNeed();
