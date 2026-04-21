@@ -5,7 +5,7 @@ import '../../../../repository/conversation/conversation_repository.dart';
 import '../../../../repository/global_search/global_search_repository.dart';
 import '../../../../repository/messages/messages_repository.dart';
 import '../../../conversation_create/bloc/conversation_create_bloc.dart';
-import '../../../search/bloc/global_search_bloc.dart';
+import '../../../global_search/bloc/global_search_bloc.dart';
 import '../../bloc/forward_message/forward_messages_bloc.dart';
 import '../../models/chat_message.dart';
 import 'forward_search_form.dart';

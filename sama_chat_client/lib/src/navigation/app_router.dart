@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/conversation_create/view/conversation_create_page.dart';
+import '../features/search/view/search_page.dart';
 import '../features/group_info/view/group_info_page.dart';
 import '../features/conversation_group_create/view/group_create_page.dart';
 import '../features/conversations_list/view/conversations_page.dart';
@@ -66,9 +66,9 @@ GoRouter router(BuildContext context, navigatorKey) => GoRouter(
           },
         ),
         GoRoute(
-          path: conversationCreateScreenPath,
+          path: searchScreenPath,
           builder: (context, state) {
-            return ConversationCreatePage.route();
+            return SearchPage.route();
           },
         ),
         GoRoute(

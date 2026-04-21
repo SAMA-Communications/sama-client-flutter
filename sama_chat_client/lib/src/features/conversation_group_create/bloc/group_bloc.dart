@@ -6,6 +6,8 @@ import 'package:formz/formz.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../db/models/user_model.dart';
+import '../../../repository/conversation/conversation_repository.dart';
+import '../../../repository/user/user_repository.dart';
 import '../models/avatar.dart';
 import '../models/groupname.dart';
 import '../models/participants.dart';
@@ -15,7 +17,11 @@ part 'group_event.dart';
 part 'group_state.dart';
 
 class GroupBloc extends Bloc<GroupEvent, GroupState> {
-  GroupBloc() : super(const GroupState()) {
+  final ConversationRepository conversationRepository;
+  final UserRepository userRepository;
+
+  GroupBloc(this.conversationRepository, this.userRepository)
+      : super(const GroupState()) {
     on<GroupnameChanged>(_onGroupnameChanged);
     on<GroupAvatarPicked>(_onGroupAvatarPicked);
     on<GroupParticipantsAdded>(_onGroupParticipantsAdded);

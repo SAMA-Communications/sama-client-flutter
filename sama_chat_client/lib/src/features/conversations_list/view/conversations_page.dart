@@ -102,7 +102,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: <Widget>[
         ConnectionChecker(
           child: IconButton(
-            onPressed: () => context.push(conversationCreateScreenPath),
+            onPressed: () => context.push(searchScreenPath),
             icon: const Icon(
               Icons.edit_note_outlined,
               color: lightWhite,

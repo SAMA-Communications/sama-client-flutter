@@ -8,11 +8,11 @@ import '../../../features/conversation_create/bloc/conversation_create_event.dar
 import '../../../shared/ui/colors.dart';
 import '../../../shared/ui/view/participants_forms.dart';
 import '../../../shared/ui/view/text_button_forms.dart';
-import '../../../shared/utils/api_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
-import '../../search/view/search_bar.dart';
+import '../../global_search/view/search_bar.dart';
+import '../../search/bloc/search_bloc.dart';
 import '../bloc/group_bloc.dart';
 import '../models/groupname.dart';
 
@@ -39,7 +39,7 @@ class GroupCreateFormState extends State<GroupCreateForm> {
             leading: const BackButton(color: white),
             centerTitle: true,
             title: const Text(
-              'Group create',
+              'New group',
               style: TextStyle(color: white),
             )),
         body: BlocListener<GroupBloc, GroupState>(
@@ -63,30 +63,37 @@ class GroupCreateFormState extends State<GroupCreateForm> {
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const GlobalSearchBar(),
-                Expanded(
-                    child: BlocBuilder<GroupBloc, GroupState>(
-                        buildWhen: (previous, current) {
-                  return previous.participants != current.participants;
-                }, builder: (context, state) {
-                  var users = state.participants.value;
-                  return ParticipantsForm(
-                    users: List.of(users),
-                    onAddParticipants: (user) {
-                      context
-                          .read<GroupBloc>()
-                          .add(GroupParticipantsAdded(user));
-                    },
-                    onRemoveParticipants: (user) {
-                      context
-                          .read<GroupBloc>()
-                          .add(GroupParticipantsRemoved(user));
-                    },
-                  );
-                }))
-              ]),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10,
+                  children: [
+                    const GlobalSearchBar(hintText: 'Search for people to add'),
+                    Expanded(
+                        child: BlocBuilder<GroupBloc, GroupState>(
+                            buildWhen: (previous, current) {
+                      return previous.participants != current.participants;
+                    }, builder: (context, state) {
+                      return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 25),
+                          child: ParticipantsForm(
+                            participants: List.of(state.participants.value),
+                            users: context.select(
+                              (SearchBloc bloc) => bloc.state.users,
+                            ),
+                            onAddParticipants: (user) {
+                              context
+                                  .read<GroupBloc>()
+                                  .add(GroupParticipantsAdded(user));
+                            },
+                            onRemoveParticipants: (user) {
+                              context
+                                  .read<GroupBloc>()
+                                  .add(GroupParticipantsRemoved(user));
+                            },
+                          ));
+                    }))
+                  ]),
             )),
         floatingActionButton:
             BlocBuilder<GroupBloc, GroupState>(buildWhen: (previous, current) {

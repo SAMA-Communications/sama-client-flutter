@@ -76,11 +76,15 @@ class _MessagesListState extends State<MessagesList> {
           })
         ],
         child: Stack(children: [
-          BlocSelector<ConversationBloc, ConversationState, ConversationStatus>(
-            selector: (state) => state.status,
-            builder: (context, status) {
+          BlocSelector<ConversationBloc, ConversationState,
+              ({ConversationStatus status, bool initial})>(
+            selector: (state) => (
+              status: state.status,
+              initial: state.initial,
+            ),
+            builder: (context, data) {
               var state = context.read<ConversationBloc>().state;
-              switch (status) {
+              switch (data.status) {
                 case ConversationStatus.failure:
                   WidgetsBinding.instance
                       .addPostFrameCallback((_) => ScaffoldMessenger.of(context)
@@ -94,7 +98,7 @@ class _MessagesListState extends State<MessagesList> {
                 success:
                 case ConversationStatus.success:
                   if (state.messages.isEmpty) {
-                    return state.initial
+                    return data.initial
                         ? const Center(child: CircularProgressIndicator())
                         : Center(
                             child: Container(

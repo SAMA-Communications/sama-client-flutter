@@ -16,8 +16,8 @@ import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/keyboard_listener.dart';
 import '../../conversations_list/widgets/avatar_letter_icon.dart';
-import '../../search/bloc/global_search_bloc.dart';
-import '../../search/view/search_bar.dart';
+import '../../global_search/bloc/global_search_bloc.dart';
+import '../../global_search/view/search_bar.dart';
 import '../bloc/group_info_bloc.dart';
 import '../models/models.dart';
 
@@ -220,7 +220,7 @@ class _ParticipantsHeaderForm extends StatelessWidget {
   Widget build(BuildContext context) {
     var state = context.read<GroupInfoBloc>().state;
     return ListTile(
-      contentPadding: const EdgeInsets.all(8.0),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
       leading: Text(
         '${state.participants.value.length} ${state.participants.value.length > 1 ? 'members' : 'member'}',
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
@@ -274,10 +274,11 @@ class _ParticipantsListForm extends StatelessWidget {
             if (user.id == ownerId)
               const Text(
                 'admin',
-                style: TextStyle(fontWeight: FontWeight.w300, fontSize: 18),
+                style: TextStyle(
+                    fontWeight: FontWeight.w300, fontSize: 18, height: 1.0),
               ),
           ]),
-          contentPadding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
+          contentPadding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 12.0),
           onTap: () {
             user.id == currentUserId
                 ? context.push(profilePath)
@@ -350,7 +351,7 @@ void _showSearchScreenDialog(BuildContext context) {
                                   state.participants.value
                                     ..remove(state.currentUser));
                               return ParticipantsForm(
-                                users: List.of(currentParticipants)
+                                participants: List.of(currentParticipants)
                                   ..addAll(state.addParticipants.value),
                                 nonRemovableUsers: currentParticipants,
                                 onAddParticipants: (user) {

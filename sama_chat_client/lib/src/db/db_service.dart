@@ -57,7 +57,7 @@ class DatabaseService {
   /// ////////////////////////////////
 
   Future<List<ConversationModel>> getAllConversationsLocal(
-      DateTime? ltDate) async {
+      DateTime? ltDate, int? limit, String? type) async {
     var filter = ConversationModel_.type
         .equals('u')
         .and(ConversationModel_.lastMessageBind.notEquals(0).and(
@@ -65,13 +65,19 @@ class DatabaseService {
                 .lessThanDate(ltDate ?? DateTime.now())))
         .or(ConversationModel_.type.equals('g'));
 
+    var condition =
+        ConversationModel_.updatedAt.lessThanDate(ltDate ?? DateTime.now());
+    if (type != null) {
+      condition = condition.and(ConversationModel_.type.equals(type));
+    }
+
     final query = store!
         .box<ConversationModel>()
         // .query(filtered ? filter : null)
-        .query(
-            ConversationModel_.updatedAt.lessThanDate(ltDate ?? DateTime.now()))
+        .query(condition)
         .order(ConversationModel_.updatedAt, flags: Order.descending)
-        .build();
+        .build()
+      ..limit = limit ?? 0;
     final results = await query.findAsync();
     query.close();
     return results;
@@ -264,6 +270,13 @@ class DatabaseService {
       user.bid = userInDb?.bid;
       if (userInDb?.avatar?.fileId == user.avatar?.fileId) {
         user.avatar?.bid = userInDb?.avatar?.bid;
+        if (user.avatar?.imageUrl != userInDb?.avatar?.imageUrl) {
+          //to check
+          print('user.avatar putAsync');
+          await store!
+              .box<AvatarModel>()
+              .putAsync(user.avatar!, mode: PutMode.update);
+        }
       }
     }
     return store!.box<UserModel>().putAndGetManyAsync(items, mode: PutMode.put);

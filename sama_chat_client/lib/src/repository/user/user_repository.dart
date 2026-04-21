@@ -101,7 +101,7 @@ class UserRepository {
     return participants;
   }
 
-  Future<List<UserModel>> getUsersByCids(List<String> cids) async {
+  Future<List<UserModel>> fetchUsersByCids(List<String> cids) async {
     return (await fetchParticipants(cids))
         .$2
         .map((element) => element.toUserModel())

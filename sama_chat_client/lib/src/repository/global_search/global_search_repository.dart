@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:sama_sdk/api/api.dart';
 
 import '../../db/models/models.dart';
-import '../../features/search/models/models.dart';
+import '../../features/global_search/models/models.dart';
 import '../conversation/conversation_repository.dart';
 import '../user/user_repository.dart';
 

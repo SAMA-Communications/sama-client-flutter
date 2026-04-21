@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../db/models/user_model.dart';
 import '../../../features/conversations_list/widgets/avatar_letter_icon.dart';
-import '../../../features/search/bloc/global_search_bloc.dart';
-import '../../../features/search/bloc/global_search_state.dart';
+import '../../../features/global_search/bloc/global_search_bloc.dart';
+import '../../../features/global_search/bloc/global_search_state.dart';
 import '../../utils/api_utils.dart';
 import '../../utils/screen_factor.dart';
 import '../../utils/string_utils.dart';
@@ -12,13 +12,15 @@ import '../colors.dart';
 
 class ParticipantsForm extends StatelessWidget {
   const ParticipantsForm(
-      {required this.users,
+      {required this.participants,
       required this.onAddParticipants,
       required this.onRemoveParticipants,
+      this.users,
       this.nonRemovableUsers,
       super.key});
 
-  final List<UserModel> users;
+  final List<UserModel> participants;
+  final List<UserModel>? users;
   final List<UserModel>? nonRemovableUsers;
   final ValueSetter<UserModel> onAddParticipants;
   final ValueSetter<UserModel> onRemoveParticipants;
@@ -26,35 +28,19 @@ class ParticipantsForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(mainAxisSize: MainAxisSize.min, children: [
-      const Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-          child: Text('Add participants',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        ),
-      ),
       LimitedBox(
         maxHeight: screenHeight / 5.5,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: ParticipantsList(
-              users: users,
+              users: participants,
               nonRemovableUsers: nonRemovableUsers,
               onRemoveParticipants: onRemoveParticipants),
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text('List of users ${users.length}/$maxParticipantsCount',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        ),
-      ),
       _SearchBody(
-          selectedUsers: users,
+          selectedUsers: participants,
+          users: users,
           onAddParticipants: onAddParticipants,
           onRemoveParticipants: onRemoveParticipants)
     ]);
@@ -64,10 +50,12 @@ class ParticipantsForm extends StatelessWidget {
 class _SearchBody extends StatelessWidget {
   const _SearchBody(
       {required this.selectedUsers,
+      required this.users,
       required this.onAddParticipants,
       required this.onRemoveParticipants});
 
   final List<UserModel> selectedUsers;
+  final List<UserModel>? users;
   final ValueSetter<UserModel> onAddParticipants;
   final ValueSetter<UserModel> onRemoveParticipants;
 
@@ -76,10 +64,14 @@ class _SearchBody extends StatelessWidget {
     return BlocBuilder<GlobalSearchBloc, GlobalSearchState>(
       builder: (context, state) {
         return switch (state) {
-          SearchStateEmpty() => const Padding(
-              padding: EdgeInsets.only(top: 18.0),
-              child: Text('Please start typing to find user'),
-            ),
+          SearchStateEmpty() => users?.isEmpty ?? true
+              ? const SizedBox.shrink()
+              : Expanded(
+                  child: _SearchResults(
+                      users: users!,
+                      selectedUsers: selectedUsers,
+                      onAddParticipants: onAddParticipants,
+                      onRemoveParticipants: onRemoveParticipants)),
           SearchStateLoading() => const Padding(
               padding: EdgeInsets.only(top: 18.0),
               child: CircularProgressIndicator.adaptive(),
@@ -159,7 +151,7 @@ class _SearchResults extends StatelessWidget {
               );
             },
             separatorBuilder: (context, index) {
-              return const Divider(color: lightMallow);
+              return const Divider(color: Colors.transparent, height: 4);
             },
           );
 

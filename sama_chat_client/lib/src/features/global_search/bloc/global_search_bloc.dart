@@ -2,8 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../repository/global_search/global_search_repository.dart';
-import '../bloc/global_search_event.dart';
-import '../bloc/global_search_state.dart';
+import 'global_search_event.dart';
+import 'global_search_state.dart';
 import '../models/models.dart';
 
 const _duration = Duration(milliseconds: 300);
