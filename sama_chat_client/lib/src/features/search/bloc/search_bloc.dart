@@ -24,8 +24,12 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   Future<void> _onUsersRecent(event, emit) async {
     var lim = 10;
     var currentUserId = await userRepository.getCurrentUserId();
-    var chats = await conversationRepository.getStoredConversations(limit: lim);
-
+    var chats = await conversationRepository.getStoredConversations(
+        limit: lim, type: 'u');
+    if (chats.length < lim) {
+      chats.addAll(await conversationRepository.getStoredConversations(
+          limit: lim, type: 'g'));
+    }
     List<UserModel> users = chats
         .map((chat) => chat.participants.toList())
         .flattenedToSet

@@ -187,9 +187,9 @@ class ConversationRepository {
   }
 
   Future<List<ConversationModel>> getStoredConversations(
-      {DateTime? ltDate, int? limit}) async {
+      {DateTime? ltDate, int? limit, String? type}) async {
     var conversations = await localDatasource.getAllConversationsLocal(
-        ltDate: ltDate, limit: limit);
+        ltDate: ltDate, limit: limit, type: type);
     return conversations.whereNot((c) => _chatsFilter(c)).toList();
   }
 

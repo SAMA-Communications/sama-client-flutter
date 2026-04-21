@@ -57,7 +57,7 @@ class DatabaseService {
   /// ////////////////////////////////
 
   Future<List<ConversationModel>> getAllConversationsLocal(
-      DateTime? ltDate, int? limit) async {
+      DateTime? ltDate, int? limit, String? type) async {
     var filter = ConversationModel_.type
         .equals('u')
         .and(ConversationModel_.lastMessageBind.notEquals(0).and(
@@ -65,11 +65,16 @@ class DatabaseService {
                 .lessThanDate(ltDate ?? DateTime.now())))
         .or(ConversationModel_.type.equals('g'));
 
+    var condition =
+        ConversationModel_.updatedAt.lessThanDate(ltDate ?? DateTime.now());
+    if (type != null) {
+      condition = condition.and(ConversationModel_.type.equals(type));
+    }
+
     final query = store!
         .box<ConversationModel>()
         // .query(filtered ? filter : null)
-        .query(
-            ConversationModel_.updatedAt.lessThanDate(ltDate ?? DateTime.now()))
+        .query(condition)
         .order(ConversationModel_.updatedAt, flags: Order.descending)
         .build()
       ..limit = limit ?? 0;

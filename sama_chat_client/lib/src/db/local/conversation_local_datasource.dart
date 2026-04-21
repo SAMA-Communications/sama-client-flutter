@@ -8,10 +8,11 @@ class ConversationLocalDatasource {
   // ConversationLocalDataSource(this.databaseService);
 
   Future<List<ConversationModel>> getAllConversationsLocal(
-      {DateTime? ltDate, int? limit}) async {
+      {DateTime? ltDate, int? limit, String? type}) async {
     print('getAllConversationsLocal');
     try {
-      return await _databaseService.getAllConversationsLocal(ltDate, limit);
+      return await _databaseService.getAllConversationsLocal(
+          ltDate, limit, type);
     } catch (e) {
       print('getAllConversationsLocal e ${e.toString()}');
       throw DatabaseException(e.toString());
