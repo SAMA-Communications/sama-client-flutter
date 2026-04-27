@@ -32,7 +32,7 @@ class ConversationListItem extends StatelessWidget {
                 avatar: conversation.avatar,
                 isDeleted: isDeletedUser(conversation.opponent),
               )
-            : AvatarGroupIcon(conversation.avatar),
+            : AvatarGroupIcon(conversation.avatar, conversation.name),
         title: Text(
           conversation.name,
           style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),

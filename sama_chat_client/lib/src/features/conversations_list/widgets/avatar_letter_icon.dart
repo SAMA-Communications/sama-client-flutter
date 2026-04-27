@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../db/models/avatar_model.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/string_utils.dart';
 
 class AvatarLetterIcon extends StatelessWidget {
   const AvatarLetterIcon({
@@ -10,8 +11,8 @@ class AvatarLetterIcon extends StatelessWidget {
     super.key,
     this.size = const Size(55, 55),
     this.padding = EdgeInsets.zero,
-    this.backgroundColor = black,
-    this.textColor = dullGray,
+    this.backgroundColor,
+    this.textColor = signalBlack,
     this.avatar,
     this.isDeleted,
   });
@@ -21,7 +22,7 @@ class AvatarLetterIcon extends StatelessWidget {
   final String? lastName;
   final Size size;
   final EdgeInsetsGeometry padding;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final Color textColor;
   final AvatarModel? avatar;
   final bool? isDeleted;
@@ -38,7 +39,9 @@ class AvatarLetterIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: isDeleted ?? false
+            ? black
+            : backgroundColor ?? getAvatarColor(name + (lastName ?? '')),
         shape: BoxShape.circle,
         // border: Border.all(color: whiteAluminum, width: 2),
       ),

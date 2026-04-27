@@ -4,16 +4,17 @@ import '../../../db/models/avatar_model.dart';
 import '../../../shared/ui/colors.dart';
 
 class AvatarGroupIcon extends StatelessWidget {
-  const AvatarGroupIcon(this.avatar, {super.key});
+  const AvatarGroupIcon(this.avatar, this.name, {super.key});
 
   final AvatarModel? avatar;
+  final String name;
   final Size size = const Size(55, 60);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: const BoxDecoration(
-          color: black,
+        decoration: BoxDecoration(
+          color: getAvatarColor(name),
           shape: BoxShape.circle,
         ),
         height: size.height,
