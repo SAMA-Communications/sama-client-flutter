@@ -29,26 +29,25 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<ProfileResetChanges>(_onResetChanges);
     on<ProfileSubmitted>(_onSubmitted);
 
-    _userRepository.getCurrentUser().then((user) {
-      add(ProfileUserReceived(user));
-    });
+    add(ProfileUserReceived());
   }
 
   final UserRepository _userRepository;
 
-  void _onUserReceived(
+  Future<void> _onUserReceived(
     ProfileUserReceived event,
     Emitter<ProfileState> emit,
-  ) {
+  ) async {
+    var user = await _userRepository.getCurrentUser();
     emit(
       state.copyWith(
           status: FormzSubmissionStatus.initial,
-          userLogin: event.user?.login,
-          userAvatar: UserAvatar.pure(event.user?.avatar?.imageUrl ?? ''),
-          userFirstname: UserFirstname.pure(event.user?.firstName ?? ''),
-          userLastname: UserLastname.pure(event.user?.lastName ?? ''),
-          userPhone: UserPhone.pure(event.user?.phone ?? ''),
-          userEmail: UserEmail.pure(event.user?.email ?? '')),
+          userLogin: user?.login,
+          userAvatar: UserAvatar.pure(user?.avatar?.imageUrl ?? ''),
+          userFirstname: UserFirstname.pure(user?.firstName ?? ''),
+          userLastname: UserLastname.pure(user?.lastName ?? ''),
+          userPhone: UserPhone.pure(user?.phone ?? ''),
+          userEmail: UserEmail.pure(user?.email ?? '')),
     );
   }
 

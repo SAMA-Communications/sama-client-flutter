@@ -7,14 +7,7 @@ sealed class ProfileEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class ProfileUserReceived extends ProfileEvent {
-  const ProfileUserReceived(this.user);
-
-  final UserModel? user;
-
-  @override
-  List<Object?> get props => [user];
-}
+final class ProfileUserReceived extends ProfileEvent {}
 
 final class ProfileAvatarPicked extends ProfileEvent {}
 
