@@ -129,3 +129,11 @@ final class SelectedChatsRemoved extends ConversationEvent {
   @override
   List<Object> get props => [message];
 }
+
+final class ShowHeader extends ConversationEvent {
+  const ShowHeader();
+}
+
+final class HideHeader extends ConversationEvent {
+  const HideHeader();
+}
