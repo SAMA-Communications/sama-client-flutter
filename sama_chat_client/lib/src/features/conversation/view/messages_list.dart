@@ -5,6 +5,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/list_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
@@ -31,7 +32,7 @@ class MessagesList extends StatefulWidget {
 }
 
 class _MessagesListState extends State<MessagesList> {
-  final _scrollController = ItemScrollController();
+  final scrollController = ItemScrollController();
   final itemPositionsListener = ItemPositionsListener.create();
 
   @override
@@ -47,6 +48,10 @@ class _MessagesListState extends State<MessagesList> {
             },
           ),
           BlocListener<ConversationBloc, ConversationState>(
+            listenWhen: (previous, current) {
+              return previous.replyIdToScroll != current.replyIdToScroll ||
+                  previous.conversation != current.conversation;
+            },
             listener: (context, state) {
               scrollToReplyIfNeed(state);
               markAsReadIfNeed();
@@ -131,6 +136,10 @@ class _MessagesListState extends State<MessagesList> {
                                     shouldClose) {
                                   hideKeyboard();
                                 }
+
+                                context
+                                    .read<ConversationBloc>()
+                                    .add(const ShowHeader());
                               } else if (notification
                                   is ScrollEndNotification) {
                                 _onScroll(notification.metrics.pixels,
@@ -139,59 +148,24 @@ class _MessagesListState extends State<MessagesList> {
                               return false;
                             },
                             child: ScrollablePositionedList.separated(
-                              reverse: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                var msg = state.messages[index];
-                                return SwipeTo(
-                                  key: Key(msg.id.toString()),
-                                  stickToRight: msg.isOwn,
-                                  direction: msg.isServiceMessage()
-                                      ? DismissDirection.none
-                                      : msg.isOwn
-                                          ? DismissDirection.endToStart
-                                          : DismissDirection.startToEnd,
-                                  onSwipe: () {
-                                    print('onSwipe');
-                                    context
-                                        .read<SendMessageBloc>()
-                                        .add(AddReplyMessage(msg));
-                                  },
-                                  actionIcon: const Icon(
-                                    Icons.reply_rounded,
-                                    color: black,
-                                    size: 25,
-                                  ),
-                                  child: MessageItem(
-                                      message: msg,
-                                      onTapReply: () {
-                                        var replyIndex = state.messages
-                                            .indexWhere((item) =>
-                                                item.id ==
-                                                msg.repliedMessageId);
-                                        if (replyIndex == -1) {
-                                          if (!state.hasReachedMax) {
-                                            context
-                                                .read<ConversationBloc>()
-                                                .add(MessagesMoreForReply(
-                                                    msg.repliedMessageId!));
-                                            showProgress();
-                                          }
-                                          return;
-                                        }
-                                        scrollTo(replyIndex);
-                                      },
-                                      onTapForward: () =>
-                                          print('onTapForward')),
-                                );
-                              },
-                              itemCount: state.messages.length,
-                              itemScrollController: _scrollController,
-                              itemPositionsListener: itemPositionsListener,
-                              padding: const EdgeInsets.only(top: 5),
-                              separatorBuilder: (context, index) => SizedBox(
-                                height: separateSpace(state.messages, index),
-                              ),
-                            ));
+                                reverse: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  var msg = state.messages[index];
+                                  return Column(children: [
+                                    if (isDifferentDay(
+                                        msg, state.messages.tryGet(index + 1)))
+                                      buildDateDivider(msg),
+                                    buildMessage(msg, state)
+                                  ]);
+                                },
+                                itemCount: state.messages.length,
+                                itemScrollController: scrollController,
+                                itemPositionsListener: itemPositionsListener,
+                                padding: const EdgeInsets.only(top: 5),
+                                separatorBuilder: (context, index) => SizedBox(
+                                      height:
+                                          separateSpace(state.messages, index),
+                                    )));
                       });
                 case ConversationStatus.initial:
                   return const Center(child: CircularProgressIndicator());
@@ -204,7 +178,55 @@ class _MessagesListState extends State<MessagesList> {
             },
           ),
           scrollFAB,
+          dateHeader,
         ]));
+  }
+
+  Widget buildMessage(ChatMessage msg, ConversationState state) {
+    return SwipeTo(
+      key: Key(msg.id.toString()),
+      stickToRight: msg.isOwn,
+      direction: msg.isServiceMessage()
+          ? DismissDirection.none
+          : msg.isOwn
+              ? DismissDirection.endToStart
+              : DismissDirection.startToEnd,
+      onSwipe: () {
+        print('onSwipe');
+        context.read<SendMessageBloc>().add(AddReplyMessage(msg));
+      },
+      actionIcon: const Icon(
+        Icons.reply_rounded,
+        color: black,
+        size: 25,
+      ),
+      child: MessageItem(
+          message: msg,
+          onTapReply: () {
+            var replyIndex = state.messages
+                .indexWhere((item) => item.id == msg.repliedMessageId);
+            if (replyIndex == -1) {
+              if (!state.hasReachedMax) {
+                context
+                    .read<ConversationBloc>()
+                    .add(MessagesMoreForReply(msg.repliedMessageId!));
+                showProgress();
+              }
+              return;
+            }
+            scrollTo(replyIndex);
+          },
+          onTapForward: () => print('onTapForward')),
+    );
+  }
+
+  Widget buildDateDivider(MessageModel msg) {
+    final date = msg.createdAt ?? DateTime.fromMillisecondsSinceEpoch(msg.t!);
+    return Padding(
+      padding: const EdgeInsets.only(top: 5, bottom: 15),
+      child: Text(formatDateToDay(date),
+          style: const TextStyle(fontWeight: FontWeight.w300)),
+    );
   }
 
   double separateSpace(List<MessageModel> messages, int index) {
@@ -214,6 +236,47 @@ class _MessagesListState extends State<MessagesList> {
         ? 2
         : 10;
   }
+
+  Widget get dateHeader => BlocSelector<ConversationBloc, ConversationState,
+          bool>(
+      selector: (state) => state.showHeader,
+      builder: (context, showHeader) {
+        return ValueListenableBuilder<Iterable<ItemPosition>>(
+            valueListenable: itemPositionsListener.itemPositions,
+            builder: (context, positions, child) {
+              var items = context.read<ConversationBloc>().state.messages;
+              String? date;
+              bool? hide = false;
+              if (positions.isNotEmpty) {
+                final maxPos = positions
+                    .where((pos) => pos.itemTrailingEdge > 0)
+                    .reduce((max, pos) =>
+                        pos.itemLeadingEdge > max.itemLeadingEdge ? pos : max);
+
+                final maxIndex = maxPos.index;
+
+                date = formatDateToDay(
+                    items[maxIndex].createdAt ?? DateTime.now());
+                var isDateWidget =
+                    isDifferentDay(items[maxIndex], items.tryGet(maxIndex + 1));
+                if (isDateWidget) {
+                  hide = maxPos.itemLeadingEdge < 0.92;
+                }
+              }
+              return Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 100),
+                    opacity: (date != null && !hide && showHeader) ? 1.0 : 0.0,
+                    child: Center(
+                      child: Text(date ?? '',
+                          style: const TextStyle(color: whiteAluminum)),
+                    )),
+              );
+            });
+      });
 
   Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
       valueListenable: itemPositionsListener.itemPositions,
@@ -258,7 +321,7 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void scrollTo(int msgIndex) {
-    _scrollController.scrollTo(
+    scrollController.scrollTo(
         index: msgIndex,
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOutCubic);
