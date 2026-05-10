@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 const Color white = Color(0xFFFFFFFF);
 const Color lightWhite = Color(0xFFF9F9F9);
 const Color smokyWhite = Color(0xFFF6F6F6);
@@ -23,3 +25,25 @@ const Color lightPink = Color(0xFFFFB6C1);
 const Color orange = Color(0xFFFFA500);
 const Color redPurple = Color(0xFF68174D);
 const Color red = Color(0xFFDF2E38);
+
+const colors = [
+  Color(0xFFe17076), // red
+  Color(0xFFf4a261), // orange
+  Color(0xFFe9c46a), // yellow
+  Color(0xFF2a9d8f), // teal
+  Color(0xFF4d96ff), // blue
+  Color(0xFF9b5de5), // purple
+  Color(0xFFf15bb5), // pink
+  Color(0xFF00bcd4), // cyan
+];
+
+Color getAvatarColor(String input) {
+  final hash = input.runes.fold(0, (prev, el) => prev * 31 + el);
+  final index = hash.abs() % colors.length;
+
+  final saturation = 0.35 + ((hash >> 8) % 40) / 100; // 0.35–0.75
+  final lightness = 0.55 + ((hash >> 16) % 20) / 100; // 0.55–0.75
+
+  final hsl = HSLColor.fromColor(colors[index]);
+  return hsl.withSaturation(saturation).withLightness(lightness).toColor();
+}

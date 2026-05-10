@@ -28,12 +28,6 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
   }
 
   @override
-  void didPopNext() {
-    // TODO RP for now not using
-    // context.read<ConversationsBloc>().add(ConversationsRefreshed());
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocBuilder<ConversationsBloc, ConversationsState>(
       builder: (context, state) {

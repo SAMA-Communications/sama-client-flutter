@@ -32,7 +32,7 @@ class ConversationListItem extends StatelessWidget {
                 avatar: conversation.avatar,
                 isDeleted: isDeletedUser(conversation.opponent),
               )
-            : AvatarGroupIcon(conversation.avatar),
+            : AvatarGroupIcon(conversation.avatar, conversation.name),
         title: Text(
           conversation.name,
           style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
@@ -128,62 +128,67 @@ class DateUnreadWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 2),
-          child: Text(
-            DateFormatter().getVerboseDateTimeRepresentation(
-                (conversation.lastMessage?.t != null
-                    ? DateTime.fromMillisecondsSinceEpoch(
-                        conversation.lastMessage!.t! * 1000)
-                    : conversation.updatedAt!)),
-            style: const TextStyle(color: whiteAluminum, fontSize: 15),
-          ),
-        ),
-        if (conversation.unreadMessagesCount != null &&
-            conversation.unreadMessagesCount != 0)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
-              decoration: BoxDecoration(
-                  color: slateBlue, borderRadius: BorderRadius.circular(10.0)),
+    return Padding(
+        padding: const EdgeInsets.only(top: 5),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 2),
               child: Text(
-                conversation.unreadMessagesCount.toString(),
-                style: const TextStyle(color: white),
+                DateFormatter().getVerboseDateTimeRepresentation(
+                    (conversation.lastMessage?.t != null
+                        ? DateTime.fromMillisecondsSinceEpoch(
+                            conversation.lastMessage!.t! * 1000)
+                        : conversation.updatedAt)),
+                style: const TextStyle(color: whiteAluminum, fontSize: 13),
               ),
             ),
-          ),
-      ],
-    );
+            if (conversation.unreadMessagesCount != null &&
+                conversation.unreadMessagesCount != 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+                  decoration: BoxDecoration(
+                      color: slateBlue,
+                      borderRadius: BorderRadius.circular(10.0)),
+                  child: Text(
+                    conversation.unreadMessagesCount.toString(),
+                    style: const TextStyle(color: white),
+                  ),
+                ),
+              ),
+          ],
+        ));
   }
 }
 
 class DateFormatter {
-  String getVerboseDateTimeRepresentation(DateTime dateTime) {
-    DateTime now = DateTime.now();
-    DateTime justNow = DateTime.now().subtract(const Duration(minutes: 1));
+  String getVerboseDateTimeRepresentation(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
 
-    DateTime localDateTime = dateTime.toLocal();
-
-    if (!localDateTime.difference(justNow).isNegative) {
-      return DateFormat('jm').format(dateTime);
+    if (difference.inMinutes < 1) {
+      return 'Just now';
     }
 
-    String roughTimeString = DateFormat('jm').format(dateTime);
-    if (localDateTime.day == now.day &&
-        localDateTime.month == now.month &&
-        localDateTime.year == now.year) {
-      return roughTimeString;
+    if (now.year == date.year &&
+        now.month == date.month &&
+        now.day == date.day) {
+      return DateFormat('HH:mm').format(date);
     }
 
-    if (now.difference(localDateTime).inDays < 4) {
-      String weekday = DateFormat('EEEE').format(localDateTime);
-      return weekday.substring(0, 2);
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    if (date.isAfter(startOfWeek)) {
+      return DateFormat('EEE').format(date).toLowerCase();
     }
 
-    return DateFormat.yMd().format(dateTime);
+    if (now.year == date.year) {
+      return DateFormat('dd.MM').format(date);
+    }
+
+    return DateFormat('dd.MM.yy').format(date);
   }
 }
