@@ -64,6 +64,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.userRepository,
   }) : super(ConversationState(
             conversation: currentConversation,
+            unreadMessagesCount: currentConversation.unreadMessagesCount ?? 0,
             participants: Set.of(currentConversation.participants))) {
     on<MessagesRequested>(_onMessagesRequested);
     on<MessagesMoreRequested>(
@@ -132,6 +133,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<HideHeader>(
       onHideHeader,
+    );
+    on<ResetUnreadCount>(
+      onResetUnreadCount,
     );
 
     add(const ParticipantsReceived());
@@ -234,16 +238,25 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       if (state.status == ConversationStatus.initial) {
         final messages = await buildChatMessageModels(
             await messagesRepository.getStoredMessages(currentConversation.id));
-        emit(
-          state.copyWith(
-              status: ConversationStatus.success,
-              messages: messages,
-              hasReachedMax: false,
-              participants: Set.of(currentConversation.participants),
-              initial: true),
-        );
-        add(const MessagesRequested());
-        return;
+        if (messages.length >= state.unreadMessagesCount) {
+          emit(
+            state.copyWith(
+                status: ConversationStatus.success,
+                messages: messages,
+                hasReachedMax: false,
+                participants: Set.of(currentConversation.participants),
+                initial: true),
+          );
+          add(const MessagesRequested());
+          return;
+        } else {
+          emit(
+            state.copyWith(
+                hasReachedMax: false,
+                participants: Set.of(currentConversation.participants),
+                initial: true),
+          );
+        }
       }
       await _getAllMessages(emit, refresh: event.refresh);
     } catch (e) {
@@ -273,19 +286,33 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       case Status.success:
         var messages =
             await buildChatMessageModels(resource.data ?? List.empty());
-        messages.isEmpty
-            ? emit(state.copyWith(hasReachedMax: true, initial: false))
-            : emit(
-                state.copyWith(
-                  status: ConversationStatus.success,
-                  messages: state.initial || refresh
-                      ? List.of(messages)
-                      : (List.of(state.messages)..addAll(messages)),
-                  hasReachedMax: false,
-                  initial: false,
-                  showHeader: false
-                ),
-              );
+
+        var totalMessagesLength = state.messages.length + messages.length;
+        if (totalMessagesLength >= state.unreadMessagesCount) {
+          messages.isEmpty
+              ? emit(state.copyWith(hasReachedMax: true, initial: false))
+              : emit(
+                  state.copyWith(
+                    status: ConversationStatus.success,
+                    messages: state.initial || refresh
+                        ? List.of(messages)
+                        : (List.of(state.messages)..addAll(messages)),
+                    hasReachedMax: false,
+                    initial: false,
+                  ),
+                );
+        } else {
+          emit(
+            state.copyWith(
+              messages: state.initial || refresh
+                  ? List.of(messages)
+                  : (List.of(state.messages)..addAll(messages)),
+              hasReachedMax: false,
+              initial: false,
+            ),
+          );
+          add(const MessagesMoreRequested());
+        }
         break;
       case Status.failed:
         emit(state.copyWith(status: ConversationStatus.failure));
@@ -307,6 +334,10 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   void onHideHeader(event, emit) {
     emit(state.copyWith(showHeader: false));
+  }
+
+  void onResetUnreadCount(event, emit) {
+    emit(state.copyWith(unreadMessagesCount: 0));
   }
 
   Future<void> _onParticipantsReceived(
