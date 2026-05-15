@@ -445,9 +445,6 @@ class DatabaseService {
   Future<void> assignMessage(MessageModel msg, MessageModel msgInDb) async {
     msg.bid = msgInDb.bid;
     msg.replyMessage = msgInDb.replyMessage;
-    if (msg.attachments.isNotEmpty) {
-      msg.attachments.clear();
-    }
   }
 
   Future<bool> removeMessageLocal(String id) async {
