@@ -82,13 +82,13 @@ class _MessagesListState extends State<MessagesList> {
         ],
         child: Stack(children: [
           BlocSelector<ConversationBloc, ConversationState,
-              ({ConversationStatus status, bool initial})>(
+              ({ConversationStatus status, bool initial, bool isEmptyMsgs})>(
             selector: (state) => (
               status: state.status,
               initial: state.initial,
+              isEmptyMsgs: state.messages.isEmpty
             ),
             builder: (context, data) {
-              var state = context.read<ConversationBloc>().state;
               switch (data.status) {
                 case ConversationStatus.failure:
                   WidgetsBinding.instance
@@ -102,7 +102,7 @@ class _MessagesListState extends State<MessagesList> {
                   continue success;
                 success:
                 case ConversationStatus.success:
-                  if (state.messages.isEmpty) {
+                  if (data.isEmptyMsgs) {
                     return data.initial
                         ? const Center(child: CircularProgressIndicator())
                         : Center(
