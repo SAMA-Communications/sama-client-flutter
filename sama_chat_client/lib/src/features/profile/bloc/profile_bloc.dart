@@ -182,8 +182,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     if (state.isValid) {
-      emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
-
+      emit(state.copyWith(
+          informationMessage: 'User updating in progress',
+          status: FormzSubmissionStatus.inProgress));
       try {
         var user = await _userRepository.updateCurrentUser(
             currentPsw: state.userPassword.isValid
