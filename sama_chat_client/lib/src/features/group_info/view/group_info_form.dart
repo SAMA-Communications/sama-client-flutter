@@ -125,6 +125,8 @@ class GroupInfoCard extends StatelessWidget {
                                   child: TextField(
                                     keyboardType: TextInputType.text,
                                     controller: groupNameTxt,
+                                    readOnly: !isOwner,
+                                    canRequestFocus: isOwner,
                                     style: const TextStyle(fontSize: 18),
                                     onSubmitted: (value) =>
                                         ScaffoldMessenger.of(context)
@@ -162,6 +164,8 @@ class GroupInfoCard extends StatelessWidget {
                                   child: TextField(
                                     keyboardType: TextInputType.text,
                                     controller: descriptionTxt,
+                                    readOnly: !isOwner,
+                                    canRequestFocus: isOwner,
                                     style: const TextStyle(fontSize: 18),
                                     onSubmitted: (value) =>
                                         ScaffoldMessenger.of(context)
