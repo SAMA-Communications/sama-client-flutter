@@ -9,25 +9,31 @@ import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/connection/view/connection_title.dart';
 import '../../../shared/sharing/bloc/sharing_intent_bloc.dart';
 import '../../../shared/ui/colors.dart';
+import '../../conversation_delete/bloc/conversation_delete_bloc.dart';
 import '../conversations_list.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static BlocProvider route() {
-    return BlocProvider<ConversationsBloc>(
-        create: (context) {
-          final bloc = ConversationsBloc(
-              conversationRepository:
-                  RepositoryProvider.of<ConversationRepository>(context))
-            ..add(const ConversationsFetched());
-          if (context.read<ConnectionBloc>().state.status ==
-              ConnectionStatus.connected) {
-            bloc.add(const ConversationsFetched(refresh: true));
-          }
-          return bloc;
-        },
-        child: const HomePage());
+  static MultiBlocProvider route() {
+    return MultiBlocProvider(providers: [
+      BlocProvider<ConversationsBloc>(create: (context) {
+        final bloc = ConversationsBloc(
+            conversationRepository:
+                RepositoryProvider.of<ConversationRepository>(context))
+          ..add(const ConversationsFetched());
+        if (context.read<ConnectionBloc>().state.status ==
+            ConnectionStatus.connected) {
+          bloc.add(const ConversationsFetched(refresh: true));
+        }
+        return bloc;
+      }),
+      BlocProvider<ConversationDeleteBloc>(
+          create: (context) => ConversationDeleteBloc(
+                conversationRepository:
+                    RepositoryProvider.of<ConversationRepository>(context),
+              )),
+    ], child: const HomePage());
   }
 
   @override
