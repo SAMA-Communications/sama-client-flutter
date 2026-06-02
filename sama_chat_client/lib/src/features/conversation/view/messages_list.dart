@@ -50,9 +50,11 @@ class _MessagesListState extends State<MessagesList> {
           BlocListener<ConversationBloc, ConversationState>(
             listenWhen: (previous, current) {
               return previous.replyIdToScroll != current.replyIdToScroll ||
-                  previous.conversation != current.conversation;
+                  previous.conversation != current.conversation ||
+                  previous.messages != current.messages;
             },
             listener: (context, state) {
+              scrollToUnreadIfNeed(state);
               scrollToReplyIfNeed(state);
               markAsReadIfNeed();
             },
@@ -305,6 +307,19 @@ class _MessagesListState extends State<MessagesList> {
               ),
             ));
       });
+
+  void scrollToUnreadIfNeed(ConversationState state) {
+    int unreadCount = state.unreadMessagesCount;
+    if (unreadCount > 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        int index = unreadCount - 1;
+        if (scrollController.isAttached) {
+          scrollController.jumpTo(index: index);
+          context.read<ConversationBloc>().add(const ResetUnreadCount());
+        }
+      });
+    }
+  }
 
   void scrollToReplyIfNeed(ConversationState state) {
     WidgetsBinding.instance.addPostFrameCallback((_) {

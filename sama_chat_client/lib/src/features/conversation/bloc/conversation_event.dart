@@ -137,3 +137,7 @@ final class ShowHeader extends ConversationEvent {
 final class HideHeader extends ConversationEvent {
   const HideHeader();
 }
+
+final class ResetUnreadCount extends ConversationEvent {
+  const ResetUnreadCount();
+}
