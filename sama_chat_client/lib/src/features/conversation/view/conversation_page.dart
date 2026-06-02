@@ -317,7 +317,7 @@ Future<void> _infoAction(BuildContext context) async {
       context,
       MaterialPageRoute(
           settings: const RouteSettings(name: groupInfoPath),
-          builder: (context) => GroupInfoPage.route(state.conversation,
+          builder: (_) => GroupInfoPage.route(state.conversation,
                   onResult: (conversationUpdated) {
                 if (conversationUpdated && context.mounted) {
                   context
