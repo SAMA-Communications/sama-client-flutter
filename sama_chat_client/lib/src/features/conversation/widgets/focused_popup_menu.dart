@@ -91,14 +91,14 @@ class FocusedMenuDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
+    final itemBottom = childOffset.dy + childSize.height;
+    final bottomOffset = screenHeight - itemBottom;
+
     final menuHeight = menuItems.length * menuItemHeight;
     final childPaddingDy = menuHeight + topPaddingHeight;
 
-    final needToMove = menuHeight +
-            childSize.height +
-            topPaddingHeight -
-            childOffset.dy.abs() >
-        size.height;
+    final needToMove = menuHeight + topPaddingHeight > childOffset.dy &&
+        menuHeight > bottomOffset;
 
     final leftOffset = stickToRight
         ? childOffset.dx -
