@@ -394,7 +394,12 @@ class ConversationRepository {
   }
 
   Future<bool> deleteConversation(ConversationModel conversation) async {
-    var result = await api.deleteConversation(conversation.id);
+    bool result;
+    try {
+      result = await api.deleteConversation(conversation.id);
+    } catch (_) {
+      result = false;
+    }
     if (result) await localDatasource.removeConversationLocal(conversation.id);
     _conversationsController.add(conversation);
     return result;

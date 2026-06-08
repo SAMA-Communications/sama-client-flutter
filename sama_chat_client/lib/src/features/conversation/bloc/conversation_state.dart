@@ -1,6 +1,6 @@
 part of 'conversation_bloc.dart';
 
-enum ConversationStatus { initial, success, failure, delete }
+enum ConversationStatus { initial, success, failure }
 
 class TypingMessageStatus {
   final TypingState typingState;

@@ -6,7 +6,7 @@ import '../../../db/models/conversation_model.dart';
 part 'conversation_delete_event.dart';
 
 part 'conversation_delete_state.dart';
-//Add this to conversation instead of _onConversationDeleted in ConversationBloc
+
 class ConversationDeleteBloc
     extends Bloc<ConversationDeleteEvent, ConversationDeleteState> {
   ConversationDeleteBloc({required this.conversationRepository})
@@ -24,6 +24,6 @@ class ConversationDeleteBloc
         ? emit(state.copyWith(status: ConversationDeleteStatus.success))
         : emit(state.copyWith(
             status: ConversationDeleteStatus.failure,
-            errorMessage: 'Conversation deletion failed.'));
+            errorMessage: 'Failed to delete conversation.'));
   }
 }

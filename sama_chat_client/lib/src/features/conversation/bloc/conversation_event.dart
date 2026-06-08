@@ -72,10 +72,6 @@ final class _ConversationUpdated extends ConversationEvent {
   const _ConversationUpdated(this.conversation);
 }
 
-final class ConversationDeleted extends ConversationEvent {
-  const ConversationDeleted();
-}
-
 final class TypingStatusStartReceived extends ConversationEvent {
   final String from;
 

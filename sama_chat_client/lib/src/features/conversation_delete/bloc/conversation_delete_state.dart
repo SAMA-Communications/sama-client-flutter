@@ -15,7 +15,6 @@ final class ConversationDeleteState extends Equatable {
 
   ConversationDeleteState copyWith({
     ConversationDeleteStatus? status,
-    ConversationModel? conversation,
     String? errorMessage,
     String? informationMessage,
   }) {
