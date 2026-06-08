@@ -50,9 +50,11 @@ class _MessagesListState extends State<MessagesList> {
           BlocListener<ConversationBloc, ConversationState>(
             listenWhen: (previous, current) {
               return previous.replyIdToScroll != current.replyIdToScroll ||
-                  previous.conversation != current.conversation;
+                  previous.conversation != current.conversation ||
+                  previous.messages != current.messages;
             },
             listener: (context, state) {
+              scrollToUnreadIfNeed(state);
               scrollToReplyIfNeed(state);
               markAsReadIfNeed();
             },
@@ -82,13 +84,13 @@ class _MessagesListState extends State<MessagesList> {
         ],
         child: Stack(children: [
           BlocSelector<ConversationBloc, ConversationState,
-              ({ConversationStatus status, bool initial})>(
+              ({ConversationStatus status, bool initial, bool isEmptyMsgs})>(
             selector: (state) => (
               status: state.status,
               initial: state.initial,
+              isEmptyMsgs: state.messages.isEmpty
             ),
             builder: (context, data) {
-              var state = context.read<ConversationBloc>().state;
               switch (data.status) {
                 case ConversationStatus.failure:
                   WidgetsBinding.instance
@@ -102,7 +104,7 @@ class _MessagesListState extends State<MessagesList> {
                   continue success;
                 success:
                 case ConversationStatus.success:
-                  if (state.messages.isEmpty) {
+                  if (data.isEmptyMsgs) {
                     return data.initial
                         ? const Center(child: CircularProgressIndicator())
                         : Center(
@@ -300,6 +302,19 @@ class _MessagesListState extends State<MessagesList> {
               ),
             ));
       });
+
+  void scrollToUnreadIfNeed(ConversationState state) {
+    int unreadCount = state.unreadMessagesCount;
+    if (unreadCount > 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        int index = unreadCount - 1;
+        if (scrollController.isAttached) {
+          scrollController.jumpTo(index: index);
+          context.read<ConversationBloc>().add(const ResetUnreadCount());
+        }
+      });
+    }
+  }
 
   void scrollToReplyIfNeed(ConversationState state) {
     WidgetsBinding.instance.addPostFrameCallback((_) {

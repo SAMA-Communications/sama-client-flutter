@@ -28,3 +28,26 @@ class LoadingOverlay {
     }
   }
 }
+
+void showTopBanner(BuildContext context, String message) {
+  final messenger = ScaffoldMessenger.of(context);
+
+  messenger.clearMaterialBanners();
+
+  messenger.showMaterialBanner(
+    MaterialBanner(
+      content: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: black),
+      ),
+      backgroundColor: lightMallow,
+      dividerColor: Colors.transparent,
+      actions: const [SizedBox.shrink()],
+    ),
+  );
+
+  Future.delayed(const Duration(seconds: 3), () {
+    messenger.hideCurrentMaterialBanner();
+  });
+}

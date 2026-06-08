@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../db/models/models.dart';
 import '../../../../navigation/constants.dart';
 import '../../../../shared/ui/colors.dart';
+import '../../../../shared/ui/view/loading_overlay.dart';
 import '../../../conversation_create/bloc/conversation_create_bloc.dart';
 import '../../../conversation_create/bloc/conversation_create_state.dart';
 import '../../../global_search/bloc/global_search_bloc.dart';
@@ -94,14 +95,7 @@ class _SearchBody extends StatelessWidget {
                     '$conversationListScreenPath/$conversationScreenSubPath',
                     extra: conversation);
               }
-
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  const SnackBar(
-                      duration: Duration(seconds: 2),
-                      content: Text('Forwarded successfully')),
-                );
+              showTopBanner(context, 'Forwarded successfully');
             case ForwardMessagesStatus.failure:
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 ScaffoldMessenger.of(context)

@@ -12,6 +12,7 @@ class TypingMessageStatus {
 final class ConversationState extends Equatable {
   const ConversationState({
     required this.conversation,
+    required this.unreadMessagesCount,
     this.status = ConversationStatus.initial,
     this.messages = const <ChatMessage>[],
     this.selectedMessages = const SelectedMessages.pure(),
@@ -25,6 +26,7 @@ final class ConversationState extends Equatable {
   });
 
   final ConversationModel conversation;
+  final int unreadMessagesCount;
   final ConversationStatus status;
   final List<ChatMessage> messages;
   final SelectedMessages selectedMessages;
@@ -38,6 +40,7 @@ final class ConversationState extends Equatable {
 
   ConversationState copyWith({
     ConversationModel? conversation,
+    int? unreadMessagesCount,
     ConversationStatus? status,
     List<ChatMessage>? messages,
     SelectedMessages? selectedMessages,
@@ -51,6 +54,7 @@ final class ConversationState extends Equatable {
   }) {
     return ConversationState(
       conversation: conversation ?? this.conversation,
+      unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
       status: status ?? this.status,
       messages: messages ?? this.messages,
       selectedMessages: selectedMessages ?? this.selectedMessages,
@@ -72,6 +76,7 @@ final class ConversationState extends Equatable {
   @override
   List<Object?> get props => [
         conversation,
+        unreadMessagesCount,
         status,
         messages,
         selectedMessages,
