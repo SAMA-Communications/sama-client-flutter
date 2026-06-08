@@ -91,9 +91,7 @@ class TextMessage extends StatelessWidget {
 
   List<InlineSpan> linkify(String text, [bool preview = true]) {
     final List<InlineSpan> list = <InlineSpan>[];
-    final RegExp linkRegExp =
-        RegExp('($urlPattern)|($emailPattern)|($phonePattern)');
-    final RegExpMatch? match = linkRegExp.firstMatch(text);
+    final RegExpMatch? match = RegPatterns.any.firstMatch(text);
 
     if (match == null) {
       list.add(TextSpan(text: text));
@@ -105,16 +103,16 @@ class TextMessage extends StatelessWidget {
     }
 
     final String linkText = match.group(0)!;
-    if (linkText.contains(RegExp(urlPattern))) {
+    if (linkText.contains(RegPatterns.url)) {
       if (preview) {
         preview = false;
         list.add(buildLinkPreviewComponent(linkText, linkText));
       } else {
         list.add(buildTextComponent(linkText, linkText));
       }
-    } else if (linkText.contains(RegExp(emailPattern))) {
+    } else if (linkText.contains(RegPatterns.email)) {
       list.add(buildTextComponent(linkText, 'mailto:$linkText'));
-    } else if (linkText.contains(RegExp(phonePattern))) {
+    } else if (linkText.contains(RegPatterns.phone)) {
       list.add(buildTextComponent(linkText, 'tel:$linkText'));
     } else {
       throw 'Unexpected match: $linkText';
