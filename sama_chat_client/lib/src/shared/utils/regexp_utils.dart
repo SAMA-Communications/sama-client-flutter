@@ -11,11 +11,13 @@ class RegPatterns {
 }
 
 extension RegPatternsExtension on String {
-  String? firstUrl() => RegPatterns.url.firstMatch(this)?.group(0);
+  String? _firstMatch(RegExp pattern) => pattern.firstMatch(this)?.group(0);
 
-  String? firstEmail() => RegPatterns.email.firstMatch(this)?.group(0);
+  String? get firstUrl => _firstMatch(RegPatterns.url);
 
-  String? firstPhone() => RegPatterns.phone.firstMatch(this)?.group(0);
+  String? get firstEmail => _firstMatch(RegPatterns.email);
+
+  String? get firstPhone => _firstMatch(RegPatterns.phone);
 }
 
 List<String> matches(String text, RegExp regExp) {

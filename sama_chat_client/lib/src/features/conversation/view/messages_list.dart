@@ -500,9 +500,9 @@ class MessageItem extends StatelessWidget {
                               String? text = message.body;
                               if (text == null || text.isEmpty) return;
 
-                              String? link = text.firstUrl();
-                              String? email = text.firstEmail();
-                              String? phone = text.firstPhone();
+                              String? link = text.firstUrl;
+                              String? email = text.firstEmail;
+                              String? phone = text.firstPhone;
 
                               FocusedPopupMenu(
                                       menuItems: <FocusedPopupMenuItem>[
