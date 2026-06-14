@@ -125,10 +125,16 @@ class GroupInfoCard extends StatelessWidget {
                                   child: TextField(
                                     keyboardType: TextInputType.text,
                                     controller: groupNameTxt,
+                                    readOnly: !isOwner,
+                                    canRequestFocus: isOwner,
                                     style: const TextStyle(fontSize: 18),
-                                    onSubmitted: (value) =>
-                                        ScaffoldMessenger.of(context)
-                                            .hideCurrentSnackBar(),
+                                    onSubmitted: (value) {
+                                      ScaffoldMessenger.of(context)
+                                          .hideCurrentSnackBar();
+                                      context
+                                          .read<GroupInfoBloc>()
+                                          .add(GroupInfoSubmitted());
+                                    },
                                     onChanged: (groupname) => context
                                         .read<GroupInfoBloc>()
                                         .add(GroupNameChanged(groupname)),
@@ -162,10 +168,16 @@ class GroupInfoCard extends StatelessWidget {
                                   child: TextField(
                                     keyboardType: TextInputType.text,
                                     controller: descriptionTxt,
+                                    readOnly: !isOwner,
+                                    canRequestFocus: isOwner,
                                     style: const TextStyle(fontSize: 18),
-                                    onSubmitted: (value) =>
-                                        ScaffoldMessenger.of(context)
-                                            .hideCurrentSnackBar(),
+                                    onSubmitted: (value) {
+                                      ScaffoldMessenger.of(context)
+                                          .hideCurrentSnackBar();
+                                      context
+                                          .read<GroupInfoBloc>()
+                                          .add(GroupInfoSubmitted());
+                                    },
                                     onChanged: (description) => context
                                         .read<GroupInfoBloc>()
                                         .add(GroupDescriptionChanged(
