@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sama_sdk/api/connection/exceptions.dart';
 
 import '../../../db/models/models.dart';
 import '../../../repository/user/user_repository.dart';
@@ -215,7 +216,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             userPhone: UserPhone.pure(user.phone ?? ''),
             userEmail: UserEmail.pure(user.email ?? ''),
             informationMessage: 'User was successfully updated'));
-      } catch (e) {
+      } on ResponseException catch (ex) {
         var user = await _userRepository.getCurrentUser();
         emit(state.copyWith(
             status: FormzSubmissionStatus.failure,
@@ -225,7 +226,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             userPhone: UserPhone.pure(user?.phone ?? ''),
             userEmail: UserEmail.pure(user?.email ?? ''),
             userPassword: const UserPassword.pure(),
-            errorMessage: 'User wasn\'t updated: $e'));
+            errorMessage: 'User wasn\'t updated: ${ex.message}'));
       }
     }
   }
