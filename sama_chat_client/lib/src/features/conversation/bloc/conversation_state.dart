@@ -22,7 +22,9 @@ final class ConversationState extends Equatable {
     this.typingStatus,
     this.replyIdToScroll = '',
     this.choose = false,
-    this.showHeader = false,
+    this.showDateHeader = false,
+    this.scroll = false,
+    this.unreadIndex = 0,
   });
 
   final ConversationModel conversation;
@@ -34,9 +36,11 @@ final class ConversationState extends Equatable {
   final bool hasReachedMax;
   final bool initial;
   final bool choose;
-  final bool showHeader;
+  final bool showDateHeader;
+  final bool scroll;
   final TypingMessageStatus? typingStatus;
   final String replyIdToScroll;
+  final int unreadIndex;
 
   ConversationState copyWith({
     ConversationModel? conversation,
@@ -48,9 +52,11 @@ final class ConversationState extends Equatable {
     bool? hasReachedMax,
     bool? initial,
     bool? choose,
-    bool? showHeader,
+    bool? showDateHeader,
+    bool? scroll,
     String? replyIdToScroll,
     TypingMessageStatus? typingStatus,
+    int? unreadIndex,
   }) {
     return ConversationState(
       conversation: conversation ?? this.conversation,
@@ -62,9 +68,11 @@ final class ConversationState extends Equatable {
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
       choose: choose ?? this.choose,
-      showHeader: showHeader ?? this.showHeader,
+      showDateHeader: showDateHeader ?? this.showDateHeader,
+      scroll: scroll ?? this.scroll,
       typingStatus: typingStatus ?? this.typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
+      unreadIndex: unreadIndex ?? this.unreadIndex,
     );
   }
 
@@ -83,9 +91,11 @@ final class ConversationState extends Equatable {
         hasReachedMax,
         initial,
         choose,
-        showHeader,
+        showDateHeader,
+        scroll,
         replyIdToScroll,
         participants,
-        typingStatus
+        typingStatus,
+        unreadIndex
       ];
 }

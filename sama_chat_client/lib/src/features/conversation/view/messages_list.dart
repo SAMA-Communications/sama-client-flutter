@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sama_sdk/api/api.dart' hide DeleteMessagesStatus;
@@ -36,6 +38,30 @@ class _MessagesListState extends State<MessagesList> {
   final itemPositionsListener = ItemPositionsListener.create();
 
   @override
+  void initState() {
+    super.initState();
+
+    itemPositionsListener.itemPositions.addListener(_onPositionsChanged);
+  }
+
+  void _onPositionsChanged() {
+    final positions = itemPositionsListener.itemPositions.value;
+
+    final minIndex = positions.map((e) => e.index).reduce(math.min);
+    if (minIndex == 0 &&
+        context.read<ConversationBloc>().state.unreadIndex > 0 &&
+        context.read<ConversationBloc>().state.unreadMessagesCount == 0) {
+      context.read<ConversationBloc>().add(const ResetUnreadIndex());
+    }
+  }
+
+  @override
+  void dispose() {
+    itemPositionsListener.itemPositions.removeListener(_onPositionsChanged);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
         listeners: [
@@ -45,6 +71,14 @@ class _MessagesListState extends State<MessagesList> {
                   sendState.scroll) {
                 scrollTo(0);
               }
+            },
+          ),
+          BlocListener<ConversationBloc, ConversationState>(
+            listenWhen: (previous, current) {
+              return previous.messages != current.messages && current.scroll;
+            },
+            listener: (context, state) {
+              scrollToNewMessagesIfNeed();
             },
           ),
           BlocListener<ConversationBloc, ConversationState>(
@@ -141,7 +175,7 @@ class _MessagesListState extends State<MessagesList> {
 
                                 context
                                     .read<ConversationBloc>()
-                                    .add(const ShowHeader());
+                                    .add(const ShowDateHeader());
                               } else if (notification
                                   is ScrollEndNotification) {
                                 _onScroll(notification.metrics.pixels,
@@ -157,9 +191,12 @@ class _MessagesListState extends State<MessagesList> {
                                     if (isDifferentDay(
                                         msg, state.messages.tryGet(index + 1)))
                                       buildDateDivider(msg),
+                                    if (showUnread(state.unreadIndex, index))
+                                      buildUnreadDivider(),
                                     buildMessage(msg, state)
                                   ]);
                                 },
+                                initialScrollIndex: state.unreadIndex,
                                 itemCount: state.messages.length,
                                 itemScrollController: scrollController,
                                 itemPositionsListener: itemPositionsListener,
@@ -231,6 +268,21 @@ class _MessagesListState extends State<MessagesList> {
     );
   }
 
+  bool showUnread(int unreadIndex, int index) {
+    return unreadIndex > 0 && unreadIndex == index;
+  }
+
+  Widget buildUnreadDivider() {
+    return const Padding(
+      padding: EdgeInsets.only(top: 5, bottom: 15),
+      child: Divider(
+        color: semiBlack,
+        thickness: 1,
+        height: 20,
+      ),
+    );
+  }
+
   double separateSpace(List<MessageModel> messages, int index) {
     MessageModel currentMsg = messages[index];
     MessageModel? prevMsg = messages.tryGet(index + 1);
@@ -241,7 +293,7 @@ class _MessagesListState extends State<MessagesList> {
 
   Widget get dateHeader => BlocSelector<ConversationBloc, ConversationState,
           bool>(
-      selector: (state) => state.showHeader,
+      selector: (state) => state.showDateHeader,
       builder: (context, showHeader) {
         return ValueListenableBuilder<Iterable<ItemPosition>>(
             valueListenable: itemPositionsListener.itemPositions,
@@ -285,7 +337,8 @@ class _MessagesListState extends State<MessagesList> {
       builder: (context, positions, child) {
         bool showScrollFAB = false;
         if (positions.isNotEmpty) {
-          if (positions.first.index > 0) {
+          final minIndex = positions.map((e) => e.index).reduce(math.min);
+          if (minIndex > 0) {
             showScrollFAB = true;
           }
         }
@@ -308,13 +361,31 @@ class _MessagesListState extends State<MessagesList> {
             ));
       });
 
+  void scrollToNewMessagesIfNeed() {
+    final positions = itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty) return;
+
+    final firstVisible = positions
+        .where((p) => p.itemLeadingEdge < 1.0)
+        .reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
+    if (firstVisible.index > 0) {
+      final firstIndex = firstVisible.index;
+      final offset = firstVisible.itemLeadingEdge;
+
+      scrollController.jumpTo(
+        index: firstIndex + 1,
+        alignment: offset,
+      );
+    } else {
+      scrollController.jumpTo(index: 0);
+    }
+  }
+
   void scrollToUnreadIfNeed(ConversationState state) {
     int unreadCount = state.unreadMessagesCount;
     if (unreadCount > 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        int index = unreadCount - 1;
         if (scrollController.isAttached) {
-          scrollController.jumpTo(index: index);
           context.read<ConversationBloc>().add(const ResetUnreadCount());
         }
       });

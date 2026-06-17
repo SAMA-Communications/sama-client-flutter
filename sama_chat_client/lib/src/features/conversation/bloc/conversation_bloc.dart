@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -65,6 +66,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }) : super(ConversationState(
             conversation: currentConversation,
             unreadMessagesCount: currentConversation.unreadMessagesCount ?? 0,
+            unreadIndex:
+                max(0, ((currentConversation.unreadMessagesCount ?? 0) - 1)),
             participants: Set.of(currentConversation.participants))) {
     on<MessagesRequested>(_onMessagesRequested);
     on<MessagesMoreRequested>(
@@ -127,15 +130,18 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<SelectedChatsRemoved>(
       onSelectedChatsRemoved,
     );
-    on<ShowHeader>(
+    on<ShowDateHeader>(
       onShowHeader,
       transformer: throttleDroppable(scrollThrottleDuration),
     );
-    on<HideHeader>(
+    on<HideDateHeader>(
       onHideHeader,
     );
     on<ResetUnreadCount>(
       onResetUnreadCount,
+    );
+    on<ResetUnreadIndex>(
+      onResetUnreadIndex,
     );
 
     add(const ParticipantsReceived());
@@ -243,6 +249,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
             state.copyWith(
                 status: ConversationStatus.success,
                 messages: messages,
+                scroll: false,
                 hasReachedMax: false,
                 participants: Set.of(currentConversation.participants),
                 initial: true),
@@ -298,6 +305,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
                         ? List.of(messages)
                         : (List.of(state.messages)..addAll(messages)),
                     hasReachedMax: false,
+                    scroll: false,
                     initial: false,
                   ),
                 );
@@ -308,6 +316,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
                   ? List.of(messages)
                   : (List.of(state.messages)..addAll(messages)),
               hasReachedMax: false,
+              scroll: false,
               initial: false,
             ),
           );
@@ -323,21 +332,25 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   Future<void> onShowHeader(event, emit) async {
-    emit(state.copyWith(showHeader: true));
+    emit(state.copyWith(showDateHeader: true));
 
     headerTimer?.cancel();
 
     headerTimer = Timer(const Duration(seconds: 3), () {
-      add(const HideHeader());
+      add(const HideDateHeader());
     });
   }
 
   void onHideHeader(event, emit) {
-    emit(state.copyWith(showHeader: false));
+    emit(state.copyWith(showDateHeader: false));
   }
 
   void onResetUnreadCount(event, emit) {
     emit(state.copyWith(unreadMessagesCount: 0));
+  }
+
+  void onResetUnreadIndex(event, emit) {
+    emit(state.copyWith(unreadIndex: 0));
   }
 
   Future<void> _onParticipantsReceived(
@@ -483,8 +496,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
               bubbleType(List.of(messages)..insert(0, event.message), 0)));
     }
 
-    emit(
-        state.copyWith(messages: messages, status: ConversationStatus.success));
+    emit(state.copyWith(
+        messages: messages, scroll: true, status: ConversationStatus.success));
   }
 
   Future<void> _onPendingStatusReceived(

@@ -407,9 +407,8 @@ class DatabaseService {
   }
 
   Future<MessageModel> saveMessageLocal(MessageModel item) async {
-    return await store!
-        .box<MessageModel>()
-        .putAndGetAsync(item, mode: PutMode.put);
+    final id = await store!.box<MessageModel>().putAsync(item);
+    return store!.box<MessageModel>().get(id)!;
   }
 
   Future<MessageModel> updateMessageLocal(MessageModel item) async {
