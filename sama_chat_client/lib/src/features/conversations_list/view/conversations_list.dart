@@ -135,7 +135,7 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
                                       .add(ConversationDeleted(chat: chat));
                                   Navigator.pop(context);
                                 },
-                                child: const Text('Delete for all'),
+                                child: const Text('Delete chat'),
                               )),
                         ],
                       ),
