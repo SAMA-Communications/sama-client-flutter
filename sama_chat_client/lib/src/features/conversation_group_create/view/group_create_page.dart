@@ -50,18 +50,17 @@ class GroupCreatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LoadingOverlay loadingOverlay = LoadingOverlay();
     return BlocListener<ConversationCreateBloc, ConversationCreateState>(
         listener: (context, state) {
           if (state is ConversationCreatedLoading) {
-            loadingOverlay.show(context);
+            LoadingOverlay.instance.show(context);
           } else if (state is ConversationCreatedState) {
-            loadingOverlay.hide();
+            LoadingOverlay.instance.hide();
             ConversationModel conversation = state.conversation;
             context.go('$conversationListScreenPath/$conversationScreenSubPath',
                 extra: conversation);
           } else if (state is ConversationCreatedStateError) {
-            loadingOverlay.hide();
+            LoadingOverlay.instance.hide();
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(

@@ -1,31 +1,91 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../colors.dart';
 
 class LoadingOverlay {
-  OverlayEntry? _overlay;
+  LoadingOverlay._();
 
-  LoadingOverlay();
+  static final LoadingOverlay instance = LoadingOverlay._();
 
-  void show(BuildContext context) {
-    if (_overlay == null) {
-      _overlay = OverlayEntry(
-        builder: (context) => const ColoredBox(
-          color: semiBlack,
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      );
-      Overlay.of(context).insert(_overlay!);
-    }
+  OverlayEntry? _overlayEntry;
+  Timer? _autoHideTimer;
+
+  bool get isShowing => _overlayEntry != null;
+
+  void show(BuildContext context,
+      {String? message, Duration duration = const Duration(seconds: 10)}) {
+    if (_overlayEntry != null) return;
+
+    _overlayEntry = OverlayEntry(
+      builder: (_) => _LoaderWidget(message: message),
+    );
+
+    Overlay.of(
+      context,
+      rootOverlay: true,
+    ).insert(_overlayEntry!);
+
+    _autoHideTimer?.cancel();
+
+    _autoHideTimer = Timer(duration, () {
+      hide();
+    });
   }
 
   void hide() {
-    if (_overlay != null) {
-      _overlay!.remove();
-      _overlay = null;
-    }
+    _autoHideTimer?.cancel();
+    _autoHideTimer = null;
+
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+}
+
+class _LoaderWidget extends StatelessWidget {
+  final String? message;
+
+  const _LoaderWidget({
+    this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: 2,
+                sigmaY: 2,
+              ),
+              child: Container(
+                color: black.withValues(alpha: 0.25),
+              ),
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                if (message != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    message!,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

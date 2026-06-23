@@ -9,6 +9,7 @@ import '../../../features/profile/bloc/profile_bloc.dart';
 import '../../../shared/auth/bloc/auth_bloc.dart';
 import '../../../shared/connection/view/connection_checker.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/ui/view/loading_overlay.dart';
 import '../../../shared/ui/view/user_forms.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../models/models.dart';
@@ -20,7 +21,11 @@ class ProfileForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
+          if (state.status.isInProgress) {
+            LoadingOverlay.instance.show(context);
+          }
           if (state.status.isFailure) {
+            LoadingOverlay.instance.hide();
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
@@ -28,6 +33,7 @@ class ProfileForm extends StatelessWidget {
               );
           } else if (state.status.isSuccess &&
               state.informationMessage != null) {
+            LoadingOverlay.instance.hide();
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
