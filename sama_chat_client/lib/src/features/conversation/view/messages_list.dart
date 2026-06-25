@@ -493,63 +493,75 @@ class MessageItem extends StatelessWidget {
                                     );
                                   });
                             }),
-                        FocusedPopupMenuItem(
-                            leadingIcon: const Icon(Icons.copy_outlined),
-                            title: const Text('Copy'),
-                            onPressed: () {
-                              String? text = message.body;
-                              if (text == null || text.isEmpty) return;
+                        if ((message.body != null) ||
+                            message.attachments.firstOrNull != null)
+                          FocusedPopupMenuItem(
+                              leadingIcon: const Icon(Icons.copy_outlined),
+                              title: const Text('Copy'),
+                              onPressed: () {
+                                var text = message.body;
+                                var link = text?.firstUrl;
+                                var email = text?.firstEmail;
+                                var phone = text?.firstPhone;
+                                var url = message.attachments.firstOrNull?.url;
 
-                              String? link = text.firstUrl;
-                              String? email = text.firstEmail;
-                              String? phone = text.firstPhone;
-
-                              FocusedPopupMenu(
-                                      menuItems: <FocusedPopupMenuItem>[
-                                    if (link?.isNotEmpty ?? false)
-                                      FocusedPopupMenuItem(
-                                          title: const Text('Copy URL'),
-                                          onPressed: () {
-                                            Clipboard.setData(
-                                              ClipboardData(text: link!),
-                                            );
-                                          }),
-                                    if (email?.isNotEmpty ?? false)
-                                      FocusedPopupMenuItem(
-                                          title: const Text('Copy email'),
-                                          onPressed: () {
-                                            Clipboard.setData(
-                                              ClipboardData(text: email!),
-                                            );
-                                          }),
-                                    if (phone?.isNotEmpty ?? false)
-                                      FocusedPopupMenuItem(
-                                          title: const Text('Copy phone'),
-                                          onPressed: () {
-                                            Clipboard.setData(
-                                              ClipboardData(text: phone!),
-                                            );
-                                          }),
-                                    FocusedPopupMenuItem(
-                                        title: const Text('Copy message'),
-                                        onPressed: () {
-                                          Clipboard.setData(
-                                            ClipboardData(text: text),
-                                          );
-                                        }),
-                                  ],
-                                      context: context,
-                                      child: MultiBlocProvider(providers: [
-                                        BlocProvider.value(
-                                            value: BlocProvider.of<
-                                                MediaAttachmentBloc>(context)),
-                                        BlocProvider.value(
-                                            value: BlocProvider.of<
-                                                ConversationBloc>(context)),
-                                      ], child: this),
-                                      stickToRight: message.isOwn)
-                                  .show();
-                            }),
+                                FocusedPopupMenu(
+                                        menuItems: <FocusedPopupMenuItem>[
+                                      if (link?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy URL'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: link!),
+                                              );
+                                            }),
+                                      if (email?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy email'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: email!),
+                                              );
+                                            }),
+                                      if (phone?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy phone'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: phone!),
+                                              );
+                                            }),
+                                      if (url?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title:
+                                                const Text('Copy attachment'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: url!),
+                                              );
+                                            }),
+                                      if (text?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy message'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: text!),
+                                              );
+                                            }),
+                                    ],
+                                        context: context,
+                                        child: MultiBlocProvider(providers: [
+                                          BlocProvider.value(
+                                              value: BlocProvider.of<
+                                                      MediaAttachmentBloc>(
+                                                  context)),
+                                          BlocProvider.value(
+                                              value: BlocProvider.of<
+                                                  ConversationBloc>(context)),
+                                        ], child: this),
+                                        stickToRight: message.isOwn)
+                                    .show();
+                              }),
                         FocusedPopupMenuItem(
                             leadingIcon: const Icon(Icons.check_circle_outline),
                             title: const Text('Select'),
