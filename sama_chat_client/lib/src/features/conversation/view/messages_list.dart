@@ -48,10 +48,12 @@ class _MessagesListState extends State<MessagesList> {
     final positions = itemPositionsListener.itemPositions.value;
 
     final minIndex = positions.map((e) => e.index).reduce(math.min);
-    if (minIndex == 0 &&
-        context.read<ConversationBloc>().state.unreadIndex > 0 &&
-        context.read<ConversationBloc>().state.unreadMessagesCount == 0) {
-      context.read<ConversationBloc>().add(const ResetUnreadIndex());
+    if (minIndex == 0) {
+      if (context.read<ConversationBloc>().state.unreadIndex > 0 &&
+          context.read<ConversationBloc>().state.unreadMessagesCount == 0) {
+        context.read<ConversationBloc>().add(const ResetUnreadIndex());
+      } //?
+      markAsReadIfNeed();
     }
   }
 
@@ -88,9 +90,7 @@ class _MessagesListState extends State<MessagesList> {
                   previous.messages != current.messages;
             },
             listener: (context, state) {
-              scrollToUnreadIfNeed(state);
-              scrollToReplyIfNeed(state);
-              markAsReadIfNeed();
+              scrollToReplyIfNeed(state); //TODO check
             },
           ),
           BlocListener<DeleteMessagesBloc, DeleteMessagesState>(
@@ -332,34 +332,44 @@ class _MessagesListState extends State<MessagesList> {
             });
       });
 
-  Widget get scrollFAB => ValueListenableBuilder<Iterable<ItemPosition>>(
-      valueListenable: itemPositionsListener.itemPositions,
-      builder: (context, positions, child) {
-        bool showScrollFAB = false;
-        if (positions.isNotEmpty) {
-          final minIndex = positions.map((e) => e.index).reduce(math.min);
-          if (minIndex > 0) {
-            showScrollFAB = true;
-          }
-        }
-        return Positioned(
-            bottom: 16,
-            right: 16,
-            child: Visibility(
-              visible: showScrollFAB,
-              child: FloatingActionButton(
-                backgroundColor: semiBlack,
-                tooltip: 'Scroll',
-                mini: true,
-                shape: const CircleBorder(),
-                onPressed: () {
-                  scrollTo(0);
-                },
-                child: const Icon(Icons.arrow_downward_outlined,
-                    color: lightMallow, size: 28),
-              ),
-            ));
-      });
+  Widget get scrollFAB => ValueListenableBuilder(
+        valueListenable: itemPositionsListener.itemPositions,
+        child: FloatingActionButton(
+          backgroundColor: semiBlack,
+          tooltip: 'Scroll',
+          mini: true,
+          shape: const CircleBorder(),
+          onPressed: () {
+            scrollTo(0);
+          },
+          child: const Icon(
+            Icons.arrow_downward_outlined,
+            color: lightMallow,
+            size: 28,
+          ),
+        ),
+        builder: (context, positions, fab) {
+          final showScrollFAB = positions.isNotEmpty &&
+              positions.map((e) => e.index).reduce(math.min) > 0;
+          if (!showScrollFAB) return const SizedBox.shrink();
+
+          return BlocSelector<ConversationBloc, ConversationState, int>(
+            selector: (state) => state.conversation.unreadMessagesCount ?? 0,
+            builder: (context, unreadCount) {
+              return Positioned(
+                bottom: 16,
+                right: 16,
+                child: Badge(
+                  backgroundColor: slateBlue,
+                  label: Text('$unreadCount'),
+                  isLabelVisible: unreadCount > 0,
+                  child: fab,
+                ),
+              );
+            },
+          );
+        },
+      );
 
   void scrollToNewMessagesIfNeed() {
     final positions = itemPositionsListener.itemPositions.value;
@@ -378,17 +388,6 @@ class _MessagesListState extends State<MessagesList> {
       );
     } else {
       scrollController.jumpTo(index: 0);
-    }
-  }
-
-  void scrollToUnreadIfNeed(ConversationState state) {
-    int unreadCount = state.unreadMessagesCount;
-    if (unreadCount > 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.isAttached) {
-          context.read<ConversationBloc>().add(const ResetUnreadCount());
-        }
-      });
     }
   }
 
@@ -434,8 +433,9 @@ class _MessagesListState extends State<MessagesList> {
   }
 
   void markAsReadIfNeed() {
-    var conversation = context.read<ConversationBloc>().state.conversation;
-    if ((conversation.unreadMessagesCount ?? 0) != 0) {
+    var unreadCount =
+        context.read<ConversationBloc>().state.unreadMessagesCount;
+    if (unreadCount > 0) {
       context.read<SendMessageBloc>().add(const SendStatusReadMessages());
     }
   }

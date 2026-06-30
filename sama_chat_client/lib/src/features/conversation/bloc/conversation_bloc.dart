@@ -368,7 +368,9 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   Future<void> _onConversationUpdated(event, emit) async {
-    emit(state.copyWith(conversation: event.conversation));
+    emit(state.copyWith(
+        conversation: event.conversation,
+        unreadMessagesCount: event.conversation.unreadMessagesCount));
   }
 
   Future<void> _onConversationDeleted(
@@ -495,9 +497,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
                   event.message.from != messages.first.from,
               bubbleType(List.of(messages)..insert(0, event.message), 0)));
     }
-
     emit(state.copyWith(
-        messages: messages, scroll: true, status: ConversationStatus.success));
+        messages: messages,
+        scroll: true,
+        unreadMessagesCount: state.unreadMessagesCount + 1,
+        status: ConversationStatus.success));
   }
 
   Future<void> _onPendingStatusReceived(

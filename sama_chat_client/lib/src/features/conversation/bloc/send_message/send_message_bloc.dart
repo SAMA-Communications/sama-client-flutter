@@ -16,17 +16,17 @@ part 'send_message_event.dart';
 
 part 'send_message_state.dart';
 
-const typingThrottleDuration = 5;
+Duration typingThrottleDuration = const Duration(seconds: 5);
+Duration readThrottleDuration = const Duration(seconds: 1);
 
-EventTransformer<E> typingThrottleDroppable<E>() {
-  Duration duration = const Duration(seconds: typingThrottleDuration);
+EventTransformer<E> typingThrottleDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
   };
 }
 
 class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
-  final ConversationModel currentConversation;
+  final ConversationModel currentConversation; //TODO replace with chatId
   final ConversationRepository conversationRepository;
   final MessagesRepository messagesRepository;
 
@@ -62,11 +62,10 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<RemoveEditMessage>(
       _onRemoveEditReply,
     );
-    on<SendStatusReadMessages>(
-      _onSendStatusReadMessages,
-    );
+    on<SendStatusReadMessages>(_onSendStatusReadMessages,
+        transformer: typingThrottleDroppable(readThrottleDuration));
     on<SendTypingChanged>(_onSendTypingChanged,
-        transformer: typingThrottleDroppable());
+        transformer: typingThrottleDroppable(typingThrottleDuration));
 
     add(const _DraftMessageReceived());
   }
