@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sama_sdk/api/api.dart' hide DeleteMessagesStatus;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -7,6 +8,7 @@ import '../../../db/models/models.dart';
 import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/date_utils.dart';
 import '../../../shared/utils/list_utils.dart';
+import '../../../shared/utils/regexp_utils.dart';
 import '../../../shared/utils/screen_factor.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../bloc/conversation_bloc.dart';
@@ -491,6 +493,75 @@ class MessageItem extends StatelessWidget {
                                     );
                                   });
                             }),
+                        if ((message.body != null) ||
+                            message.attachments.firstOrNull != null)
+                          FocusedPopupMenuItem(
+                              leadingIcon: const Icon(Icons.copy_outlined),
+                              title: const Text('Copy'),
+                              onPressed: () {
+                                var text = message.body;
+                                var link = text?.firstUrl;
+                                var email = text?.firstEmail;
+                                var phone = text?.firstPhone;
+                                var url = message.attachments.firstOrNull?.url;
+
+                                FocusedPopupMenu(
+                                        menuItems: <FocusedPopupMenuItem>[
+                                      if (link?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy URL'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: link!),
+                                              );
+                                            }),
+                                      if (email?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy email'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: email!),
+                                              );
+                                            }),
+                                      if (phone?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy phone'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: phone!),
+                                              );
+                                            }),
+                                      if (url?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title:
+                                                const Text('Copy attachment'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: url!),
+                                              );
+                                            }),
+                                      if (text?.isNotEmpty ?? false)
+                                        FocusedPopupMenuItem(
+                                            title: const Text('Copy message'),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: text!),
+                                              );
+                                            }),
+                                    ],
+                                        context: context,
+                                        child: MultiBlocProvider(providers: [
+                                          BlocProvider.value(
+                                              value: BlocProvider.of<
+                                                      MediaAttachmentBloc>(
+                                                  context)),
+                                          BlocProvider.value(
+                                              value: BlocProvider.of<
+                                                  ConversationBloc>(context)),
+                                        ], child: this),
+                                        stickToRight: message.isOwn)
+                                    .show();
+                              }),
                         FocusedPopupMenuItem(
                             leadingIcon: const Icon(Icons.check_circle_outline),
                             title: const Text('Select'),
