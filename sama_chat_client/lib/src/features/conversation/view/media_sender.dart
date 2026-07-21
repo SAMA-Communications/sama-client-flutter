@@ -23,13 +23,13 @@ class MediaSender extends StatelessWidget {
 
   static Widget create({
     Key? key,
-    required ConversationModel currentConversation,
+    required String currentConversationId,
     required MessageModel? replyMessage,
     required String? path,
   }) {
     return BlocProvider<MediaSenderBloc>(
       create: (context) => MediaSenderBloc(
-          currentConversation: currentConversation,
+          currentConversationId: currentConversationId,
           messagesRepository:
               RepositoryProvider.of<MessagesRepository>(context)),
       child: MediaSender(

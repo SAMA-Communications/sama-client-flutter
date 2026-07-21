@@ -8,6 +8,7 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/keyboard_listener.dart';
 import '../bloc/ai_message/ai_message_bloc.dart';
+import '../bloc/conversation_bloc.dart';
 import '../bloc/send_message/send_message_bloc.dart';
 import '../widgets/header_input_box.dart';
 import 'media_sender.dart';
@@ -48,7 +49,7 @@ class _MessageInputState extends State<MessageInput> {
   Widget build(BuildContext context) {
     var showReply = false;
     var showEdit = false;
-    var currentChat = context.read<SendMessageBloc>().currentConversation;
+    var currentChat = context.read<ConversationBloc>().currentConversation;
     var blockSending = currentChat.type == 'u' && currentChat.opponent == null;
 
     if (widget.sharedMessage?.type == SharedMediaType.text ||
@@ -209,8 +210,8 @@ class _MessageInputState extends State<MessageInput> {
             content: SizedBox(
               width: double.maxFinite,
               child: MediaSender.create(
-                  currentConversation:
-                      context.watch<SendMessageBloc>().currentConversation,
+                  currentConversationId:
+                      context.read()<SendMessageBloc>().currentConversationId,
                   replyMessage: BlocProvider.of<SendMessageBloc>(context)
                       .state
                       .replyMessage,

@@ -138,10 +138,18 @@ final class HideDateHeader extends ConversationEvent {
   const HideDateHeader();
 }
 
-final class ResetUnreadCount extends ConversationEvent {
-  const ResetUnreadCount();
+final class ResetUnreadIndex extends ConversationEvent {
+  final int index;
+
+  const ResetUnreadIndex(this.index);
 }
 
-final class ResetUnreadIndex extends ConversationEvent {
-  const ResetUnreadIndex();
+final class TryMarkAsRead extends ConversationEvent {
+  const TryMarkAsRead();
+}
+
+class ViewportChanged extends ConversationEvent {
+  final int lastVisibleIndex;
+
+  const ViewportChanged(this.lastVisibleIndex);
 }

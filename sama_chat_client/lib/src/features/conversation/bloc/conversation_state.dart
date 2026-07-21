@@ -12,7 +12,6 @@ class TypingMessageStatus {
 final class ConversationState extends Equatable {
   const ConversationState({
     required this.conversation,
-    required this.unreadMessagesCount,
     this.status = ConversationStatus.initial,
     this.messages = const <ChatMessage>[],
     this.selectedMessages = const SelectedMessages.pure(),
@@ -24,11 +23,10 @@ final class ConversationState extends Equatable {
     this.choose = false,
     this.showDateHeader = false,
     this.scroll = false,
-    this.unreadIndex = 0,
+    this.startUnreadIndex = 0,
   });
 
   final ConversationModel conversation;
-  final int unreadMessagesCount;
   final ConversationStatus status;
   final List<ChatMessage> messages;
   final SelectedMessages selectedMessages;
@@ -40,11 +38,10 @@ final class ConversationState extends Equatable {
   final bool scroll;
   final TypingMessageStatus? typingStatus;
   final String replyIdToScroll;
-  final int unreadIndex;
+  final int startUnreadIndex;
 
   ConversationState copyWith({
     ConversationModel? conversation,
-    int? unreadMessagesCount,
     ConversationStatus? status,
     List<ChatMessage>? messages,
     SelectedMessages? selectedMessages,
@@ -56,11 +53,10 @@ final class ConversationState extends Equatable {
     bool? scroll,
     String? replyIdToScroll,
     TypingMessageStatus? typingStatus,
-    int? unreadIndex,
+    int? startUnreadIndex,
   }) {
     return ConversationState(
       conversation: conversation ?? this.conversation,
-      unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
       status: status ?? this.status,
       messages: messages ?? this.messages,
       selectedMessages: selectedMessages ?? this.selectedMessages,
@@ -72,7 +68,7 @@ final class ConversationState extends Equatable {
       scroll: scroll ?? this.scroll,
       typingStatus: typingStatus ?? this.typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
-      unreadIndex: unreadIndex ?? this.unreadIndex,
+      startUnreadIndex: startUnreadIndex ?? this.startUnreadIndex,
     );
   }
 
@@ -84,7 +80,6 @@ final class ConversationState extends Equatable {
   @override
   List<Object?> get props => [
         conversation,
-        unreadMessagesCount,
         status,
         messages,
         selectedMessages,
@@ -96,6 +91,6 @@ final class ConversationState extends Equatable {
         replyIdToScroll,
         participants,
         typingStatus,
-        unreadIndex
+        startUnreadIndex
       ];
 }

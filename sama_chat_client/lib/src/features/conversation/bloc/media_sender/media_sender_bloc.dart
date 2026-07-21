@@ -21,12 +21,12 @@ const maxAttachmentSize = 100; // in MB
 const maxAttachmentsCount = 10;
 
 class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
-  final ConversationModel currentConversation;
+  final String currentConversationId;
   final MessagesRepository messagesRepository;
   final ImagePicker picker = ImagePicker();
 
   MediaSenderBloc({
-    required this.currentConversation,
+    required this.currentConversationId,
     required this.messagesRepository,
   }) : super(MediaSenderState()) {
     on<PickMedia>(
@@ -164,7 +164,7 @@ class MediaSenderBloc extends Bloc<MediaSenderEvent, MediaSenderState> {
 
       if (state.status == MediaSelectorStatus.canceled) return;
 
-      await messagesRepository.sendMediaMessage(currentConversation.id,
+      await messagesRepository.sendMediaMessage(currentConversationId,
           body: body,
           attachments: attachments,
           replyMessage: event.replyMessage);

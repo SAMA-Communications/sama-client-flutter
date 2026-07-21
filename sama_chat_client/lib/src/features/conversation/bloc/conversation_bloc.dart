@@ -22,8 +22,11 @@ part 'conversation_event.dart';
 part 'conversation_state.dart';
 
 const messagesThrottleDuration = Duration(milliseconds: 100);
+const typingThrottleDuration = Duration(milliseconds: 5000);
 const scrollThrottleDuration = Duration(milliseconds: 1000);
 const scrollToReplyTimeout = Duration(seconds: 7);
+const readDebounceDuration = Duration(milliseconds: 500);
+const markAsReadDebounceDuration = Duration(milliseconds: 1000);
 
 EventTransformer<E> throttleDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -31,16 +34,7 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
   };
 }
 
-EventTransformer<E> typingThrottleDroppable<E>() {
-  Duration duration = const Duration(milliseconds: 5000);
-  return (events, mapper) {
-    return droppable<E>().call(events.throttle(duration), mapper);
-  };
-}
-
-EventTransformer<Event> readDebounce<Event>({
-  Duration duration = const Duration(milliseconds: 500),
-}) {
+EventTransformer<Event> debounceDroppable<Event>(Duration duration) {
   return (events, mapper) => events.debounce(duration).switchMap(mapper);
 }
 
@@ -58,6 +52,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Timer? headerTimer;
 
+  int _lastVisibleIndex = -1;
+
   ConversationBloc({
     required this.currentConversation,
     required this.conversationRepository,
@@ -65,8 +61,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     required this.userRepository,
   }) : super(ConversationState(
             conversation: currentConversation,
-            unreadMessagesCount: currentConversation.unreadMessagesCount ?? 0,
-            unreadIndex:
+            startUnreadIndex:
                 max(0, ((currentConversation.unreadMessagesCount ?? 0) - 1)),
             participants: Set.of(currentConversation.participants))) {
     on<MessagesRequested>(_onMessagesRequested);
@@ -94,7 +89,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<_ReadStatusReceived>(
       _onReadStatusReceived,
-      transformer: readDebounce(),
+      transformer: debounceDroppable(readDebounceDuration),
     );
     on<_FailedStatusReceived>(
       _onFailedStatusReceived,
@@ -107,7 +102,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     );
     on<TypingStatusStartReceived>(
       _onTypingStatusStartReceived,
-      transformer: typingThrottleDroppable(),
+      transformer: throttleDroppable(typingThrottleDuration),
     );
     on<TypingStatusStopReceived>(
       _onTypingStatusStopReceived,
@@ -137,11 +132,16 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<HideDateHeader>(
       onHideHeader,
     );
-    on<ResetUnreadCount>(
-      onResetUnreadCount,
-    );
     on<ResetUnreadIndex>(
       onResetUnreadIndex,
+    );
+    on<TryMarkAsRead>(
+      onTryMarkAsRead,
+      transformer: debounceDroppable(markAsReadDebounceDuration),
+    );
+    on<ViewportChanged>(
+      onViewportChanged,
+      transformer: debounceDroppable(markAsReadDebounceDuration),
     );
 
     add(const ParticipantsReceived());
@@ -208,6 +208,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         .listen((chat) {
       if (chat != null && chat != currentConversation) {
         currentConversation = currentConversation.copyWithItem(item: chat);
+        add(const TryMarkAsRead());
         add(_ConversationUpdated(currentConversation));
       }
     });
@@ -244,7 +245,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
       if (state.status == ConversationStatus.initial) {
         final messages = await buildChatMessageModels(
             await messagesRepository.getStoredMessages(currentConversation.id));
-        if (messages.length >= state.unreadMessagesCount) {
+        if (messages.length >= (currentConversation.unreadMessagesCount ?? 0)) {
           emit(
             state.copyWith(
                 status: ConversationStatus.success,
@@ -295,7 +296,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
             await buildChatMessageModels(resource.data ?? List.empty());
 
         var totalMessagesLength = state.messages.length + messages.length;
-        if (totalMessagesLength >= state.unreadMessagesCount) {
+        if (totalMessagesLength >=
+            (currentConversation.unreadMessagesCount ?? 0)) {
           messages.isEmpty
               ? emit(state.copyWith(hasReachedMax: true, initial: false))
               : emit(
@@ -345,12 +347,50 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     emit(state.copyWith(showDateHeader: false));
   }
 
-  void onResetUnreadCount(event, emit) {
-    emit(state.copyWith(unreadMessagesCount: 0));
+  void onResetUnreadIndex(event, emit) {
+    emit(state.copyWith(startUnreadIndex: event.index));
   }
 
-  void onResetUnreadIndex(event, emit) {
-    emit(state.copyWith(unreadIndex: 0));
+  Future<void> onTryMarkAsRead(TryMarkAsRead event, emit) async {
+    final lastUnreadIndex = (currentConversation.unreadMessagesCount ?? 0) - 1;
+
+    if (!_lastVisibleIndex.isNegative && _lastVisibleIndex <= lastUnreadIndex) {
+      if (state.startUnreadIndex > 0) {
+        add(ResetUnreadIndex(_lastVisibleIndex));
+      }
+
+      int start = lastUnreadIndex < _lastVisibleIndex
+          ? lastUnreadIndex
+          : _lastVisibleIndex;
+      int end = lastUnreadIndex > _lastVisibleIndex
+          ? lastUnreadIndex
+          : _lastVisibleIndex;
+
+      List<int> result = List.generate(end - start + 1, (i) => start + i);
+      final markReadIds = state.messages
+          .sublist(result.first, result.last + 1)
+          .map((m) => m.id)
+          .toList();
+
+      try {
+        final success = await messagesRepository.sendStatusReadMessages(
+            currentConversation.id,
+            _lastVisibleIndex == 0 ? null : markReadIds);
+        if (success) {
+          int unreadCount = _lastVisibleIndex == 0
+              ? 0
+              : (currentConversation.unreadMessagesCount ?? 0) -
+                  markReadIds.length;
+          conversationRepository.resetUnreadMessagesCount(
+              currentConversation.id, unreadCount);
+        }
+      } catch (_) {}
+    }
+  }
+
+  void onViewportChanged(event, emit) {
+    _lastVisibleIndex = event.lastVisibleIndex;
+    add(const TryMarkAsRead());
   }
 
   Future<void> _onParticipantsReceived(
@@ -368,9 +408,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   Future<void> _onConversationUpdated(event, emit) async {
-    emit(state.copyWith(
-        conversation: event.conversation,
-        unreadMessagesCount: event.conversation.unreadMessagesCount));
+    emit(state.copyWith(conversation: event.conversation));
   }
 
   Future<void> _onConversationDeleted(
@@ -499,8 +537,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     }
     emit(state.copyWith(
         messages: messages,
-        scroll: true,
-        unreadMessagesCount: state.unreadMessagesCount + 1,
+        scroll: !event.message.isOwn,
         status: ConversationStatus.success));
   }
 

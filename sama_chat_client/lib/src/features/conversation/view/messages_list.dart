@@ -46,15 +46,13 @@ class _MessagesListState extends State<MessagesList> {
 
   void _onPositionsChanged() {
     final positions = itemPositionsListener.itemPositions.value;
+    final fullyVisible = positions.where(
+        (item) => item.itemLeadingEdge >= 0 && item.itemTrailingEdge <= 1);
 
-    final minIndex = positions.map((e) => e.index).reduce(math.min);
-    if (minIndex == 0) {
-      if (context.read<ConversationBloc>().state.unreadIndex > 0 &&
-          context.read<ConversationBloc>().state.unreadMessagesCount == 0) {
-        context.read<ConversationBloc>().add(const ResetUnreadIndex());
-      } //?
-      markAsReadIfNeed();
-    }
+    final minIndex = fullyVisible.isNotEmpty
+        ? fullyVisible.map((e) => e.index).reduce(math.min)
+        : positions.map((e) => e.index).reduce(math.min);
+    context.read<ConversationBloc>().add(ViewportChanged(minIndex));
   }
 
   @override
@@ -191,12 +189,13 @@ class _MessagesListState extends State<MessagesList> {
                                     if (isDifferentDay(
                                         msg, state.messages.tryGet(index + 1)))
                                       buildDateDivider(msg),
-                                    if (showUnread(state.unreadIndex, index))
+                                    if (showUnread(
+                                        state.startUnreadIndex, index))
                                       buildUnreadDivider(),
                                     buildMessage(msg, state)
                                   ]);
                                 },
-                                initialScrollIndex: state.unreadIndex,
+                                initialScrollIndex: state.startUnreadIndex,
                                 itemCount: state.messages.length,
                                 itemScrollController: scrollController,
                                 itemPositionsListener: itemPositionsListener,
@@ -430,14 +429,6 @@ class _MessagesListState extends State<MessagesList> {
 
   hideProgress() {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  }
-
-  void markAsReadIfNeed() {
-    var unreadCount =
-        context.read<ConversationBloc>().state.unreadMessagesCount;
-    if (unreadCount > 0) {
-      context.read<SendMessageBloc>().add(const SendStatusReadMessages());
-    }
   }
 
   void _onScroll(var currentScroll, var maxScroll) {
