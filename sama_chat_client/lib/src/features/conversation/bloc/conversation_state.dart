@@ -12,7 +12,6 @@ class TypingMessageStatus {
 final class ConversationState extends Equatable {
   const ConversationState({
     required this.conversation,
-    required this.unreadMessagesCount,
     this.status = ConversationStatus.initial,
     this.messages = const <ChatMessage>[],
     this.selectedMessages = const SelectedMessages.pure(),
@@ -22,11 +21,12 @@ final class ConversationState extends Equatable {
     this.typingStatus,
     this.replyIdToScroll = '',
     this.choose = false,
-    this.showHeader = false,
+    this.showDateHeader = false,
+    this.scroll = false,
+    this.startUnreadIndex = 0,
   });
 
   final ConversationModel conversation;
-  final int unreadMessagesCount;
   final ConversationStatus status;
   final List<ChatMessage> messages;
   final SelectedMessages selectedMessages;
@@ -34,13 +34,14 @@ final class ConversationState extends Equatable {
   final bool hasReachedMax;
   final bool initial;
   final bool choose;
-  final bool showHeader;
+  final bool showDateHeader;
+  final bool scroll;
   final TypingMessageStatus? typingStatus;
   final String replyIdToScroll;
+  final int startUnreadIndex;
 
   ConversationState copyWith({
     ConversationModel? conversation,
-    int? unreadMessagesCount,
     ConversationStatus? status,
     List<ChatMessage>? messages,
     SelectedMessages? selectedMessages,
@@ -48,13 +49,14 @@ final class ConversationState extends Equatable {
     bool? hasReachedMax,
     bool? initial,
     bool? choose,
-    bool? showHeader,
+    bool? showDateHeader,
+    bool? scroll,
     String? replyIdToScroll,
     TypingMessageStatus? typingStatus,
+    int? startUnreadIndex,
   }) {
     return ConversationState(
       conversation: conversation ?? this.conversation,
-      unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
       status: status ?? this.status,
       messages: messages ?? this.messages,
       selectedMessages: selectedMessages ?? this.selectedMessages,
@@ -62,9 +64,11 @@ final class ConversationState extends Equatable {
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       initial: initial ?? this.initial,
       choose: choose ?? this.choose,
-      showHeader: showHeader ?? this.showHeader,
+      showDateHeader: showDateHeader ?? this.showDateHeader,
+      scroll: scroll ?? this.scroll,
       typingStatus: typingStatus ?? this.typingStatus,
       replyIdToScroll: replyIdToScroll ?? this.replyIdToScroll,
+      startUnreadIndex: startUnreadIndex ?? this.startUnreadIndex,
     );
   }
 
@@ -76,16 +80,17 @@ final class ConversationState extends Equatable {
   @override
   List<Object?> get props => [
         conversation,
-        unreadMessagesCount,
         status,
         messages,
         selectedMessages,
         hasReachedMax,
         initial,
         choose,
-        showHeader,
+        showDateHeader,
+        scroll,
         replyIdToScroll,
         participants,
-        typingStatus
+        typingStatus,
+        startUnreadIndex
       ];
 }

@@ -16,22 +16,21 @@ part 'send_message_event.dart';
 
 part 'send_message_state.dart';
 
-const typingThrottleDuration = 5;
+Duration typingThrottleDuration = const Duration(seconds: 5);
 
-EventTransformer<E> typingThrottleDroppable<E>() {
-  Duration duration = const Duration(seconds: typingThrottleDuration);
+EventTransformer<E> typingThrottleDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
   };
 }
 
 class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
-  final ConversationModel currentConversation;
+  final String currentConversationId;
   final ConversationRepository conversationRepository;
   final MessagesRepository messagesRepository;
 
   SendMessageBloc({
-    required this.currentConversation,
+    required this.currentConversationId,
     required this.conversationRepository,
     required this.messagesRepository,
   }) : super(const SendMessageState()) {
@@ -62,11 +61,8 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     on<RemoveEditMessage>(
       _onRemoveEditReply,
     );
-    on<SendStatusReadMessages>(
-      _onSendStatusReadMessages,
-    );
     on<SendTypingChanged>(_onSendTypingChanged,
-        transformer: typingThrottleDroppable());
+        transformer: typingThrottleDroppable(typingThrottleDuration));
 
     add(const _DraftMessageReceived());
   }
@@ -83,7 +79,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
       } else {
         scroll = true;
         await messagesRepository.sendTextMessage(
-            event.message, currentConversation.id, state.replyMessage);
+            event.message, currentConversationId, state.replyMessage);
       }
       emit(state.copyWith(
           isTextEmpty: true,
@@ -113,7 +109,7 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
   Future<void> _onDraftMessageReceived(
       _DraftMessageReceived event, Emitter<SendMessageState> emit) async {
     var draftMsg = await messagesRepository.getMessageLocalByStatus(
-        currentConversation.id, MessageModelStatus.draft);
+        currentConversationId, MessageModelStatus.draft);
     if (draftMsg != null) {
       emit(state.copyWith(
           draftMessage: () => draftMsg,
@@ -149,28 +145,17 @@ class SendMessageBloc extends Bloc<SendMessageEvent, SendMessageState> {
     emit(state.copyWith(editMessage: () => null));
   }
 
-  Future<FutureOr<void>> _onSendStatusReadMessages(
-      SendStatusReadMessages event, Emitter<SendMessageState> emit) async {
-    try {
-      final success = await messagesRepository
-          .sendStatusReadMessages(currentConversation.id);
-      if (success) {
-        conversationRepository.resetUnreadMessagesCount(currentConversation.id);
-      }
-    } catch (_) {}
-  }
-
   Future<FutureOr<void>> _onSendTypingChanged(
       SendTypingChanged event, Emitter<SendMessageState> emit) async {
     try {
-      await messagesRepository.sendTypingStatus(currentConversation.id);
+      await messagesRepository.sendTypingStatus(currentConversationId);
     } catch (_) {}
   }
 
   saveDraftIfExist() {
     if (state.text.isNotEmpty && state.safeDraft) {
       messagesRepository.saveDraftMessage(
-          state.text, currentConversation.id, state.replyMessage);
+          state.text, currentConversationId, state.replyMessage);
     }
   }
 

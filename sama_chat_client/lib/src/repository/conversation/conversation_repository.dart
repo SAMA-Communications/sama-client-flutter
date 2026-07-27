@@ -178,10 +178,12 @@ class ConversationRepository {
     TypingManager.instance.destroy();
   }
 
-  Future<void> resetUnreadMessagesCount(String conversationId) async {
+  Future<void> resetUnreadMessagesCount(
+      String conversationId, int unreadCount) async {
     final conversation =
         await localDatasource.getConversationLocal(conversationId);
-    final updatedConversation = conversation?.copyWith(unreadMessagesCount: 0);
+    final updatedConversation =
+        conversation?.copyWith(unreadMessagesCount: unreadCount);
     await localDatasource.updateConversationLocal(updatedConversation!);
     _conversationsController.add(updatedConversation);
   }

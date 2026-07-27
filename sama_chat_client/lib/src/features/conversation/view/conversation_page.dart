@@ -53,7 +53,7 @@ class ConversationPage extends StatelessWidget {
                 ..add(const MessagesRequested())),
           BlocProvider(
             create: (context) => SendMessageBloc(
-              currentConversation: currentConversation,
+              currentConversationId: currentConversation.id,
               conversationRepository:
                   RepositoryProvider.of<ConversationRepository>(context),
               messagesRepository:
