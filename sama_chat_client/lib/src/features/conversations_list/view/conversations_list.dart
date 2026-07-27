@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../navigation/constants.dart';
+import '../../../db/models/conversation_model.dart';
+import '../../../shared/connection/view/connection_checker.dart';
+import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/observer_utils.dart';
+import '../../../shared/widget/swipe_to.dart';
+import '../../conversation_delete/bloc/conversation_delete_bloc.dart';
 import '../conversations_list.dart';
 
 class ConversationsList extends StatefulWidget {
@@ -29,7 +33,22 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConversationsBloc, ConversationsState>(
+    return BlocListener<ConversationDeleteBloc, ConversationDeleteState>(
+        listener: (context, state) {
+      switch (state.status) {
+        case ConversationDeleteStatus.initial:
+        case ConversationDeleteStatus.success:
+          break;
+        case ConversationDeleteStatus.failure:
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                  duration: const Duration(seconds: 3),
+                  content: Text(state.errorMessage ?? '')),
+            );
+      }
+    }, child: BlocBuilder<ConversationsBloc, ConversationsState>(
       builder: (context, state) {
         switch (state.status) {
           case ConversationsStatus.failure:
@@ -68,8 +87,7 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
                   var typing = state.typingStatuses[chat.id];
                   return index >= state.conversations.length
                       ? const BottomLoader()
-                      : ConversationListItem(
-                          conversation: chat, typingStatus: typing);
+                      : buildChat(chat, typing);
                 },
                 itemCount: state.conversations.length,
                 // itemCount: state.hasReachedMax
@@ -83,6 +101,54 @@ class _ConversationsListState extends State<ConversationsList> with RouteAware {
             return const Center(child: CircularProgressIndicator());
         }
       },
+    ));
+  }
+
+  Widget buildChat(ConversationModel chat, TypingChatStatus? typing) {
+    return SwipeTo(
+      key: Key(chat.id.toString()),
+      stickToRight: true,
+      direction: DismissDirection.endToStart,
+      onSwipe: () {
+        print('onSwipe');
+        connectionChecker(
+            context,
+            () => showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext bc) {
+                    return SafeArea(
+                        child: SizedBox(
+                      height: 50,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Padding(
+                              padding: const EdgeInsets.only(top: 5),
+                              child: TextButton(
+                                style: const ButtonStyle(
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: () {
+                                  context
+                                      .read<ConversationDeleteBloc>()
+                                      .add(ConversationDeleted(chat: chat));
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Delete chat'),
+                              )),
+                        ],
+                      ),
+                    ));
+                  },
+                ));
+      },
+      actionIcon: const Icon(
+        Icons.delete_forever_outlined,
+        color: black,
+        size: 25,
+      ),
+      child: ConversationListItem(conversation: chat, typingStatus: typing),
     );
   }
 

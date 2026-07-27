@@ -99,9 +99,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<_ConversationUpdated>(
       _onConversationUpdated,
     );
-    on<ConversationDeleted>(
-      _onConversationDeleted,
-    );
     on<TypingStatusStartReceived>(
       _onTypingStatusStartReceived,
       transformer: typingThrottleDroppable(),
@@ -356,13 +353,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
 
   Future<void> _onConversationUpdated(event, emit) async {
     emit(state.copyWith(conversation: event.conversation));
-  }
-
-  Future<void> _onConversationDeleted(
-      ConversationDeleted event, Emitter<ConversationState> emit) async {
-    await conversationRepository.deleteConversation(state.conversation)
-        ? emit(state.copyWith(status: ConversationStatus.delete))
-        : emit(state.copyWith(status: ConversationStatus.failure));
   }
 
   Future<void> _onTypingStatusStartReceived(

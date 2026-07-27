@@ -173,11 +173,6 @@ class _MessagesListState extends State<MessagesList> {
                       });
                 case ConversationStatus.initial:
                   return const Center(child: CircularProgressIndicator());
-                case ConversationStatus.delete:
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Navigator.popUntil(context, (route) => route.isFirst);
-                  });
-                  return const SizedBox.shrink();
               }
             },
           ),

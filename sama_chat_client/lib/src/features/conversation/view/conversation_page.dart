@@ -21,6 +21,7 @@ import '../../../shared/ui/colors.dart';
 import '../../../shared/utils/string_utils.dart';
 import '../../../shared/widget/loaders.dart';
 import '../../../shared/widget/typing_indicator.dart';
+import '../../conversation_delete/bloc/conversation_delete_bloc.dart';
 import '../../group_info/view/group_info_page.dart';
 import '../bloc/ai_message/ai_message_bloc.dart';
 import '../bloc/conversation_bloc.dart';
@@ -66,6 +67,12 @@ class ConversationPage extends StatelessWidget {
             ),
           ),
           BlocProvider(
+            create: (context) => ConversationDeleteBloc(
+              conversationRepository:
+                  RepositoryProvider.of<ConversationRepository>(context),
+            ),
+          ),
+          BlocProvider(
               create: (context) => MediaAttachmentBloc(
                   attachmentsRepository:
                       RepositoryProvider.of<AttachmentsRepository>(context))),
@@ -80,78 +87,102 @@ class ConversationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConversationBloc, ConversationState>(
-        buildWhen: (previous, current) => previous.choose != current.choose,
-        builder: (BuildContext context, state) {
-          return PopScope(
-              onPopInvokedWithResult: (didPop, result) {
-                if (didPop) return;
-                context
-                    .read<ConversationBloc>()
-                    .add(const SelectMessagesMode(false));
-              },
-              canPop: !state.choose,
-              child: Scaffold(
-                appBar: AppBar(
-                  toolbarHeight: 64,
-                  centerTitle: false,
-                  titleSpacing: 0.0,
-                  backgroundColor: smokyBorough,
-                  surfaceTintColor: Colors.transparent,
-                  title: BlocBuilder<AiMessageBloc, AiMessageState>(
-                      builder: (BuildContext context, aiState) {
-                    return aiState.status == AiMessageStatus.processing
-                        ? const TitleLoader(
-                            black,
-                            Text('AI processing',
-                                style: TextStyle(color: black, fontSize: 20.0)))
-                        : ConnectionTitle(
-                            color: black,
-                            title: title,
-                          );
-                  }),
-                  actions: [_PopupMenuButton()],
-                ),
-                body: Column(
-                  children: [
-                    BlocListener<ConnectionBloc, ConnectionState>(
-                        listener: (context, state) {
-                          if (state.status == ConnectionStatus.connected) {
-                            BlocProvider.of<ConversationBloc>(context)
-                                .add(const MessagesRequested(refresh: true));
-                          }
-                        },
-                        child: const Flexible(child: MessagesList())),
-                    SafeArea(
-                        child: !state.choose
-                            ? context.read<SharingIntentBloc>().state.status ==
-                                    SharingIntentStatus.processing
-                                ? BlocListener<SendMessageBloc,
-                                    SendMessageState>(
-                                    listener: (context, sendState) {
-                                      if (sendState.status ==
-                                              SendMessageStatus.success ||
-                                          sendState.status ==
-                                              SendMessageStatus.failure) {
-                                        context
+    return BlocListener<ConversationDeleteBloc, ConversationDeleteState>(
+        listener: (context, state) {
+          switch (state.status) {
+            case ConversationDeleteStatus.initial:
+              break;
+            case ConversationDeleteStatus.success:
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.popUntil(context, (route) => route.isFirst);
+              });
+              break;
+            case ConversationDeleteStatus.failure:
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                      duration: const Duration(seconds: 3),
+                      content: Text(state.errorMessage ?? '')),
+                );
+          }
+        },
+        child: BlocBuilder<ConversationBloc, ConversationState>(
+            buildWhen: (previous, current) => previous.choose != current.choose,
+            builder: (BuildContext context, state) {
+              return PopScope(
+                  onPopInvokedWithResult: (didPop, result) {
+                    if (didPop) return;
+                    context
+                        .read<ConversationBloc>()
+                        .add(const SelectMessagesMode(false));
+                  },
+                  canPop: !state.choose,
+                  child: Scaffold(
+                    appBar: AppBar(
+                      toolbarHeight: 64,
+                      centerTitle: false,
+                      titleSpacing: 0.0,
+                      backgroundColor: smokyBorough,
+                      surfaceTintColor: Colors.transparent,
+                      title: BlocBuilder<AiMessageBloc, AiMessageState>(
+                          builder: (BuildContext context, aiState) {
+                        return aiState.status == AiMessageStatus.processing
+                            ? const TitleLoader(
+                                black,
+                                Text('AI processing',
+                                    style: TextStyle(
+                                        color: black, fontSize: 20.0)))
+                            : ConnectionTitle(
+                                color: black,
+                                title: title,
+                              );
+                      }),
+                      actions: [_PopupMenuButton()],
+                    ),
+                    body: Column(
+                      children: [
+                        BlocListener<ConnectionBloc, ConnectionState>(
+                            listener: (context, state) {
+                              if (state.status == ConnectionStatus.connected) {
+                                BlocProvider.of<ConversationBloc>(context).add(
+                                    const MessagesRequested(refresh: true));
+                              }
+                            },
+                            child: const Flexible(child: MessagesList())),
+                        SafeArea(
+                            child: !state.choose
+                                ? context
                                             .read<SharingIntentBloc>()
-                                            .add(SharingIntentCompleted());
-                                      }
-                                    },
-                                    child: ConnectionChecker(
-                                        child: MessageInput(
-                                            sharedMessage: context
+                                            .state
+                                            .status ==
+                                        SharingIntentStatus.processing
+                                    ? BlocListener<SendMessageBloc,
+                                        SendMessageState>(
+                                        listener: (context, sendState) {
+                                          if (sendState.status ==
+                                                  SendMessageStatus.success ||
+                                              sendState.status ==
+                                                  SendMessageStatus.failure) {
+                                            context
                                                 .read<SharingIntentBloc>()
-                                                .state
-                                                .sharedFiles
-                                                .firstOrNull)),
-                                  )
-                                : const MessageInput()
-                            : const SelectInput())
-                  ],
-                ),
-              ));
-        });
+                                                .add(SharingIntentCompleted());
+                                          }
+                                        },
+                                        child: ConnectionChecker(
+                                            child: MessageInput(
+                                                sharedMessage: context
+                                                    .read<SharingIntentBloc>()
+                                                    .state
+                                                    .sharedFiles
+                                                    .firstOrNull)),
+                                      )
+                                    : const MessageInput()
+                                : const SelectInput())
+                      ],
+                    ),
+                  ));
+            }));
   }
 
   Widget get title => BlocBuilder<ConversationBloc, ConversationState>(
@@ -271,9 +302,13 @@ class _PopupMenuButton extends StatelessWidget {
                                     context
                                         .read<SendMessageBloc>()
                                         .add(const TextMessageClear());
-                                    context
-                                        .read<ConversationBloc>()
-                                        .add(const ConversationDeleted());
+                                    context.read<ConversationDeleteBloc>().add(
+                                        ConversationDeleted(
+                                            chat: context
+                                                .read<ConversationBloc>()
+                                                .state
+                                                .conversation));
+                                    Navigator.of(context).pop();
                                   },
                                 ),
                               ],
